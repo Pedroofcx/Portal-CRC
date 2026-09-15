@@ -33,14 +33,14 @@ export default function ColaboradorFeriasCard({ colaborador, cicloAtivo, onClick
 
   return (
     <Card
-      className="border-0 shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer group"
+      className="border-0 shadow-sm hover:shadow-sm transition-all duration-200 cursor-pointer group"
       onClick={onClick}
     >
       <CardContent className="p-5">
         <div className="flex items-start gap-3 mb-4">
           <Avatar className="h-12 w-12 flex-shrink-0">
             <AvatarImage src={colaborador.foto_url} />
-            <AvatarFallback className="bg-gradient-to-br from-blue-500 to-blue-600 text-white font-semibold">
+            <AvatarFallback className="bg-primary text-white font-semibold">
               {colaborador.nome_completo?.charAt(0)}
             </AvatarFallback>
           </Avatar>
@@ -86,7 +86,7 @@ export default function ColaboradorFeriasCard({ colaborador, cicloAtivo, onClick
             {/* Barra de progresso */}
             <div className="w-full bg-muted rounded-full h-1.5 mb-2">
               <div
-                className={`h-1.5 rounded-full transition-all ${barPercent >= 100 ? 'bg-slate-400' : barPercent > 60 ? 'bg-amber-400' : 'bg-primary'}`}
+                className={`h-1.5 rounded-full transition-all ${barPercent >= 100 ? 'bg-muted' : barPercent > 60 ? 'bg-warning' : 'bg-primary'}`}
                 style={{ width: `${barPercent}%` }}
               />
             </div>

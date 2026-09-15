@@ -3,8 +3,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Plus, Trash2, Target, Wrench, ShieldCheck, GitBranch, Info, Users } from 'lucide-react';
 
 const PARTICIPANTES = [
@@ -28,7 +26,7 @@ function RaciSelect({ value, onChange }) {
     <select
       value={value || ''}
       onChange={(e) => onChange(e.target.value)}
-      className="w-full text-xs border border-border rounded-md px-2 py-1.5 bg-card text-foreground focus:outline-none focus:ring-1 focus:ring-slate-400"
+      className="w-full text-xs border border-border rounded-md px-2 py-1.5 bg-card text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
     >
       <option value="">—</option>
       {PARTICIPANTES.map((p) => (
@@ -78,10 +76,10 @@ export default function POPForm({ onSubmit, onCancel, isLoading }) {
     const colors = {
       slate: 'border-border bg-muted text-foreground',
       blue: 'border-info/25 bg-info-soft text-primary',
-      emerald: 'border-emerald-200 bg-success-soft text-success',
+      emerald: 'border-success/25 bg-success-soft text-success',
       amber: 'border-warning/25 bg-warning-soft text-warning',
       violet: 'border-info/25 bg-info-soft text-primary',
-      indigo: 'border-indigo-200 bg-info-soft text-primary',
+      indigo: 'border-primary/25 bg-info-soft text-primary',
     };
     return (
       <div className="space-y-3">
@@ -246,7 +244,7 @@ export default function POPForm({ onSubmit, onCancel, isLoading }) {
         <Button type="button" variant="outline" onClick={onCancel}>
           Cancelar
         </Button>
-        <Button type="submit" className="bg-slate-800 superficie-escura hover:bg-slate-900" disabled={isLoading}>
+        <Button type="submit" className="bg-muted superficie-escura hover:bg-muted" disabled={isLoading}>
           {isLoading ? 'Salvando...' : 'Salvar POP'}
         </Button>
       </div>

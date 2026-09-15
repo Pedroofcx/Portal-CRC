@@ -9,7 +9,6 @@ import StatCard from '@/components/ui/StatCard';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -17,7 +16,6 @@ import {
   BarChart3,
   Download,
   TrendingUp,
-  TrendingDown,
   Star,
   DollarSign,
   MessageSquare,
@@ -25,9 +23,11 @@ import {
   AlertTriangle
 } from 'lucide-react';
 import RelatorioFinanceiroConsolidado from '@/components/relatorios/RelatorioFinanceiroConsolidado';
-import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 
-const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
+import { SERIE_GRAFICO } from '@/lib/cores-grafico';
+
+const COLORS = SERIE_GRAFICO;
 
 export default function RelatoriosTratativas() {
   const [periodoInicio, setPeriodoInicio] = useState('');
@@ -364,13 +364,13 @@ export default function RelatoriosTratativas() {
         <CardContent>
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={volumePorTipoData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
               <XAxis dataKey="tipo" tick={{ fontSize: 12 }} />
               <YAxis />
               <Tooltip />
               <Legend />
-              <Bar dataKey="volume" fill="#3b82f6" name="Total" />
-              <Bar dataKey="encerradas" fill="#10b981" name="Encerradas" />
+              <Bar dataKey="volume" fill="hsl(var(--chart-1))" name="Total" />
+              <Bar dataKey="encerradas" fill="hsl(var(--chart-2))" name="Encerradas" />
             </BarChart>
           </ResponsiveContainer>
         </CardContent>
@@ -432,7 +432,7 @@ export default function RelatoriosTratativas() {
                   <span className="text-sm text-foreground">Casos com Devolução</span>
                   <span className="font-bold text-lg text-critical">{ri.totalDevolucoes || 0}</span>
                 </div>
-                <div className="flex justify-between items-center p-3 bg-destructive/10 border border-red-100 rounded-lg">
+                <div className="flex justify-between items-center p-3 bg-destructive/10 border border-destructive/25 rounded-lg">
                   <span className="text-sm text-foreground">Valor Total Devolvido</span>
                   <span className="font-bold text-lg text-destructive">
                     R$ {(ri.valorTotalDevolvido || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
@@ -494,7 +494,7 @@ export default function RelatoriosTratativas() {
               <p className="text-2xl font-bold text-critical">{ra.totalDevolucoes || 0}</p>
               <p className="text-xs text-muted-foreground mt-1">Casos com Devolução</p>
             </div>
-            <div className="p-4 bg-destructive/10 border border-red-100 rounded-lg text-center">
+            <div className="p-4 bg-destructive/10 border border-destructive/25 rounded-lg text-center">
               <p className="text-xl font-bold text-destructive">R$ {(ra.valorTotalDevolvido || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
               <p className="text-xs text-muted-foreground mt-1">Valor Devolvido</p>
             </div>

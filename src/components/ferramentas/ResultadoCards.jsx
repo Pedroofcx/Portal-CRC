@@ -1,6 +1,6 @@
 import React from 'react';
 import { fmtBRL } from './calculos';
-import { DollarSign, Percent, TrendingDown, AlertTriangle, CheckCircle, Minus, Clock } from 'lucide-react';
+import { DollarSign, Percent, TrendingDown, CheckCircle, Minus, Clock } from 'lucide-react';
 
 function MiniCard({ label, value, colorClass, icon: Icon, negative = false }) {
   return (
@@ -83,7 +83,7 @@ export default function ResultadoCards({ resultado, valorNota, aplicarMulta, onT
 
       {/* Resultados finais — ambos os cenários */}
       <div className="grid grid-cols-2 gap-2">
-        <div className={`rounded-xl border-2 p-3 ${!aplicarMulta ? 'border-emerald-400 bg-success-soft' : 'border-border bg-muted'}`}>
+        <div className={`rounded-xl border-2 p-3 ${!aplicarMulta ? 'border-success/40 bg-success-soft' : 'border-border bg-muted'}`}>
           <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-1">Sem Multa</p>
           <p className={`font-bold text-xl ${!aplicarMulta ? 'text-success' : 'text-muted-foreground'}`}>
             {fmtBRL(resultado.valor_final_sem_multa)}
@@ -98,13 +98,13 @@ export default function ResultadoCards({ resultado, valorNota, aplicarMulta, onT
       </div>
 
       {/* Destaque final */}
-      <div className={`rounded-xl border-2 p-4 ${aplicarMulta ? 'bg-destructive/10 border-destructive/30' : 'bg-success-soft border-emerald-300'}`}>
+      <div className={`rounded-xl border-2 p-4 ${aplicarMulta ? 'bg-destructive/10 border-destructive/30' : 'bg-success-soft border-success/25'}`}>
         <div className="flex items-center justify-between">
           <div>
             <p className="text-xs font-semibold uppercase tracking-wide opacity-70">
               Valor Final de Devolução {aplicarMulta ? '(com multa)' : '(sem multa)'}
             </p>
-            <p className={`font-bold text-2xl mt-1 ${aplicarMulta ? 'text-destructive' : 'text-emerald-800'}`}>
+            <p className={`font-bold text-2xl mt-1 ${aplicarMulta ? 'text-destructive' : 'text-success'}`}>
               {fmtBRL(aplicarMulta ? resultado.valor_final_devolucao : resultado.valor_final_sem_multa)}
             </p>
           </div>

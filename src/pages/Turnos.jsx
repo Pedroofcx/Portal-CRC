@@ -222,7 +222,7 @@ export default function Turnos() {
           ) : (
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
               {escalaAtual.turnos?.map((turno, diaIndex) => (
-                <Card key={turno.dia} className={`border-0 shadow-sm overflow-hidden ${turno.cancelado ? 'ring-2 ring-red-200' : ''}`}>
+                <Card key={turno.dia} className={`border-0 shadow-sm overflow-hidden ${turno.cancelado ? 'ring-2 ring-ring' : ''}`}>
                   {/* Header do card */}
                   <div className={`px-4 pt-4 pb-2 ${turno.cancelado ? 'bg-destructive/10' : ''}`}>
                     <div className="flex items-start justify-between gap-2">
@@ -250,8 +250,8 @@ export default function Turnos() {
                   <CardContent className="px-3 pb-3 space-y-2">
                     {turno.cancelado ? (
                       <div className="py-6 text-center">
-                        <BanIcon className="w-8 h-8 mx-auto text-red-300 mb-1" />
-                        <p className="text-xs text-red-400 font-medium">Sem operação neste dia</p>
+                        <BanIcon className="w-8 h-8 mx-auto text-destructive mb-1" />
+                        <p className="text-xs text-destructive font-medium">Sem operação neste dia</p>
                       </div>
                     ) : (
                       <>
@@ -269,7 +269,7 @@ export default function Turnos() {
                             ))}
                           </div>
                         </div>
-                        <div className="bg-info-soft border border-indigo-200 rounded-lg p-2">
+                        <div className="bg-info-soft border border-primary/25 rounded-lg p-2">
                           <div className="flex items-center gap-1.5 mb-1.5">
                             <Moon className="w-3.5 h-3.5 text-primary" />
                             <span className="text-xs font-semibold text-primary">Tarde</span>
@@ -347,7 +347,7 @@ export default function Turnos() {
                     onClick={() => setSelecionados(prev => sel ? prev.filter(id => id !== c.id) : [...prev, c.id])}
                     className={`w-full flex items-center gap-3 p-2.5 rounded-lg border text-left transition-all ${sel ? 'border-primary/40 bg-info-soft' : 'border-border hover:bg-muted'}`}
                   >
-                    <div className={`w-5 h-5 rounded border-2 flex items-center justify-center flex-shrink-0 ${sel ? 'bg-primary border-blue-600' : 'border-border'}`}>
+                    <div className={`w-5 h-5 rounded border-2 flex items-center justify-center flex-shrink-0 ${sel ? 'bg-primary border-primary/40' : 'border-border'}`}>
                       {sel && <Check className="w-3 h-3 text-white" />}
                     </div>
                     <span className="text-sm font-medium text-foreground flex-1">{c.nome_completo}</span>

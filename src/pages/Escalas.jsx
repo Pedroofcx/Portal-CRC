@@ -11,11 +11,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from 'sonner';
 import {
   Dialog,
@@ -29,14 +26,6 @@ import {
   Eye,
   Trash2,
   Users,
-  Home,
-  Building2,
-  Laptop,
-  Plane,
-  Coffee,
-  X as XIcon,
-  BookOpen,
-  Star as StarIcon,
 } from 'lucide-react';
 import CalendarioEquipes from '@/components/escalas/CalendarioEquipes';
 import DiaDetalheDialog from '@/components/escalas/DiaDetalheDialog';
@@ -483,7 +472,7 @@ export default function Escalas() {
       ) : (
         <>
           {!isGestor && minhasAtribuicoes.length > 0 && (
-            <Card className="border-0 shadow-sm bg-gradient-to-br from-blue-50 to-blue-100">
+            <Card className="border-0 shadow-sm bg-info-soft">
               <CardHeader>
                 <CardTitle className="text-base">Minhas Escalas Ativas</CardTitle>
               </CardHeader>

@@ -81,7 +81,7 @@ export default function FeedbackModal({ feedback, open, onClose }) {
 
           {/* Skills Avaliadas */}
           {(feedback.soft_skills_avaliadas || feedback.hard_skills_avaliadas) && (
-            <Card className="bg-info-soft border-indigo-200">
+            <Card className="bg-info-soft border-primary/25">
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm">Avaliação de Skills</CardTitle>
               </CardHeader>

@@ -34,7 +34,7 @@ const ColaboradorItem = React.memo(({ colab, isSelected, onToggle }) => {
         type="checkbox"
         checked={isSelected}
         onChange={() => {}}
-        className="w-4 h-4 rounded border-border text-primary focus:ring-blue-500"
+        className="w-4 h-4 rounded border-border text-primary focus:ring-ring"
       />
       <div className="flex-1">
         <p className="font-medium text-sm">{colab.nome_completo}</p>

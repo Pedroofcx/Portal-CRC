@@ -3,7 +3,6 @@ import React, { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
 import { Trash2, RefreshCw, CheckSquare, X, AlertTriangle, Zap } from 'lucide-react';
@@ -118,18 +117,18 @@ export default function AdminBulkActions({ selectedIds, tratativas, onClearSelec
 
   return (
     <>
-      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-slate-900 superficie-escura text-white rounded-2xl shadow-2xl px-6 py-4 flex items-center gap-4 border border-slate-700">
+      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-muted superficie-escura text-white rounded-2xl shadow-sm px-6 py-4 flex items-center gap-4 border border-border">
         <div className="flex items-center gap-2">
           <CheckSquare className="w-5 h-5 text-primary" />
           <span className="font-semibold">{count} selecionada{count > 1 ? 's' : ''}</span>
         </div>
 
-        <div className="w-px h-6 bg-slate-600" />
+        <div className="w-px h-6 bg-muted" />
 
         <Button
           size="sm"
           variant="outline"
-          className="bg-transparent border-slate-600 text-white hover:bg-slate-800 superficie-escura"
+          className="bg-transparent border-border text-white hover:bg-muted superficie-escura"
           onClick={() => setStatusDialogOpen(true)}
         >
           <RefreshCw className="w-4 h-4 mr-2" />
@@ -139,7 +138,7 @@ export default function AdminBulkActions({ selectedIds, tratativas, onClearSelec
         <Button
           size="sm"
           variant="outline"
-          className="bg-transparent border-amber-500 text-warning hover:bg-amber-900/20"
+          className="bg-transparent border-warning/40 text-warning hover:bg-warning/20"
           onClick={() => quickCloseMutation.mutate()}
           disabled={quickCloseMutation.isPending}
         >
@@ -150,19 +149,19 @@ export default function AdminBulkActions({ selectedIds, tratativas, onClearSelec
         <Button
           size="sm"
           variant="outline"
-          className="bg-transparent border-red-500 text-red-400 hover:bg-red-900/20"
+          className="bg-transparent border-destructive/40 text-destructive hover:bg-destructive/20"
           onClick={() => setDeleteDialogOpen(true)}
         >
           <Trash2 className="w-4 h-4 mr-2" />
           Excluir
         </Button>
 
-        <div className="w-px h-6 bg-slate-600" />
+        <div className="w-px h-6 bg-muted" />
 
         <Button
           size="sm"
           variant="ghost"
-          className="text-muted-foreground hover:text-white hover:bg-slate-800 superficie-escura"
+          className="text-muted-foreground hover:text-white hover:bg-muted superficie-escura"
           onClick={onClearSelection}
         >
           <X className="w-4 h-4" />

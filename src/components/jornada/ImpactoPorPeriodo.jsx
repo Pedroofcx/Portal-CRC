@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { TrendingUp, TrendingDown, Calendar } from 'lucide-react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line, ReferenceLine } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ReferenceLine } from 'recharts';
 import { agruparImpactoPorMes, projetarProximosMeses, calcularToleranciaReais } from './inteligenciaFinanceira';
 import { formatBRL } from '@/components/utils/helpers';
 
@@ -101,15 +101,15 @@ export default function ImpactoPorPeriodo({ tratativas, colaboradores, params })
         <CardContent>
           <ResponsiveContainer width="100%" height={350}>
             <BarChart data={dadosGrafico}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
               <XAxis dataKey="mes" tick={{ fontSize: 11 }} />
               <YAxis tickFormatter={(v) => `R$ ${(v / 1000).toFixed(0)}k`} />
               <Tooltip formatter={(v) => formatBRL(v)} />
               <Legend />
-              <Bar dataKey="total" name="Impacto Real" fill="#3b82f6" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="total" name="Impacto Real" fill="hsl(var(--chart-1))" radius={[4, 4, 0, 0]} />
               {toleranciaReais > 0 && (
-                <ReferenceLine y={toleranciaReais / 12} stroke="#dc2626" strokeDasharray="6 6"
-                  label={{ value: 'Tol. mensal', position: 'insideTopRight', fill: '#dc2626', fontSize: 10 }} />
+                <ReferenceLine y={toleranciaReais / 12} stroke="hsl(var(--destructive))" strokeDasharray="6 6"
+                  label={{ value: 'Tol. mensal', position: 'insideTopRight', fill: 'hsl(var(--destructive))', fontSize: 10 }} />
               )}
             </BarChart>
           </ResponsiveContainer>
@@ -142,7 +142,7 @@ export default function ImpactoPorPeriodo({ tratativas, colaboradores, params })
                     <td className="p-3 text-right font-bold text-foreground">{formatBRL(d.total)}</td>
                     <td className="p-3 text-center">
                       <Badge variant={d.tipo === 'Projeção' ? 'outline' : 'default'}
-                        className={d.tipo === 'Projeção' ? 'border-orange-300 text-critical' : ''}>
+                        className={d.tipo === 'Projeção' ? 'border-critical/25 text-critical' : ''}>
                         {d.tipo}
                       </Badge>
                     </td>

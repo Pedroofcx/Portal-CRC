@@ -115,7 +115,7 @@ export default function BuscaGlobal() {
       </kbd>
 
       {(resultados.length > 0 || semResultado) && aberto && (
-        <div className="absolute left-0 right-0 top-11 z-50 overflow-hidden rounded-lg border border-border bg-popover shadow-lg">
+        <div className="absolute left-0 right-0 top-11 z-50 overflow-hidden rounded-lg border border-border bg-popover shadow-sm">
           {semResultado ? (
             <p className="px-3 py-4 text-sm text-muted-foreground">
               Nada encontrado para “{termo.trim()}”.

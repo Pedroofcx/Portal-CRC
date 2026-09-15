@@ -24,7 +24,7 @@ export default function RodizioAssistido({ agentesAtivos, distribuicoes }) {
   };
 
   return (
-    <Card className="border-2 border-indigo-100 shadow-sm">
+    <Card className="border-2 border-primary/25 shadow-sm">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <CardTitle className="text-sm flex items-center gap-2">
@@ -50,7 +50,7 @@ export default function RodizioAssistido({ agentesAtivos, distribuicoes }) {
                   onClick={() => setTipoSelecionado(key)}
                   className={`px-3 py-1.5 rounded-lg text-xs font-medium border-2 transition-all ${
                     tipoSelecionado === key
-                      ? 'border-indigo-500 bg-info-soft text-primary'
+                      ? 'border-primary/40 bg-info-soft text-primary'
                       : 'border-border bg-card text-muted-foreground hover:border-border'
                   }`}
                 >
@@ -61,7 +61,7 @@ export default function RodizioAssistido({ agentesAtivos, distribuicoes }) {
           </div>
 
           {/* Sugestão principal */}
-          <div className="p-4 bg-info-soft border-2 border-indigo-200 rounded-xl">
+          <div className="p-4 bg-info-soft border-2 border-primary/25 rounded-xl">
             <p className="text-xs text-primary uppercase tracking-wide font-semibold mb-2 flex items-center gap-1">
               <User className="w-3 h-3" /> Próximo agente sugerido — {tipoConfig.label}
             </p>
@@ -98,7 +98,7 @@ export default function RodizioAssistido({ agentesAtivos, distribuicoes }) {
                     key={agente.id}
                     className={`flex items-center justify-between p-2.5 rounded-lg border text-xs transition-all ${
                       idx === 0
-                        ? 'bg-info-soft border-indigo-300 font-medium'
+                        ? 'bg-info-soft border-primary/25 font-medium'
                         : 'bg-card border-border'
                     }`}
                   >

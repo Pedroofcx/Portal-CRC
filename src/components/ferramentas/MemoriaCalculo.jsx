@@ -13,7 +13,7 @@ export default function MemoriaCalculo({ resultado, config, valorNota, aplicarMu
   const divergenciaImpostos = Math.abs(somaImpostosIndividuais - resultado.total_impostos_valor) > 0.01;
 
   return (
-    <div className="bg-slate-900 superficie-escura rounded-xl p-4 font-mono text-xs text-muted-foreground space-y-1">
+    <div className="bg-muted superficie-escura rounded-xl p-4 font-mono text-xs text-muted-foreground space-y-1">
       <p className="text-muted-foreground text-[10px] uppercase tracking-widest mb-2">Memória de Cálculo Completa</p>
 
       {/* Valor base */}
@@ -30,25 +30,25 @@ export default function MemoriaCalculo({ resultado, config, valorNota, aplicarMu
         </div>
       )}
 
-      <div className="border-t border-slate-700 my-1.5" />
+      <div className="border-t border-border my-1.5" />
 
       {/* Impostos individuais */}
       <p className="text-muted-foreground text-[10px] uppercase tracking-wider">Impostos</p>
       {IMPOSTOS_KEYS.map(k => (
         <div key={k} className="flex justify-between">
           <span className="text-muted-foreground">{IMPOSTO_LABELS[k]} ({Number(config[k]).toFixed(2)}%):</span>
-          <span className="text-red-400">− {fmtBRL(resultado.detalhes_impostos?.[k] ?? 0)}</span>
+          <span className="text-destructive">− {fmtBRL(resultado.detalhes_impostos?.[k] ?? 0)}</span>
         </div>
       ))}
       <div className="flex justify-between text-muted-foreground mt-0.5">
         <span className="font-semibold">Total Impostos ({resultado.total_impostos_pct?.toFixed(2)}%):</span>
-        <span className="text-red-400 font-semibold">− {fmtBRL(resultado.total_impostos_valor)}</span>
+        <span className="text-destructive font-semibold">− {fmtBRL(resultado.total_impostos_valor)}</span>
       </div>
       {divergenciaImpostos && (
         <div className="text-warning text-[10px]">Divergência de arredondamento nos impostos detectada.</div>
       )}
 
-      <div className="border-t border-slate-700 my-1.5" />
+      <div className="border-t border-border my-1.5" />
 
       {/* Comissão */}
       <p className="text-muted-foreground text-[10px] uppercase tracking-wider">Outros Descontos</p>
@@ -60,7 +60,7 @@ export default function MemoriaCalculo({ resultado, config, valorNota, aplicarMu
       {/* Uso proporcional detalhado — base mensal */}
       {uso && uso.valor > 0 && (
         <>
-          <div className="border-t border-slate-700 my-1.5" />
+          <div className="border-t border-border my-1.5" />
           <p className="text-muted-foreground text-[10px] uppercase tracking-wider">
             Uso Proporcional — Plano {tipoPlano ? tipoPlano.label : ''} ({uso.mesesContrato} meses)
           </p>
@@ -104,42 +104,42 @@ export default function MemoriaCalculo({ resultado, config, valorNota, aplicarMu
         </>
       )}
 
-      <div className="border-t border-slate-700 my-1.5" />
+      <div className="border-t border-border my-1.5" />
 
       {/* Custo total */}
       <div className="flex justify-between text-muted-foreground">
         <span className="font-semibold">Custo total de descontos:</span>
-        <span className="text-red-400 font-semibold">− {fmtBRL(resultado.total_descontos_valor)}</span>
+        <span className="text-destructive font-semibold">− {fmtBRL(resultado.total_descontos_valor)}</span>
       </div>
 
-      <div className="border-t border-slate-700 my-1.5" />
+      <div className="border-t border-border my-1.5" />
 
       {/* Cenários */}
       <p className="text-muted-foreground text-[10px] uppercase tracking-wider">Cenários de Devolução</p>
 
-      <div className="flex justify-between text-emerald-400">
+      <div className="flex justify-between text-success">
         <span>✓ Devolução sem multa:</span>
         <span className="font-semibold">{fmtBRL(resultado.valor_final_sem_multa)}</span>
       </div>
 
       <div className="flex justify-between">
         <span className="text-muted-foreground">Multa contratual ({Number(config.multa_contratual).toFixed(2)}% sobre {fmtBRL(resultado.valor_sem_multa)}):</span>
-        <span className="text-red-400">− {fmtBRL(resultado.valor_multa_calculado)}</span>
+        <span className="text-destructive">− {fmtBRL(resultado.valor_multa_calculado)}</span>
       </div>
 
-      <div className="flex justify-between text-red-300">
+      <div className="flex justify-between text-destructive">
         <span>✗ Devolução com multa:</span>
         <span className="font-semibold">{fmtBRL(resultado.valor_final_devolucao)}</span>
       </div>
 
-      <div className="border-t border-slate-500 my-1.5" />
+      <div className="border-t border-border my-1.5" />
 
       {/* Resultado final selecionado */}
       <div className="flex justify-between font-bold text-sm">
-        <span className={aplicarMulta ? 'text-red-300' : 'text-emerald-300'}>
+        <span className={aplicarMulta ? 'text-destructive' : 'text-success'}>
           Valor final ({aplicarMulta ? 'com multa' : 'sem multa'}):
         </span>
-        <span className={aplicarMulta ? 'text-red-300' : 'text-emerald-400'}>
+        <span className={aplicarMulta ? 'text-destructive' : 'text-success'}>
           {fmtBRL(aplicarMulta ? resultado.valor_final_devolucao : resultado.valor_final_sem_multa)}
         </span>
       </div>

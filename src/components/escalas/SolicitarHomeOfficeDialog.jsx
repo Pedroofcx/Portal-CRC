@@ -282,7 +282,7 @@ export default function SolicitarHomeOfficeDialog({
                       className={`
                         p-3 border rounded-lg flex items-center justify-between
                         ${!dia.elegivel ? 'bg-muted opacity-60' : 'hover:bg-info-soft cursor-pointer'}
-                        ${diasSelecionados.includes(dia.data) ? 'border-blue-500 bg-info-soft' : ''}
+                        ${diasSelecionados.includes(dia.data) ? 'border-primary/40 bg-info-soft' : ''}
                       `}
                       onClick={() => dia.elegivel && toggleDia(dia.data)}
                     >

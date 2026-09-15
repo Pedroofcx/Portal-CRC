@@ -1,10 +1,10 @@
 // Configurações de tipos e pesos operacionais
 export const TIPOS_CONFIG = {
-  reclamacao_interna:  { label: 'Reclamação Interna',    color: 'bg-warning-soft text-warning',   colorSolid: '#f59e0b', peso: 1, pontos: 2 },
-  reclame_aqui:        { label: 'Reclame Aqui',          color: 'bg-success-soft text-success',   colorSolid: '#22c55e', peso: 2, pontos: 4 },
-  google_meu_negocio:  { label: 'Google Meu Negócio',    color: 'bg-info-soft text-primary',     colorSolid: '#3b82f6', peso: 2, pontos: 3 },
-  contestacao_compra:  { label: 'Contestação de Compra', color: 'bg-info-soft text-primary', colorSolid: '#a855f7', peso: 3, pontos: 5 },
-  procon:              { label: 'PROCON',                 color: 'bg-destructive/10 text-destructive',       colorSolid: '#ef4444', peso: 4, pontos: 6 },
+  reclamacao_interna:  { label: 'Reclamação Interna',    color: 'bg-warning-soft text-warning',   colorSolid: 'hsl(var(--chart-3))', peso: 1, pontos: 2 },
+  reclame_aqui:        { label: 'Reclame Aqui',          color: 'bg-success-soft text-success',   colorSolid: 'hsl(var(--chart-2))', peso: 2, pontos: 4 },
+  google_meu_negocio:  { label: 'Google Meu Negócio',    color: 'bg-info-soft text-primary',     colorSolid: 'hsl(var(--chart-1))', peso: 2, pontos: 3 },
+  contestacao_compra:  { label: 'Contestação de Compra', color: 'bg-info-soft text-primary', colorSolid: 'hsl(var(--chart-5))', peso: 3, pontos: 5 },
+  procon:              { label: 'PROCON',                 color: 'bg-destructive/10 text-destructive',       colorSolid: 'hsl(var(--destructive))', peso: 4, pontos: 6 },
 };
 
 export const PRIORIDADE_CONFIG = {

@@ -15,7 +15,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
 import {
   Dialog,
@@ -29,8 +28,7 @@ import {
   Filter,
   ExternalLink,
   Eye,
-  Archive,
-  ShieldCheck
+  Archive
 } from 'lucide-react';
 import ImportExportCSV from '@/components/tratativas/ImportExportCSV';
 import AdminBulkActions from '@/components/tratativas/AdminBulkActions';
@@ -543,7 +541,7 @@ export default function Tratativas() {
         {['registrada', 'tratativa_iniciada', 'em_andamento', 'dependencia_externa', 'aguardando_confirmacao_reabertura', 'encerrada'].map(status => (
           <Card 
             key={status}
-            className={`p-4 cursor-pointer transition-all ${filterStatus === status ? 'ring-2 ring-blue-500' : ''}`}
+            className={`p-4 cursor-pointer transition-all ${filterStatus === status ? 'ring-2 ring-ring' : ''}`}
             onClick={() => setFilterStatus(filterStatus === status ? 'all' : status)}
           >
             <p className="text-2xl font-bold">{countByStatus(status)}</p>
@@ -803,7 +801,7 @@ export default function Tratativas() {
                           }}
                           className={`w-full text-left p-2 border rounded-lg transition-all ${
                             isSelected 
-                              ? 'border-blue-500 bg-info-soft' 
+                              ? 'border-primary/40 bg-info-soft' 
                               : !canSelect 
                                 ? 'border-border bg-muted opacity-50 cursor-not-allowed' 
                                 : 'border-border hover:border-info/30'
@@ -827,7 +825,7 @@ export default function Tratativas() {
 
                   {/* Campos específicos para Contestação de Compra */}
                   {formData.tipo_tratativa === 'contestacao' && (
-                  <div className="p-4 bg-info-soft border-2 border-purple-300 rounded-lg space-y-4">
+                  <div className="p-4 bg-info-soft border-2 border-primary/25 rounded-lg space-y-4">
                   <h4 className="font-semibold text-primary flex items-center gap-2">
                   Dados da Contestação de Compra
                   </h4>

@@ -9,28 +9,22 @@ import ConfirmDialog from '@/components/ui/ConfirmDialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
 import {
   Settings,
-  Plus,
   Trash2,
   Save,
   Download,
-  Upload,
   Shield,
   Database,
   Target,
   Tag,
-  Award,
-  Brain,
   Trophy,
   Eye,
-  EyeOff,
-  FileText
+  EyeOff
 } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import RankingTrimestral from '@/components/dashboard/RankingTrimestral';
@@ -306,7 +300,7 @@ export default function Configuracoes() {
                   Defina as etapas que o cliente percorre
                 </p>
                 <Link to={createPageUrl('ConfigEtapasJornada')}>
-                  <Button className="w-full bg-primary hover:bg-purple-700">
+                  <Button className="w-full bg-primary hover:bg-primary">
                     Gerenciar Etapas
                   </Button>
                 </Link>
@@ -394,7 +388,7 @@ export default function Configuracoes() {
                     onCheckedChange={handleToggleRanking}
                   />
                 </div>
-                <div className="mt-4 p-3 bg-info-soft rounded-lg border border-blue-100 text-xs text-primary">
+                <div className="mt-4 p-3 bg-info-soft rounded-lg border border-primary/25 text-xs text-primary">
                   O gestor sempre vê o ranking completo, independente desta configuração.
                 </div>
               </CardContent>

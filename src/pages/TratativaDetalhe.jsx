@@ -832,7 +832,7 @@ export default function TratativaDetalhe() {
 
               {/* Painel de tempo ativo vs congelado — contestações */}
               {tratativa.congelamento_sla?.data_congelamento && (
-                <div className="p-3 bg-info-soft border border-sky-200 rounded-lg space-y-2">
+                <div className="p-3 bg-info-soft border border-info/25 rounded-lg space-y-2">
                   <p className="text-xs font-semibold text-info flex items-center gap-1">
                     <Snowflake className="w-3.5 h-3.5" />
                     Histórico de SLA
@@ -976,7 +976,7 @@ export default function TratativaDetalhe() {
                               type="button"
                               size="sm"
                               variant={solucaoForm.houve_devolucao_financeira === true ? 'default' : 'outline'}
-                              className={solucaoForm.houve_devolucao_financeira === true ? 'bg-critical hover:bg-orange-700' : ''}
+                              className={solucaoForm.houve_devolucao_financeira === true ? 'bg-critical hover:bg-critical' : ''}
                               onClick={() => setSolucaoForm({ ...solucaoForm, houve_devolucao_financeira: true })}
                             >
                               Sim
@@ -985,7 +985,7 @@ export default function TratativaDetalhe() {
                               type="button"
                               size="sm"
                               variant={solucaoForm.houve_devolucao_financeira === false ? 'default' : 'outline'}
-                              className={solucaoForm.houve_devolucao_financeira === false ? 'bg-slate-600 hover:bg-slate-700' : ''}
+                              className={solucaoForm.houve_devolucao_financeira === false ? 'bg-muted hover:bg-muted' : ''}
                               onClick={() => setSolucaoForm({ ...solucaoForm, houve_devolucao_financeira: false, valor_devolvido_cliente: '' })}
                             >
                               Não
@@ -1305,9 +1305,9 @@ export default function TratativaDetalhe() {
 
           {/* Pontuação */}
           {isEncerrada && pontosPreview && (
-            <Card className="border-0 shadow-sm bg-gradient-to-br from-amber-500 to-orange-500 text-white">
+            <Card className="border-0 shadow-sm bg-warning text-white">
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-amber-100 flex items-center gap-2">
+                <CardTitle className="text-sm font-medium text-warning flex items-center gap-2">
                   <Award className="w-4 h-4" />
                   Pontuação Gerada
                 </CardTitle>
@@ -1316,7 +1316,7 @@ export default function TratativaDetalhe() {
                 <div className="text-4xl font-bold mb-3">{pontosPreview.pontos.toFixed(1)}</div>
                 <div className="space-y-1">
                   {pontosPreview.detalhes.map((d, i) => (
-                    <div key={i} className="text-sm text-amber-100 flex justify-between">
+                    <div key={i} className="text-sm text-warning flex justify-between">
                       <span>{d.tipo}</span>
                       <span>+{d.pontos}</span>
                     </div>

@@ -22,7 +22,7 @@ const EtapaItem = React.memo(({ etapa, index, isChecked, onToggle }) => {
             type="checkbox"
             checked={isChecked}
             onChange={() => {}}
-            className="w-4 h-4 mt-1 rounded border-border text-primary focus:ring-blue-500 cursor-pointer"
+            className="w-4 h-4 mt-1 rounded border-border text-primary focus:ring-ring cursor-pointer"
           />
           <div className="flex-1">
             <div className="flex items-center gap-2">

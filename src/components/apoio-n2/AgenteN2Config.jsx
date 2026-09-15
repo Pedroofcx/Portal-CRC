@@ -158,7 +158,7 @@ export default function AgenteN2Config() {
               </CardTitle>
               <p className="text-sm text-muted-foreground mt-1">Gerencie os agentes do Time N2, posições e status. O cadastro não cria usuário no sistema.</p>
             </div>
-            <Button className="bg-primary hover:bg-violet-700" onClick={handleAdd}>
+            <Button className="bg-primary hover:bg-primary" onClick={handleAdd}>
               <Plus className="w-4 h-4 mr-1" /> Adicionar Agente N2
             </Button>
           </div>
@@ -268,7 +268,7 @@ export default function AgenteN2Config() {
                 </Select>
               </div>
             </div>
-            <div className="p-3 bg-info-soft rounded-lg border border-blue-100 text-xs text-primary space-y-1">
+            <div className="p-3 bg-info-soft rounded-lg border border-primary/25 text-xs text-primary space-y-1">
               <p><strong>Permitido:</strong> participa do rodízio normalmente.</p>
               <p><strong>Férias:</strong> pulado temporariamente, sem perder a posição.</p>
               <p><strong>Bloqueado:</strong> não participa do rodízio, sem perder a posição.</p>
@@ -276,7 +276,7 @@ export default function AgenteN2Config() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancelar</Button>
-            <Button className="bg-primary hover:bg-violet-700" disabled={!form.colaborador_nome.trim() || salvarMutation.isPending} onClick={() => salvarMutation.mutate({ editId, form })}>
+            <Button className="bg-primary hover:bg-primary" disabled={!form.colaborador_nome.trim() || salvarMutation.isPending} onClick={() => salvarMutation.mutate({ editId, form })}>
               <Save className="w-4 h-4 mr-1" /> {salvarMutation.isPending ? 'Salvando...' : 'Salvar'}
             </Button>
           </DialogFooter>

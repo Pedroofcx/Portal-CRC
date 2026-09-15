@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Brain, AlertTriangle, TrendingUp, Target, HeartCrack, Wrench, ShieldAlert, Wallet } from 'lucide-react';
+import { Brain, AlertTriangle, TrendingUp, Target, Wrench, ShieldAlert, Wallet } from 'lucide-react';
 import { gerarPerguntasEstrategicas } from './inteligenciaFinanceira';
 
 const ICONES = [

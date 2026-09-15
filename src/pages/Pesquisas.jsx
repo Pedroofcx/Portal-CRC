@@ -7,16 +7,14 @@ import PageHeader from '@/components/ui/PageHeader';
 import DataTable from '@/components/ui/DataTable';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import ConfirmDialog from '@/components/ui/ConfirmDialog';
-import StatusBadge from '@/components/ui/StatusBadge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
-import { Progress } from '@/components/ui/progress';
 import { toast } from 'sonner';
 import {
   Dialog,
@@ -29,14 +27,11 @@ import {
   Plus,
   Eye,
   Trash2,
-  ClipboardList,
   CheckCircle,
   BarChart3,
   Send,
-  TrendingUp,
   Heart,
-  Copy,
-  Pencil
+  Copy
 } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import AgendamentoPesquisa from '@/components/pesquisas/AgendamentoPesquisa';
@@ -676,7 +671,7 @@ export default function Pesquisas() {
                     <Heart className="w-4 h-4 text-primary" />
                     <Label className="text-sm font-medium">Configurações de Clima Organizacional</Label>
                   </div>
-                  <div className="pl-6 border-l-2 border-purple-300 space-y-2">
+                  <div className="pl-6 border-l-2 border-primary/25 space-y-2">
                     <div>
                       <Label className="text-xs">Peso no Health Score (0-10)</Label>
                       <Input

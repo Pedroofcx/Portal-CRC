@@ -114,7 +114,7 @@ function RegistrarFeriasDialog({ open, onOpenChange, ciclos, onSalvar, loading }
                   onClick={() => setForm(f => ({ ...f, abono_dias: dias }))}
                   className={`flex-1 py-2.5 rounded-lg border-2 text-sm font-semibold transition-all ${
                     form.abono_dias === dias
-                      ? 'border-amber-500 bg-warning text-white'
+                      ? 'border-warning/40 bg-warning text-white'
                       : 'border-border bg-card text-foreground hover:border-warning/30'
                   }`}
                 >
@@ -187,7 +187,7 @@ export default function DetalheColaboradorFerias({ colaborador, ciclos, onBack, 
         <div className="flex flex-col sm:flex-row sm:items-center gap-4">
           <Avatar className="h-16 w-16">
             <AvatarImage src={colaborador.foto_url} />
-            <AvatarFallback className="bg-gradient-to-br from-blue-500 to-blue-600 text-white text-xl font-semibold">
+            <AvatarFallback className="bg-primary text-white text-xl font-semibold">
               {colaborador.nome_completo?.charAt(0)}
             </AvatarFallback>
           </Avatar>
@@ -239,7 +239,7 @@ export default function DetalheColaboradorFerias({ colaborador, ciclos, onBack, 
                 </div>
                 <div className="flex items-center gap-2">
                   <StatusBadge status={status} />
-                  <Button variant="ghost" size="icon" className="h-7 w-7 text-red-400" onClick={() => { if (confirm('Excluir este ciclo?')) onDeletarCiclo(ciclo.id); }}>
+                  <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => { if (confirm('Excluir este ciclo?')) onDeletarCiclo(ciclo.id); }}>
                     <Trash2 className="w-3.5 h-3.5" />
                   </Button>
                 </div>
@@ -277,7 +277,7 @@ export default function DetalheColaboradorFerias({ colaborador, ciclos, onBack, 
               <div>
                 <div className="w-full bg-muted rounded-full h-2">
                   <div
-                    className={`h-2 rounded-full ${barPercent >= 100 ? 'bg-slate-400' : barPercent > 70 ? 'bg-amber-400' : 'bg-primary'}`}
+                    className={`h-2 rounded-full ${barPercent >= 100 ? 'bg-muted' : barPercent > 70 ? 'bg-warning' : 'bg-primary'}`}
                     style={{ width: `${barPercent}%` }}
                   />
                 </div>
@@ -292,9 +292,9 @@ export default function DetalheColaboradorFerias({ colaborador, ciclos, onBack, 
                 ) : (
                   <div className="space-y-2">
                     {(ciclo.fragmentos || []).map((frag, idx) => (
-                      <div key={frag.id || idx} className="flex items-center justify-between p-3 bg-success-soft border border-green-100 rounded-lg">
+                      <div key={frag.id || idx} className="flex items-center justify-between p-3 bg-success-soft border border-success/25 rounded-lg">
                         <div className="flex items-center gap-3 text-sm">
-                          <span className="w-6 h-6 rounded-full bg-green-200 text-success flex items-center justify-center text-xs font-bold flex-shrink-0">{idx + 1}</span>
+                          <span className="w-6 h-6 rounded-full bg-success text-success flex items-center justify-center text-xs font-bold flex-shrink-0">{idx + 1}</span>
                           <div>
                             <span className="font-medium">{fmtDate(frag.data_inicio)}</span>
                             <span className="text-muted-foreground mx-1">→</span>
@@ -308,7 +308,7 @@ export default function DetalheColaboradorFerias({ colaborador, ciclos, onBack, 
                             {frag.observacao && <span className="ml-2 text-muted-foreground italic text-xs">{frag.observacao}</span>}
                           </div>
                         </div>
-                        <Button variant="ghost" size="icon" className="h-7 w-7 text-red-400 flex-shrink-0" onClick={() => onRemoverFragmento(ciclo, frag.id)}>
+                        <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive flex-shrink-0" onClick={() => onRemoverFragmento(ciclo, frag.id)}>
                           <Trash2 className="w-3.5 h-3.5" />
                         </Button>
                       </div>

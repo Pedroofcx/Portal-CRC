@@ -149,7 +149,7 @@ export default function LiderTecnicoConfig() {
               </CardTitle>
               <p className="text-sm text-muted-foreground mt-1">Gerencie os participantes do rodízio, suas posições e status.</p>
             </div>
-            <Button className="bg-primary hover:bg-violet-700" onClick={handleAdd}>
+            <Button className="bg-primary hover:bg-primary" onClick={handleAdd}>
               <Plus className="w-4 h-4 mr-1" /> Adicionar Líder
             </Button>
           </div>
@@ -248,7 +248,7 @@ export default function LiderTecnicoConfig() {
                 </Select>
               </div>
             </div>
-            <div className="p-3 bg-info-soft rounded-lg border border-blue-100 text-xs text-primary space-y-1">
+            <div className="p-3 bg-info-soft rounded-lg border border-primary/25 text-xs text-primary space-y-1">
               <p><strong>Permitido:</strong> disponível para acionamentos pelo rodízio.</p>
               <p><strong>Férias:</strong> pulado temporariamente, sem perder a posição.</p>
               <p><strong>Bloqueado:</strong> não disponibilizado no rodízio, sem perder a posição.</p>
@@ -256,7 +256,7 @@ export default function LiderTecnicoConfig() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancelar</Button>
-            <Button className="bg-primary hover:bg-violet-700" disabled={!form.nome.trim() || salvarMutation.isPending} onClick={() => salvarMutation.mutate({ editId, form })}>
+            <Button className="bg-primary hover:bg-primary" disabled={!form.nome.trim() || salvarMutation.isPending} onClick={() => salvarMutation.mutate({ editId, form })}>
               <Save className="w-4 h-4 mr-1" /> {salvarMutation.isPending ? 'Salvando...' : 'Salvar'}
             </Button>
           </DialogFooter>

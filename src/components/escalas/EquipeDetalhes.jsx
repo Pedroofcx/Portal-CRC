@@ -11,11 +11,11 @@ const corPorTipo = {
   home_office: 'bg-success',
   presencial: 'bg-primary',
   hibrido: 'bg-primary',
-  ferias: 'bg-cyan-500',
+  ferias: 'bg-info',
   day_off: 'bg-warning',
   falta: 'bg-destructive',
   treinamento: 'bg-primary',
-  evento_especial: 'bg-pink-500'
+  evento_especial: 'bg-primary'
 };
 
 const labelPorTipo = {
@@ -65,7 +65,7 @@ export default function EquipeDetalhes({
           const escala = escalas.find(e => e.id === atribAtual?.escala_id);
 
           return (
-            <Card key={colab.id} className="border-0 shadow-md overflow-hidden">
+            <Card key={colab.id} className="border-0 shadow-sm overflow-hidden">
               <div className={cn('h-1.5', cor)} />
               <CardContent className="p-4">
                 <div className="flex items-start gap-3 mb-3">

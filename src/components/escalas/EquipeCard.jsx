@@ -8,11 +8,11 @@ const corPorTipo = {
   home_office: 'bg-success',
   presencial: 'bg-primary',
   hibrido: 'bg-primary',
-  ferias: 'bg-cyan-500',
+  ferias: 'bg-info',
   day_off: 'bg-warning',
   falta: 'bg-destructive',
   treinamento: 'bg-primary',
-  evento_especial: 'bg-pink-500'
+  evento_especial: 'bg-primary'
 };
 
 export default function EquipeCard({ 
@@ -37,7 +37,7 @@ export default function EquipeCard({
 
   return (
     <Card 
-      className="border-0 shadow-md hover:shadow-xl transition-all cursor-pointer group"
+      className="border-0 shadow-sm hover:shadow-sm transition-all cursor-pointer group"
       onClick={onClick}
     >
       <CardContent className="p-0">

@@ -11,11 +11,11 @@ const corPorTipo = {
   home_office: 'bg-success',
   presencial: 'bg-primary',
   hibrido: 'bg-primary',
-  ferias: 'bg-cyan-500',
+  ferias: 'bg-info',
   day_off: 'bg-warning',
   falta: 'bg-destructive',
   treinamento: 'bg-primary',
-  evento_especial: 'bg-pink-500'
+  evento_especial: 'bg-primary'
 };
 
 const labelPorTipo = {
@@ -64,8 +64,8 @@ export default function CalendarioLimpo({
   const hoje_data = new Date().toDateString();
 
   return (
-    <Card className="border-0 shadow-lg">
-      <div className="p-4 border-b bg-gradient-to-r from-slate-50 to-slate-100">
+    <Card className="border-0 shadow-sm">
+      <div className="p-4 border-b bg-muted">
         <div className="flex items-center justify-between">
           <h2 className="text-xl font-bold text-foreground">
             {mesAtual.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' }).replace(/^\w/, c => c.toUpperCase())}
@@ -108,7 +108,7 @@ export default function CalendarioLimpo({
                   diaObj.mesAtual 
                     ? 'bg-card hover:bg-muted' 
                     : 'bg-muted/50 opacity-40',
-                  isHoje && 'ring-2 ring-blue-500 bg-info-soft'
+                  isHoje && 'ring-2 ring-ring bg-info-soft'
                 )}
               >
                 <div className="flex items-center justify-between mb-1">
@@ -132,7 +132,7 @@ export default function CalendarioLimpo({
                         key={tipo}
                         className={cn(
                           'h-1.5 flex-1 rounded-full',
-                          corPorTipo[tipo] || 'bg-slate-400'
+                          corPorTipo[tipo] || 'bg-muted'
                         )}
                         title={labelPorTipo[tipo]}
                       />

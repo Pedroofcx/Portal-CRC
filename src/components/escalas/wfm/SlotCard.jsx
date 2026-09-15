@@ -52,9 +52,9 @@ export default function SlotCard({
       className={cn(
         'w-full rounded-lg border-2 p-1.5 text-left transition-all space-y-1',
         cfg.bg, cfg.border,
-        isGestor && 'hover:ring-2 hover:ring-blue-400 cursor-pointer',
+        isGestor && 'hover:ring-2 hover:ring-ring cursor-pointer',
         !isGestor && 'cursor-default',
-        temTravado && 'ring-2 ring-amber-400'
+        temTravado && 'ring-2 ring-ring'
       )}
     >
       {/* Linha de cada colaborador */}

@@ -46,7 +46,7 @@ export default function Login() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-900 superficie-escura p-4">
+    <div className="flex min-h-screen items-center justify-center bg-muted superficie-escura p-4">
       <div className="w-full max-w-sm space-y-6">
 
         <div className="space-y-1 text-center">

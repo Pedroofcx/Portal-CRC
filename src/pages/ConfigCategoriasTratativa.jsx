@@ -11,7 +11,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import DataTable from '@/components/ui/DataTable';
 import EmptyState from '@/components/ui/EmptyState';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { toast } from 'sonner';
 import { Plus, Edit, Trash2, Tag, CheckCircle, AlertTriangle } from 'lucide-react';
 
@@ -22,7 +21,7 @@ export default function ConfigCategoriasTratativa() {
   const [formData, setFormData] = useState({
     nome: '',
     descricao: '',
-    cor: '#3B82F6'
+    cor: 'hsl(var(--chart-1))'
   });
 
   const queryClient = useQueryClient();
@@ -66,7 +65,7 @@ export default function ConfigCategoriasTratativa() {
     setFormData({
       nome: '',
       descricao: '',
-      cor: '#3B82F6'
+      cor: 'hsl(var(--chart-1))'
     });
     setEditingCategoria(null);
     setShowForm(false);
@@ -89,7 +88,7 @@ export default function ConfigCategoriasTratativa() {
     setFormData({
       nome: categoria.nome || '',
       descricao: categoria.descricao || '',
-      cor: categoria.cor || '#3B82F6'
+      cor: categoria.cor || 'hsl(var(--chart-1))'
     });
     setShowForm(true);
   };

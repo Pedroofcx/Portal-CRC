@@ -276,12 +276,12 @@ export default function PainelWFM({ colaboradores, isGestor }) {
       {isLoading ? (
         <Card className="border-0 shadow-sm">
           <CardContent className="p-8 text-center">
-            <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+            <div className="w-8 h-8 border-4 border-primary/40 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
             <p className="text-muted-foreground text-sm">Carregando escala...</p>
           </CardContent>
         </Card>
       ) : escala ? (
-        <Card className="border-0 shadow-lg">
+        <Card className="border-0 shadow-sm">
           <CardHeader className="pb-2">
             <div className="flex items-center justify-between">
               <CardTitle className="text-base text-foreground">Grade Semanal WFM</CardTitle>

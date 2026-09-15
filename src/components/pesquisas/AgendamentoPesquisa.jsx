@@ -4,7 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Card, CardContent } from '@/components/ui/card';
-import { Clock, Calendar, Bell } from 'lucide-react';
+import { Clock, Bell } from 'lucide-react';
 
 export default function AgendamentoPesquisa({ agendamento = {}, onChange }) {
   const handleChange = (field, value) => {

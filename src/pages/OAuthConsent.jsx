@@ -1,4 +1,3 @@
-import db from '@/api/db';
 import React, { useEffect, useState } from "react";
 import { appParams } from "@/lib/app-params";
 import { Button } from "@/components/ui/button";

@@ -115,7 +115,7 @@ export default function DistribuicaoTratativas({ gestorId, gestorNome, colaborad
             )}
           </div>
           <div className="flex items-center gap-2">
-            <Button size="sm" onClick={() => setDialogOpen(true)} className="bg-primary hover:bg-indigo-700 gap-1">
+            <Button size="sm" onClick={() => setDialogOpen(true)} className="bg-primary hover:bg-primary gap-1">
               <Plus className="w-4 h-4" /> Nova Atribuição
             </Button>
             <button onClick={() => setExpandido(e => !e)} className="p-1.5 hover:bg-muted rounded transition-colors">
@@ -260,7 +260,7 @@ export default function DistribuicaoTratativas({ gestorId, gestorNome, colaborad
                           <span className="text-muted-foreground">{d.data_atribuicao} {d.horario_atribuicao || ''}</span>
                           <button
                             onClick={() => { if (window.confirm('Remover este registro?')) deleteMutation.mutate(d.id); }}
-                            className="text-red-300 hover:text-destructive transition-colors"
+                            className="text-destructive hover:text-destructive transition-colors"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
                           </button>
@@ -277,7 +277,7 @@ export default function DistribuicaoTratativas({ gestorId, gestorNome, colaborad
                   </p>
                   <div className="space-y-1.5">
                     {distribuicoesFiltradas.filter(d => d.override_rodizio).map(d => (
-                      <div key={d.id} className="p-2 bg-warning-soft border border-amber-100 rounded text-xs text-warning">
+                      <div key={d.id} className="p-2 bg-warning-soft border border-warning/25 rounded text-xs text-warning">
                         <span className="font-medium">{d.agente_nome}</span> recebeu <span className="font-medium">{TIPOS_CONFIG[d.tipo_tratativa]?.label}</span>
                         {' '}(sugerido: {d.agente_sugerido_nome || '—'}) em {d.data_atribuicao}
                         {d.justificativa_override && <span className="block text-warning italic mt-0.5">"{d.justificativa_override}"</span>}

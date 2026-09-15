@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { formatDateSP, tipoTratativaLabels } from '@/components/utils/helpers';
+import { formatDateSP } from '@/components/utils/helpers';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';

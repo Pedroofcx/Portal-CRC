@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Alert } from '@/components/ui/alert';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Progress } from '@/components/ui/progress';
 import {
@@ -11,20 +11,15 @@ import {
   PolarAngleAxis,
   PolarRadiusAxis,
   ResponsiveContainer,
-  LineChart,
-  Line,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
   Legend,
-  BarChart,
-  Bar,
   Area,
   AreaChart
 } from 'recharts';
 import {
-  TrendingUp,
   TrendingDown,
   AlertTriangle,
   CheckCircle,
@@ -32,12 +27,10 @@ import {
   Heart,
   Zap,
   Target,
-  Users,
   MessageSquare,
   Award,
   Activity,
   Clock,
-  ThumbsUp,
   ThumbsDown,
   AlertCircle,
   Sparkles
@@ -468,7 +461,7 @@ export default function AnaliseProfundaColaborador({
   return (
     <div className="space-y-6">
       {/* Header do Colaborador */}
-      <Card className="border-0 shadow-sm bg-gradient-to-r from-blue-50 to-indigo-50">
+      <Card className="border-0 shadow-sm bg-info-soft">
         <CardHeader>
           <div className="flex items-center gap-4">
             <Avatar className="h-16 w-16">
@@ -560,14 +553,14 @@ export default function AnaliseProfundaColaborador({
           <CardContent>
             <ResponsiveContainer width="100%" height={280}>
               <RadarChart data={radarData}>
-                <PolarGrid stroke="#cbd5e1" />
-                <PolarAngleAxis dataKey="skill" tick={{ fill: '#64748b', fontSize: 12 }} />
-                <PolarRadiusAxis angle={90} domain={[0, 100]} tick={{ fill: '#94a3b8', fontSize: 10 }} />
+                <PolarGrid stroke="hsl(var(--border))" />
+                <PolarAngleAxis dataKey="skill" tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }} />
+                <PolarRadiusAxis angle={90} domain={[0, 100]} tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 10 }} />
                 <Radar
                   name={colaborador.nome_completo}
                   dataKey="value"
-                  stroke="#3b82f6"
-                  fill="#3b82f6"
+                  stroke="hsl(var(--chart-1))"
+                  fill="hsl(var(--chart-1))"
                   fillOpacity={0.5}
                 />
               </RadarChart>
@@ -725,8 +718,8 @@ export default function AnaliseProfundaColaborador({
                 <YAxis domain={[0, 100]} />
                 <Tooltip />
                 <Legend />
-                <Area type="monotone" dataKey="csat" stackId="1" stroke="#3b82f6" fill="#3b82f6" fillOpacity={0.6} name="CSAT" />
-                <Area type="monotone" dataKey="performance" stackId="2" stroke="#8b5cf6" fill="#8b5cf6" fillOpacity={0.6} name="Performance" />
+                <Area type="monotone" dataKey="csat" stackId="1" stroke="hsl(var(--chart-1))" fill="hsl(var(--chart-1))" fillOpacity={0.6} name="CSAT" />
+                <Area type="monotone" dataKey="performance" stackId="2" stroke="hsl(var(--chart-5))" fill="hsl(var(--chart-5))" fillOpacity={0.6} name="Performance" />
               </AreaChart>
             </ResponsiveContainer>
           </CardContent>
@@ -735,7 +728,7 @@ export default function AnaliseProfundaColaborador({
 
       {/* Insights Estratégicos */}
       {insightsEstrategicos.length > 0 && (
-        <Card className="border-0 shadow-sm bg-gradient-to-br from-indigo-50 to-purple-50">
+        <Card className="border-0 shadow-sm bg-info-soft">
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2">
               <Brain className="w-5 h-5 text-primary" />
@@ -745,7 +738,7 @@ export default function AnaliseProfundaColaborador({
           </CardHeader>
           <CardContent className="space-y-3">
             {insightsEstrategicos.map((insight, idx) => (
-              <div key={idx} className="p-4 bg-card rounded-lg border border-indigo-100">
+              <div key={idx} className="p-4 bg-card rounded-lg border border-primary/25">
                 <div className="flex items-start gap-3">
                   {insight.tipo === 'positivo' && <CheckCircle className="w-5 h-5 text-success mt-0.5" />}
                   {insight.tipo === 'atencao' && <AlertTriangle className="w-5 h-5 text-warning mt-0.5" />}
@@ -753,7 +746,7 @@ export default function AnaliseProfundaColaborador({
                   <div className="flex-1">
                     <p className="font-semibold text-sm mb-1">{insight.titulo}</p>
                     <p className="text-sm text-foreground mb-2">{insight.descricao}</p>
-                    <div className="p-2 bg-info-soft rounded border border-indigo-200">
+                    <div className="p-2 bg-info-soft rounded border border-primary/25">
                       <p className="text-xs font-medium text-primary">
                         Recomendação: {insight.recomendacao}
                       </p>
@@ -768,7 +761,7 @@ export default function AnaliseProfundaColaborador({
 
       {/* Oráculo CRC */}
       {ultimoOraculo && (
-        <Card className="border-0 shadow-sm bg-gradient-to-br from-purple-50 to-indigo-50">
+        <Card className="border-0 shadow-sm bg-info-soft">
           <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle className="text-base flex items-center gap-2">
@@ -782,7 +775,7 @@ export default function AnaliseProfundaColaborador({
           </CardHeader>
           <CardContent className="space-y-4">
             {ultimoOraculo.texto_livre && (
-              <div className="p-4 bg-card rounded-lg border border-purple-100">
+              <div className="p-4 bg-card rounded-lg border border-primary/25">
                 <p className="text-sm text-foreground italic">"{ultimoOraculo.texto_livre}"</p>
               </div>
             )}
@@ -823,7 +816,7 @@ export default function AnaliseProfundaColaborador({
               )}
             </div>
             {ultimoOraculo.contexto_performance && (
-              <div className="grid grid-cols-3 gap-3 pt-2 border-t border-purple-100">
+              <div className="grid grid-cols-3 gap-3 pt-2 border-t border-primary/25">
                 <div className="text-center">
                   <p className="text-lg font-bold text-primary">{ultimoOraculo.contexto_performance.csat_recente?.toFixed(1) ?? '-'}%</p>
                   <p className="text-xs text-muted-foreground">CSAT</p>

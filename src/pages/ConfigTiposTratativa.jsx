@@ -12,7 +12,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import DataTable from '@/components/ui/DataTable';
 import EmptyState from '@/components/ui/EmptyState';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { toast } from 'sonner';
 import { Plus, Edit, Trash2, FileText, CheckCircle } from 'lucide-react';
 
@@ -26,7 +25,7 @@ export default function ConfigTiposTratativa() {
     descricao: '',
     sla_horas: 24,
     permite_reabertura: false,
-    cor: '#3B82F6',
+    cor: 'hsl(var(--chart-1))',
     campos_especificos: []
   });
 
@@ -74,7 +73,7 @@ export default function ConfigTiposTratativa() {
       descricao: '',
       sla_horas: 24,
       permite_reabertura: false,
-      cor: '#3B82F6',
+      cor: 'hsl(var(--chart-1))',
       campos_especificos: []
     });
     setEditingTipo(null);
@@ -98,7 +97,7 @@ export default function ConfigTiposTratativa() {
       descricao: tipo.descricao || '',
       sla_horas: tipo.sla_horas || 24,
       permite_reabertura: tipo.permite_reabertura || false,
-      cor: tipo.cor || '#3B82F6',
+      cor: tipo.cor || 'hsl(var(--chart-1))',
       campos_especificos: tipo.campos_especificos || []
     });
     setShowForm(true);

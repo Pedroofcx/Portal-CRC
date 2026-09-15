@@ -29,7 +29,7 @@ export default function MotivationalQuote() {
   const fraseAtual = frases[currentIndex];
 
   return (
-    <Card className="border-0 shadow-sm bg-gradient-to-r from-blue-50 to-purple-50 overflow-hidden">
+    <Card className="border-0 shadow-sm bg-info-soft overflow-hidden">
       <CardContent className="p-6">
         <AnimatePresence mode="wait">
           <motion.div

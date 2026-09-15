@@ -13,6 +13,7 @@ import {
 import { CheckCircle, Clock, Target, MessageSquare, BarChart3, Award, AlertTriangle, Info, Send, Lightbulb, Zap } from 'lucide-react';
 import { formatDateSP } from '@/components/utils/helpers';
 import { gerarInsights, ACOES_MELHORIA } from './hanseiUtils';
+import { corDaSerie } from '@/lib/cores-grafico';
 
 const TIPOS_LABEL = {
   reclamacao_interna: 'Rec. Interna', reclame_aqui: 'Reclame Aqui',
@@ -142,7 +143,7 @@ export default function HanseiVisualizarDialog({
                   <RadarChart data={radarData}>
                     <PolarGrid />
                     <PolarAngleAxis dataKey="subject" tick={{ fontSize: 10 }} />
-                    <Radar name="Desempenho" dataKey="value" stroke="#3b82f6" fill="#3b82f6" fillOpacity={0.3} />
+                    <Radar name="Desempenho" dataKey="value" stroke="hsl(var(--chart-1))" fill="hsl(var(--chart-1))" fillOpacity={0.3} />
                   </RadarChart>
                 </ResponsiveContainer>
               </CardContent>
@@ -158,8 +159,8 @@ export default function HanseiVisualizarDialog({
                       <XAxis type="number" tick={{ fontSize: 10 }} />
                       <YAxis type="category" dataKey="name" tick={{ fontSize: 9 }} width={80} />
                       <Tooltip />
-                      <Bar dataKey="count" fill="#8b5cf6" radius={[0, 4, 4, 0]}>
-                        {motivosBarData.map((_, i) => <Cell key={i} fill={['#8b5cf6','#3b82f6','#10b981','#f59e0b','#ef4444'][i % 5]} />)}
+                      <Bar dataKey="count" fill="hsl(var(--chart-5))" radius={[0, 4, 4, 0]}>
+                        {motivosBarData.map((_, i) => <Cell key={i} fill={corDaSerie(i)} />)}
                       </Bar>
                     </BarChart>
                   </ResponsiveContainer>
@@ -175,7 +176,7 @@ export default function HanseiVisualizarDialog({
                       <XAxis dataKey="name" tick={{ fontSize: 10 }} />
                       <YAxis tick={{ fontSize: 10 }} />
                       <Tooltip />
-                      <Bar dataKey="count" fill="#3b82f6" radius={[4, 4, 0, 0]} />
+                      <Bar dataKey="count" fill="hsl(var(--chart-1))" radius={[4, 4, 0, 0]} />
                     </BarChart>
                   </ResponsiveContainer>
                 </CardContent>
@@ -236,7 +237,7 @@ export default function HanseiVisualizarDialog({
           {!isGestor && (
             <>
               {/* Seção de Reflexão Guiada */}
-              <Card className="border-0 shadow-sm border border-purple-100 bg-info-soft/40">
+              <Card className="border-0 shadow-sm border border-primary/25 bg-info-soft/40">
                 <CardHeader className="pb-3">
                   <CardTitle className="text-sm flex items-center gap-2 text-primary">
                     <Lightbulb className="w-4 h-4 text-primary" />
@@ -279,7 +280,7 @@ export default function HanseiVisualizarDialog({
               </Card>
 
               {/* Ação de Melhoria */}
-              <Card className="border-0 shadow-sm border border-amber-100 bg-warning-soft/40">
+              <Card className="border-0 shadow-sm border border-warning/25 bg-warning-soft/40">
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm flex items-center gap-2 text-warning">
                     <Zap className="w-4 h-4 text-warning" />
@@ -296,7 +297,7 @@ export default function HanseiVisualizarDialog({
                         onClick={() => setAcaoSelecionada(acaoSelecionada === acao ? '' : acao)}
                         className={`text-xs px-3 py-1.5 rounded-full border transition-all ${
                           acaoSelecionada === acao
-                            ? 'bg-warning border-amber-500 text-white font-medium'
+                            ? 'bg-warning border-warning/40 text-white font-medium'
                             : 'bg-card border-warning/30 text-warning hover:bg-warning-soft'
                         }`}
                       >

@@ -41,11 +41,11 @@ export default function CardsAcompanhamento({
             </div>
             {proximo ? (
               <>
-                <p className="text-lg font-bold text-violet-800 truncate">{proximo.nome}</p>
+                <p className="text-lg font-bold text-primary truncate">{proximo.nome}</p>
                 <p className="text-xs text-primary mt-0.5">Posição #{proximo.ordem}</p>
               </>
             ) : (
-              <p className="text-lg font-bold text-violet-300">Sem disponível</p>
+              <p className="text-lg font-bold text-primary">Sem disponível</p>
             )}
           </CardContent>
         </Card>
@@ -101,7 +101,7 @@ export default function CardsAcompanhamento({
                     <div key={i} className="flex items-center gap-2">
                       <span className="text-xs text-muted-foreground w-32 truncate flex-shrink-0">#{p.ordem} {p.nome}</span>
                       <div className="flex-1 h-4 bg-muted rounded overflow-hidden">
-                        <div className="h-full bg-violet-400 rounded transition-all" style={{ width: `${pct}%` }} />
+                        <div className="h-full bg-primary rounded transition-all" style={{ width: `${pct}%` }} />
                       </div>
                       <span className="text-xs font-semibold text-foreground w-6 text-right">{p.count}</span>
                     </div>

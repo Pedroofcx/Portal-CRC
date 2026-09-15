@@ -96,7 +96,7 @@ export default function FluxoJornadaVisual({ etapas = [], tratativas = [], motiv
       {/* Fluxo Visual */}
       <div className="relative">
         {/* Linha conectora */}
-        <div className="absolute top-20 left-0 right-0 h-1 bg-gradient-to-r from-blue-200 via-purple-200 to-green-200 z-0" />
+        <div className="absolute top-20 left-0 right-0 h-1 bg-primary z-0" />
         
         {/* Etapas */}
         <div className="relative flex flex-wrap items-start justify-between gap-6 z-10">
@@ -117,11 +117,11 @@ export default function FluxoJornadaVisual({ etapas = [], tratativas = [], motiv
                     className="flex-1 min-w-[200px]"
                   >
                     <Card 
-                      className={`relative border-2 transition-all cursor-pointer hover:shadow-lg ${
+                      className={`relative border-2 transition-all cursor-pointer hover:shadow-sm ${
                         isCritica 
                           ? 'border-destructive/30 bg-destructive/10/50' 
                           : intensidade > 60 
-                            ? 'border-orange-300 bg-critical-soft/30'
+                            ? 'border-critical/25 bg-critical-soft/30'
                             : 'border-border hover:border-info/30'
                       }`}
                       onClick={() => handleEtapaClick(etapa.id)}
@@ -138,8 +138,8 @@ export default function FluxoJornadaVisual({ etapas = [], tratativas = [], motiv
                       {/* Círculo indicador */}
                       <div className="absolute -top-4 left-1/2 -translate-x-1/2">
                         <div 
-                          className="w-8 h-8 rounded-full border-4 border-white shadow-lg flex items-center justify-center text-white font-bold text-sm"
-                          style={{ backgroundColor: etapa.cor || '#3B82F6' }}
+                          className="w-8 h-8 rounded-full border-4 border-white shadow-sm flex items-center justify-center text-white font-bold text-sm"
+                          style={{ backgroundColor: etapa.cor || 'hsl(var(--chart-1))' }}
                         >
                           {index + 1}
                         </div>
@@ -151,7 +151,7 @@ export default function FluxoJornadaVisual({ etapas = [], tratativas = [], motiv
                           
                           {/* Volume */}
                           <div className="space-y-1">
-                            <div className="text-3xl font-bold" style={{ color: etapa.cor || '#3B82F6' }}>
+                            <div className="text-3xl font-bold" style={{ color: etapa.cor || 'hsl(var(--chart-1))' }}>
                               {metricas.total || 0}
                             </div>
                             <p className="text-xs text-muted-foreground">tratativas</p>
@@ -224,7 +224,7 @@ export default function FluxoJornadaVisual({ etapas = [], tratativas = [], motiv
 
       {/* Insights e Oportunidades */}
       <div className="grid lg:grid-cols-3 gap-4">
-        <Card className="border-0 shadow-sm bg-gradient-to-br from-red-50 to-orange-50">
+        <Card className="border-0 shadow-sm bg-destructive/10">
           <CardContent className="p-4">
             <div className="flex items-start gap-3">
               <div className="w-10 h-10 bg-destructive/10 rounded-full flex items-center justify-center">
@@ -243,7 +243,7 @@ export default function FluxoJornadaVisual({ etapas = [], tratativas = [], motiv
           </CardContent>
         </Card>
 
-        <Card className="border-0 shadow-sm bg-gradient-to-br from-blue-50 to-cyan-50">
+        <Card className="border-0 shadow-sm bg-info-soft">
           <CardContent className="p-4">
             <div className="flex items-start gap-3">
               <div className="w-10 h-10 bg-info-soft rounded-full flex items-center justify-center">
@@ -267,7 +267,7 @@ export default function FluxoJornadaVisual({ etapas = [], tratativas = [], motiv
           </CardContent>
         </Card>
 
-        <Card className="border-0 shadow-sm bg-gradient-to-br from-green-50 to-emerald-50">
+        <Card className="border-0 shadow-sm bg-success-soft">
           <CardContent className="p-4">
             <div className="flex items-start gap-3">
               <div className="w-10 h-10 bg-success-soft rounded-full flex items-center justify-center">
@@ -294,7 +294,7 @@ export default function FluxoJornadaVisual({ etapas = [], tratativas = [], motiv
             <DialogTitle className="flex items-center gap-3">
               <div 
                 className="w-6 h-6 rounded-full" 
-                style={{ backgroundColor: etapaSelecionada?.etapa?.cor || '#3B82F6' }}
+                style={{ backgroundColor: etapaSelecionada?.etapa?.cor || 'hsl(var(--chart-1))' }}
               />
               {etapaSelecionada?.etapa?.nome}
             </DialogTitle>
@@ -424,7 +424,7 @@ export default function FluxoJornadaVisual({ etapas = [], tratativas = [], motiv
               )}
 
               {/* Recomendações */}
-              <Card className="border-0 shadow-sm bg-gradient-to-br from-purple-50 to-pink-50">
+              <Card className="border-0 shadow-sm bg-info-soft">
                 <CardContent className="p-4">
                   <h4 className="font-semibold text-primary mb-3 flex items-center gap-2">
                     <CheckCircle className="w-4 h-4" />

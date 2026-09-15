@@ -45,7 +45,7 @@ export default function PerfilComercialCliente({ tratativa }) {
   const receitaAnualEq = temValorContratado ? calcularReceitaAnualEquivalente(tratativa) : 0;
 
   return (
-    <Card className="border-0 shadow-sm bg-gradient-to-br from-emerald-50 to-teal-50">
+    <Card className="border-0 shadow-sm bg-success-soft">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-base">
           <Building2 className="w-5 h-5 text-success" />
@@ -94,7 +94,7 @@ export default function PerfilComercialCliente({ tratativa }) {
 
         {/* Valores Equivalentes — calculados dinamicamente, não contratuais */}
         {temValorContratado && (
-          <div className="mt-3 pt-3 border-t border-emerald-200">
+          <div className="mt-3 pt-3 border-t border-success/25">
             <p className="text-xs font-semibold text-success uppercase mb-2">Valores Equivalentes (calculados)</p>
             <div className="grid grid-cols-2 gap-4">
               <div className="flex items-center gap-2">
@@ -117,7 +117,7 @@ export default function PerfilComercialCliente({ tratativa }) {
 
         {/* Datas de contratação */}
         {(tratativa.data_primeira_contratacao || tratativa.data_contratacao_plano_atual) && (
-          <div className="flex flex-wrap items-center gap-4 mt-3 pt-3 border-t border-emerald-200">
+          <div className="flex flex-wrap items-center gap-4 mt-3 pt-3 border-t border-success/25">
             {tratativa.data_primeira_contratacao && (
               <div className="flex items-center gap-2">
                 <Calendar className="w-3.5 h-3.5 text-success" />

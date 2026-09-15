@@ -16,10 +16,10 @@ import { StickyNote, X, Plus, Bell, CheckCircle, Clock } from 'lucide-react';
 import { toast } from 'sonner';
 
 const corPaleta = {
-  amarelo: 'bg-warning-soft border border-yellow-200 text-yellow-900',
+  amarelo: 'bg-warning-soft border border-warning/25 text-warning',
   azul: 'bg-info-soft border border-info/25 text-primary',
   verde: 'bg-success-soft border border-success/25 text-success',
-  rosa: 'bg-info-soft border border-pink-200 text-pink-900',
+  rosa: 'bg-info-soft border border-primary/25 text-primary',
   roxo: 'bg-info-soft border border-info/25 text-primary',
 };
 
@@ -27,7 +27,7 @@ const corBadge = {
   amarelo: 'bg-warning-soft text-warning',
   azul: 'bg-info-soft text-primary',
   verde: 'bg-success-soft text-success',
-  rosa: 'bg-info-soft text-pink-800',
+  rosa: 'bg-info-soft text-primary',
   roxo: 'bg-info-soft text-primary',
 };
 
@@ -194,7 +194,7 @@ export default function MinhasAnotacoes({ colaboradorId }) {
                   Depois
                 </Button>
                 <Button
-                  className="flex-1 bg-warning hover:bg-amber-700"
+                  className="flex-1 bg-warning hover:bg-warning"
                   onClick={() => dispensarLembrete(lembreteAtivo.id)}
                 >
                   <CheckCircle className="w-4 h-4 mr-2" />
@@ -218,7 +218,7 @@ export default function MinhasAnotacoes({ colaboradorId }) {
                 </span>
               )}
             </CardTitle>
-            <Button size="sm" onClick={handleNovo} className="bg-warning hover:bg-yellow-600 h-7 w-7 p-0">
+            <Button size="sm" onClick={handleNovo} className="bg-warning hover:bg-warning h-7 w-7 p-0">
               <Plus className="w-3.5 h-3.5" />
             </Button>
           </div>
@@ -333,7 +333,7 @@ export default function MinhasAnotacoes({ colaboradorId }) {
                     key={cor}
                     onClick={() => setForm({ ...form, cor })}
                     className={`w-8 h-8 rounded border-2 ${corBadge[cor]} ${
-                      form.cor === cor ? 'border-gray-800' : 'border-transparent'
+                      form.cor === cor ? 'border-border' : 'border-transparent'
                     }`}
                   />
                 ))}
@@ -345,7 +345,7 @@ export default function MinhasAnotacoes({ colaboradorId }) {
                 Cancelar
               </Button>
               <Button
-                className="flex-1 bg-yellow-600 hover:bg-yellow-700"
+                className="flex-1 bg-warning hover:bg-warning"
                 onClick={handleSubmit}
                 disabled={criarMutation.isPending || atualizarMutation.isPending}
               >

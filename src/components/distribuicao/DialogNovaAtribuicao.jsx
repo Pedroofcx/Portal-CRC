@@ -90,7 +90,7 @@ export default function DialogNovaAtribuicao({ open, onClose, onSalvar, agentes,
 
           {/* Sugestão do Rodízio */}
           {sugestao && (
-            <div className="p-3 bg-info-soft border border-indigo-200 rounded-lg">
+            <div className="p-3 bg-info-soft border border-primary/25 rounded-lg">
               <p className="text-xs font-semibold text-primary flex items-center gap-1 mb-1">
                 <RotateCcw className="w-3 h-3" /> Sugestão do Rodízio Assistido
               </p>
@@ -145,7 +145,7 @@ export default function DialogNovaAtribuicao({ open, onClose, onSalvar, agentes,
                   <Button size="sm" variant="outline" onClick={() => { f('agente_id', sugestao.sugerido?.id || ''); }}>
                     Usar sugerido
                   </Button>
-                  <Button size="sm" className="bg-warning hover:bg-amber-700 text-white" onClick={() => setOverrideConfirmado(true)}>
+                  <Button size="sm" className="bg-warning hover:bg-warning text-white" onClick={() => setOverrideConfirmado(true)}>
                     Atribuir mesmo assim
                   </Button>
                 </div>
@@ -212,7 +212,7 @@ export default function DialogNovaAtribuicao({ open, onClose, onSalvar, agentes,
             <Button
               onClick={handleSalvar}
               disabled={!form.agente_id || !form.ticket_id || !form.tipo_tratativa || !podeConfirmar || isPending}
-              className="bg-primary hover:bg-indigo-700"
+              className="bg-primary hover:bg-primary"
             >
               {isPending ? 'Registrando...' : 'Registrar Atribuição'}
             </Button>

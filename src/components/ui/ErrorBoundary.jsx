@@ -134,7 +134,7 @@ export class ErrorBoundary extends React.Component {
     if (this.state.hasError) {
       return (
         <div className="min-h-screen flex items-center justify-center p-6 bg-muted">
-          <Card className="max-w-lg w-full border-0 shadow-lg">
+          <Card className="max-w-lg w-full border-0 shadow-sm">
             <CardContent className="p-8 text-center">
               <div className="w-16 h-16 bg-destructive/10 rounded-full flex items-center justify-center mx-auto mb-4">
                 <AlertTriangle className="w-8 h-8 text-destructive" />

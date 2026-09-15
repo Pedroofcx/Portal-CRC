@@ -152,7 +152,7 @@ export default function FormularioApoioDialog({ open, onOpenChange, onSubmit, di
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>Cancelar</Button>
-          <Button onClick={handleSubmit} disabled={!canSubmit || isSubmitting} className="bg-primary hover:bg-violet-700">
+          <Button onClick={handleSubmit} disabled={!canSubmit || isSubmitting} className="bg-primary hover:bg-primary">
             {isSubmitting ? 'Registrando...' : 'Criar Solicitação'}
           </Button>
         </DialogFooter>

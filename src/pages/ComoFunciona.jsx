@@ -1,5 +1,5 @@
 import db from '@/api/db';
-import React, { useState } from 'react';
+import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 
 import PageHeader from '@/components/ui/PageHeader';
@@ -30,7 +30,6 @@ import {
   CheckCircle,
   Target
 } from 'lucide-react';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
 const modulosGestor = [
   {
@@ -358,7 +357,7 @@ export default function ComoFunciona() {
         icon={BookOpen}
       />
 
-      <Card className="border-0 shadow-sm bg-gradient-to-r from-blue-600 to-blue-700 text-white">
+      <Card className="border-0 shadow-sm bg-primary text-white">
         <CardContent className="py-6">
           <div className="flex items-start gap-4">
             <div className="w-12 h-12 bg-card/20 rounded-xl flex items-center justify-center flex-shrink-0">
@@ -366,7 +365,7 @@ export default function ComoFunciona() {
             </div>
             <div>
               <h3 className="font-bold text-lg mb-2">Bem-vindo ao Guia do Portal CRC</h3>
-              <p className="text-blue-100 text-sm leading-relaxed">
+              <p className="text-primary text-sm leading-relaxed">
                 Este guia apresenta todos os módulos do sistema e como utilizá-los de forma eficiente. 
                 {isGestor 
                   ? ' Como gestor, você tem acesso a módulos administrativos e de análise da equipe.'
@@ -399,7 +398,7 @@ export default function ComoFunciona() {
             {modulosGestor.map((modulo, index) => {
               const Icon = modulo.icon;
               return (
-                <Card key={index} className="border-0 shadow-sm hover:shadow-md transition-shadow">
+                <Card key={index} className="border-0 shadow-sm hover:shadow-sm transition-shadow">
                   <CardHeader className="pb-3">
                     <div className="flex items-start gap-3">
                       <div className="w-10 h-10 bg-info-soft rounded-lg flex items-center justify-center flex-shrink-0">
@@ -436,7 +435,7 @@ export default function ComoFunciona() {
             {modulosAgente.map((modulo, index) => {
               const Icon = modulo.icon;
               return (
-                <Card key={index} className="border-0 shadow-sm hover:shadow-md transition-shadow">
+                <Card key={index} className="border-0 shadow-sm hover:shadow-sm transition-shadow">
                   <CardHeader className="pb-3">
                     <div className="flex items-start gap-3">
                       <div className="w-10 h-10 bg-success-soft rounded-lg flex items-center justify-center flex-shrink-0">
@@ -490,7 +489,7 @@ export default function ComoFunciona() {
             {modulosComuns.map((modulo, index) => {
               const Icon = modulo.icon;
               return (
-                <Card key={index} className="border-0 shadow-sm hover:shadow-md transition-shadow">
+                <Card key={index} className="border-0 shadow-sm hover:shadow-sm transition-shadow">
                   <CardContent className="p-5">
                     <div className="flex items-start gap-3">
                       <div className="w-10 h-10 bg-info-soft rounded-lg flex items-center justify-center flex-shrink-0">

@@ -4,8 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
-  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
-  BarChart, Bar
+  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
 } from 'recharts';
 import { TrendingUp, TrendingDown, Minus, Eye, Bell } from 'lucide-react';
 import { formatDateSP } from '@/components/utils/helpers';
@@ -124,14 +123,14 @@ export default function HanseiAgenteDashboard({ meusEnvios, onVerDetalhes }) {
           <CardContent>
             <ResponsiveContainer width="100%" height={220}>
               <LineChart data={chartData} margin={{ top: 5, right: 10, left: -20, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                 <XAxis dataKey="label" tick={{ fontSize: 10 }} />
                 <YAxis tick={{ fontSize: 10 }} domain={[0, 100]} />
                 <Tooltip formatter={(val, name) => [`${val}%`, name]} />
                 <Legend iconSize={10} wrapperStyle={{ fontSize: 11 }} />
-                <Line type="monotone" dataKey="performance" stroke="#3b82f6" name="Performance" strokeWidth={2} dot={{ r: 3 }} />
-                <Line type="monotone" dataKey="csat" stroke="#10b981" name="CSAT" strokeWidth={2} dot={{ r: 3 }} />
-                <Line type="monotone" dataKey="sla" stroke="#f59e0b" name="SLA" strokeWidth={2} dot={{ r: 3 }} />
+                <Line type="monotone" dataKey="performance" stroke="hsl(var(--chart-1))" name="Performance" strokeWidth={2} dot={{ r: 3 }} />
+                <Line type="monotone" dataKey="csat" stroke="hsl(var(--chart-2))" name="CSAT" strokeWidth={2} dot={{ r: 3 }} />
+                <Line type="monotone" dataKey="sla" stroke="hsl(var(--chart-3))" name="SLA" strokeWidth={2} dot={{ r: 3 }} />
               </LineChart>
             </ResponsiveContainer>
           </CardContent>

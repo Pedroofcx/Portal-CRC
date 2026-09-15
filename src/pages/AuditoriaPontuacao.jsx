@@ -4,20 +4,18 @@ import { useQuery } from '@tanstack/react-query';
 
 import { calculateTratativaPoints } from '@/components/utils/helpers';
 import { tratativaNosCiclo } from '@/hooks/usePontuacaoAgente';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
 import PageHeader from '@/components/ui/PageHeader';
 import {
   ShieldCheck, Search, AlertTriangle, User, Star, ChevronDown, ChevronRight, Filter
 } from 'lucide-react';
-import { formatDateSP } from '@/components/utils/helpers';
 import AuditoriaDetalheTabela from '@/components/auditoria/AuditoriaDetalheTabela';
 
 const TIPOS_TRATATIVA = [
   { value: 'reclamacao_interna', label: 'Reclamação Interna', color: 'bg-info-soft text-primary border-info/30' },
-  { value: 'reclame_aqui', label: 'Reclame Aqui', color: 'bg-critical-soft text-critical border-orange-300' },
-  { value: 'google_meu_negocio', label: 'Google Meu Negócio', color: 'bg-success-soft text-success border-emerald-300' },
+  { value: 'reclame_aqui', label: 'Reclame Aqui', color: 'bg-critical-soft text-critical border-critical/25' },
+  { value: 'google_meu_negocio', label: 'Google Meu Negócio', color: 'bg-success-soft text-success border-success/25' },
   { value: 'contestacao', label: 'Contestação', color: 'bg-destructive/10 text-destructive border-destructive/30' },
 ];
 

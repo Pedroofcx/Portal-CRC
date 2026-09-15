@@ -4,7 +4,6 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 import PageHeader from '@/components/ui/PageHeader';
 import DataTable from '@/components/ui/DataTable';
-import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import ConfirmDialog from '@/components/ui/ConfirmDialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -25,7 +24,7 @@ export default function ConfigMotivosJornada() {
     motivo: '',
     descricao: '',
     submotivos: [],
-    cor: '#3B82F6',
+    cor: 'hsl(var(--chart-1))',
     ordem: 0,
     ativo: true,
     esforco_correcao_ti: ''
@@ -81,7 +80,7 @@ export default function ConfigMotivosJornada() {
 
   const openCreate = () => {
     setSelected(null);
-    setFormData({ motivo: '', descricao: '', submotivos: [], cor: '#3B82F6', ordem: 0, ativo: true, esforco_correcao_ti: '' });
+    setFormData({ motivo: '', descricao: '', submotivos: [], cor: 'hsl(var(--chart-1))', ordem: 0, ativo: true, esforco_correcao_ti: '' });
     setDialogOpen(true);
   };
 
@@ -91,7 +90,7 @@ export default function ConfigMotivosJornada() {
       motivo: item.motivo || '',
       descricao: item.descricao || '',
       submotivos: item.submotivos || [],
-      cor: item.cor || '#3B82F6',
+      cor: item.cor || 'hsl(var(--chart-1))',
       ordem: item.ordem || 0,
       ativo: item.ativo !== false,
       esforco_correcao_ti: item.esforco_correcao_ti || ''
@@ -142,7 +141,7 @@ export default function ConfigMotivosJornada() {
         <div className="flex items-center gap-2">
           <div 
             className="w-3 h-3 rounded-full flex-shrink-0" 
-            style={{ backgroundColor: row.cor || '#3B82F6' }}
+            style={{ backgroundColor: row.cor || 'hsl(var(--chart-1))' }}
           />
           <span className="font-medium">{row.motivo}</span>
         </div>
@@ -238,7 +237,7 @@ export default function ConfigMotivosJornada() {
                   <div className="flex items-center gap-2">
                     <div 
                       className="w-3 h-3 rounded-full" 
-                      style={{ backgroundColor: etapa.cor || '#3B82F6' }}
+                      style={{ backgroundColor: etapa.cor || 'hsl(var(--chart-1))' }}
                     />
                     <span className="font-medium">{etapa.nome}</span>
                   </div>

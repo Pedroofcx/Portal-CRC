@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Sun, Moon, BarChart2, TrendingUp, Users, ChevronDown, ChevronUp } from 'lucide-react';
 
@@ -102,7 +102,7 @@ export default function RelatorioProdutividadeTurnos({ escalas, tratativas, cola
         <div className="flex items-center gap-2">
           <label className="text-xs font-medium text-muted-foreground">Semana:</label>
           <select
-            className="border border-border rounded-lg text-sm px-3 py-1.5 bg-card shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            className="border border-border rounded-lg text-sm px-3 py-1.5 bg-card shadow-sm focus:ring-2 focus:ring-ring focus:outline-none"
             value={semanaFiltro}
             onChange={e => setSemanaFiltro(e.target.value)}
           >
@@ -122,7 +122,7 @@ export default function RelatorioProdutividadeTurnos({ escalas, tratativas, cola
 
       {/* KPI Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <Card className="border-0 shadow-sm bg-gradient-to-br from-amber-50 to-orange-50">
+        <Card className="border-0 shadow-sm bg-warning-soft">
           <CardContent className="p-4">
             <div className="flex items-center justify-between mb-2">
               <Sun className="w-5 h-5 text-warning" />
@@ -133,7 +133,7 @@ export default function RelatorioProdutividadeTurnos({ escalas, tratativas, cola
           </CardContent>
         </Card>
 
-        <Card className="border-0 shadow-sm bg-gradient-to-br from-indigo-50 to-purple-50">
+        <Card className="border-0 shadow-sm bg-info-soft">
           <CardContent className="p-4">
             <div className="flex items-center justify-between mb-2">
               <Moon className="w-5 h-5 text-primary" />
@@ -144,7 +144,7 @@ export default function RelatorioProdutividadeTurnos({ escalas, tratativas, cola
           </CardContent>
         </Card>
 
-        <Card className="border-0 shadow-sm bg-gradient-to-br from-green-50 to-emerald-50">
+        <Card className="border-0 shadow-sm bg-success-soft">
           <CardContent className="p-4">
             <div className="flex items-center justify-between mb-2">
               <TrendingUp className="w-5 h-5 text-success" />
@@ -155,7 +155,7 @@ export default function RelatorioProdutividadeTurnos({ escalas, tratativas, cola
           </CardContent>
         </Card>
 
-        <Card className="border-0 shadow-sm bg-gradient-to-br from-blue-50 to-sky-50">
+        <Card className="border-0 shadow-sm bg-info-soft">
           <CardContent className="p-4">
             <div className="flex items-center justify-between mb-2">
               <Users className="w-5 h-5 text-primary" />
@@ -201,7 +201,7 @@ export default function RelatorioProdutividadeTurnos({ escalas, tratativas, cola
                   onClick={() => toggleDia(key)}
                 >
                   {/* Data */}
-                  <div className="w-12 h-12 bg-gradient-to-br from-slate-100 to-slate-200 rounded-xl flex flex-col items-center justify-center flex-shrink-0 shadow-sm">
+                  <div className="w-12 h-12 bg-muted rounded-xl flex flex-col items-center justify-center flex-shrink-0 shadow-sm">
                     {grupo.data ? (
                       <>
                         <span className="text-xs font-bold text-foreground leading-none">
@@ -230,7 +230,7 @@ export default function RelatorioProdutividadeTurnos({ escalas, tratativas, cola
                     {/* Barra de progresso */}
                     <div className="h-1.5 bg-muted rounded-full overflow-hidden">
                       <div
-                        className={`h-full rounded-full transition-all ${pct >= 70 ? 'bg-success' : pct >= 40 ? 'bg-yellow-400' : 'bg-muted'}`}
+                        className={`h-full rounded-full transition-all ${pct >= 70 ? 'bg-success' : pct >= 40 ? 'bg-warning' : 'bg-muted'}`}
                         style={{ width: `${pct}%` }}
                       />
                     </div>
@@ -275,7 +275,7 @@ export default function RelatorioProdutividadeTurnos({ escalas, tratativas, cola
                                 <div className="flex items-center gap-1 mt-0.5">
                                   <div className="flex-1 h-1 bg-muted rounded-full overflow-hidden">
                                     <div
-                                      className="h-full bg-amber-400 rounded-full"
+                                      className="h-full bg-warning rounded-full"
                                       style={{ width: `${pctBarra(l.total, maxTotal)}%` }}
                                     />
                                   </div>
@@ -320,7 +320,7 @@ export default function RelatorioProdutividadeTurnos({ escalas, tratativas, cola
                                 <div className="flex items-center gap-1 mt-0.5">
                                   <div className="flex-1 h-1 bg-muted rounded-full overflow-hidden">
                                     <div
-                                      className="h-full bg-indigo-400 rounded-full"
+                                      className="h-full bg-primary rounded-full"
                                       style={{ width: `${pctBarra(l.total, maxTotal)}%` }}
                                     />
                                   </div>

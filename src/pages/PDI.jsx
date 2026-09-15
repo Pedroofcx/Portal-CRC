@@ -2,16 +2,13 @@ import db from '@/api/db';
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 
-import { Link } from 'react-router-dom';
-import { createPageUrl } from '@/utils';
 import { formatDateSP } from '@/components/utils/helpers';
 import PageHeader from '@/components/ui/PageHeader';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { Target, CheckCircle, Clock, AlertCircle, Calendar } from 'lucide-react';
+import { Target, CheckCircle, Clock, Calendar } from 'lucide-react';
 
 export default function PDIPage() {
   const { data: user } = useQuery({
@@ -83,7 +80,7 @@ export default function PDIPage() {
         <div className="space-y-6">
           {/* PDI Ativo */}
           {pdiAtivo && (
-            <Card className="border-0 shadow-lg bg-gradient-to-br from-purple-50 to-blue-50">
+            <Card className="border-0 shadow-sm bg-info-soft">
               <CardHeader>
                 <div className="flex items-start justify-between">
                   <div>
@@ -98,7 +95,7 @@ export default function PDIPage() {
                 </div>
               </CardHeader>
               <CardContent className="space-y-6">
-                <div className="p-4 bg-card rounded-lg border border-purple-100">
+                <div className="p-4 bg-card rounded-lg border border-primary/25">
                   <p className="text-sm font-medium text-foreground mb-2">Objetivo Geral</p>
                   <p className="text-muted-foreground">{pdiAtivo.objetivo_geral}</p>
                 </div>

@@ -12,7 +12,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { toast } from 'sonner';
-import { Settings, Plus, Pencil, Trash2, Map } from 'lucide-react';
+import { Plus, Pencil, Trash2, Map } from 'lucide-react';
 
 export default function ConfigEtapasJornada() {
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -21,7 +21,7 @@ export default function ConfigEtapasJornada() {
   const [formData, setFormData] = useState({
     nome: '',
     descricao: '',
-    cor: '#3B82F6',
+    cor: 'hsl(var(--chart-1))',
     ordem: 0,
     ativa: true
   });
@@ -62,7 +62,7 @@ export default function ConfigEtapasJornada() {
 
   const openCreate = () => {
     setSelected(null);
-    setFormData({ nome: '', descricao: '', cor: '#3B82F6', ordem: 0, ativa: true });
+    setFormData({ nome: '', descricao: '', cor: 'hsl(var(--chart-1))', ordem: 0, ativa: true });
     setDialogOpen(true);
   };
 
@@ -71,7 +71,7 @@ export default function ConfigEtapasJornada() {
     setFormData({
       nome: item.nome || '',
       descricao: item.descricao || '',
-      cor: item.cor || '#3B82F6',
+      cor: item.cor || 'hsl(var(--chart-1))',
       ordem: item.ordem || 0,
       ativa: item.ativa !== false
     });
@@ -110,7 +110,7 @@ export default function ConfigEtapasJornada() {
         <div className="flex items-center gap-2">
           <div 
             className="w-3 h-3 rounded-full" 
-            style={{ backgroundColor: row.cor || '#3B82F6' }}
+            style={{ backgroundColor: row.cor || 'hsl(var(--chart-1))' }}
           />
           <span className="font-medium">{row.nome}</span>
         </div>

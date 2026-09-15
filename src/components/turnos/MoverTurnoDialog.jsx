@@ -65,7 +65,7 @@ export default function MoverTurnoDialog({ open, onClose, turno, diaIndex, escal
               <div className="flex items-center gap-1.5 mb-3">
                 <Sun className="w-4 h-4 text-warning" />
                 <span className="text-sm font-semibold text-warning">Manhã</span>
-                <span className="ml-auto text-xs bg-amber-200 text-warning rounded-full w-5 h-5 flex items-center justify-center font-bold">
+                <span className="ml-auto text-xs bg-warning text-warning rounded-full w-5 h-5 flex items-center justify-center font-bold">
                   {localManha.length}
                 </span>
               </div>
@@ -78,38 +78,38 @@ export default function MoverTurnoDialog({ open, onClose, turno, diaIndex, escal
                     key={c.colaborador_id}
                     onClick={() => moverParaTarde(c)}
                     title="Mover para Tarde"
-                    className="w-full flex items-center gap-2 px-2.5 py-1.5 bg-card border border-warning/25 rounded-lg hover:bg-info-soft hover:border-indigo-300 transition-all group text-left"
+                    className="w-full flex items-center gap-2 px-2.5 py-1.5 bg-card border border-warning/25 rounded-lg hover:bg-info-soft hover:border-primary/25 transition-all group text-left"
                   >
                     <span className="text-xs font-medium text-foreground flex-1 truncate">
                       {c.colaborador_nome?.split(' ').slice(0, 2).join(' ')}
                     </span>
-                    <ArrowLeftRight className="w-3 h-3 text-amber-300 group-hover:text-primary flex-shrink-0" />
+                    <ArrowLeftRight className="w-3 h-3 text-warning group-hover:text-primary flex-shrink-0" />
                   </button>
                 ))}
               </div>
             </div>
 
             {/* Tarde */}
-            <div className="bg-info-soft border border-indigo-200 rounded-xl p-3">
+            <div className="bg-info-soft border border-primary/25 rounded-xl p-3">
               <div className="flex items-center gap-1.5 mb-3">
                 <Moon className="w-4 h-4 text-primary" />
                 <span className="text-sm font-semibold text-primary">Tarde</span>
-                <span className="ml-auto text-xs bg-indigo-200 text-primary rounded-full w-5 h-5 flex items-center justify-center font-bold">
+                <span className="ml-auto text-xs bg-primary text-primary rounded-full w-5 h-5 flex items-center justify-center font-bold">
                   {localTarde.length}
                 </span>
               </div>
               <div className="space-y-1.5 min-h-[72px]">
                 {localTarde.length === 0 && (
-                  <p className="text-xs text-indigo-400 text-center italic py-2">Vazio</p>
+                  <p className="text-xs text-primary text-center italic py-2">Vazio</p>
                 )}
                 {localTarde.map(c => (
                   <button
                     key={c.colaborador_id}
                     onClick={() => moverParaManha(c)}
                     title="Mover para Manhã"
-                    className="w-full flex items-center gap-2 px-2.5 py-1.5 bg-card border border-indigo-200 rounded-lg hover:bg-warning-soft hover:border-warning/30 transition-all group text-left"
+                    className="w-full flex items-center gap-2 px-2.5 py-1.5 bg-card border border-primary/25 rounded-lg hover:bg-warning-soft hover:border-warning/30 transition-all group text-left"
                   >
-                    <ArrowLeftRight className="w-3 h-3 text-indigo-300 group-hover:text-warning flex-shrink-0" />
+                    <ArrowLeftRight className="w-3 h-3 text-primary group-hover:text-warning flex-shrink-0" />
                     <span className="text-xs font-medium text-foreground flex-1 truncate">
                       {c.colaborador_nome?.split(' ').slice(0, 2).join(' ')}
                     </span>

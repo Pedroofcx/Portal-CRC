@@ -63,8 +63,8 @@ export default function RichTextEditor({
           padding: 12px 16px;
         }
         .quill-editor .ql-toolbar {
-          border-bottom: 1px solid #e2e8f0;
-          background: #f8fafc;
+          border-bottom: 1px solid hsl(var(--border));
+          background: hsl(var(--muted));
           border-radius: 8px 8px 0 0;
           flex-wrap: wrap;
         }
@@ -76,7 +76,7 @@ export default function RichTextEditor({
         .quill-editor .ql-editor h3 { font-size: 1.1rem; font-weight: 600; margin-bottom: 4px; }
         .quill-editor .ql-editor ul, .quill-editor .ql-editor ol { padding-left: 1.5rem; }
         .quill-editor .ql-editor li { margin-bottom: 4px; }
-        .quill-editor .ql-editor a { color: #2563eb; text-decoration: underline; }
+        .quill-editor .ql-editor a { color: hsl(var(--primary)); text-decoration: underline; }
       `}</style>
     </div>
   );

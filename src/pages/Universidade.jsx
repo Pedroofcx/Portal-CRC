@@ -28,8 +28,7 @@ import {
   Clock,
   CheckCircle,
   Play,
-  ExternalLink,
-  Star
+  ExternalLink
 } from 'lucide-react';
 
 export default function Universidade() {
@@ -249,7 +248,7 @@ export default function Universidade() {
               {cursos.map((curso) => {
                 const matricula = getMatricula(curso.id);
                 return (
-                  <Card key={curso.id} className="border-0 shadow-sm hover:shadow-md transition-shadow">
+                  <Card key={curso.id} className="border-0 shadow-sm hover:shadow-sm transition-shadow">
                     <CardHeader className="pb-2">
                       <div className="flex items-start justify-between">
                         <div>

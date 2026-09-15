@@ -13,18 +13,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   BarChart3,
   Download,
-  TrendingUp,
   Clock,
-  Users,
   AlertTriangle,
   CheckCircle,
-  Target,
-  Award,
-  TrendingDown,
   ExternalLink,
   Brain,
   Handshake
@@ -466,7 +460,7 @@ export default function Relatorios() {
         </TabsList>
 
         <TabsContent value="tratativas" className="mt-6">
-          <Card className="border-0 shadow-sm bg-gradient-to-br from-blue-50 to-blue-100 p-6">
+          <Card className="border-0 shadow-sm bg-info-soft p-6">
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-lg font-semibold text-primary mb-2">
@@ -487,7 +481,7 @@ export default function Relatorios() {
         </TabsContent>
 
         <TabsContent value="preditivo" className="mt-6">
-          <Card className="border-0 shadow-sm bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-50 p-6 border-2 border-info/25">
+          <Card className="border-0 shadow-sm bg-info-soft p-6 border-2 border-info/25">
             <div className="flex items-center justify-between">
               <div className="flex-1">
                 <div className="flex items-center gap-3 mb-3">
@@ -497,7 +491,7 @@ export default function Relatorios() {
                   <h3 className="text-xl font-bold text-primary">
                     Inteligência Operacional Preditiva
                   </h3>
-                  <Badge className="bg-gradient-to-r from-purple-600 to-blue-600 text-white">CMMI Nível 4</Badge>
+                  <Badge className="bg-primary text-white">CMMI Nível 4</Badge>
                 </div>
                 <p className="text-sm text-primary mb-4">
                   Controle quantitativo de processos com métricas preditivas: throughput, capacidade operacional, 
@@ -512,7 +506,7 @@ export default function Relatorios() {
                 </div>
               </div>
               <Link to={createPageUrl('AnalyticsPreditivo')}>
-                <Button className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white shadow-lg">
+                <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
                   Acessar Analytics
                   <ExternalLink className="w-4 h-4 ml-2" />
                 </Button>
@@ -748,9 +742,9 @@ export default function Relatorios() {
                   {rankingPontuacao.map((pontuacao, index) => (
                     <div key={pontuacao.id} className="flex items-center gap-4 p-3 bg-muted rounded-lg">
                       <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg ${
-                        index === 0 ? 'bg-gradient-to-br from-amber-400 to-amber-600 text-white shadow-lg' :
-                        index === 1 ? 'bg-gradient-to-br from-slate-300 to-slate-500 text-white shadow-md' :
-                        index === 2 ? 'bg-gradient-to-br from-orange-400 to-orange-600 text-white shadow-md' :
+                        index === 0 ? 'bg-warning text-white shadow-sm' :
+                        index === 1 ? 'bg-muted text-white shadow-sm' :
+                        index === 2 ? 'bg-critical text-white shadow-sm' :
                         'bg-info-soft text-primary'
                       }`}>
                         {index + 1}

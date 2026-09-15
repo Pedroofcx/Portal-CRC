@@ -2,16 +2,14 @@ import db from '@/api/db';
 import React, { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 
-import { formatDateSP } from '@/components/utils/helpers';
 import PageHeader from '@/components/ui/PageHeader';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
-import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { BarChart3, Phone, MessageSquare, TrendingUp, Calendar, Users } from 'lucide-react';
+import { BarChart3, Phone, MessageSquare, TrendingUp } from 'lucide-react';
 import { agruparDadosPorSemana } from '@/components/apuracao/calculosApuracao';
 
 export default function RelatoriosApuracao() {

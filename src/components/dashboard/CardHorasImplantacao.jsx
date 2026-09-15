@@ -11,12 +11,16 @@ export default function CardHorasImplantacao({ utilizadosMinutos = 0 }) {
   const isZero = disponivelMinutos <= 0;
   const isLow = !isZero && disponivelMinutos <= 60;
 
-  const gradient = isZero ? 'from-red-500 to-red-600' : isLow ? 'from-amber-500 to-amber-600' : 'from-violet-500 to-violet-600';
-  const barColor = isZero ? 'bg-red-300' : isLow ? 'bg-amber-300' : 'bg-violet-300';
+  // O saldo de horas era comunicado por gradiente. Gradiente é proibido fora
+  // do card de destaque do Dashboard, e além disso não dizia nada que a cor
+  // sólida não diga. Vermelho sai por ser reservado a ação destrutiva:
+  // esgotar horas é um alerta operacional, não uma exclusão.
+  const tom = isZero ? 'bg-critical' : isLow ? 'bg-warning' : 'bg-primary';
+  const barColor = isZero ? 'bg-destructive' : isLow ? 'bg-warning' : 'bg-primary';
 
   return (
     <Link to={createPageUrl('FerramentasOperacionais')}>
-      <Card className={`border-0 shadow-sm bg-gradient-to-br ${gradient} text-white cursor-pointer hover:shadow-md transition-shadow`}>
+      <Card className={`cursor-pointer border-0 shadow-none ${tom} text-white transition-colors`}>
         <CardContent className="p-4">
           <div className="flex items-center justify-between mb-2">
             <span className="text-white/90 text-sm font-medium">Horas de Implantação</span>

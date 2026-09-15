@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { UserCog, Search, CheckCircle2, AlertCircle, ArrowRight, History } from 'lucide-react';
+import { UserCog, CheckCircle2, AlertCircle, ArrowRight, History } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { formatDateSP } from '@/components/utils/helpers';
 import { findNextLider, getPosicaoAtual, STATUS_LABELS, TIPO_ACIONAMENTO_LABELS } from './rodizioUtils';
@@ -267,10 +267,10 @@ export default function LiderTecnicoTool() {
                   <button
                     type="button"
                     onClick={() => setTipoAcionamento('rodizio')}
-                    className={`p-4 rounded-xl border-2 text-left transition-all ${tipoAcionamento === 'rodizio' ? 'border-violet-500 bg-info-soft' : 'border-border bg-card hover:border-border'}`}
+                    className={`p-4 rounded-xl border-2 text-left transition-all ${tipoAcionamento === 'rodizio' ? 'border-primary/40 bg-info-soft' : 'border-border bg-card hover:border-border'}`}
                   >
                     <div className="flex items-center gap-2 mb-1">
-                      <div className={`w-4 h-4 rounded-full border-2 ${tipoAcionamento === 'rodizio' ? 'border-violet-500 bg-primary' : 'border-border'}`} />
+                      <div className={`w-4 h-4 rounded-full border-2 ${tipoAcionamento === 'rodizio' ? 'border-primary/40 bg-primary' : 'border-border'}`} />
                       <span className="font-semibold text-sm text-foreground">Estou realizando o acionamento</span>
                     </div>
                     <p className="text-xs text-muted-foreground ml-6">O sistema segue a ordem do rodízio automaticamente.</p>
@@ -279,10 +279,10 @@ export default function LiderTecnicoTool() {
                   <button
                     type="button"
                     onClick={() => isGestor ? setTipoAcionamento('supervisor') : toast({ title: 'Sem permissão', description: 'Apenas supervisores/gestores podem usar esta opção.', variant: 'destructive' })}
-                    className={`p-4 rounded-xl border-2 text-left transition-all ${tipoAcionamento === 'supervisor' ? 'border-violet-500 bg-info-soft' : 'border-border bg-card hover:border-border'} ${!isGestor ? 'opacity-60' : ''}`}
+                    className={`p-4 rounded-xl border-2 text-left transition-all ${tipoAcionamento === 'supervisor' ? 'border-primary/40 bg-info-soft' : 'border-border bg-card hover:border-border'} ${!isGestor ? 'opacity-60' : ''}`}
                   >
                     <div className="flex items-center gap-2 mb-1">
-                      <div className={`w-4 h-4 rounded-full border-2 ${tipoAcionamento === 'supervisor' ? 'border-violet-500 bg-primary' : 'border-border'}`} />
+                      <div className={`w-4 h-4 rounded-full border-2 ${tipoAcionamento === 'supervisor' ? 'border-primary/40 bg-primary' : 'border-border'}`} />
                       <span className="font-semibold text-sm text-foreground">Supervisor realizou a escolha</span>
                     </div>
                     <p className="text-xs text-muted-foreground ml-6">Permite selecionar qualquer líder, inclusive bloqueado ou em férias.</p>
@@ -334,7 +334,7 @@ export default function LiderTecnicoTool() {
 
                 {tipoAcionamento && (
                   <Button
-                    className="w-full bg-primary hover:bg-violet-700"
+                    className="w-full bg-primary hover:bg-primary"
                     disabled={!canConfirm || acionarMutation.isPending}
                     onClick={handleConfirmar}
                   >

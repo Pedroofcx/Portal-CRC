@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { formatDateSP } from '@/components/utils/helpers';
-import { ChevronDown, ChevronRight, Star, Clock, User, Shield } from 'lucide-react';
+import { ChevronDown, ChevronRight, Star, User, Shield } from 'lucide-react';
 
 const TIPO_LABEL = {
   reclamacao_interna: 'Rec. Interna',
@@ -74,7 +74,7 @@ export default function AuditoriaDetalheTabela({ linhas, totalPontos, colaborado
             return (
               <React.Fragment key={tratativa.id}>
                 <tr
-                  className="border-b border-slate-50 hover:bg-muted cursor-pointer"
+                  className="border-b border-border hover:bg-muted cursor-pointer"
                   onClick={() => setExpandido(expandido === tratativa.id ? null : tratativa.id)}
                 >
                   <td className="py-2 px-3">

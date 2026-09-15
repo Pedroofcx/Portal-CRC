@@ -21,7 +21,7 @@ export default function WelcomeScreen({ userName, onComplete }) {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[100] bg-gradient-to-br from-blue-600 via-blue-500 to-purple-600 flex items-center justify-center"
+          className="fixed inset-0 z-[100] bg-primary flex items-center justify-center"
         >
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
@@ -41,13 +41,13 @@ export default function WelcomeScreen({ userName, onComplete }) {
               }}
               className="inline-block mb-6"
             >
-              <Sparkles className="w-20 h-20 text-white drop-shadow-2xl" />
+              <Sparkles className="w-20 h-20 text-white " />
             </motion.div>
             <motion.h1
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.4 }}
-              className="text-4xl md:text-5xl font-bold text-white mb-4 drop-shadow-lg"
+              className="text-4xl md:text-5xl font-bold text-white mb-4 "
             >
               Portal CRC
             </motion.h1>

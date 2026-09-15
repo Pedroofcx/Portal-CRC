@@ -10,13 +10,12 @@ export const SLOT_CONFIG = {
     emoji: '',
     // Tailwind literal classes (não dinâmicas)
     bg: 'bg-success-soft',
-    border: 'border-green-400',
+    border: 'border-success/40',
     badgeBg: 'bg-success',
     text: 'text-success',
     iconColor: 'text-success',
     headerBg: 'bg-success',
-    ringColor: 'ring-green-400',
-    hex: '#16A34A'
+    ringColor: 'ring-ring'
   },
   manha_analise: {
     label: 'M-ANÁL',
@@ -28,34 +27,31 @@ export const SLOT_CONFIG = {
     text: 'text-primary',
     iconColor: 'text-primary',
     headerBg: 'bg-primary',
-    ringColor: 'ring-blue-400',
-    hex: '#2563EB'
+    ringColor: 'ring-ring'
   },
   tarde_atendimento: {
     label: 'T-ATEND',
     labelLong: 'Tarde · Atendimento',
     emoji: '',
     bg: 'bg-critical-soft',
-    border: 'border-orange-400',
+    border: 'border-critical/40',
     badgeBg: 'bg-critical',
     text: 'text-critical',
     iconColor: 'text-critical',
     headerBg: 'bg-critical',
-    ringColor: 'ring-orange-400',
-    hex: '#EA580C'
+    ringColor: 'ring-ring'
   },
   tarde_analise: {
     label: 'T-ANÁL',
     labelLong: 'Tarde · Análise',
     emoji: '',
     bg: 'bg-info-soft',
-    border: 'border-purple-400',
+    border: 'border-primary/40',
     badgeBg: 'bg-primary',
     text: 'text-primary',
     iconColor: 'text-primary',
     headerBg: 'bg-primary',
-    ringColor: 'ring-purple-400',
-    hex: '#7C3AED'
+    ringColor: 'ring-ring'
   }
 };
 

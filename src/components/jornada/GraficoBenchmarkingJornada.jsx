@@ -68,18 +68,18 @@ export default function GraficoBenchmarkingJornada({ tratativas, etapasOrdenadas
         <CardContent>
           <ResponsiveContainer width="100%" height={320}>
             <LineChart data={dadosPorEtapa}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
               <XAxis dataKey="etapa" tick={{ fontSize: 11 }} />
               <YAxis tickFormatter={(v) => `R$ ${(v / 1000).toFixed(1)}k`} />
               <Tooltip formatter={(v) => formatBRL(v)} />
               <Legend />
-              <Line type="monotone" dataKey="acumulado" stroke="#2563eb" strokeWidth={3} name="Impacto Real Acumulado" dot={{ r: 4 }} />
+              <Line type="monotone" dataKey="acumulado" stroke="hsl(var(--chart-1))" strokeWidth={3} name="Impacto Real Acumulado" dot={{ r: 4 }} />
               {toleranciaEmReais > 0 && (
                 <ReferenceLine
                   y={toleranciaEmReais}
-                  stroke="#dc2626"
+                  stroke="hsl(var(--destructive))"
                   strokeDasharray="6 6"
-                  label={{ value: `Tolerância (${formatBRL(toleranciaEmReais)})`, position: 'insideTopRight', fill: '#dc2626', fontSize: 11 }}
+                  label={{ value: `Tolerância (${formatBRL(toleranciaEmReais)})`, position: 'insideTopRight', fill: 'hsl(var(--destructive))', fontSize: 11 }}
                 />
               )}
             </LineChart>
@@ -117,7 +117,7 @@ export default function GraficoBenchmarkingJornada({ tratativas, etapasOrdenadas
       <Card className="border-0 shadow-sm">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base">
-            <HeartCrack className="w-5 h-5 text-pink-500" />
+            <HeartCrack className="w-5 h-5 text-primary" />
             Taxa de Churn (Cancelamento)
           </CardTitle>
         </CardHeader>

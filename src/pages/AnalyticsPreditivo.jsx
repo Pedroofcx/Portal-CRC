@@ -2,11 +2,9 @@ import db from '@/api/db';
 import React, { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 
-import { formatDateSP } from '@/components/utils/helpers';
 import PageHeader from '@/components/ui/PageHeader';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -17,18 +15,11 @@ import {
   Brain,
   TrendingUp,
   TrendingDown,
-  Activity,
-  Users,
   AlertTriangle,
-  CheckCircle,
-  Clock,
-  BarChart3,
-  Target,
-  Zap,
   Info,
   Download
 } from 'lucide-react';
-import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Area, AreaChart } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Area, AreaChart } from 'recharts';
 
 // ========================================
 // FUNÇÕES MATEMÁTICAS CMMI 4
@@ -480,8 +471,8 @@ export default function AnalyticsPreditivo() {
                   <YAxis />
                   <Tooltip />
                   <Legend />
-                  <Area type="monotone" dataKey="abertos" stackId="1" stroke="#ef4444" fill="#ef4444" fillOpacity={0.6} name="Abertos" />
-                  <Area type="monotone" dataKey="resolvidos" stackId="2" stroke="#22c55e" fill="#22c55e" fillOpacity={0.6} name="Resolvidos" />
+                  <Area type="monotone" dataKey="abertos" stackId="1" stroke="hsl(var(--destructive))" fill="hsl(var(--destructive))" fillOpacity={0.6} name="Abertos" />
+                  <Area type="monotone" dataKey="resolvidos" stackId="2" stroke="hsl(var(--chart-2))" fill="hsl(var(--chart-2))" fillOpacity={0.6} name="Resolvidos" />
                 </AreaChart>
               </ResponsiveContainer>
             </CardContent>
@@ -522,7 +513,7 @@ export default function AnalyticsPreditivo() {
                     <XAxis dataKey="canal" tick={{ fontSize: 11 }} />
                     <YAxis />
                     <Tooltip />
-                    <Bar dataKey="count" fill="#3b82f6" name="Tickets" />
+                    <Bar dataKey="count" fill="hsl(var(--chart-1))" name="Tickets" />
                   </BarChart>
                 </ResponsiveContainer>
               </CardContent>
@@ -567,7 +558,7 @@ export default function AnalyticsPreditivo() {
               </CardContent>
             </Card>
 
-            <Card className="border-0 shadow-sm bg-gradient-to-br from-purple-50 to-purple-100">
+            <Card className="border-0 shadow-sm bg-info-soft">
               <CardHeader>
                 <CardTitle className="text-base">Indicador de Saturação</CardTitle>
               </CardHeader>
@@ -745,7 +736,7 @@ export default function AnalyticsPreditivo() {
             </Card>
           </div>
 
-          <Card className="border-0 shadow-sm bg-gradient-to-br from-purple-50 to-purple-100">
+          <Card className="border-0 shadow-sm bg-info-soft">
             <CardHeader>
               <CardTitle>Risco de Quebra de SLA</CardTitle>
               <CardDescription>Probabilidade estatística baseada em tickets próximos ao vencimento</CardDescription>

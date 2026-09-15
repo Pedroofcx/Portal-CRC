@@ -1,6 +1,5 @@
 import React from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { ThumbsUp, ThumbsDown, FileText, ChevronRight } from 'lucide-react';
 
@@ -21,14 +20,14 @@ export default function ColaboradorCard({ colaborador, observacoes, pdis, onClic
 
   return (
     <Card
-      className="border-0 shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer group"
+      className="border-0 shadow-sm hover:shadow-sm transition-all duration-200 cursor-pointer group"
       onClick={onClick}
     >
       <CardContent className="p-5">
         <div className="flex items-start gap-4">
           <Avatar className="h-14 w-14 flex-shrink-0">
             <AvatarImage src={colaborador.foto_url} />
-            <AvatarFallback className="bg-gradient-to-br from-blue-500 to-blue-600 text-white text-lg font-semibold">
+            <AvatarFallback className="bg-primary text-white text-lg font-semibold">
               {colaborador.nome_completo?.charAt(0)}
             </AvatarFallback>
           </Avatar>

@@ -156,6 +156,11 @@
    * exatamente o problema que estamos eliminando do sistema.
    */
   .superficie-escura {
+    /* Pinta o próprio fundo: assim a classe basta, e nenhuma tela precisa
+       cravar bg-slate-900 junto. */
+    background-color: hsl(217 33% 16%);
+    color: hsl(0 0% 98%);
+
     --foreground: 0 0% 98%;
     --muted-foreground: 214 14% 72%;
     --card: 217 33% 20%;

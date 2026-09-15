@@ -78,12 +78,12 @@ export default function POPViewer({ pop }) {
       <Separator />
 
       {/* Objetivo — Destaque */}
-      <div className="bg-slate-900 superficie-escura rounded-xl p-5 text-white">
+      <div className="bg-muted superficie-escura rounded-xl p-5 text-white">
         <div className="flex items-center gap-2 mb-3">
           <Target className="w-4 h-4 text-muted-foreground" />
           <span className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Objetivo</span>
         </div>
-        <p className="text-sm leading-relaxed whitespace-pre-wrap text-slate-100">{pop.objetivo}</p>
+        <p className="text-sm leading-relaxed whitespace-pre-wrap text-muted-foreground">{pop.objetivo}</p>
       </div>
 
       {/* Ferramentas */}

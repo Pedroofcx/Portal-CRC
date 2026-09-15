@@ -54,7 +54,7 @@ export default function CardAgenteEquidade({ agente, distribuicoes, todas }) {
           <p className="text-xs text-muted-foreground mt-0.5">{agente.cargo_atual || 'Agente'}</p>
         </div>
         <div className="flex items-center gap-2 flex-shrink-0">
-          <Badge className="bg-slate-700 text-white text-xs">{minhas.length} tickets</Badge>
+          <Badge className="bg-muted text-white text-xs">{minhas.length} tickets</Badge>
           <button onClick={() => setExpandido(e => !e)} className="p-1 hover:bg-card/60 rounded transition-colors">
             {expandido ? <ChevronUp className="w-4 h-4 text-muted-foreground" /> : <ChevronDown className="w-4 h-4 text-muted-foreground" />}
           </button>
@@ -105,7 +105,7 @@ export default function CardAgenteEquidade({ agente, distribuicoes, todas }) {
           const pct = Math.round((qty / (minhas.length || 1)) * 100);
           const concentrado = pct > 60;
           return (
-            <span key={key} className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${cfg.color} ${concentrado ? 'ring-2 ring-amber-400 ring-offset-1' : ''}`}>
+            <span key={key} className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${cfg.color} ${concentrado ? 'ring-2 ring-ring ring-offset-1' : ''}`}>
               {cfg.label.split(' ')[0]}: {qty}
               {concentrado && <AlertTriangle className="w-3 h-3 text-warning" />}
             </span>

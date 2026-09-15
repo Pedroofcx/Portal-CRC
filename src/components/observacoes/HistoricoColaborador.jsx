@@ -3,7 +3,6 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -11,8 +10,7 @@ import ConfirmDialog from '@/components/ui/ConfirmDialog';
 import RichTextViewer from '@/components/ui/RichTextViewer';
 import { formatDateSP } from '@/components/utils/helpers';
 import {
-  ArrowLeft, Plus, Eye, EyeOff, Trash2, Sparkles,
-  ThumbsUp, ThumbsDown, Calendar, User, Filter, MessageSquare
+  ArrowLeft, Plus, Eye, EyeOff, Trash2, Sparkles, Calendar, User, Filter, MessageSquare
 } from 'lucide-react';
 
 const tipoLabels = {
@@ -34,11 +32,11 @@ const tipoCores = {
   feedback_negativo: 'bg-destructive/10 text-destructive border-destructive/25',
   feedback_regular: 'bg-warning-soft text-warning border-warning/25',
   one_on_one: 'bg-info-soft text-primary border-info/25',
-  kaizen: 'bg-teal-100 text-teal-700 border-teal-200',
+  kaizen: 'bg-success-soft text-success border-success/25',
   hansei: 'bg-info-soft text-primary border-info/25',
-  keidoh: 'bg-info-soft text-primary border-indigo-200',
+  keidoh: 'bg-info-soft text-primary border-primary/25',
   registro_livre: 'bg-muted text-foreground border-border',
-  observacao_diaria: 'bg-cyan-100 text-cyan-700 border-cyan-200',
+  observacao_diaria: 'bg-info-soft text-info border-info/25',
 };
 
 function ObservacaoCard({ obs, onView, onDelete, podeExcluir }) {
@@ -150,7 +148,7 @@ export default function HistoricoColaborador({
         <div className="flex flex-col sm:flex-row sm:items-center gap-4">
           <Avatar className="h-16 w-16">
             <AvatarImage src={colaborador.foto_url} />
-            <AvatarFallback className="bg-gradient-to-br from-blue-500 to-blue-600 text-white text-xl font-semibold">
+            <AvatarFallback className="bg-primary text-white text-xl font-semibold">
               {colaborador.nome_completo?.charAt(0)}
             </AvatarFallback>
           </Avatar>
@@ -293,7 +291,7 @@ export default function HistoricoColaborador({
 
               {(viewObs.soft_skills_avaliadas && Object.keys(viewObs.soft_skills_avaliadas).length > 0) ||
                (viewObs.hard_skills_avaliadas && Object.keys(viewObs.hard_skills_avaliadas).length > 0) ? (
-                <Card className="bg-info-soft border-indigo-200">
+                <Card className="bg-info-soft border-primary/25">
                   <CardHeader className="pb-2 pt-4 px-4"><CardTitle className="text-sm">Avaliação de Skills</CardTitle></CardHeader>
                   <CardContent className="grid grid-cols-2 gap-4 text-sm px-4 pb-4">
                     {viewObs.soft_skills_avaliadas && Object.keys(viewObs.soft_skills_avaliadas).length > 0 && (

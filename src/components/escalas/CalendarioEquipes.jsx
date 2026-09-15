@@ -79,8 +79,8 @@ export default function CalendarioEquipes({
   const hoje = new Date().toDateString();
 
   return (
-    <Card className="border-0 shadow-lg">
-      <div className="p-4 border-b bg-gradient-to-r from-slate-50 to-slate-100">
+    <Card className="border-0 shadow-sm">
+      <div className="p-4 border-b bg-muted">
         <div className="flex items-center justify-between">
           <h2 className="text-xl font-bold text-foreground">
             {mesAtual.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' }).replace(/^\w/, c => c.toUpperCase())}
@@ -120,9 +120,9 @@ export default function CalendarioEquipes({
                 className={cn(
                   'min-h-32 p-2 rounded-lg transition-all border-2',
                   diaObj.mesAtual 
-                    ? 'bg-card hover:shadow-md cursor-pointer' 
+                    ? 'bg-card hover:shadow-sm cursor-pointer' 
                     : 'bg-muted/50 opacity-40 border-border',
-                  isHoje && 'ring-2 ring-blue-500 bg-info-soft border-primary/40'
+                  isHoje && 'ring-2 ring-ring bg-info-soft border-primary/40'
                 )}
               >
                 <div className="flex items-center justify-between mb-2">

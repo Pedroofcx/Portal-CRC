@@ -1,13 +1,11 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { 
   Smile, 
   Meh, 
   Frown,
   TrendingUp,
-  TrendingDown,
   Minus,
   Star,
   ThumbsUp,
@@ -137,7 +135,7 @@ export function ResultadosVisuaisCSAT({ respostas }) {
 
       {/* Métrica Resumida */}
       <div className="grid grid-cols-2 gap-4">
-        <Card className="bg-gradient-to-br from-green-50 to-green-100 border-success/25">
+        <Card className="bg-success-soft border-success/25">
           <CardContent className="p-4">
             <div className="flex items-center gap-2 mb-1">
               <Star className="w-4 h-4 text-success" />
@@ -147,7 +145,7 @@ export function ResultadosVisuaisCSAT({ respostas }) {
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-info/25">
+        <Card className="bg-info-soft border-info/25">
           <CardContent className="p-4">
             <div className="flex items-center gap-2 mb-1">
               <TrendingUp className="w-4 h-4 text-primary" />
@@ -258,7 +256,7 @@ export function ResultadosVisuaisNPS({ respostas }) {
 
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2 w-32">
-              <div className="w-3 h-3 rounded-full bg-yellow-600"></div>
+              <div className="w-3 h-3 rounded-full bg-warning"></div>
               <span className="text-sm font-medium">Neutros</span>
             </div>
             <Progress value={(stats.neutros / stats.total) * 100} className="flex-1 h-3" />

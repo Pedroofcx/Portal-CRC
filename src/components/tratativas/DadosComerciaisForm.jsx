@@ -22,8 +22,8 @@ const MODALIDADES = ['Mensal', 'Trimestral', 'Semestral', 'Anual'];
 // são calculados dinamicamente pela aplicação, nunca persistidos.
 export default function DadosComerciaisForm({ formData, setFormData }) {
   return (
-    <div className="p-4 bg-success-soft border border-emerald-200 rounded-lg space-y-4">
-      <h4 className="font-semibold text-emerald-900 flex items-center gap-2">
+    <div className="p-4 bg-success-soft border border-success/25 rounded-lg space-y-4">
+      <h4 className="font-semibold text-success flex items-center gap-2">
         <Building2 className="w-4 h-4" />
         Dados Comerciais do Cliente
       </h4>

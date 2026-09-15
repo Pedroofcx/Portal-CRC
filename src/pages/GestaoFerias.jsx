@@ -1,5 +1,5 @@
 import db from '@/api/db';
-import React, { useState, useMemo, useRef } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 import PageHeader from '@/components/ui/PageHeader';
@@ -478,7 +478,7 @@ export default function GestaoFerias() {
               ) : (
                 <div className="space-y-2">
                   {emFerias.map((f, i) => (
-                    <div key={i} className="flex items-center justify-between p-3 bg-warning-soft border border-amber-100 rounded-lg text-sm">
+                    <div key={i} className="flex items-center justify-between p-3 bg-warning-soft border border-warning/25 rounded-lg text-sm">
                       <span className="font-medium">{f.ciclo.colaborador_nome}</span>
                       <span className="text-muted-foreground">retorna em {fmtDate(f.data_fim)}</span>
                     </div>

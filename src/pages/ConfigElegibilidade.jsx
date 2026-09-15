@@ -127,7 +127,7 @@ export default function ConfigElegibilidade() {
     <div className="space-y-6">
       {/* Ciclo Ativo Banner */}
       {cicloAtivo ? (
-        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-info/25 rounded-xl p-4 flex items-start gap-3">
+        <div className="bg-info-soft border border-info/25 rounded-xl p-4 flex items-start gap-3">
           <CheckCircle2 className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
           <div>
             <p className="font-semibold text-primary text-sm">Ciclo Ativo: {cicloAtivo.nome}</p>
@@ -228,7 +228,7 @@ export default function ConfigElegibilidade() {
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="text-red-400 hover:text-destructive flex-shrink-0"
+                        className="text-destructive hover:text-destructive flex-shrink-0"
                         onClick={() => deleteMutation.mutate(elegib.id)}
                       >
                         <Trash2 className="w-4 h-4" />

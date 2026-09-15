@@ -2,7 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { DollarSign, TrendingUp, ShieldAlert, Brain, Layers, BarChart3 } from 'lucide-react';
+import { DollarSign, TrendingUp, ShieldAlert, Brain, Layers } from 'lucide-react';
 import ImpactoPorDimensao from './ImpactoPorDimensao';
 import ImpactoPorPeriodo from './ImpactoPorPeriodo';
 import PerguntasEstrategicas from './PerguntasEstrategicas';

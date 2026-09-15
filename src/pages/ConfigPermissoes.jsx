@@ -11,7 +11,7 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Shield, Users, Eye, EyeOff, Save } from 'lucide-react';
+import { Shield, Eye, EyeOff } from 'lucide-react';
 import { toast } from 'sonner';
 
 const modulosDisponiveis = [

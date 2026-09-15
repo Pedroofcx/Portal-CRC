@@ -66,7 +66,7 @@ export default function PerfilComercialClienteAgregado({ tratativas }) {
   }
 
   return (
-    <Card className="border-0 shadow-sm bg-gradient-to-br from-emerald-50 to-teal-50">
+    <Card className="border-0 shadow-sm bg-success-soft">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-base">
           <Building2 className="w-5 h-5 text-success" />

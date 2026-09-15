@@ -6,12 +6,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { toast } from 'sonner';
 import { Plus, Trash2, Tag } from 'lucide-react';
 
 export default function ConfigTiposObservacao() {
-  const [novoTipo, setNovoTipo] = useState({ nome: '', descricao: '', cor: '#3b82f6' });
+  const [novoTipo, setNovoTipo] = useState({ nome: '', descricao: '', cor: 'hsl(var(--chart-1))' });
   const queryClient = useQueryClient();
 
   const { data: tipos = [] } = useQuery({
@@ -24,7 +23,7 @@ export default function ConfigTiposObservacao() {
     onSuccess: () => {
       queryClient.invalidateQueries(['tiposObservacao']);
       toast.success('Tipo criado');
-      setNovoTipo({ nome: '', descricao: '', cor: '#3b82f6' });
+      setNovoTipo({ nome: '', descricao: '', cor: 'hsl(var(--chart-1))' });
     },
   });
 

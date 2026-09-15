@@ -214,7 +214,7 @@ export default function OraculoWizard({
             </div>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="p-6 bg-info-soft rounded-lg border-l-4 border-purple-500">
+            <div className="p-6 bg-info-soft rounded-lg border-l-4 border-primary/40">
               <p className="text-lg font-medium text-foreground">
                 {data.pergunta_gerada}
               </p>
@@ -359,7 +359,7 @@ export default function OraculoWizard({
                         className={cn(
                           'flex-1 py-2 rounded border transition-colors',
                           data.soft_skills[skill] === valor
-                            ? 'bg-warning text-white border-amber-600'
+                            ? 'bg-warning text-white border-warning/40'
                             : 'border-border hover:border-warning/40'
                         )}
                       >
@@ -390,7 +390,7 @@ export default function OraculoWizard({
                         className={cn(
                           'flex-1 py-2 rounded border transition-colors',
                           data.hard_skills[skill] === valor
-                            ? 'bg-warning text-white border-amber-600'
+                            ? 'bg-warning text-white border-warning/40'
                             : 'border-border hover:border-warning/40'
                         )}
                       >
@@ -407,7 +407,7 @@ export default function OraculoWizard({
 
       {/* Card 5 - Texto Livre */}
       {step === 5 && (
-        <Card className="border-indigo-200">
+        <Card className="border-primary/25">
           <CardHeader>
             <div className="flex items-center gap-2">
               <Edit3 className="w-5 h-5 text-primary" />

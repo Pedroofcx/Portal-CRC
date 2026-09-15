@@ -11,7 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import {
@@ -210,7 +210,7 @@ export default function Avisos() {
             return (
               <Card 
                 key={aviso.id} 
-                className={`border-0 shadow-sm cursor-pointer transition-all hover:shadow-md ${!lido ? 'ring-2 ring-blue-200' : ''}`}
+                className={`border-0 shadow-sm cursor-pointer transition-all hover:shadow-sm ${!lido ? 'ring-2 ring-ring' : ''}`}
                 onClick={() => openAviso(aviso)}
               >
                 <CardContent className="p-4">

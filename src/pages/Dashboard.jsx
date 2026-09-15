@@ -641,14 +641,14 @@ export default function Dashboard() {
         <div className="space-y-6">
           {/* Linha 1: Stats de performance */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <Card className="border-0 shadow-sm bg-gradient-to-br from-amber-500 to-amber-600 text-white">
+            <Card className="border-0 shadow-sm bg-warning text-white">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between mb-1">
-                  <span className="text-amber-100 text-xs font-medium">Pontuação {trimestre}</span>
-                  <Award className="w-4 h-4 text-amber-200" />
+                  <span className="text-warning text-xs font-medium">Pontuação {trimestre}</span>
+                  <Award className="w-4 h-4 text-warning" />
                 </div>
                 <div className="text-3xl font-bold">{totalPontosAgente.toFixed(1)}</div>
-                <p className="text-amber-200 text-xs mt-1">pts acumulados</p>
+                <p className="text-warning text-xs mt-1">pts acumulados</p>
               </CardContent>
             </Card>
             <StatCard title="Tratativas Encerradas" value={stats.encerradas} subtitle={`de ${stats.total} total`} icon={CheckCircle} color="green" />
@@ -782,7 +782,7 @@ export default function Dashboard() {
             <div className="space-y-4">
               {/* Hansei */}
               <Card
-                className="border-0 shadow-sm bg-gradient-to-r from-blue-500 to-blue-600 text-white cursor-pointer hover:shadow-md transition-shadow"
+                className="border-0 shadow-sm bg-primary text-white cursor-pointer hover:shadow-sm transition-shadow"
                 onClick={() => navigate(createPageUrl('Hansei'))}
               >
                 <CardContent className="p-3 flex items-center justify-between">
@@ -792,21 +792,21 @@ export default function Dashboard() {
                     </div>
                     <div>
                       <p className="font-semibold text-sm">Meu Hansei</p>
-                      <p className="text-blue-100 text-xs">Resultados e desempenho</p>
+                      <p className="text-primary text-xs">Resultados e desempenho</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
                     {meusHansei.filter(h => !h.visualizado).length > 0 && (
                       <Badge className="bg-card/25 text-white border-0 text-xs">{meusHansei.filter(h => !h.visualizado).length} novo(s)</Badge>
                     )}
-                    <ArrowRight className="w-4 h-4 text-blue-200" />
+                    <ArrowRight className="w-4 h-4 text-primary" />
                   </div>
                 </CardContent>
               </Card>
 
               {/* PDI Ativo */}
               {pdiAtivo ? (
-                <Card className="border-0 shadow-sm bg-gradient-to-br from-purple-50 to-purple-100 cursor-pointer hover:shadow-md transition-shadow" onClick={() => setSelectedPDI(pdiAtivo)}>
+                <Card className="border-0 shadow-sm bg-info-soft cursor-pointer hover:shadow-sm transition-shadow" onClick={() => setSelectedPDI(pdiAtivo)}>
                   <CardContent className="p-4">
                     <div className="flex items-center gap-2 mb-2">
                       <Target className="w-4 h-4 text-primary" />
@@ -818,7 +818,7 @@ export default function Dashboard() {
                         <span>Progresso</span>
                         <span>{pdiAtivo.percentual_conclusao || 0}%</span>
                       </div>
-                      <Progress value={pdiAtivo.percentual_conclusao || 0} className="h-1.5 bg-purple-200" />
+                      <Progress value={pdiAtivo.percentual_conclusao || 0} className="h-1.5 bg-primary" />
                     </div>
                     <p className="text-xs text-primary mt-2">{pdiAtivo.etapas?.filter(e => !e.concluida).length || 0} etapa(s) pendente(s) · clique para detalhes</p>
                   </CardContent>
@@ -981,7 +981,7 @@ export default function Dashboard() {
 
               {/* Minhas Férias */}
               <Card
-                className={`border-0 shadow-sm cursor-pointer hover:shadow-md transition-shadow ${minhasferiasPendentes.length > 0 ? 'bg-gradient-to-br from-amber-50 to-orange-50' : 'bg-gradient-to-br from-green-50 to-teal-50'}`}
+                className={`border-0 shadow-sm cursor-pointer hover:shadow-sm transition-shadow ${minhasferiasPendentes.length > 0 ? 'bg-warning-soft' : 'bg-success-soft'}`}
                 onClick={() => setValidarFeriasOpen(true)}
               >
                 <CardContent className="p-4">

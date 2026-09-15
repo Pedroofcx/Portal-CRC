@@ -168,7 +168,7 @@ export default function FerramentasOperacionais() {
     <div className="max-w-7xl mx-auto space-y-6">
       <div className="flex items-start justify-between gap-4">
         <div className="flex items-center gap-3">
-          <div className="p-2.5 bg-gradient-to-br from-violet-500 to-violet-700 rounded-xl text-white shadow-lg shadow-violet-500/20">
+          <div className="p-2.5 bg-primary rounded-xl text-white shadow-sm">
             <Wrench className="w-6 h-6" />
           </div>
           <div>
@@ -184,7 +184,7 @@ export default function FerramentasOperacionais() {
           className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold flex-shrink-0 transition-all ${
             ferramentaAtiva === 'estorno'
               ? 'bg-primary text-white shadow'
-              : 'bg-card border border-border text-muted-foreground hover:border-violet-300'
+              : 'bg-card border border-border text-muted-foreground hover:border-primary/25'
           }`}
         >
           <Calculator className="w-4 h-4" />
@@ -195,7 +195,7 @@ export default function FerramentasOperacionais() {
           className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold flex-shrink-0 transition-all ${
             ferramentaAtiva === 'apoio'
               ? 'bg-primary text-white shadow'
-              : 'bg-card border border-border text-muted-foreground hover:border-violet-300'
+              : 'bg-card border border-border text-muted-foreground hover:border-primary/25'
           }`}
         >
           <LifeBuoy className="w-4 h-4" />
@@ -206,7 +206,7 @@ export default function FerramentasOperacionais() {
           className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold flex-shrink-0 transition-all ${
             ferramentaAtiva === 'lider'
               ? 'bg-primary text-white shadow'
-              : 'bg-card border border-border text-muted-foreground hover:border-violet-300'
+              : 'bg-card border border-border text-muted-foreground hover:border-primary/25'
           }`}
         >
           <UserCog className="w-4 h-4" />
@@ -217,7 +217,7 @@ export default function FerramentasOperacionais() {
           className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold flex-shrink-0 transition-all ${
             ferramentaAtiva === 'n2'
               ? 'bg-primary text-white shadow'
-              : 'bg-card border border-border text-muted-foreground hover:border-violet-300'
+              : 'bg-card border border-border text-muted-foreground hover:border-primary/25'
           }`}
         >
           <Headset className="w-4 h-4" />
@@ -365,7 +365,7 @@ export default function FerramentasOperacionais() {
                           onClick={() => onChange('tipo_plano', p.value)}
                           className={`py-2 px-1 rounded-lg text-xs font-semibold border-2 transition-all ${
                             form.tipo_plano === p.value
-                              ? 'border-violet-500 bg-info-soft text-primary'
+                              ? 'border-primary/40 bg-info-soft text-primary'
                               : 'border-border bg-card text-muted-foreground hover:border-border'
                           }`}
                         >
@@ -471,7 +471,7 @@ export default function FerramentasOperacionais() {
 
             <div className="lg:col-span-2 space-y-4">
               <div className="lg:sticky lg:top-6 space-y-4">
-                <Card className="border-2 border-violet-100">
+                <Card className="border-2 border-primary/25">
                   <CardHeader className="pb-3">
                     <CardTitle className="text-sm flex items-center gap-2">
                       <Calculator className="w-4 h-4 text-primary" />
@@ -495,7 +495,7 @@ export default function FerramentasOperacionais() {
                             aplicarMulta={aplicarMulta}
                           />
                           <Button
-                            className="w-full gap-2 bg-primary hover:bg-violet-700 text-white"
+                            className="w-full gap-2 bg-primary hover:bg-primary text-white"
                             onClick={handleSalvar}
                             disabled={salvarMutation.isPending}
                           >
@@ -569,7 +569,7 @@ export default function FerramentasOperacionais() {
                   <ImpostosPanel config={configEditada} onChange={(k, v) => setConfigEditada(c => ({ ...c, [k]: v }))} isAdmin />
                   <div className="flex gap-2 pt-2 border-t border-border">
                     <Button
-                      className="gap-2 bg-primary hover:bg-violet-700 text-white"
+                      className="gap-2 bg-primary hover:bg-primary text-white"
                       onClick={() => salvarConfigMutation.mutate(configEditada)}
                       disabled={salvarConfigMutation.isPending}
                     >

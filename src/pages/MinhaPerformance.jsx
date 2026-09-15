@@ -256,7 +256,7 @@ export default function MinhaPerformance() {
         <div className="space-y-6">
           {/* Card de Acesso ao Hansei */}
           <Link to={createPageUrl('Hansei')}>
-            <Card className="border-0 shadow-sm bg-gradient-to-br from-blue-500 to-blue-600 text-white cursor-pointer hover:shadow-lg transition-all hover:scale-105">
+            <Card className="border-0 shadow-sm bg-primary text-white cursor-pointer hover:shadow-sm transition-all hover:scale-105">
               <CardHeader className="pb-3">
                 <CardTitle className="text-base flex items-center gap-2 text-white">
                   <TrendingUp className="w-5 h-5" />
@@ -264,12 +264,12 @@ export default function MinhaPerformance() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                <p className="text-sm text-blue-50">
+                <p className="text-sm text-primary">
                   Visualize seus resultados consolidados, histórico de desempenho e gráficos de evolução
                 </p>
                 {meusHansei.length > 0 && (
                   <div className="p-3 bg-card/20 rounded-lg backdrop-blur-sm">
-                    <p className="text-xs text-blue-100 mb-1">Últimos resultados:</p>
+                    <p className="text-xs text-primary mb-1">Últimos resultados:</p>
                     <p className="text-sm font-medium text-white">
                       {meusHansei.filter(h => !h.visualizado).length} novo(s) • {meusHansei.length} total
                     </p>
@@ -355,7 +355,7 @@ export default function MinhaPerformance() {
           {/* PDI Ativo */}
           {pdiAtivo ? (
             <Card 
-              className="border-0 shadow-sm bg-gradient-to-br from-blue-50 to-blue-100 border-info/25 cursor-pointer hover:shadow-md transition-shadow"
+              className="border-0 shadow-sm bg-info-soft border-info/25 cursor-pointer hover:shadow-sm transition-shadow"
               onClick={() => setSelectedPDI(pdiAtivo)}
             >
               <CardHeader className="pb-2">
@@ -372,7 +372,7 @@ export default function MinhaPerformance() {
                     <span>Progresso</span>
                     <span>{pdiAtivo.percentual_conclusao || 0}%</span>
                   </div>
-                  <Progress value={pdiAtivo.percentual_conclusao || 0} className="h-2 bg-blue-200" />
+                  <Progress value={pdiAtivo.percentual_conclusao || 0} className="h-2 bg-primary" />
                 </div>
                 <p className="text-xs text-primary mt-2">
                   {pdiAtivo.etapas?.filter(e => e.concluida).length || 0} de {pdiAtivo.etapas?.length || 0} etapas concluídas
@@ -433,7 +433,7 @@ export default function MinhaPerformance() {
                     return (
                       <div 
                         key={obs.id} 
-                        className={`p-3 border rounded-lg cursor-pointer transition-all hover:shadow-md ${bgColor}`}
+                        className={`p-3 border rounded-lg cursor-pointer transition-all hover:shadow-sm ${bgColor}`}
                         onClick={() => setSelectedFeedback(obs)}
                       >
                         <div className="flex items-start justify-between gap-2 mb-2">

@@ -290,10 +290,10 @@ export default function ApoioN2Tool() {
                   <button
                     type="button"
                     onClick={() => setTipoAcionamento('rodizio')}
-                    className={`p-4 rounded-xl border-2 text-left transition-all ${tipoAcionamento === 'rodizio' ? 'border-violet-500 bg-info-soft' : 'border-border bg-card hover:border-border'}`}
+                    className={`p-4 rounded-xl border-2 text-left transition-all ${tipoAcionamento === 'rodizio' ? 'border-primary/40 bg-info-soft' : 'border-border bg-card hover:border-border'}`}
                   >
                     <div className="flex items-center gap-2 mb-1">
-                      <div className={`w-4 h-4 rounded-full border-2 ${tipoAcionamento === 'rodizio' ? 'border-violet-500 bg-primary' : 'border-border'}`} />
+                      <div className={`w-4 h-4 rounded-full border-2 ${tipoAcionamento === 'rodizio' ? 'border-primary/40 bg-primary' : 'border-border'}`} />
                       <span className="font-semibold text-sm text-foreground">Seguir rodízio</span>
                     </div>
                     <p className="text-xs text-muted-foreground ml-6">O sistema identifica automaticamente o próximo N2 elegível.</p>
@@ -302,10 +302,10 @@ export default function ApoioN2Tool() {
                   <button
                     type="button"
                     onClick={() => isGestor ? setTipoAcionamento('supervisor') : toast({ title: 'Sem permissão', description: 'Apenas supervisores/gestores podem usar esta opção.', variant: 'destructive' })}
-                    className={`p-4 rounded-xl border-2 text-left transition-all ${tipoAcionamento === 'supervisor' ? 'border-violet-500 bg-info-soft' : 'border-border bg-card hover:border-border'} ${!isGestor ? 'opacity-60' : ''}`}
+                    className={`p-4 rounded-xl border-2 text-left transition-all ${tipoAcionamento === 'supervisor' ? 'border-primary/40 bg-info-soft' : 'border-border bg-card hover:border-border'} ${!isGestor ? 'opacity-60' : ''}`}
                   >
                     <div className="flex items-center gap-2 mb-1">
-                      <div className={`w-4 h-4 rounded-full border-2 ${tipoAcionamento === 'supervisor' ? 'border-violet-500 bg-primary' : 'border-border'}`} />
+                      <div className={`w-4 h-4 rounded-full border-2 ${tipoAcionamento === 'supervisor' ? 'border-primary/40 bg-primary' : 'border-border'}`} />
                       <span className="font-semibold text-sm text-foreground">Supervisor realizou a escolha</span>
                     </div>
                     <p className="text-xs text-muted-foreground ml-6">Permite selecionar qualquer N2, inclusive bloqueado ou em férias.</p>
@@ -355,7 +355,7 @@ export default function ApoioN2Tool() {
 
                 {tipoAcionamento && (
                   <Button
-                    className="w-full bg-primary hover:bg-violet-700"
+                    className="w-full bg-primary hover:bg-primary"
                     disabled={!canConfirm || acionarMutation.isPending}
                     onClick={handleConfirmar}
                   >

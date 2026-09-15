@@ -13,8 +13,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import ApuracaoWizard from '@/components/apuracao/ApuracaoWizard';
-import { calcularTelefone, calcularChat, calcularCX, validarConsistenciaTelefone } from '@/components/apuracao/calculosApuracao';
-import { PlusCircle } from 'lucide-react';
+import { calcularTelefone, calcularChat, calcularCX } from '@/components/apuracao/calculosApuracao';
 import { toast } from 'sonner';
 import {
   Search,
@@ -445,7 +444,7 @@ export default function Apuracao() {
                 onClick={() => setTipoApuracao('telefone')}
                 className={`p-6 border-2 rounded-lg transition-all ${
                   tipoApuracao === 'telefone' 
-                    ? 'border-blue-600 bg-info-soft' 
+                    ? 'border-primary/40 bg-info-soft' 
                     : 'border-border hover:border-border'
                 }`}
               >
@@ -458,7 +457,7 @@ export default function Apuracao() {
                 onClick={() => setTipoApuracao('chat')}
                 className={`p-6 border-2 rounded-lg transition-all ${
                   tipoApuracao === 'chat' 
-                    ? 'border-blue-600 bg-info-soft' 
+                    ? 'border-primary/40 bg-info-soft' 
                     : 'border-border hover:border-border'
                 }`}
               >
@@ -471,7 +470,7 @@ export default function Apuracao() {
                 onClick={() => setTipoApuracao('cx')}
                 className={`p-6 border-2 rounded-lg transition-all ${
                   tipoApuracao === 'cx' 
-                    ? 'border-blue-600 bg-info-soft' 
+                    ? 'border-primary/40 bg-info-soft' 
                     : 'border-border hover:border-border'
                 }`}
               >
@@ -599,7 +598,7 @@ export default function Apuracao() {
             {dadosExtraidos.length === 0 ? (
               <div>
                 <Label htmlFor="file-upload" className="cursor-pointer">
-                  <div className="border-2 border-dashed border-border rounded-lg p-12 text-center hover:border-blue-500 hover:bg-info-soft transition-all">
+                  <div className="border-2 border-dashed border-border rounded-lg p-12 text-center hover:border-primary/40 hover:bg-info-soft transition-all">
                     <FileSpreadsheet className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
                     <p className="text-base font-medium mb-2">Clique para fazer upload da planilha CSV</p>
                     <p className="text-sm text-muted-foreground">Apenas formato CSV é aceito</p>
@@ -762,9 +761,9 @@ export default function Apuracao() {
                   const ed = resultadosEditaveis[agente];
                   return (
                     <div key={agente} className="border rounded-lg overflow-hidden">
-                      <div className={`px-4 py-2 text-sm font-semibold text-white flex items-center justify-between ${r.validacao?.ok ? 'bg-slate-700' : 'bg-amber-700'}`}>
+                      <div className={`px-4 py-2 text-sm font-semibold text-white flex items-center justify-between ${r.validacao?.ok ? 'bg-muted' : 'bg-warning'}`}>
                         <span>{agente}</span>
-                        {!r.validacao?.ok && <span className="text-xs bg-amber-900 px-2 py-0.5 rounded">Verificar</span>}
+                        {!r.validacao?.ok && <span className="text-xs bg-warning px-2 py-0.5 rounded">Verificar</span>}
                       </div>
                       <div className="p-3 bg-muted grid grid-cols-4 gap-2 text-xs text-center">
                         <div><p className="text-muted-foreground">Importados</p><p className="font-bold">{v?.registros_importados}</p></div>
@@ -896,7 +895,7 @@ export default function Apuracao() {
                   if (semanas.length === 0) return null;
                   return (
                     <div key={agente} className="border rounded-lg overflow-hidden">
-                      <div className="bg-slate-700 text-white px-4 py-2 text-sm font-semibold">{agente} — Consolidação Semanal</div>
+                      <div className="bg-muted text-white px-4 py-2 text-sm font-semibold">{agente} — Consolidação Semanal</div>
                       <div className="overflow-x-auto">
                         <table className="w-full text-sm">
                           <thead className="bg-muted">
@@ -1004,7 +1003,7 @@ export default function Apuracao() {
                   if (semanas.length === 0) return null;
                   return (
                     <div key={agente} className="border rounded-lg overflow-hidden">
-                      <div className="bg-purple-700 text-white px-4 py-2 text-sm font-semibold">{agente} — Consolidação Semanal (Chat)</div>
+                      <div className="bg-primary text-white px-4 py-2 text-sm font-semibold">{agente} — Consolidação Semanal (Chat)</div>
                       <table className="w-full text-sm">
                         <thead className="bg-muted">
                           <tr>

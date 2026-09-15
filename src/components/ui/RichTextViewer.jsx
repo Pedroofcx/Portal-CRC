@@ -36,7 +36,7 @@ export default function RichTextViewer({
         .prose ul { list-style: disc; padding-left: 1.5rem; margin: 0.5rem 0; }
         .prose ol { list-style: decimal; padding-left: 1.5rem; margin: 0.5rem 0; }
         .prose li { margin-bottom: 4px; }
-        .prose a { color: #2563eb; text-decoration: underline; }
+        .prose a { color: hsl(var(--primary)); text-decoration: underline; }
         .prose strong { font-weight: 700; }
         .prose em { font-style: italic; }
         .prose p { margin: 0.4rem 0; }

@@ -6,9 +6,6 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Sun, Moon, Clock, ArrowRight } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { createPageUrl } from '@/utils';
-import { Link } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
 
 const DIAS_PT = {
   segunda: 'Segunda-feira',
@@ -65,12 +62,12 @@ export default function MeuTurnoCard({ colaboradorId }) {
   return (
     <>
       <Card
-        className={`border-0 shadow-sm cursor-pointer hover:shadow-md transition-all ${
+        className={`border-0 shadow-sm cursor-pointer hover:shadow-sm transition-all ${
           meuTurnoHoje === 'manha'
-            ? 'bg-gradient-to-r from-amber-400 to-orange-400 text-white'
+            ? 'bg-warning text-white'
             : meuTurnoHoje === 'tarde'
-            ? 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white'
-            : 'bg-gradient-to-r from-slate-100 to-slate-200'
+            ? 'bg-primary text-white'
+            : 'bg-muted'
         }`}
         onClick={() => setAgendaOpen(true)}
       >
@@ -129,21 +126,21 @@ export default function MeuTurnoCard({ colaboradorId }) {
                         <span className="text-xs font-semibold text-warning">Manhã</span>
                       </div>
                       {turno.manha?.length > 0 ? turno.manha.map(c => (
-                        <div key={c.colaborador_id} className={`text-xs py-0.5 px-1.5 rounded mb-0.5 ${c.colaborador_id === colaboradorId ? 'bg-amber-200 font-semibold text-warning' : 'text-warning'}`}>
+                        <div key={c.colaborador_id} className={`text-xs py-0.5 px-1.5 rounded mb-0.5 ${c.colaborador_id === colaboradorId ? 'bg-warning font-semibold text-warning' : 'text-warning'}`}>
                           {c.colaborador_nome?.split(' ')[0]}
                         </div>
                       )) : <p className="text-xs text-warning italic">—</p>}
                     </div>
-                    <div className="bg-info-soft border border-indigo-200 rounded-lg p-2">
+                    <div className="bg-info-soft border border-primary/25 rounded-lg p-2">
                       <div className="flex items-center gap-1.5 mb-1.5">
                         <Moon className="w-3.5 h-3.5 text-primary" />
                         <span className="text-xs font-semibold text-primary">Tarde</span>
                       </div>
                       {turno.tarde?.length > 0 ? turno.tarde.map(c => (
-                        <div key={c.colaborador_id} className={`text-xs py-0.5 px-1.5 rounded mb-0.5 ${c.colaborador_id === colaboradorId ? 'bg-indigo-200 font-semibold text-primary' : 'text-primary'}`}>
+                        <div key={c.colaborador_id} className={`text-xs py-0.5 px-1.5 rounded mb-0.5 ${c.colaborador_id === colaboradorId ? 'bg-primary font-semibold text-primary' : 'text-primary'}`}>
                           {c.colaborador_nome?.split(' ')[0]}
                         </div>
-                      )) : <p className="text-xs text-indigo-400 italic">—</p>}
+                      )) : <p className="text-xs text-primary italic">—</p>}
                     </div>
                   </div>
                 </div>

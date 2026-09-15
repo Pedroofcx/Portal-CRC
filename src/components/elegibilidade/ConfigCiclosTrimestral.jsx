@@ -8,11 +8,9 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
 import { Plus, Trash2, CalendarDays, CheckCircle2, Circle } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
 
 const MESES = [
   '01','02','03','04','05','06','07','08','09','10','11','12'
@@ -94,7 +92,7 @@ export default function ConfigCiclosTrimestral() {
     <div className="space-y-6">
       {/* Ciclo Ativo */}
       {cicloAtivo && (
-        <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-success/25 rounded-xl p-4 flex items-center gap-4">
+        <div className="bg-success-soft border border-success/25 rounded-xl p-4 flex items-center gap-4">
           <CheckCircle2 className="w-8 h-8 text-success flex-shrink-0" />
           <div className="flex-1">
             <p className="font-semibold text-success">{cicloAtivo.nome}</p>
@@ -170,7 +168,7 @@ export default function ConfigCiclosTrimestral() {
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-7 w-7 text-red-400 hover:text-destructive"
+                      className="h-7 w-7 text-destructive hover:text-destructive"
                       onClick={() => { if (confirm('Remover este ciclo?')) deleteMutation.mutate(ciclo.id); }}
                     >
                       <Trash2 className="w-3.5 h-3.5" />

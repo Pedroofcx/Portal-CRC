@@ -8,9 +8,9 @@ import { createPageUrl } from '@/utils';
 export default function EmptyPerformanceState() {
   return (
     <div className="min-h-[60vh] flex items-center justify-center">
-      <Card className="border-0 shadow-lg max-w-2xl w-full">
+      <Card className="border-0 shadow-sm max-w-2xl w-full">
         <CardContent className="p-12 text-center">
-          <div className="w-20 h-20 bg-gradient-to-br from-blue-100 to-blue-200 rounded-full flex items-center justify-center mx-auto mb-6">
+          <div className="w-20 h-20 bg-info-soft rounded-full flex items-center justify-center mx-auto mb-6">
             <Award className="w-10 h-10 text-primary" />
           </div>
           <h2 className="text-2xl font-bold text-foreground mb-3">

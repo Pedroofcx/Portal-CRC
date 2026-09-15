@@ -97,7 +97,7 @@ export default function DesfechoContestacao({ tratativa, onSalvar, isLoading }) 
         <Button
           onClick={() => onSalvar({ resultado, descricao_outros: descricaoOutros })}
           disabled={!podeSubmeter || isLoading}
-          className="bg-primary hover:bg-purple-700 w-full"
+          className="bg-primary hover:bg-primary w-full"
         >
           <CheckCircle className="w-4 h-4 mr-2" />
           {isLoading ? 'Salvando...' : 'Registrar Desfecho'}

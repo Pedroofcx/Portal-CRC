@@ -8,7 +8,7 @@ import { formatBRL } from '@/components/utils/helpers';
 const RISCO_CORES = {
   green: { badge: 'bg-success-soft text-success', card: 'border-success/30 bg-success-soft' },
   amber: { badge: 'bg-warning-soft text-warning', card: 'border-warning/30 bg-warning-soft' },
-  orange: { badge: 'bg-critical-soft text-critical', card: 'border-orange-300 bg-critical-soft' },
+  orange: { badge: 'bg-critical-soft text-critical', card: 'border-critical/25 bg-critical-soft' },
   red: { badge: 'bg-destructive/10 text-destructive', card: 'border-destructive/30 bg-destructive/10' },
   slate: { badge: 'bg-muted text-foreground', card: 'border-border bg-muted' },
 };

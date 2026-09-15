@@ -6,7 +6,6 @@ import { formatDateSP, papelLabels, formatBRL } from '@/components/utils/helpers
 import { CurrencyInput } from '@/components/ui/CurrencyInput';
 import PageHeader from '@/components/ui/PageHeader';
 import DataTable from '@/components/ui/DataTable';
-import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import ConfirmDialog from '@/components/ui/ConfirmDialog';
 import StatusBadge from '@/components/ui/StatusBadge';
 import { Button } from '@/components/ui/button';
@@ -14,7 +13,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import {
@@ -611,7 +609,7 @@ export default function Cadastro() {
                       type="button"
                       size="sm"
                       onClick={() => setPromocaoDialog(true)}
-                      className="bg-primary hover:bg-purple-700"
+                      className="bg-primary hover:bg-primary"
                     >
                       <TrendingUp className="w-4 h-4 mr-2" />
                       Nova Promoção
@@ -1067,7 +1065,7 @@ export default function Cadastro() {
               <Button type="button" variant="outline" onClick={() => setPromocaoDialog(false)}>
                 Cancelar
               </Button>
-              <Button onClick={handlePromocao} className="bg-primary hover:bg-purple-700">
+              <Button onClick={handlePromocao} className="bg-primary hover:bg-primary">
                 Registrar Promoção
               </Button>
             </div>

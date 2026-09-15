@@ -14,10 +14,8 @@ import {
   Eye, 
   Plus, 
   Sparkles, 
-  TrendingUp, 
   Users,
   Calendar,
-  Filter,
   BarChart3
 } from 'lucide-react';
 import { formatDateSP, getCurrentTrimester } from '@/components/utils/helpers';
@@ -273,7 +271,7 @@ export default function OraculoPage() {
               const ultimoLancamento = lancamentosColaborador[0];
               
               return (
-                <Card key={colaborador.id} className="hover:shadow-md transition-shadow">
+                <Card key={colaborador.id} className="hover:shadow-sm transition-shadow">
                   <CardContent className="p-6">
                     <div className="flex items-start justify-between">
                       <div className="flex-1">

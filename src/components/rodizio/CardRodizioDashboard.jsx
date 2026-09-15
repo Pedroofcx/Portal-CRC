@@ -19,7 +19,9 @@ export default function CardRodizioDashboard({ tipo }) {
   const findNext = isLider ? findNextLider : findNextN2;
   const getPosicao = isLider ? getPosicaoAtual : getPosicaoAtualN2;
   const titulo = isLider ? 'Líder Técnico' : 'Apoio N2';
-  const gradient = isLider ? 'from-violet-500 to-violet-600' : 'from-blue-500 to-blue-600';
+  // Líder Técnico e Apoio N2 são categorias, não níveis — usam a paleta
+  // categórica, que distingue sem sugerir que um é melhor que o outro.
+  const tom = isLider ? 'bg-chart-5' : 'bg-chart-1';
 
   const { data: participantes = [] } = useQuery({
     queryKey: [`rodizio-${tipo}-dashboard`],
@@ -51,7 +53,7 @@ export default function CardRodizioDashboard({ tipo }) {
 
   return (
     <Link to={createPageUrl('FerramentasOperacionais')}>
-      <Card className={`border-0 shadow-sm bg-gradient-to-br ${gradient} text-white cursor-pointer hover:shadow-md transition-shadow h-full`}>
+      <Card className={`h-full cursor-pointer border-0 shadow-none ${tom} text-white transition-colors`}>
         <CardContent className="p-4">
           <div className="flex items-center justify-between mb-3">
             <span className="text-white/90 text-sm font-medium">{titulo}</span>

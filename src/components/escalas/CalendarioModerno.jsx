@@ -44,8 +44,8 @@ export default function CalendarioModerno({
   const hoje_data = new Date().toDateString();
 
   return (
-    <Card className="border-0 shadow-xl bg-card">
-      <div className="p-6 border-b bg-gradient-to-r from-blue-50 to-indigo-50">
+    <Card className="border-0 shadow-sm bg-card">
+      <div className="p-6 border-b bg-info-soft">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-info-soft rounded-lg">
@@ -72,7 +72,7 @@ export default function CalendarioModerno({
       <div className="p-6">
         <div className="grid grid-cols-7 gap-2">
           {diasSemanaFull.map((dia) => (
-            <div key={dia} className="p-3 text-center font-bold text-sm bg-gradient-to-b from-slate-100 to-slate-50 rounded-t-lg border-b-2 border-border">
+            <div key={dia} className="p-3 text-center font-bold text-sm bg-muted rounded-t-lg border-b-2 border-border">
               <div className="text-foreground">{dia}</div>
             </div>
           ))}
@@ -94,9 +94,9 @@ export default function CalendarioModerno({
                 className={cn(
                   'min-h-32 p-3 border-2 rounded-lg transition-all',
                   diaObj.mesAtual 
-                    ? 'bg-card hover:bg-muted hover:shadow-md border-border' 
+                    ? 'bg-card hover:bg-muted hover:shadow-sm border-border' 
                     : 'bg-muted/50 text-muted-foreground border-border',
-                  isHoje && 'ring-4 ring-blue-400 border-primary/40 bg-info-soft/30'
+                  isHoje && 'ring-4 ring-ring border-primary/40 bg-info-soft/30'
                 )}
               >
                 <div className="flex items-center justify-between mb-2">

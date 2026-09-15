@@ -54,7 +54,7 @@ export default function HistoricoEstornos({ calculos, isAdmin, onVer, onExcluir 
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-border">
               {filtrados.map(c => (
                 <tr key={c.id} className="hover:bg-muted transition-colors">
                   <td className="px-4 py-3 font-mono text-xs text-muted-foreground">{c.numero_calculo || '—'}</td>
@@ -77,7 +77,7 @@ export default function HistoricoEstornos({ calculos, isAdmin, onVer, onExcluir 
                         <Eye className="w-3.5 h-3.5" />
                       </Button>
                       {isAdmin && (
-                        <Button size="sm" variant="ghost" onClick={() => onExcluir(c)} className="h-7 w-7 p-0 text-red-400 hover:text-destructive" title="Excluir">
+                        <Button size="sm" variant="ghost" onClick={() => onExcluir(c)} className="h-7 w-7 p-0 text-destructive hover:text-destructive" title="Excluir">
                           <Trash2 className="w-3.5 h-3.5" />
                         </Button>
                       )}

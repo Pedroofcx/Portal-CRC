@@ -195,7 +195,7 @@ export default function JornadaCliente() {
     return (
       <div className="space-y-6">
         <div className="flex items-center gap-3 p-4 bg-info-soft border border-info/25 rounded-xl">
-          <div className="w-5 h-5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin flex-shrink-0" />
+          <div className="w-5 h-5 border-2 border-primary/40 border-t-transparent rounded-full animate-spin flex-shrink-0" />
           <div>
             <p className="text-sm font-medium text-primary">Carregando dados da jornada...</p>
             <p className="text-xs text-primary">Buscando histórico completo de tratativas</p>
@@ -389,13 +389,13 @@ export default function JornadaCliente() {
             <CardContent>
               <ResponsiveContainer width="100%" height={350}>
                 <BarChart data={dadosGraficoEtapas}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                   <XAxis dataKey="etapa" tick={{ fontSize: 11 }} />
                   <YAxis />
                   <Tooltip />
                   <Legend />
-                  <Bar dataKey="volume" fill="#3b82f6" name="Volume Total" />
-                  <Bar dataKey="encerradas" fill="#10b981" name="Encerradas" />
+                  <Bar dataKey="volume" fill="hsl(var(--chart-1))" name="Volume Total" />
+                  <Bar dataKey="encerradas" fill="hsl(var(--chart-2))" name="Encerradas" />
                 </BarChart>
               </ResponsiveContainer>
             </CardContent>
@@ -468,7 +468,7 @@ export default function JornadaCliente() {
           </div>
 
           {/* Resumo de Causas Globais */}
-          <Card className="border-0 shadow-sm bg-gradient-to-br from-red-50 to-orange-50">
+          <Card className="border-0 shadow-sm bg-destructive/10">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <AlertCircle className="w-5 h-5 text-destructive" />

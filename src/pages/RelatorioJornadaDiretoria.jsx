@@ -223,7 +223,7 @@ export default function RelatorioJornadaDiretoria() {
 
       <div className="bg-card border border-border rounded-none sm:rounded-xl p-8 space-y-8">
         {/* Cabeçalho formal */}
-        <div className="text-center border-b-2 border-slate-900 pb-4">
+        <div className="text-center border-b-2 border-border pb-4">
           <h2 className="text-2xl font-bold text-foreground uppercase tracking-wide">
             Relatório de Impacto Financeiro e Eficiência Operacional
           </h2>
@@ -255,7 +255,7 @@ export default function RelatorioJornadaDiretoria() {
           <p className="text-xs text-muted-foreground mb-3 no-print">Clique em uma etapa para ver a causa raiz detalhada.</p>
           <table className="w-full text-sm border-collapse">
             <thead>
-              <tr className="bg-slate-900 superficie-escura text-white text-xs uppercase">
+              <tr className="bg-muted superficie-escura text-white text-xs uppercase">
                 <th className="text-left p-2">Etapa da Jornada</th>
                 <th className="text-right p-2">Qtd. Reclamações</th>
                 <th className="text-right p-2">Dinheiro Devolvido</th>
@@ -300,7 +300,7 @@ export default function RelatorioJornadaDiretoria() {
                             ) : (
                               <div className="space-y-1.5">
                                 {(causaRaizPorEtapa[e.etapa] || []).map((m, idx) => (
-                                  <div key={idx} className="flex items-center justify-between bg-card rounded-md p-2 border border-blue-100 text-xs">
+                                  <div key={idx} className="flex items-center justify-between bg-card rounded-md p-2 border border-primary/25 text-xs">
                                     <span className="font-medium text-foreground">{m.nome}</span>
                                     <div className="flex items-center gap-3">
                                       <span className="text-muted-foreground">{m.casos} caso(s)</span>
@@ -322,7 +322,7 @@ export default function RelatorioJornadaDiretoria() {
               })}
             </tbody>
             <tfoot>
-              <tr className="border-t-2 border-slate-900 font-bold">
+              <tr className="border-t-2 border-border font-bold">
                 <td className="p-2" colSpan={5}>Total Geral</td>
                 <td className="p-2 text-right">{formatBRL(totalGeral)}</td>
               </tr>

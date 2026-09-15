@@ -18,7 +18,7 @@ const eventoConfig = {
   home_office: {
     icon: Home,
     label: 'Home Office',
-    bg: 'bg-gradient-to-br from-green-50 to-emerald-50',
+    bg: 'bg-success-soft',
     border: 'border-success/25',
     iconBg: 'bg-success-soft',
     iconColor: 'text-success',
@@ -28,18 +28,18 @@ const eventoConfig = {
   presencial: {
     icon: Building2,
     label: 'Presencial',
-    bg: 'bg-gradient-to-br from-slate-50 to-gray-50',
+    bg: 'bg-muted',
     border: 'border-border',
     iconBg: 'bg-muted',
     iconColor: 'text-muted-foreground',
     textColor: 'text-foreground',
-    badgeBg: 'bg-slate-500'
+    badgeBg: 'bg-muted'
   },
   hibrido: {
     icon: Laptop,
     label: 'Híbrido',
-    bg: 'bg-gradient-to-br from-indigo-50 to-blue-50',
-    border: 'border-indigo-200',
+    bg: 'bg-info-soft',
+    border: 'border-primary/25',
     iconBg: 'bg-info-soft',
     iconColor: 'text-primary',
     textColor: 'text-primary',
@@ -48,17 +48,17 @@ const eventoConfig = {
   ferias: {
     icon: Plane,
     label: 'Férias',
-    bg: 'bg-gradient-to-br from-cyan-50 to-sky-50',
-    border: 'border-cyan-200',
-    iconBg: 'bg-cyan-100',
+    bg: 'bg-info-soft',
+    border: 'border-info/25',
+    iconBg: 'bg-info-soft',
     iconColor: 'text-info',
-    textColor: 'text-cyan-900',
-    badgeBg: 'bg-cyan-500'
+    textColor: 'text-info',
+    badgeBg: 'bg-info'
   },
   day_off: {
     icon: Coffee,
     label: 'Day Off',
-    bg: 'bg-gradient-to-br from-amber-50 to-yellow-50',
+    bg: 'bg-warning-soft',
     border: 'border-warning/25',
     iconBg: 'bg-warning-soft',
     iconColor: 'text-warning',
@@ -68,7 +68,7 @@ const eventoConfig = {
   falta: {
     icon: X,
     label: 'Falta',
-    bg: 'bg-gradient-to-br from-red-50 to-rose-50',
+    bg: 'bg-destructive/10',
     border: 'border-destructive/25',
     iconBg: 'bg-destructive/10',
     iconColor: 'text-destructive',
@@ -78,7 +78,7 @@ const eventoConfig = {
   treinamento: {
     icon: BookOpen,
     label: 'Treinamento',
-    bg: 'bg-gradient-to-br from-purple-50 to-violet-50',
+    bg: 'bg-info-soft',
     border: 'border-info/25',
     iconBg: 'bg-info-soft',
     iconColor: 'text-primary',
@@ -88,12 +88,12 @@ const eventoConfig = {
   evento_especial: {
     icon: Star,
     label: 'Evento Especial',
-    bg: 'bg-gradient-to-br from-pink-50 to-rose-50',
-    border: 'border-pink-200',
+    bg: 'bg-info-soft',
+    border: 'border-primary/25',
     iconBg: 'bg-info-soft',
     iconColor: 'text-primary',
-    textColor: 'text-pink-900',
-    badgeBg: 'bg-pink-500'
+    textColor: 'text-primary',
+    badgeBg: 'bg-primary'
   }
 };
 
@@ -104,7 +104,7 @@ export default function EventoCard({ atribuicao, colaborador, escala, compact = 
   if (compact) {
     return (
       <div className={cn(
-        'p-2 rounded-lg border-2 transition-all hover:shadow-md',
+        'p-2 rounded-lg border-2 transition-all hover:shadow-sm',
         config.bg,
         config.border
       )}>
@@ -130,7 +130,7 @@ export default function EventoCard({ atribuicao, colaborador, escala, compact = 
 
   return (
     <div className={cn(
-      'p-4 rounded-xl border-2 transition-all hover:shadow-lg hover:-translate-y-0.5',
+      'p-4 rounded-xl border-2 transition-all hover:shadow-sm hover:-translate-y-0.5',
       config.bg,
       config.border
     )}>
@@ -168,7 +168,7 @@ export default function EventoCard({ atribuicao, colaborador, escala, compact = 
 
 export function EventoLegend() {
   return (
-    <div className="flex flex-wrap items-center gap-3 p-4 bg-gradient-to-r from-slate-50 to-slate-100 rounded-xl border border-border">
+    <div className="flex flex-wrap items-center gap-3 p-4 bg-muted rounded-xl border border-border">
       <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Legenda:</span>
       {Object.entries(eventoConfig).map(([key, config]) => {
         const Icon = config.icon;

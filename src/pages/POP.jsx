@@ -91,7 +91,7 @@ export default function POP() {
           isGestor && (
             <Button
               onClick={() => setDialogOpen(true)}
-              className="bg-slate-800 superficie-escura hover:bg-slate-900 gap-2"
+              className="bg-muted superficie-escura hover:bg-muted gap-2"
             >
               <Plus className="w-4 h-4" />
               Novo POP
@@ -137,7 +137,7 @@ export default function POP() {
           {popsFiltrados.map((pop) => (
             <Card
               key={pop.id}
-              className="border-0 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+              className="border-0 shadow-sm hover:shadow-sm transition-shadow cursor-pointer"
               onClick={() => { setSelectedPOP(pop); setViewDialogOpen(true); }}
             >
               <CardContent className="p-4 flex items-center justify-between gap-4">
@@ -174,7 +174,7 @@ export default function POP() {
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="text-red-400 hover:text-destructive"
+                      className="text-destructive hover:text-destructive"
                       onClick={(e) => { e.stopPropagation(); setSelectedPOP(pop); setDeleteDialogOpen(true); }}
                     >
                       <Trash2 className="w-4 h-4" />

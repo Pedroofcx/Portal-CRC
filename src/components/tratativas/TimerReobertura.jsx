@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Clock, CheckCircle, AlertTriangle, Timer } from 'lucide-react';
+import { CheckCircle, AlertTriangle, Timer } from 'lucide-react';
 import { formatDateSP } from '@/components/utils/helpers';
 
 /**
@@ -113,7 +113,7 @@ export default function TimerReobertura({ tratativa, onConfirmar, isLoading }) {
 
           <Button
             onClick={() => onConfirmar(false)}
-            className={`w-full ${expirou ? 'bg-success hover:bg-success/90' : 'bg-slate-400 hover:bg-slate-500 cursor-default'}`}
+            className={`w-full ${expirou ? 'bg-success hover:bg-success/90' : 'bg-muted hover:bg-muted cursor-default'}`}
             disabled={isLoading || !expirou}
             title={!expirou ? `Disponível após ${formatDateSP(timer.dataLimite, 'DD/MM/YYYY')}` : undefined}
           >

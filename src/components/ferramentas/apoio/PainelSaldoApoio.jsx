@@ -34,7 +34,7 @@ export default function PainelSaldoApoio({ utilizadoMinutos, totalSolicitacoesMe
             <p className="text-xs text-muted-foreground mt-1">{totalSolicitacoesMes} solicitação(ões) este mês</p>
           </CardContent>
         </Card>
-        <Card className={isZero ? 'border-destructive/25 bg-destructive/10' : isLow ? 'border-warning/25 bg-warning-soft' : 'border-emerald-200 bg-success-soft'}>
+        <Card className={isZero ? 'border-destructive/25 bg-destructive/10' : isLow ? 'border-warning/25 bg-warning-soft' : 'border-success/25 bg-success-soft'}>
           <CardContent className="pt-5">
             <div className="flex items-center gap-2 text-xs font-semibold uppercase mb-1">
               <LifeBuoy className="w-3.5 h-3.5" /> Disponível
@@ -91,13 +91,13 @@ export default function PainelSaldoApoio({ utilizadoMinutos, totalSolicitacoesMe
           </div>
         </div>
       ) : (
-        <div className="p-4 bg-success-soft border-2 border-emerald-200 rounded-xl flex items-center gap-3">
+        <div className="p-4 bg-success-soft border-2 border-success/25 rounded-xl flex items-center gap-3">
           <div className="w-2.5 h-2.5 rounded-full bg-success animate-pulse" />
           <p className="font-semibold text-success">Disponível: {formatMinutos(disponivelMinutos)}</p>
         </div>
       )}
 
-      <Button onClick={onNovaSolicitacao} disabled={!hasSaldo} className="gap-2 bg-primary hover:bg-violet-700">
+      <Button onClick={onNovaSolicitacao} disabled={!hasSaldo} className="gap-2 bg-primary hover:bg-primary">
         <Plus className="w-4 h-4" /> Nova Solicitação
       </Button>
     </div>

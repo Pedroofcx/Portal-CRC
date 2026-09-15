@@ -16,9 +16,9 @@ function getMedalIcon(pos) {
 }
 
 function getMedalBg(pos) {
-  if (pos === 0) return 'bg-gradient-to-r from-yellow-50 to-amber-50 border-yellow-200';
-  if (pos === 1) return 'bg-gradient-to-r from-slate-50 to-slate-100 border-border';
-  if (pos === 2) return 'bg-gradient-to-r from-amber-50 to-orange-50 border-warning/25';
+  if (pos === 0) return 'bg-warning-soft border-warning/25';
+  if (pos === 1) return 'bg-muted border-border';
+  if (pos === 2) return 'bg-warning-soft border-warning/25';
   return 'bg-card border-border';
 }
 
@@ -132,7 +132,7 @@ export default function RankingTrimestral({ colaboradorAtualId, visivel = true }
                 key={agente.id}
                 className={`flex items-center gap-3 px-3 py-2.5 rounded-xl border transition-all
                   ${getMedalBg(idx)}
-                  ${isMe ? 'ring-2 ring-blue-400 ring-offset-1' : ''}
+                  ${isMe ? 'ring-2 ring-ring ring-offset-1' : ''}
                 `}
               >
                 <div className="flex items-center justify-center w-6 flex-shrink-0">

@@ -48,7 +48,7 @@ export default function DiaDetalheDialog({ open, onClose, data, atribuicoes, col
       porEquipe[equipeId] = { 
         id: equipeId,
         nome: equipeNome, 
-        cor: equipes.find(e => e.id === equipeId)?.cor || '#3B82F6',
+        cor: equipes.find(e => e.id === equipeId)?.cor || 'hsl(var(--chart-1))',
         colaboradores: [] 
       };
     }

@@ -198,7 +198,7 @@ export default function HomeOfficeEscolha() {
     const colaboradorSol = colaboradores.find(c => c.id === solicitacao.colaborador_id);
     
     return (
-      <Card className="hover:shadow-md transition-shadow">
+      <Card className="hover:shadow-sm transition-shadow">
         <CardHeader className="pb-3">
           <div className="flex items-start justify-between">
             <div>
@@ -348,7 +348,7 @@ export default function HomeOfficeEscolha() {
         </Tabs>
       ) : (
         <div className="space-y-4">
-          <Card className="border-0 shadow-sm bg-gradient-to-br from-blue-50 to-blue-100">
+          <Card className="border-0 shadow-sm bg-info-soft">
             <CardHeader>
               <CardTitle className="text-base">Minhas Solicitações - {mesAtual}</CardTitle>
             </CardHeader>

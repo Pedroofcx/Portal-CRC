@@ -14,7 +14,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
 import {
-  TrendingUp, Send, Eye, Users, CheckCircle, Search, Filter, Calendar
+  TrendingUp, Send, Eye, Users, CheckCircle, Filter, Calendar
 } from 'lucide-react';
 import HanseiEnvioDialog from '@/components/hansei/HanseiEnvioDialog';
 import HanseiVisualizarDialog from '@/components/hansei/HanseiVisualizarDialog';

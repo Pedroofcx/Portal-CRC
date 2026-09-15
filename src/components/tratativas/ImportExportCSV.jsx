@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { toast } from 'sonner';
-import { Download, Upload, FileSpreadsheet, CheckCircle2, AlertCircle, X, Loader2 } from 'lucide-react';
+import { Download, Upload, FileSpreadsheet, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
 
 // Campos comerciais que podem ser atualizados via importação
 const COMMERCIAL_FIELDS = [
@@ -354,9 +354,9 @@ export default function ImportExportCSV({ tratativas, onRefresh }) {
                       <p className="text-xs text-warning font-medium">Com Data Contrato</p>
                       <p className="text-lg font-bold text-warning">{comData}</p>
                     </div>
-                    <div className="p-2 bg-success-soft border border-teal-200 rounded-lg text-center">
+                    <div className="p-2 bg-success-soft border border-success/25 rounded-lg text-center">
                       <p className="text-xs text-success font-medium">Com Segmento</p>
-                      <p className="text-lg font-bold text-teal-700">{comSegmento}</p>
+                      <p className="text-lg font-bold text-success">{comSegmento}</p>
                     </div>
                     <div className="p-2 bg-muted border border-border rounded-lg text-center">
                       <p className="text-xs text-muted-foreground font-medium">Sem Comercial</p>
