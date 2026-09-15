@@ -39,15 +39,15 @@ export default function DataTable({
   }
 
   return (
-    <Card className="border-0 shadow-sm overflow-hidden">
+    <Card className="overflow-hidden border shadow-none">
       <div className="overflow-x-auto">
-        <Table>
+        <Table className="tabela-operacional">
           <TableHeader>
-            <TableRow className="bg-slate-50 hover:bg-slate-50">
+            <TableRow className="border-b border-border bg-muted hover:bg-muted">
               {columns.map((column, index) => (
-                <TableHead 
-                  key={index} 
-                  className={`text-slate-600 font-semibold text-xs uppercase tracking-wider ${column.className || ''}`}
+                <TableHead
+                  key={index}
+                  className={`h-9 whitespace-nowrap text-xs font-semibold uppercase tracking-wider text-muted-foreground ${column.className || ''}`}
                 >
                   {column.header}
                 </TableHead>
@@ -56,13 +56,24 @@ export default function DataTable({
           </TableHeader>
           <TableBody>
             {data.map((row, rowIndex) => (
-              <TableRow 
-                key={row.id || rowIndex} 
-                className={`hover:bg-slate-50/50 transition-colors ${onRowClick ? 'cursor-pointer' : ''}`}
+              <TableRow
+                key={row.id || rowIndex}
+                tabIndex={onRowClick ? 0 : undefined}
+                onKeyDown={(e) => {
+                  // A regra pede operação por teclado: Enter abre a linha.
+                  if (onRowClick && (e.key === 'Enter' || e.key === ' ')) {
+                    e.preventDefault();
+                    onRowClick(row);
+                  }
+                }}
+                className={`border-b border-border transition-colors last:border-0 hover:bg-accent/60 ${onRowClick ? 'cursor-pointer' : ''}`}
                 onClick={() => onRowClick && onRowClick(row)}
               >
                 {columns.map((column, colIndex) => (
-                  <TableCell key={colIndex} className={`py-4 ${column.cellClassName || ''}`}>
+                  <TableCell
+                    key={colIndex}
+                    className={`py-0 align-middle text-sm ${column.cellClassName || ''}`}
+                  >
                     {column.render ? column.render(row) : row[column.accessor]}
                   </TableCell>
                 ))}

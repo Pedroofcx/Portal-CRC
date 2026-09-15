@@ -1,42 +1,63 @@
 import React from 'react';
-import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 
-export default function PageHeader({ 
-  title, 
-  subtitle, 
-  backTo, 
+/**
+ * Cabeçalho de página — presente em 30 das 38 telas.
+ *
+ * Conforme documentacao/regras-ui-ux.md:
+ *   - saíram o gradiente, o `shadow-lg` e o `rounded-xl` do ícone
+ *   - o título é o H1 da tela, na hierarquia tipográfica do sistema
+ *   - o bloco de ações fica à direita, na mesma linha, porque a regra pede
+ *     aproveitamento do espaço horizontal e a ação não deve exigir rolagem
+ *
+ * A régua superior em azul institucional marca o início da área de trabalho
+ * sem custar altura: é 2px, não um banner.
+ */
+export default function PageHeader({
+  title,
+  subtitle,
+  backTo,
   actions,
-  icon: Icon 
+  icon: Icon,
 }) {
   return (
-    <div className="mb-8">
+    <header className="mb-6 border-b border-border pb-4">
       {backTo && (
-        <Link to={createPageUrl(backTo)} className="inline-flex items-center text-sm text-slate-500 hover:text-slate-700 mb-4 transition-colors">
-          <ArrowLeft className="w-4 h-4 mr-1" />
+        <Link
+          to={createPageUrl(backTo)}
+          className="mb-3 inline-flex items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-foreground"
+        >
+          <ArrowLeft className="h-4 w-4" aria-hidden="true" />
           Voltar
         </Link>
       )}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div className="flex items-center gap-3">
+
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div className="flex min-w-0 items-center gap-3">
           {Icon && (
-            <div className="p-2.5 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl text-white shadow-lg shadow-blue-500/20">
-              <Icon className="w-6 h-6" />
-            </div>
+            <span
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded border border-primary/20 bg-info-soft text-primary"
+              aria-hidden="true"
+            >
+              <Icon className="h-5 w-5" />
+            </span>
           )}
-          <div>
-            <h1 className="text-2xl font-bold text-slate-900 tracking-tight">{title}</h1>
-            {subtitle && <p className="text-slate-500 text-sm mt-0.5">{subtitle}</p>}
+          <div className="min-w-0">
+            <h1 className="truncate text-2xl font-semibold tracking-tight text-foreground">
+              {title}
+            </h1>
+            {subtitle && (
+              <p className="mt-0.5 text-sm text-muted-foreground">{subtitle}</p>
+            )}
           </div>
         </div>
+
         {actions && (
-          <div className="flex items-center gap-2 flex-wrap">
-            {actions}
-          </div>
+          <div className="flex shrink-0 flex-wrap items-center gap-2">{actions}</div>
         )}
       </div>
-    </div>
+    </header>
   );
 }

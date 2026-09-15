@@ -122,27 +122,25 @@ function Sidebar({ user, colaborador, currentPageName, onNavigate, isMobile = fa
   };
 
   return (
-    <div className="flex flex-col h-full bg-slate-900">
+    <div className="flex h-full flex-col bg-sidebar text-sidebar-foreground">
       {/* Logo */}
-      <div className="p-6 border-b border-slate-800">
+      <div className="border-b border-sidebar-border px-4 py-4">
         <Link to={createPageUrl('Dashboard')} className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/30">
-            <span className="text-white font-bold text-lg">C</span>
+          <div className="flex h-9 w-9 items-center justify-center rounded bg-sidebar-primary text-base font-bold text-sidebar-primary-foreground">
+            C
           </div>
-          <div>
-            <h1 className="text-white font-bold text-lg tracking-tight">Portal CRC</h1>
-            <p className="text-slate-500 text-xs">Central de Relacionamento</p>
+          <div className="min-w-0">
+            <p className="truncate text-sm font-semibold tracking-tight text-sidebar-foreground">Portal CRC</p>
+            <p className="truncate text-xs text-sidebar-foreground/55">Central de Relacionamento</p>
           </div>
         </Link>
       </div>
 
       {/* FI Card */}
       {isFI && (
-        <div className="mx-4 mt-4 p-3 bg-gradient-to-r from-purple-600/20 to-blue-600/20 border border-purple-500/30 rounded-lg">
-          <div className="flex items-center gap-2">
-            <Star className="w-4 h-4 text-purple-400" />
-            <span className="text-purple-300 text-sm font-medium">Você é o Facilitador Interno</span>
-          </div>
+        <div className="mx-3 mt-3 flex items-center gap-2 rounded border-l-2 border-sidebar-primary bg-sidebar-accent px-3 py-2">
+          <Star className="h-4 w-4 shrink-0 text-sidebar-primary" aria-hidden="true" />
+          <span className="text-sm font-medium text-sidebar-accent-foreground">Você é o Facilitador Interno</span>
         </div>
       )}
 
@@ -160,7 +158,7 @@ function Sidebar({ user, colaborador, currentPageName, onNavigate, isMobile = fa
 
             return (
               <div key={section.section}>
-                <p className="px-3 text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
+                <p className="mb-1.5 px-3 text-[11px] font-semibold uppercase tracking-wider text-sidebar-foreground/45">
                   {section.section}
                 </p>
                 <div className="space-y-1">
@@ -171,16 +169,17 @@ function Sidebar({ user, colaborador, currentPageName, onNavigate, isMobile = fa
                         key={item.page}
                         to={createPageUrl(item.page)}
                         onClick={onNavigate}
+                        aria-current={isActive ? 'page' : undefined}
                         className={`
-                          flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200
-                          ${isActive 
-                            ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30' 
-                            : 'text-slate-400 hover:text-white hover:bg-slate-800'
+                          flex items-center gap-3 rounded border-l-2 px-3 py-2 transition-colors
+                          ${isActive
+                            ? 'border-sidebar-primary bg-sidebar-accent font-medium text-sidebar-accent-foreground'
+                            : 'border-transparent text-sidebar-foreground/70 hover:bg-sidebar-accent/60 hover:text-sidebar-foreground'
                           }
                         `}
                       >
-                        <item.icon className="w-5 h-5 flex-shrink-0" />
-                        <span className="text-sm font-medium">{item.name}</span>
+                        <item.icon className="h-[18px] w-[18px] shrink-0" aria-hidden="true" />
+                        <span className="truncate text-sm">{item.name}</span>
                       </Link>
                     );
                   })}
@@ -192,21 +191,21 @@ function Sidebar({ user, colaborador, currentPageName, onNavigate, isMobile = fa
       </ScrollArea>
 
       {/* User Profile */}
-      <div className="p-4 border-t border-slate-800">
+      <div className="border-t border-sidebar-border p-3">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <button className="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-slate-800 transition-colors">
+            <button className="flex w-full items-center gap-3 rounded p-2 transition-colors hover:bg-sidebar-accent">
               <Avatar className="h-9 w-9">
                 <AvatarImage src={colaborador?.foto_url} />
-                <AvatarFallback className="bg-blue-600 text-white text-sm">
+                <AvatarFallback className="bg-sidebar-primary text-sm text-sidebar-primary-foreground">
                   {user?.full_name?.charAt(0) || 'U'}
                 </AvatarFallback>
               </Avatar>
               <div className="flex-1 text-left">
-                <p className="text-sm font-medium text-white truncate">{user?.full_name || 'Usuário'}</p>
-                <p className="text-xs text-slate-500 capitalize">{colaborador?.papel || 'Agente'}</p>
+                <p className="truncate text-sm font-medium text-sidebar-foreground">{user?.full_name || 'Usuário'}</p>
+                <p className="text-xs capitalize text-sidebar-foreground/55">{colaborador?.papel || 'Agente'}</p>
               </div>
-              <ChevronDown className="w-4 h-4 text-slate-500" />
+              <ChevronDown className="h-4 w-4 text-sidebar-foreground/55" aria-hidden="true" />
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56">
@@ -217,7 +216,7 @@ function Sidebar({ user, colaborador, currentPageName, onNavigate, isMobile = fa
               </Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => db.auth.logout()} className="text-red-600">
+            <DropdownMenuItem onClick={() => db.auth.logout()} className="text-destructive">
               <LogOut className="w-4 h-4 mr-2" />
               Sair
             </DropdownMenuItem>
