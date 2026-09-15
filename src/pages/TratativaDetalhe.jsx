@@ -12,6 +12,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import LinhaDoTempo from '@/components/tratativas/LinhaDoTempo';
+import RegistrarNota from '@/components/tratativas/RegistrarNota';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -175,6 +177,29 @@ export default function TratativaDetalhe({ idExterno = null, embutido = false })
     },
     onError: () => toast.error('Erro ao atualizar tratativa'),
   });
+
+  /**
+   * Registra uma nota livre no histórico.
+   *
+   * Mantém o estado atual nos dois campos: é isso que distingue uma nota de
+   * uma transição, sem exigir coluna nova no banco.
+   *
+   * Ressalva conhecida: a gravação é ler-alterar-escrever sobre o array
+   * inteiro. Se duas pessoas registrarem na MESMA tratativa no mesmo
+   * instante, uma nota pode se perder. Com 10 usuários e tratativas
+   * atribuídas a um agente, a chance é remota — e a solução correta é mover
+   * o append para o servidor, o que acontece na Fase 04.
+   */
+  const registrarNota = (texto) => {
+    const historico = [...(tratativa.historico_estados || []), {
+      estado_anterior: tratativa.status,
+      estado_novo: tratativa.status,
+      data_mudanca: new Date().toISOString(),
+      usuario: user?.full_name,
+      observacao: texto,
+    }];
+    updateMutation.mutate({ data: { historico_estados: historico } });
+  };
 
   if (isLoading) {
     return <LoadingSpinner text="Carregando tratativa..." />;
@@ -1343,29 +1368,29 @@ export default function TratativaDetalhe({ idExterno = null, embutido = false })
             </Card>
           )}
 
-          {/* Histórico de Estados */}
-          <Card className="border-0 shadow-sm">
+          {/* Registro e linha do tempo.
+              A regra pede que o campo de registro seja o elemento de maior
+              destaque da área de ação — por isso ele vem ANTES do histórico,
+              e não no fim da página. */}
+          <Card className="border shadow-none">
+            <CardContent className="pt-6">
+              <RegistrarNota
+                onRegistrar={registrarNota}
+                salvando={updateMutation.isPending}
+                desabilitado={isExcluida}
+              />
+            </CardContent>
+          </Card>
+
+          <Card className="border shadow-none">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-base">
-                <History className="w-4 h-4" />
+                <History className="w-4 h-4" aria-hidden="true" />
                 Histórico
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {(!tratativa.historico_estados || tratativa.historico_estados.length === 0) ? (
-                <p className="text-muted-foreground text-sm">Nenhuma alteração registrada</p>
-              ) : (
-                <div className="space-y-3">
-                  {tratativa.historico_estados.slice().reverse().map((h, i) => (
-                    <div key={i} className="relative pl-4 border-l-2 border-border pb-3 last:pb-0">
-                      <div className="absolute -left-1.5 top-0 w-3 h-3 bg-primary rounded-full" />
-                      <p className="text-sm font-medium">{statusLabels[h.estado_novo] || h.estado_novo}</p>
-                      <p className="text-xs text-muted-foreground">{h.usuario}</p>
-                      <p className="text-xs text-muted-foreground">{formatDateSP(h.data_mudanca)}</p>
-                    </div>
-                  ))}
-                </div>
-              )}
+              <LinhaDoTempo entradas={tratativa.historico_estados} />
             </CardContent>
           </Card>
         </div>
