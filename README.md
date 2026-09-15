@@ -14,8 +14,8 @@ está no documento de migração compartilhado com o responsável pelo projeto.
 | 01 | Banco novo a partir dos schemas | **Concluída** — 48 tabelas aplicadas no Supabase |
 | 02 | Adaptador (`src/api/db.js`) | **Concluída** — app roda no Supabase, com login próprio |
 | 03 | Segurança (RLS) | **Concluída** — 9 testes de invasão passando |
-| 04 | Regras de negócio no servidor | Próxima — agora com dados reais para validar |
-| 05 | Frontend e design | Não iniciada |
+| 04 | Regras de negócio no servidor | **Em andamento** — FSM da tratativa no banco |
+| 05 | Frontend e design | **Concluída** — 6 itens, lint zerado |
 | 06 | Publicação e backup automático | Não iniciada |
 
 ## Estrutura

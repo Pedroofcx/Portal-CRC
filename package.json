@@ -11,7 +11,8 @@
     "typecheck": "tsc -p ./jsconfig.json",
     "preview": "vite preview",
     "testar-validacao": "node ferramentas/testar-validacao.mjs",
-    "testar": "node ferramentas/testar-validacao.mjs"
+    "testar": "node ferramentas/testar-validacao.mjs",
+    "testar-fsm": "node ferramentas/testar-fsm.mjs"
   },
   "dependencies": {
     "@hello-pangea/dnd": "^17.0.0",
