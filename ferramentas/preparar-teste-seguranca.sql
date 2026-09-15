@@ -34,6 +34,10 @@ values (
 )
 on conflict do nothing;
 
+-- ATENÇÃO: o "on conflict do nothing" acima só funciona se existir restrição
+-- de unicidade no e-mail. Rode o 06_email_unico.sql antes de repetir este
+-- arquivo, ou cada execução cria um cadastro duplicado do agente.
+
 -- Confere: devem aparecer duas linhas, uma gestor e uma agente.
 select nome_completo, email, papel, salario
 from public.colaborador_base

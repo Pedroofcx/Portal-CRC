@@ -139,8 +139,18 @@ console.log('\n4) Tentando ESCREVER o que não pode:');
   );
 }
 {
-  const { data: eu } = await agente.from('colaborador').select('id').eq('email', email).maybeSingle();
-  if (eu) {
+  // Sem maybeSingle(): ele estoura quando ha e-mail duplicado, e o bloco inteiro
+  // era pulado em silencio — o teste sumia do relatorio sem ninguem notar.
+  const { data: meus } = await agente.from('colaborador').select('id, papel').eq('email', email);
+  if ((meus?.length ?? 0) > 1) {
+    registrar('Cadastro do agente nao esta duplicado', false,
+      `ACHOU ${meus.length} linhas com o e-mail ${email} — papel_atual() usa "limit 1" e escolheria uma ao acaso`);
+  }
+  const eu = meus?.[0];
+  if (!eu) {
+    registrar('Agente não se promove a gestor', false,
+      'INCONCLUSIVO: não achei o cadastro do agente por e-mail.');
+  } else {
     const { error } = await agente.from('colaborador').update({ papel: 'gestor' }).eq('id', eu.id);
     let virou = false;
     if (!error) {
