@@ -12,7 +12,8 @@
     "preview": "vite preview",
     "testar-validacao": "node ferramentas/testar-validacao.mjs",
     "testar": "node ferramentas/testar-validacao.mjs",
-    "testar-fsm": "node ferramentas/testar-fsm.mjs"
+    "testar-fsm": "node ferramentas/testar-fsm.mjs",
+    "analisar-sla": "node ferramentas/analisar-regras-sla.mjs"
   },
   "dependencies": {
     "@hello-pangea/dnd": "^17.0.0",
