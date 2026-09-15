@@ -9,6 +9,7 @@ import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import RelatorioJornadaDiretoria from './pages/RelatorioJornadaDiretoria';
 import Login from './pages/Login';
+import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -76,16 +77,22 @@ const AuthenticatedApp = () => {
 
 function App() {
 
+  // O ErrorBoundary aqui na raiz é o que garante que qualquer falha apareça na
+  // TELA. O outro, dentro do Layout, só cobre o que vem depois do login — uma
+  // falha no AuthProvider ou na conexão com o banco escapava dele e o usuário
+  // via só uma página em branco, com a explicação escondida no console.
   return (
-    <AuthProvider>
-      <QueryClientProvider client={queryClientInstance}>
-        <Router>
-          <NavigationTracker />
-          <AuthenticatedApp />
-        </Router>
-        <Toaster />
-      </QueryClientProvider>
-    </AuthProvider>
+    <ErrorBoundary>
+      <AuthProvider>
+        <QueryClientProvider client={queryClientInstance}>
+          <Router>
+            <NavigationTracker />
+            <AuthenticatedApp />
+          </Router>
+          <Toaster />
+        </QueryClientProvider>
+      </AuthProvider>
+    </ErrorBoundary>
   )
 }
 
