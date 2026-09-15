@@ -2,6 +2,7 @@ import {
   obrigatorio, email, url, cpf, cnpj,
   numeroPositivo, dataNaoFutura, maximoItens, minimoCaracteres,
 } from '../src/lib/validacao.js';
+import { formatBRL, sanitizeSalario, temSalarioCadastrado } from '../src/components/utils/helpers.js';
 
 let passou = 0;
 let falhou = 0;
@@ -59,6 +60,32 @@ checa('no limite passa', maximoItens(3, 'submotivos')([1, 2, 3]), null);
 
 console.log('\n== minimoCaracteres ==');
 checa('curto diz quanto digitou', minimoCaracteres(10, 'A descrição')('abc'), 'Você digitou 3');
+
+console.log('\n== formatBRL ==');
+// Regressão do bug mais grave deste arquivo: formatBRL chamava
+// sanitizeSalario e devolvia R$ 2.000,00 para QUALQUER valor zerado — em 82
+// pontos de 14 arquivos, incluindo os relatórios financeiros.
+checa('zero e zero, nao dois mil', formatBRL(0), 'R$ 0,00');
+checa('nulo e zero', formatBRL(null), 'R$ 0,00');
+checa('indefinido e zero', formatBRL(undefined), 'R$ 0,00');
+checa('texto invalido e zero', formatBRL('abc'), 'R$ 0,00');
+checa('valor normal formata', formatBRL(1500), 'R$ 1.500,00');
+checa('string no formato BR formata', formatBRL('1.234,56'), 'R$ 1.234,56');
+checa('negativo preserva o sinal', formatBRL(-50), 'R$ -50,00');
+
+console.log('\n== sanitizeSalario ==');
+// O comentário da função sempre prometeu 0 para valor inválido; o código
+// aplicava R$ 2.000,00. Agora cumpre o que documenta.
+checa('ausente devolve 0', String(sanitizeSalario(null)), '0');
+checa('zero devolve 0', String(sanitizeSalario(0)), '0');
+checa('negativo devolve 0', String(sanitizeSalario(-100)), '0');
+checa('texto invalido devolve 0', String(sanitizeSalario('nao sei')), '0');
+checa('numero valido passa', String(sanitizeSalario(3500)), '3500');
+checa('formato BR passa', String(sanitizeSalario('R$ 3.500,00')), '3500');
+
+console.log('\n== temSalarioCadastrado ==');
+checa('sem salario e falso', String(temSalarioCadastrado({ salario: null })), 'false');
+checa('com salario e verdadeiro', String(temSalarioCadastrado({ salario: 3500 })), 'true');
 
 console.log('\n' + passou + ' passaram, ' + falhou + ' falharam');
 process.exit(falhou ? 1 : 0);

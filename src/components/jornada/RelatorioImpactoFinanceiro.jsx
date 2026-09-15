@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { DollarSign, AlertTriangle, Users, Settings } from 'lucide-react';
 import { calcularTempoEfetivo, calcularCustoOperacional, formatBRL } from '@/components/utils/helpers';
+import AvisoSalarioAusente from '@/components/jornada/AvisoSalarioAusente';
 
 const isEncerradaEfetiva = (t) => !t.excluida && (t.status === 'encerrada' || t.status === 'aguardando_confirmacao_reabertura');
 
@@ -59,6 +60,10 @@ export default function RelatorioImpactoFinanceiro({ tratativas, colaboradores =
   }
 
   return (
+    <div className="space-y-4">
+      {isGestor && (
+        <AvisoSalarioAusente tratativas={tratativas} colaboradores={colaboradores} />
+      )}
     <Card className="border-0 shadow-sm">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
@@ -165,5 +170,6 @@ export default function RelatorioImpactoFinanceiro({ tratativas, colaboradores =
         </div>
       </CardContent>
     </Card>
+    </div>
   );
 }

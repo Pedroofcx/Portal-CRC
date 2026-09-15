@@ -242,35 +242,52 @@ export function calcularTempoEfetivo(tratativa) {
 
 // Sanitiza o campo salario (que pode vir como número ou string formatada em
 // Real Brasileiro, ex: "R$ 3.500,00") e retorna um Float estrito.
-// NUNCA aplica fallback fixo — se o valor for inválido/nulo, retorna 0
-// para forçar a conferência manual do cadastro do colaborador.
-const SALARIO_FALLBACK = 2000.00;
-
+//
+// CORRIGIDO: o comentário original dizia "NUNCA aplica fallback fixo — se o
+// valor for inválido/nulo, retorna 0 para forçar a conferência manual do
+// cadastro" — e logo abaixo havia um SALARIO_FALLBACK de R$ 2.000,00, que a
+// função aplicava. Documentação e código diziam o oposto.
+//
+// Agora a função faz o que o comentário sempre prometeu: devolve 0 para valor
+// ausente ou inválido. Custo operacional calculado sobre salário inventado é
+// pior que custo não calculado — o número errado entra no relatório da
+// diretoria com a mesma cara de um número certo.
 export function sanitizeSalario(salarioInput) {
-  if (!salarioInput) {
-    console.error('[salario] Valor de salário ausente. Aplicando fallback de segurança de R$ 2000,00.');
-    return SALARIO_FALLBACK;
-  }
+  if (salarioInput === null || salarioInput === undefined || salarioInput === '') return 0;
+
   if (typeof salarioInput === 'number') {
-    if (isNaN(salarioInput) || salarioInput <= 0) {
-      console.error('[salario] Valor de salário inválido. Aplicando fallback de segurança de R$ 2000,00.');
-      return SALARIO_FALLBACK;
-    }
-    return salarioInput;
+    return (Number.isNaN(salarioInput) || salarioInput <= 0) ? 0 : salarioInput;
   }
-  const valorLimpo = salarioInput.toString().replace(/[R$\s]/g, '').replace(/\./g, '').replace(',', '.');
+
+  const valorLimpo = String(salarioInput)
+    .replace(/[R$\s]/g, '')
+    .replace(/\./g, '')
+    .replace(',', '.');
   const num = parseFloat(valorLimpo);
-  if (!num || isNaN(num) || num <= 0) {
-    console.error('[salario] Não foi possível interpretar o salário. Aplicando fallback de segurança de R$ 2000,00.');
-    return SALARIO_FALLBACK;
-  }
-  return num;
+  return (!num || Number.isNaN(num) || num <= 0) ? 0 : num;
 }
 
-// Formata um número como moeda em Real Brasileiro (R$ 0,00)
+/** Diz se dá para calcular custo para este colaborador. */
+export function temSalarioCadastrado(colaborador) {
+  return sanitizeSalario(colaborador?.salario) > 0;
+}
+
+// Formata um número como moeda em Real Brasileiro (R$ 0,00).
+//
+// CORRIGIDO — ERA O BUG MAIS GRAVE DESTE ARQUIVO: esta função chamava
+// sanitizeSalario, que devolvia R$ 2.000,00 para qualquer valor nulo ou zero.
+// O efeito: TODO valor monetário zerado do sistema aparecia como R$ 2.000,00.
+// Devolução de zero, custo de zero, valor recuperado de zero — todos exibidos
+// como dois mil reais, em 82 pontos de 14 arquivos, incluindo os relatórios
+// financeiros e o relatório da diretoria.
+//
+// Formatar dinheiro não tem nada a ver com sanear salário. São duas coisas.
 export function formatBRL(valor) {
-  const num = sanitizeSalario(valor);
-  return `R$ ${num.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  const num = typeof valor === 'number'
+    ? valor
+    : parseFloat(String(valor ?? '').replace(/[R$\s]/g, '').replace(/\./g, '').replace(',', '.'));
+  const seguro = Number.isFinite(num) ? num : 0;
+  return `R$ ${seguro.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
 // Calcula o custo operacional (R$) de uma tratativa a partir do tempo efetivo
