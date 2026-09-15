@@ -1,0 +1,939 @@
+<title>Saída do Base44</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+
+<style>
+  :root {
+    --bg: #F7F8F7;
+    --surface: #FFFFFF;
+    --surface-2: #EDF0EF;
+    --border: #DCE2E1;
+    --border-strong: #C2CCCA;
+    --ink: #13201F;
+    --ink-2: #44514F;
+    --ink-3: #6E7B79;
+    --accent: #0B6B63;
+    --accent-soft: #DCEDEA;
+    --risk: #A83226;
+    --risk-soft: #F7E2DF;
+    --caution: #8A5A08;
+    --caution-soft: #F7EDD8;
+    --ok: #2E6B38;
+    --ok-soft: #E1EFE3;
+    --shadow: 0 1px 2px rgba(19,32,31,.06), 0 8px 24px -12px rgba(19,32,31,.14);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0E1413;
+      --surface: #161E1D;
+      --surface-2: #1C2625;
+      --border: #2A3635;
+      --border-strong: #3B4948;
+      --ink: #E9EEEC;
+      --ink-2: #A9B6B3;
+      --ink-3: #7C8A87;
+      --accent: #4FC3B4;
+      --accent-soft: #143430;
+      --risk: #E38676;
+      --risk-soft: #3A211D;
+      --caution: #D9A441;
+      --caution-soft: #362A13;
+      --ok: #74C283;
+      --ok-soft: #1A2E1F;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px -12px rgba(0,0,0,.6);
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --bg: #0E1413;
+    --surface: #161E1D;
+    --surface-2: #1C2625;
+    --border: #2A3635;
+    --border-strong: #3B4948;
+    --ink: #E9EEEC;
+    --ink-2: #A9B6B3;
+    --ink-3: #7C8A87;
+    --accent: #4FC3B4;
+    --accent-soft: #143430;
+    --risk: #E38676;
+    --risk-soft: #3A211D;
+    --caution: #D9A441;
+    --caution-soft: #362A13;
+    --ok: #74C283;
+    --ok-soft: #1A2E1F;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px -12px rgba(0,0,0,.6);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Source Serif 4", Georgia, "Times New Roman", serif;
+    font-size: 17px;
+    line-height: 1.62;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap {
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 0 28px 120px;
+  }
+
+  h1, h2, h3, .eyebrow, .marker, th, .btn, .pill {
+    font-family: Archivo, "Helvetica Neue", Arial, sans-serif;
+  }
+
+  code, .mono, .metric-n, .marker, .pill, td.num {
+    font-family: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Consolas, monospace;
+  }
+
+  /* ---------- masthead ---------- */
+
+  header.masthead {
+    padding: 72px 0 0;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  .eyebrow {
+    font-size: 11.5px;
+    font-weight: 600;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  h1 {
+    font-size: clamp(38px, 6.4vw, 58px);
+    line-height: 1.02;
+    font-weight: 700;
+    letter-spacing: -.028em;
+    margin: 0;
+    text-wrap: balance;
+  }
+
+  .standfirst {
+    font-size: 20px;
+    line-height: 1.5;
+    color: var(--ink-2);
+    max-width: 60ch;
+    margin: 0;
+  }
+
+  /* ---------- metric strip ---------- */
+
+  .metrics {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(118px, 1fr));
+    gap: 0;
+    border-top: 1px solid var(--border-strong);
+    border-bottom: 1px solid var(--border-strong);
+    margin-top: 18px;
+  }
+
+  .metric {
+    padding: 16px 18px 15px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .metric + .metric {
+    padding-left: 18px;
+    border-left: 1px solid var(--border);
+  }
+
+  .metric-n {
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: -.02em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .metric-l {
+    font-family: Archivo, sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    line-height: 1.35;
+  }
+
+  /* ---------- sections ---------- */
+
+  section { margin-top: 64px; }
+
+  h2 {
+    font-size: 27px;
+    font-weight: 700;
+    letter-spacing: -.02em;
+    line-height: 1.18;
+    margin: 0 0 6px;
+    text-wrap: balance;
+  }
+
+  .section-note {
+    color: var(--ink-3);
+    font-size: 16px;
+    margin: 0 0 26px;
+    max-width: 62ch;
+  }
+
+  p { max-width: 68ch; }
+
+  h3 {
+    font-size: 18px;
+    font-weight: 600;
+    letter-spacing: -.01em;
+    margin: 0;
+  }
+
+  a { color: var(--accent); }
+
+  code {
+    font-size: .855em;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: .08em .34em;
+    color: var(--ink);
+    word-break: break-word;
+  }
+
+  strong { font-weight: 600; }
+
+  /* ---------- problems ---------- */
+
+  .problems {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .problem {
+    display: grid;
+    grid-template-columns: 96px 1fr;
+    gap: 22px;
+    padding: 22px 0;
+    border-top: 1px solid var(--border);
+    align-items: start;
+  }
+
+  .problem:last-child { border-bottom: 1px solid var(--border); }
+
+  .sev {
+    font-family: Archivo, sans-serif;
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    padding: 4px 8px;
+    border-radius: 2px;
+    display: inline-block;
+    white-space: nowrap;
+  }
+
+  .sev.crit { background: var(--risk-soft); color: var(--risk); }
+  .sev.high { background: var(--caution-soft); color: var(--caution); }
+
+  .problem p { margin: 8px 0 0; font-size: 16.5px; color: var(--ink-2); }
+  .problem p strong { color: var(--ink); }
+
+  /* ---------- diagram ---------- */
+
+  .figure {
+    margin: 34px 0 0;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 26px 20px 18px;
+    box-shadow: var(--shadow);
+    overflow-x: auto;
+  }
+
+  .figure svg { display: block; width: 100%; min-width: 520px; height: auto; }
+
+  figcaption {
+    font-size: 14.5px;
+    color: var(--ink-3);
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+    max-width: none;
+  }
+
+  /* ---------- phases ---------- */
+
+  .phases { display: flex; flex-direction: column; gap: 0; }
+
+  .phase {
+    display: grid;
+    grid-template-columns: 82px 1fr;
+    gap: 24px;
+    padding: 30px 0;
+    border-top: 1px solid var(--border);
+  }
+
+  .phase:last-child { border-bottom: 1px solid var(--border); }
+
+  .marker {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: .05em;
+    color: var(--accent);
+    padding-top: 4px;
+  }
+
+  .marker .dur {
+    display: block;
+    color: var(--ink-3);
+    font-weight: 400;
+    margin-top: 5px;
+    letter-spacing: 0;
+  }
+
+  .phase-body { min-width: 0; }
+  .phase-body > p { margin: 10px 0 0; color: var(--ink-2); font-size: 16.5px; }
+  .phase-body > p strong { color: var(--ink); }
+
+  .steps {
+    margin: 16px 0 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+    font-size: 16px;
+  }
+
+  .steps li {
+    display: grid;
+    grid-template-columns: 15px 1fr;
+    gap: 10px;
+    color: var(--ink-2);
+    max-width: 66ch;
+  }
+
+  .steps li::before {
+    content: "—";
+    color: var(--border-strong);
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 13px;
+    line-height: 1.7;
+  }
+
+  .deliverable {
+    margin-top: 18px;
+    background: var(--accent-soft);
+    border-left: 2px solid var(--accent);
+    padding: 11px 14px;
+    font-size: 15.5px;
+    color: var(--ink);
+    max-width: 66ch;
+  }
+
+  .deliverable b {
+    font-family: Archivo, sans-serif;
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--accent);
+    display: block;
+    margin-bottom: 3px;
+  }
+
+  .who {
+    display: inline-block;
+    font-family: Archivo, sans-serif;
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: .09em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    border: 1px solid var(--border-strong);
+    border-radius: 2px;
+    padding: 3px 7px;
+    margin-left: 10px;
+    vertical-align: 3px;
+    white-space: nowrap;
+  }
+
+  /* ---------- tables ---------- */
+
+  .table-scroll { overflow-x: auto; margin-top: 8px; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 15.5px;
+    min-width: 480px;
+  }
+
+  th {
+    text-align: left;
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    padding: 0 16px 9px 0;
+    border-bottom: 1px solid var(--border-strong);
+    white-space: nowrap;
+  }
+
+  td {
+    padding: 12px 16px 12px 0;
+    border-bottom: 1px solid var(--border);
+    color: var(--ink-2);
+    vertical-align: top;
+  }
+
+  td:first-child { color: var(--ink); font-weight: 600; font-family: Archivo, sans-serif; font-size: 15px; }
+  td.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
+  tr:last-child td { border-bottom: 1px solid var(--border-strong); }
+
+  .free { color: var(--ok); font-weight: 600; }
+
+  /* ---------- risks ---------- */
+
+  .risks { display: flex; flex-direction: column; gap: 14px; }
+
+  .risk-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--risk);
+    border-radius: 0 5px 5px 0;
+    padding: 16px 18px;
+  }
+
+  .risk-item.mid { border-left-color: var(--caution); }
+
+  .risk-item h3 { font-size: 16.5px; }
+  .risk-item p { margin: 7px 0 0; font-size: 15.5px; color: var(--ink-2); }
+  .risk-item p.mitig { color: var(--ink-2); }
+  .risk-item p.mitig b {
+    font-family: Archivo, sans-serif;
+    font-size: 10.5px;
+    letter-spacing: .09em;
+    text-transform: uppercase;
+    color: var(--ok);
+    margin-right: 6px;
+  }
+
+  /* ---------- decisions ---------- */
+
+  .decisions {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    overflow: hidden;
+  }
+
+  .dec { background: var(--surface); padding: 16px 18px; }
+
+  .dec dt {
+    font-family: Archivo, sans-serif;
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    margin-bottom: 6px;
+  }
+
+  .dec dd { margin: 0; font-size: 16px; color: var(--ink); line-height: 1.45; }
+
+  /* ---------- next ---------- */
+
+  .next {
+    margin-top: 64px;
+    background: var(--surface);
+    border: 1px solid var(--border-strong);
+    border-radius: 6px;
+    padding: 30px 30px 32px;
+    box-shadow: var(--shadow);
+  }
+
+  .next h2 { margin-bottom: 10px; }
+  .next p { font-size: 16.5px; color: var(--ink-2); }
+
+  .next ol {
+    margin: 18px 0 0;
+    padding-left: 0;
+    list-style: none;
+    counter-reset: n;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .next ol li {
+    counter-increment: n;
+    display: grid;
+    grid-template-columns: 26px 1fr;
+    gap: 12px;
+    font-size: 16.5px;
+    color: var(--ink-2);
+    max-width: 64ch;
+  }
+
+  .next ol li::before {
+    content: counter(n, decimal-leading-zero);
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--accent);
+    line-height: 1.85;
+  }
+
+  footer {
+    margin-top: 56px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+    font-size: 13.5px;
+    color: var(--ink-3);
+    font-family: Archivo, sans-serif;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 18px;
+  }
+
+
+  .progresso {
+    margin-top: 40px;
+    border: 1px solid var(--border-strong);
+    border-radius: 6px;
+    overflow: hidden;
+    background: var(--surface);
+    box-shadow: var(--shadow);
+  }
+    .progresso h2 { font-size: 19px; margin: 0; }
+  .progresso-cab {
+    padding: 18px 22px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 10px 14px;
+  }
+  .progresso-cab .data {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 12px;
+    color: var(--ink-3);
+  }
+  .trilha { display: flex; flex-wrap: wrap; gap: 1px; background: var(--border); }
+  .etapa {
+    flex: 1 1 108px;
+    background: var(--surface);
+    padding: 13px 14px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  .etapa .n {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--ink-3);
+    letter-spacing: .04em;
+  }
+  .etapa .nome {
+    font-family: Archivo, sans-serif;
+    font-size: 13.5px;
+    font-weight: 600;
+    line-height: 1.25;
+    color: var(--ink);
+  }
+  .etapa .est {
+    font-family: Archivo, sans-serif;
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+  .etapa.feita  { background: var(--ok-soft); }
+  .etapa.feita  .est { color: var(--ok); }
+  .etapa.agora  { background: var(--accent-soft); }
+  .etapa.agora  .est { color: var(--accent); }
+  .etapa.espera .est { color: var(--ink-3); }
+  .etapa.risco  { background: var(--caution-soft); }
+  .etapa.risco  .est { color: var(--caution); }
+  .progresso-nota {
+    padding: 16px 22px 18px;
+    border-top: 1px solid var(--border);
+    font-size: 15.5px;
+    color: var(--ink-2);
+  }
+  .progresso-nota strong { color: var(--ink); }
+
+  @media (max-width: 620px) {
+    body { font-size: 16px; }
+    .wrap { padding: 0 20px 80px; }
+    header.masthead { padding-top: 48px; }
+    .phase, .problem { grid-template-columns: 1fr; gap: 12px; }
+    .marker { padding-top: 0; }
+    .marker .dur { display: inline; margin-left: 10px; }
+    .metric + .metric { padding-left: 0; border-left: none; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+  }
+</style>
+
+<div class="wrap">
+
+  <header class="masthead">
+    <div class="eyebrow">Portal CRC · Plano de migração</div>
+    <h1>Saída do Base44</h1>
+    <p class="standfirst">Tirar um ERP operacional de 47 mil linhas de uma plataforma que não te atende mais — sem reescrever as 38 páginas, sem perder o histórico e sem custo mensal.</p>
+
+    <div class="metrics">
+      <div class="metric"><span class="metric-n">47.074</span><span class="metric-l">Linhas de código</span></div>
+      <div class="metric"><span class="metric-n">48</span><span class="metric-l">Entidades</span></div>
+      <div class="metric"><span class="metric-n">38</span><span class="metric-l">Páginas</span></div>
+      <div class="metric"><span class="metric-n">10</span><span class="metric-l">Usuários</span></div>
+      <div class="metric"><span class="metric-n free">R$ 0</span><span class="metric-l">Custo mensal</span></div>
+    </div>
+  </header>
+
+
+    <div class="progresso">
+      <div class="progresso-cab">
+        <h2>Onde estamos</h2>
+        <span class="data">atualizado em 15/09/2026</span>
+      </div>
+      <div class="trilha">
+        <div class="etapa risco">
+          <span class="n">00</span><span class="nome">Dados do Base44</span>
+          <span class="est">Bloqueada</span>
+        </div>
+        <div class="etapa feita">
+          <span class="n">01</span><span class="nome">Banco novo</span>
+          <span class="est">Concluída</span>
+        </div>
+        <div class="etapa feita">
+          <span class="n">02</span><span class="nome">Adaptador</span>
+          <span class="est">Concluída</span>
+        </div>
+        <div class="etapa agora">
+          <span class="n">03</span><span class="nome">Segurança</span>
+          <span class="est">Em teste</span>
+        </div>
+        <div class="etapa espera">
+          <span class="n">04</span><span class="nome">Regras no servidor</span>
+          <span class="est">A fazer</span>
+        </div>
+        <div class="etapa espera">
+          <span class="n">05</span><span class="nome">Frontend</span>
+          <span class="est">A fazer</span>
+        </div>
+        <div class="etapa espera">
+          <span class="n">06</span><span class="nome">Autonomia</span>
+          <span class="est">A fazer</span>
+        </div>
+      </div>
+      <p class="progresso-nota">
+        <strong>O Portal CRC já roda fora do Base44.</strong> Banco próprio com as
+        48 tabelas, adaptador no lugar do SDK, login próprio — que o sistema nunca
+        teve, porque no Base44 a tela de login era da plataforma — e as regras de
+        acesso aplicadas. Falta o teste de invasão para dar a Fase 03 por fechada.
+        A Fase 00 continua sendo o único item verdadeiramente travado: o acesso ao
+        construtor do Base44 foi perdido, e sem ele o histórico não sai de lá.
+      </p>
+    </div>
+
+  <section>
+    <h2>O diagnóstico</h2>
+    <p class="section-note">O que o export revelou sobre o estado atual do sistema, em ordem de gravidade.</p>
+
+    <div class="problems">
+
+      <div class="problem">
+        <div><span class="sev crit">Crítico</span></div>
+        <div>
+          <h3>Não existe backend</h3>
+          <p>Não há nenhuma função de servidor no export. <strong>Toda regra de negócio roda no navegador do usuário</strong> — o cálculo de SLA, o congelamento de SLA das contestações, a máquina de estados de <code>Tratativa.status</code>, a pontuação do agente, o custo operacional. Qualquer pessoa com o console do navegador aberto consegue chamar <code>entities.Tratativa.update()</code> e alterar status, pontuação ou valor devolvido diretamente. O Base44 entregava um CRUD genérico sobre JSON Schema, e nada além disso.</p>
+        </div>
+      </div>
+
+      <div class="problem">
+        <div><span class="sev crit">Crítico</span></div>
+        <div>
+          <h3>Dados sensíveis expostos no cliente</h3>
+          <p>O campo <code>Tratativa.custo_operacional_reais</code> traz escrito na própria descrição do schema: <em>"campo restrito: não deve ser exibido para usuários com papel 'agente'"</em>. Só que a proteção é <strong>um <code>if</code> no React</strong> — o valor chega ao navegador do agente de qualquer forma. O mesmo vale para <code>Colaborador.salario</code>. E <code>PermissaoModulo</code> controla a <em>visibilidade do menu</em>, não o acesso ao dado.</p>
+        </div>
+      </div>
+
+      <div class="problem">
+        <div><span class="sev high">Alto</span></div>
+        <div>
+          <h3>O export veio sem os dados</h3>
+          <p>Vieram os 48 schemas e o código, mas <strong>nenhum registro</strong>. O arquivo <code>src/api/base44Client.js</code> chegou como um bloco vazio que devolve lista vazia em toda chamada, e o mesmo bloco foi colado no topo de cada arquivo. É recuperável, mas nada mais no plano acontece antes disso.</p>
+        </div>
+      </div>
+
+    </div>
+
+    <p style="margin-top:30px">O que vale preservar: os <strong>48 JSON Schemas são uma boa especificação de domínio</strong> — enums fechados, formatos de data, descrições em português. Eles viram tabelas Postgres quase diretamente. E a base de interface (shadcn/ui sobre Radix e Tailwind) é padrão de mercado; não há motivo para jogar fora.</p>
+  </section>
+
+  <section>
+    <h2>A estratégia: um adaptador, não uma reescrita</h2>
+    <p class="section-note">A decisão técnica que define o prazo, o risco e o custo do projeto inteiro.</p>
+
+    <p>Suas 38 páginas conversam com o banco sempre pela mesma interface: <code>db.entities.Tratativa.filter(...)</code>, <code>db.entities.Colaborador.update(...)</code>. Sem exceção, nas 47 mil linhas.</p>
+
+    <p>Então não reescrevemos as páginas. Escrevemos <strong>um único arquivo</strong> que oferece exatamente essa mesma interface e, por baixo, fala com o Supabase. O app inteiro passa a rodar no banco novo trocando um <code>import</code>.</p>
+
+    <figure class="figure">
+      <svg viewBox="0 0 700 220" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="As 38 páginas chamam db.entities; o adaptador traduz essas chamadas para o Supabase, substituindo o Base44.">
+        <defs>
+          <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+            <path d="M0,0 L10,5 L0,10 z" fill="var(--border-strong)"/>
+          </marker>
+        </defs>
+
+        <rect x="8" y="46" width="188" height="86" rx="5" fill="var(--surface-2)" stroke="var(--border-strong)" stroke-width="1"/>
+        <text x="102" y="76" text-anchor="middle" fill="var(--ink)" font-family="Archivo, sans-serif" font-size="14" font-weight="600">38 páginas React</text>
+        <text x="102" y="97" text-anchor="middle" fill="var(--ink-3)" font-family="IBM Plex Mono, monospace" font-size="11.5">47.074 linhas</text>
+        <text x="102" y="115" text-anchor="middle" fill="var(--ink-3)" font-family="Archivo, sans-serif" font-size="11.5">intocadas</text>
+
+        <line x1="200" y1="89" x2="252" y2="89" stroke="var(--border-strong)" stroke-width="1.5" marker-end="url(#ah)"/>
+        <text x="226" y="79" text-anchor="middle" fill="var(--ink-3)" font-family="IBM Plex Mono, monospace" font-size="10.5">db.entities</text>
+
+        <rect x="258" y="38" width="168" height="102" rx="5" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.5"/>
+        <text x="342" y="66" text-anchor="middle" fill="var(--accent)" font-family="Archivo, sans-serif" font-size="10" font-weight="600" letter-spacing="1.4">O ADAPTADOR</text>
+        <text x="342" y="90" text-anchor="middle" fill="var(--ink)" font-family="IBM Plex Mono, monospace" font-size="13" font-weight="500">src/api/db.js</text>
+        <text x="342" y="112" text-anchor="middle" fill="var(--ink-2)" font-family="Archivo, sans-serif" font-size="11.5">≈ 300 linhas · 1 arquivo</text>
+
+        <line x1="430" y1="89" x2="482" y2="89" stroke="var(--border-strong)" stroke-width="1.5" marker-end="url(#ah)"/>
+        <text x="456" y="79" text-anchor="middle" fill="var(--ink-3)" font-family="IBM Plex Mono, monospace" font-size="10.5">SQL</text>
+
+        <rect x="488" y="46" width="188" height="86" rx="5" fill="var(--surface-2)" stroke="var(--border-strong)" stroke-width="1"/>
+        <text x="582" y="76" text-anchor="middle" fill="var(--ink)" font-family="Archivo, sans-serif" font-size="14" font-weight="600">Supabase</text>
+        <text x="582" y="97" text-anchor="middle" fill="var(--ink-3)" font-family="Archivo, sans-serif" font-size="11.5">Postgres · Auth · Storage</text>
+        <text x="582" y="115" text-anchor="middle" fill="var(--ok)" font-family="Archivo, sans-serif" font-size="11.5" font-weight="600">com RLS</text>
+
+        <line x1="342" y1="146" x2="342" y2="176" stroke="var(--border-strong)" stroke-width="1.5" stroke-dasharray="3 3"/>
+        <rect x="262" y="176" width="160" height="32" rx="4" fill="none" stroke="var(--border-strong)" stroke-width="1" stroke-dasharray="4 3"/>
+        <text x="342" y="197" text-anchor="middle" fill="var(--ink-3)" font-family="Archivo, sans-serif" font-size="12">Base44 · desligado</text>
+      </svg>
+      <figcaption>O adaptador é o único ponto do sistema que sabe que o banco mudou. Ele também é onde a migração fatiada acontece: dá para apontar <code>Tratativa</code> para o Supabase e deixar <code>Escala</code> ainda no Base44, módulo por módulo, sem virada de chave.</figcaption>
+    </figure>
+  </section>
+
+  <section>
+    <h2>As seis fases</h2>
+    <p class="section-note">As fases são numeradas porque cada uma depende da anterior — não é uma lista de tarefas paralelas. Os prazos assumem você trabalhando em ritmo parcial, comigo escrevendo o código.</p>
+
+    <div class="phases">
+
+      <div class="phase">
+        <div class="marker">FASE 00<span class="dur">em paralelo</span></div>
+        <div class="phase-body">
+          <h3>Recuperar os dados<span class="who">Trilha paralela</span></h3>
+          <p>O e-mail temporário usado no cadastro deixou de dar acesso ao <strong>construtor</strong> do Base44. Isso não bloqueia o projeto, por dois motivos: os 48 schemas já estão em disco, e a extração de dados nunca dependeu do construtor — ela sai do <strong>portal</strong>, que é outro endereço e outro login.</p>
+          <p>Esta fase deixa de ser pré-requisito e passa a correr em paralelo às demais. Mas tem um prazo real: <strong>precisa estar resolvida antes da Fase 04</strong>, porque validar cálculo de SLA e de pontuação exige dados de verdade.</p>
+          <ul class="steps">
+            <li><strong>Rota 1 — a sessão que ainda pode estar viva.</strong> A documentação técnica foi exportada do portal hoje de manhã, o que prova que havia sessão ativa. Se a aba continuar aberta, o script roda nela agora.</li>
+            <li><strong>Rota 2 — o cookie do portal.</strong> Abrir <code>preview--portal-crc-67e1ece8.base44.app</code> de novo. Se pedir login, tentar o e-mail corporativo do cadastro de <code>Colaborador</code> — o acesso ao portal é separado do acesso ao construtor.</li>
+            <li><strong>Rota 3 — os outros 9 usuários.</strong> Basta <em>uma</em> sessão de portal viva, de qualquer pessoa da equipe. O script roda no navegador dela exatamente igual.</li>
+            <li><strong>Rota 4 — suporte do Base44.</strong> Recuperação de conta de dono de aplicativo, com o <code>app_id</code> em mãos. Mais lenta, mas é a que não depende de sorte.</li>
+          </ul>
+          <div class="deliverable"><b>Entregável</b>Os dados em disco — ou a confirmação de que não virão, a tempo de decidir o que fazer antes da Fase 04.</div>
+        </div>
+      </div>
+
+      <div class="phase">
+        <div class="marker">FASE 01<span class="dur">1 semana</span></div>
+        <div class="phase-body">
+          <h3>Montar a fundação<span class="who">Eu faço</span></h3>
+          <p>Converter os 48 JSON Schemas em um banco Postgres de verdade — com tipos, chaves estrangeiras e índices que o Base44 nunca teve. Os enums do schema (<code>status</code>, <code>prioridade</code>, <code>causa_primaria</code>) viram restrições no banco: dado inválido passa a ser <em>impossível</em> de gravar, não apenas desencorajado.</p>
+          <ul class="steps">
+            <li>Você cria a conta no Supabase e no GitHub — são os dois únicos cadastros do projeto.</li>
+            <li>Eu gero o SQL das 48 tabelas a partir dos schemas, com relacionamentos reais entre <code>Tratativa</code>, <code>Colaborador</code>, <code>MotivoTratativa</code> e <code>EtapaJornada</code>.</li>
+            <li><strong>Cada tabela nasce com uma coluna <code>base44_id</code></strong>, guardando o identificador antigo. É ela que permite remontar as ligações entre <code>Tratativa</code>, <code>Colaborador</code>, <code>MotivoTratativa</code> e <code>EtapaJornada</code> quando os dados chegarem. Sem ela, a importação produziria 48 tabelas de registros soltos.</li>
+            <li><strong>O importador é escrito e testado agora</strong>, contra dados falsos no formato do Base44. No dia em que os dados reais aparecerem, é rodar um comando — não um projeto novo.</li>
+            <li>Configuro o login por e-mail e senha para os 10 usuários, usando o e-mail corporativo que já é a chave em <code>Colaborador</code>.</li>
+          </ul>
+          <div class="deliverable"><b>Entregável</b>Banco em produção com as 48 tabelas, os 10 acessos criados e o importador pronto, à espera dos dados.</div>
+        </div>
+      </div>
+
+      <div class="phase">
+        <div class="marker">FASE 02<span class="dur">1 semana</span></div>
+        <div class="phase-body">
+          <h3>O adaptador<span class="who">Eu faço</span></h3>
+          <p>O arquivo único descrito acima. Ao fim desta fase o Portal CRC roda inteiro no banco novo, com a mesma aparência de hoje — e sem o Base44 no caminho.</p>
+          <ul class="steps">
+            <li>Escrevo <code>src/api/db.js</code> reproduzindo <code>filter</code>, <code>get</code>, <code>create</code>, <code>update</code>, <code>delete</code> e <code>list</code>.</li>
+            <li>Removo o bloco vazio que o exportador colou no topo dos arquivos e reconecto tudo ao adaptador.</li>
+            <li>Substituo <code>UploadFile</code> pelo storage do Supabase — fotos de colaborador, anexos de tratativa, materiais da Universidade.</li>
+            <li>Você testa os fluxos que mais usa e me diz o que quebrou. Vai quebrar alguma coisa; é esperado e é rápido de corrigir.</li>
+          </ul>
+          <div class="deliverable"><b>Entregável</b>O portal rodando na sua máquina, com os dados reais, sem depender do Base44.</div>
+        </div>
+      </div>
+
+      <div class="phase">
+        <div class="marker">FASE 03<span class="dur">4 dias</span></div>
+        <div class="phase-body">
+          <h3>Fechar a segurança<span class="who">Eu faço</span></h3>
+          <p>Aqui corrigimos o problema nº 2 do diagnóstico, e corrigimos <em>na raiz</em>. O Postgres tem um recurso chamado Row Level Security: as regras de quem vê o quê ficam <strong>dentro do banco</strong>, não no React. Um agente que tente ler <code>salario</code> não recebe o campo — não importa por onde peça.</p>
+          <ul class="steps">
+            <li>Regras por papel (<code>agente</code>, <code>gestor</code>, <code>fi</code>) escritas no banco, espelhando o que <code>PermissaoModulo</code> tenta fazer hoje na tela.</li>
+            <li><code>Colaborador.salario</code> e <code>Tratativa.custo_operacional_reais</code> passam a ser invisíveis para o papel <code>agente</code>, de fato.</li>
+            <li><code>LogAuditoria</code> vira automático: o próprio banco registra quem alterou o quê, sem depender de a página lembrar de gravar.</li>
+            <li>Teste de invasão: eu tento, como agente, ler o salário e alterar minha própria pontuação. Se conseguir, a fase não acabou.</li>
+          </ul>
+          <div class="deliverable"><b>Entregável</b>Relatório de segurança mostrando cada tentativa de acesso indevido e o bloqueio correspondente.</div>
+        </div>
+      </div>
+
+      <div class="phase">
+        <div class="marker">FASE 04<span class="dur">3 a 4 semanas</span></div>
+        <div class="phase-body">
+          <h3>Módulo a módulo: tirar a regra do navegador<span class="who">Nós dois</span></h3>
+          <p>Esta é a fase longa e é onde entra a migração fatiada que você escolheu. Cada módulo tem sua regra de negócio movida do React para o banco, é testado e vai para produção — em vez de uma virada de chave no fim. A ordem segue a criticidade.</p>
+          <ul class="steps">
+            <li><strong>Tratativas</strong> — o núcleo. A máquina de estados de <code>status</code>, o cálculo de SLA, o congelamento de SLA das contestações e o custo operacional passam a ser calculados pelo servidor. Status inválido deixa de ser possível.</li>
+            <li><strong>Apuração e Pontuação</strong> — o cálculo de pontos e a elegibilidade de prêmio saem do navegador. Deixa de existir a possibilidade de alguém se autopontuar.</li>
+            <li><strong>Escalas, Turnos e Férias</strong> — validação de saldo e de conflito de escala no banco.</li>
+            <li><strong>Observações, PDI, Pesquisas, ORÁCULO, Universidade</strong> — os módulos de gestão de pessoas, com menor risco.</li>
+            <li>Os recursos de IA (<code>InvokeLLM</code> no ORÁCULO, na Jornada e no Relatório da Diretoria) passam a rodar no servidor. <strong>Detalhe que não é negociável:</strong> a chave da IA nunca vai para o navegador, ou qualquer pessoa pode usá-la na sua conta.</li>
+          </ul>
+          <div class="deliverable"><b>Entregável</b>Cada módulo em produção conforme fica pronto. Você para em qualquer ponto e o que já subiu continua funcionando.</div>
+        </div>
+      </div>
+
+      <div class="phase">
+        <div class="marker">FASE 05<span class="dur">2 semanas</span></div>
+        <div class="phase-body">
+          <h3>Frontend e design<span class="who">Nós dois</span></h3>
+          <p>Deixei por último de propósito. Redesenhar antes de o sistema estar seguro e íntegro é pintar a parede com o cano estourado. Além disso, os arquivos gigantes — <code>Dashboard.jsx</code> com 1.580 linhas, <code>TratativaDetalhe.jsx</code> com 1.424 — ficam muito mais fáceis de organizar depois que a regra de negócio saiu de dentro deles.</p>
+          <ul class="steps">
+            <li>Quebrar as páginas maiores em componentes menores, com o padrão já usado no projeto.</li>
+            <li>Um sistema visual consistente: cores de status, tipografia e espaçamento definidos uma vez e reaproveitados nas 38 páginas.</li>
+            <li>Rever as telas que você mais usa — abertura e encerramento de tratativa são as candidatas óbvias.</li>
+            <li>Funcionar bem no celular. Hoje só o <code>use-mobile</code> existe; o layout não foi pensado para isso.</li>
+          </ul>
+          <div class="deliverable"><b>Entregável</b>Interface consistente e um guia de estilo curto, para as próximas telas nascerem no padrão.</div>
+        </div>
+      </div>
+
+      <div class="phase">
+        <div class="marker">FASE 06<span class="dur">3 dias</span></div>
+        <div class="phase-body">
+          <h3>Autonomia<span class="who">Eu faço</span></h3>
+          <p>O objetivo final não é sair do Base44 — é você não depender de mim nem de ninguém para manter o Portal CRC de pé.</p>
+          <ul class="steps">
+            <li>Publicação automática: você aprova uma mudança e ela vai ao ar sozinha, sem comando de terminal.</li>
+            <li><strong>Backup diário automático</strong> para um repositório privado, com histórico. O plano gratuito do Supabase não garante backup; esta peça é obrigatória, não opcional.</li>
+            <li>Um documento curto de operação: como criar usuário, como restaurar backup, o que fazer quando algo cair.</li>
+            <li>Desligar o Base44 — só depois de 30 dias com tudo rodando no ar novo.</li>
+          </ul>
+          <div class="deliverable"><b>Entregável</b>Sistema no ar, com backup automático e manual de operação.</div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <section>
+    <h2>A infraestrutura e o custo</h2>
+    <p class="section-note">Com 10 usuários, cada limite abaixo sobra com folga de mais de dez vezes. Nenhum desses planos é período de teste.</p>
+
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr><th>Camada</th><th>Serviço</th><th>Limite do plano gratuito</th><th>Custo</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Banco, login e arquivos</td><td>Supabase</td><td>500 MB de Postgres · 50 mil usuários/mês · 1 GB de arquivos</td><td class="num free">R$ 0</td></tr>
+          <tr><td>Site</td><td>Cloudflare Pages</td><td>Sem limite prático para uso interno</td><td class="num free">R$ 0</td></tr>
+          <tr><td>Regras de servidor</td><td>Supabase Edge Functions</td><td>500 mil execuções por mês</td><td class="num free">R$ 0</td></tr>
+          <tr><td>Código e backup</td><td>GitHub privado</td><td>Repositórios e automações ilimitados</td><td class="num free">R$ 0</td></tr>
+          <tr><td>Recursos de IA</td><td>Google Gemini</td><td>Cota gratuita diária, suficiente para 10 usuários</td><td class="num free">R$ 0</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p style="margin-top:22px">Descartei o Railway: ele deixou de ter plano gratuito e oferece apenas US$ 5 de crédito de teste. Sobre os 500 MB do Supabase — uma <code>Tratativa</code> tem cerca de 100 campos e ocupa uns 3 KB, o que dá espaço para aproximadamente 150 mil tratativas. Se um dia isso apertar, o plano pago custa US$ 25/mês e a troca é um clique, sem mexer no sistema.</p>
+  </section>
+
+  <section>
+    <h2>O que pode dar errado</h2>
+    <p class="section-note">Os riscos reais deste projeto, com a contramedida de cada um.</p>
+
+    <div class="risks">
+
+      <div class="risk-item">
+        <h3>Os dados não saírem do Base44</h3>
+        <p>O risco deixou de ser hipotético: o e-mail temporário do cadastro não abre mais o construtor. A extração não depende dele — sai do portal, por outro login — mas nenhuma das rotas de recuperação foi testada ainda. Se todas falharem, o histórico fica preso lá dentro.</p>
+        <p class="mitig"><b>Contramedida</b>A construção deixou de esperar por isso: os schemas bastam para erguer o banco. A recuperação vira trilha paralela com prazo até a Fase 04, e o importador fica pronto antes dos dados. Se no fim nada vier, o sistema novo entra em produção limpo e o histórico é consultado à parte — perda real, mas não fatal.</p>
+        </div>
+
+      <div class="risk-item mid">
+        <h3>Regra de negócio que só existe no código</h3>
+        <p>Em 47 mil linhas há lógica que ninguém documentou e que talvez nem você lembre — cantos do cálculo de pontuação, exceções de SLA, o comportamento do rodízio de líder técnico. Ao mover isso para o servidor, um detalhe pode se perder.</p>
+        <p class="mitig"><b>Contramedida</b>O próprio sistema tem uma pasta <code>documentacao/</code> que descreve vários módulos. Uso ela como referência e, em cada módulo da Fase 04, comparo o resultado do cálculo novo com o antigo usando os dados reais antes de subir.</p>
+      </div>
+
+      <div class="risk-item mid">
+        <h3>Você travar em algum passo técnico</h3>
+        <p>Você não programa, e três momentos exigem sua mão: criar as contas, rodar o script de extração e aprovar publicações. Se algum desses travar, o projeto para.</p>
+        <p class="mitig"><b>Contramedida</b>Esses três momentos são os únicos, e para cada um eu escrevo o passo a passo literal. Tudo o mais é comigo. Se um passo estiver confuso, ele está mal escrito — me avise e eu reescrevo.</p>
+      </div>
+
+      <div class="risk-item mid">
+        <h3>O projeto perder fôlego no meio</h3>
+        <p>A Fase 04 leva de três a quatro semanas e é a menos empolgante do plano. É o ponto clássico de abandono — e um sistema meio migrado é pior que qualquer um dos dois estados completos.</p>
+        <p class="mitig"><b>Contramedida</b>É exatamente por isso que a migração é fatiada. Cada módulo vai ao ar sozinho. Se você parar depois de Tratativas e Apuração, o que subiu continua funcionando em produção, com segurança, para sempre.</p>
+      </div>
+
+    </div>
+  </section>
+
+  <section>
+    <h2>Decisões registradas</h2>
+    <p class="section-note">As escolhas que você fez e que sustentam todo o plano acima. Mudar qualquer uma muda o documento.</p>
+
+    <dl class="decisions">
+      <div class="dec"><dt>Dados</dt><dd>Migrar tudo, com histórico completo</dd></div>
+      <div class="dec"><dt>Infraestrutura</dt><dd>Supabase e Cloudflare, gratuitos</dd></div>
+      <div class="dec"><dt>Login</dt><dd>E-mail e senha próprios</dd></div>
+      <div class="dec"><dt>Estratégia</dt><dd>Fatiada, módulo a módulo</dd></div>
+      <div class="dec"><dt>Equipe</dt><dd>Você sozinho, comigo</dd></div>
+      <div class="dec"><dt>Escala</dt><dd>10 usuários</dd></div>
+    </dl>
+  </section>
+
+  <div class="next">
+    <h2>Duas frentes, a partir de agora</h2>
+    <p>O acesso perdido reordenou o plano, mas não o interrompeu. A construção começa já; a recuperação dos dados corre ao lado, com prazo até a Fase 04.</p>
+    <ol>
+      <li><strong>Hoje, na frente de recuperação:</strong> procurar a aba do portal ainda aberta, ou abrir <code>preview--portal-crc-67e1ece8.base44.app</code> e ver se o cookie ainda vale. São dois minutos e respondem a pergunta mais importante que resta.</li>
+      <li><strong>Hoje, na frente de construção:</strong> criar as contas no Supabase e no GitHub. São os dois únicos cadastros do projeto — desta vez, com o e-mail corporativo, não um temporário.</li>
+      <li><strong>Em seguida:</strong> eu converto os 48 schemas em SQL, com <code>base44_id</code> em cada tabela, e escrevo o importador contra dados de teste.</li>
+      <li><strong>Se as rotas 1 a 3 falharem:</strong> abrir chamado no suporte do Base44 com o <code>app_id</code>, em paralelo, sem travar nada.</li>
+    </ol>
+  </div>
+
+  <footer>
+    <span>Portal CRC · Plano de migração</span>
+    <span>Baseado no export de 15 de setembro de 2026 · 289 arquivos</span>
+  </footer>
+
+</div>
