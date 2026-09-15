@@ -102,9 +102,18 @@ end $$;
 -- Sem salário cadastrado devolve NULL, não zero. Zero é uma afirmação — diz
 -- que a tratativa não custou nada. NULL diz "não dá para calcular", que é a
 -- verdade, e força quem consome a decidir o que fazer com a lacuna.
+--
+-- O SEGUNDO PARÂMETRO É TEXT, NÃO UUID. A coluna `agente_responsavel_id` é
+-- texto: os campos de vínculo vieram dos schemas do Base44 como string, e o
+-- importador gravou o uuid novo dentro de um campo de texto. O drop abaixo
+-- remove uma versão com assinatura uuid que pode ter ficado de uma execução
+-- anterior — duas funções de mesmo nome deixariam o Postgres sem saber qual
+-- chamar.
+drop function if exists public.custo_operacional(jsonb, uuid, numeric, numeric);
+
 create or replace function public.custo_operacional(
   p_historico              jsonb,
-  p_agente_id              uuid,
+  p_agente_id              text,
   p_multiplicador_encargos numeric default 1.6,
   p_carga_horaria_mensal   numeric default 220
 ) returns numeric
@@ -117,14 +126,27 @@ declare
   v_salario      numeric;
   v_minutos      integer;
   v_custo_minuto numeric;
+  v_id           uuid;
 begin
-  if p_agente_id is null then
+  if p_agente_id is null or p_agente_id = '' then
     return null;
   end if;
 
+  /*
+   * O campo é texto e quase sempre guarda um uuid — mas 18 referências dos
+   * dados importados apontam para registros que já não existiam no Base44,
+   * e podem não ser uuid. Um cast direto derrubaria o cálculo da tratativa
+   * inteira por causa de um vínculo órfão.
+   */
+  begin
+    v_id := p_agente_id::uuid;
+  exception when others then
+    return null;
+  end;
+
   select salario into v_salario
   from public.colaborador_base
-  where id = p_agente_id;
+  where id = v_id;
 
   if v_salario is null or v_salario <= 0 then
     return null;   -- cadastro incompleto: não inventa número
@@ -136,8 +158,8 @@ begin
   return round(v_custo_minuto * v_minutos, 2);
 end $$;
 
-revoke execute on function public.custo_operacional(jsonb, uuid, numeric, numeric) from anon;
-grant  execute on function public.custo_operacional(jsonb, uuid, numeric, numeric) to authenticated;
+revoke execute on function public.custo_operacional(jsonb, text, numeric, numeric) from anon;
+grant  execute on function public.custo_operacional(jsonb, text, numeric, numeric) to authenticated;
 
 
 -- ------------------------------------------------------------------
