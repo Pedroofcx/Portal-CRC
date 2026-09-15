@@ -2,85 +2,149 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ============================================================
+   PORTAL CRC — TOKENS DE INTERFACE
+   Conforme documentacao/regras-ui-ux.md
+
+   Antes, estes tokens eram o padrão do shadcn, onde --primary é PRETO.
+   As telas queriam azul, o token dava preto, e cada tela escreveu a cor
+   na mão: 4.860 cores fixas contra 235 usos de token. Corrigir os tokens
+   é o que torna a adoção possível.
+
+   O AZUL: as regras pedem "Azul Claro Institucional" sem definir o valor.
+   Adotei o azul que o próprio sistema já elegeu de fato (220 ocorrências
+   entre fundo e texto). Para trocar pela cor oficial da marca, altere
+   SOMENTE --primary e --ring abaixo — nada mais precisa mudar.
+   ============================================================ */
+
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 0 0% 3.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 0 0% 3.9%;
+    /* --- Base institucional ------------------------------------ */
+    --background: 210 20% 98%;      /* fundo da área de trabalho */
+    --foreground: 0 0% 10%;         /* #1A1A1A — nunca preto puro */
+    --card: 0 0% 100%;              /* branco: containers e painéis */
+    --card-foreground: 0 0% 10%;
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 3.9%;
-    --primary: 0 0% 9%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 0 0% 96.1%;
-    --secondary-foreground: 0 0% 9%;
-    --muted: 0 0% 96.1%;
-    --muted-foreground: 0 0% 45.1%;
-    --accent: 0 0% 96.1%;
-    --accent-foreground: 0 0% 9%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 89.8%;
-    --input: 0 0% 89.8%;
-    --ring: 0 0% 3.9%;
-    --chart-1: 12 76% 61%;
-    --chart-2: 173 58% 39%;
-    --chart-3: 197 37% 24%;
-    --chart-4: 43 74% 66%;
-    --chart-5: 27 87% 67%;
-    --radius: 0.5rem;
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 240 5.9% 10%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
-  }
+    --popover-foreground: 0 0% 10%;
 
-  .dark {
-    --background: 0 0% 3.9%;
-    --foreground: 0 0% 98%;
-    --card: 0 0% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 0 0% 3.9%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 0 0% 98%;
-    --primary-foreground: 0 0% 9%;
-    --secondary: 0 0% 14.9%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 0 0% 14.9%;
-    --muted-foreground: 0 0% 63.9%;
-    --accent: 0 0% 14.9%;
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 14.9%;
-    --input: 0 0% 14.9%;
-    --ring: 0 0% 83.1%;
-    --chart-1: 220 70% 50%;
-    --chart-2: 160 60% 45%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
+    /* --- Ação principal ---------------------------------------- */
+    --primary: 221 83% 53%;         /* #2563EB — botões, links, abas ativas */
+    --primary-foreground: 0 0% 100%;
+
+    /* --- Apoio -------------------------------------------------- */
+    --secondary: 210 20% 96%;
+    --secondary-foreground: 0 0% 20%;
+    --muted: 210 20% 96%;
+    --muted-foreground: 215 14% 42%;   /* texto secundário legível */
+    --accent: 214 95% 96%;             /* realce suave de ação */
+    --accent-foreground: 221 83% 40%;
+
+    /* --- Vermelho: uso restrito --------------------------------- */
+    /* Só para ações destrutivas, tags e ícones da metodologia
+       Meteoro. Nunca em salvar, avançar ou cabeçalho. */
+    --destructive: 0 72% 46%;
+    --destructive-foreground: 0 0% 100%;
+
+    /* --- Estados de dado ---------------------------------------- */
+    /* Uma cor por significado, em vez das 17 famílias que conviviam.
+       "crítico" é âmbar escuro, não vermelho: a regra restringe o
+       vermelho, e prioridade alta não deve gerar ansiedade. */
+    --success: 152 60% 30%;
+    --success-foreground: 0 0% 100%;
+    --success-soft: 152 45% 94%;
+
+    --warning: 35 92% 38%;
+    --warning-foreground: 0 0% 100%;
+    --warning-soft: 42 90% 94%;
+
+    --critical: 22 90% 40%;
+    --critical-foreground: 0 0% 100%;
+    --critical-soft: 26 90% 94%;
+
+    --info: 221 83% 53%;
+    --info-foreground: 0 0% 100%;
+    --info-soft: 214 95% 95%;
+
+    --neutral: 215 14% 42%;
+    --neutral-foreground: 0 0% 100%;
+    --neutral-soft: 210 20% 95%;
+
+    /* --- Estrutura ---------------------------------------------- */
+    --border: 214 18% 88%;
+    --input: 214 18% 84%;
+    --ring: 221 83% 53%;            /* foco: azul institucional, nítido */
+
+    /* Cantos discretos. As regras proíbem arredondamento exagerado. */
+    --radius: 0.25rem;
+
+    /* Altura de linha de tabela: compacta, porém respirável. */
+    --linha-tabela: 44px;
+
+    /* Transições curtas. Máximo 200ms, nada decorativo. */
+    --transicao: 150ms;
+
+    /* --- Gráficos ----------------------------------------------- */
+    /* Série categórica derivada da paleta institucional, para os
+       relatórios pararem de sortear cores. */
+    --chart-1: 221 83% 53%;
+    --chart-2: 152 55% 36%;
+    --chart-3: 35 88% 45%;
+    --chart-4: 199 80% 42%;
+    --chart-5: 262 52% 52%;
+
+    /* --- Menu lateral ------------------------------------------- */
+    --sidebar-background: 217 33% 17%;
+    --sidebar-foreground: 210 20% 92%;
+    --sidebar-primary: 221 83% 53%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-accent: 217 30% 24%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 217 25% 27%;
+    --sidebar-ring: 221 83% 53%;
   }
 }
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    @apply border-border;
   }
 
   body {
     @apply bg-background text-foreground;
+    font-family: Inter, 'Segoe UI', system-ui, -apple-system, sans-serif;
+    font-size: 14px;            /* densidade operacional */
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Hierarquia tipográfica ------------------------------------- */
+  h1 { @apply text-2xl font-semibold tracking-tight; }   /* título da página */
+  h2 { @apply text-lg font-semibold tracking-tight; }    /* divisão de bloco */
+  h3 { @apply text-base font-semibold; }
+
+  /* Foco visível em azul institucional, para quem navega por Tab
+     conseguir preencher um formulário inteiro sem o mouse. */
+  :where(a, button, input, select, textarea, [tabindex]):focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
+    border-radius: calc(var(--radius) - 1px);
+  }
+
+  /* Blocos de leitura longa não cruzam a tela de ponta a ponta. */
+  .texto-leitura { max-width: 72ch; }
+}
+
+@layer components {
+  /* Linha de tabela compacta, porém respirável. */
+  .tabela-operacional tbody tr { height: var(--linha-tabela); }
+}
+
+/* Nenhuma animação decorativa: quem pediu para reduzir movimento
+   não recebe nenhum. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }
