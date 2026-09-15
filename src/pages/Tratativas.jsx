@@ -7,6 +7,8 @@ import { createPageUrl } from '@/utils';
 import { formatDateSP, tipoTratativaLabels, prioridadeLabels, statusLabels, getSLAByType } from '@/components/utils/helpers';
 import PageHeader from '@/components/ui/PageHeader';
 import DataTable from '@/components/ui/DataTable';
+import ListaTratativas from '@/components/tratativas/ListaTratativas';
+import TratativaDetalhe from '@/pages/TratativaDetalhe';
 import StatusBadge from '@/components/ui/StatusBadge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -120,6 +122,46 @@ export default function Tratativas() {
   // Estado para exibir/ocultar excluídas (gestor e agentes)
   const [mostrarExcluidas, setMostrarExcluidas] = useState(false);
   const [selectedIds, setSelectedIds] = useState(new Set());
+
+  /*
+   * MASTER-DETAIL
+   *
+   * A regra de layout pede lista à esquerda e tratativa à direita, para não
+   * obrigar a ida e volta entre duas telas a cada caso. Mas a tabela completa
+   * tem doze colunas, filtros e ações em lote que não cabem num painel
+   * estreito — então os dois modos convivem, e quem trabalha escolhe.
+   *
+   * A escolha fica lembrada, e a tratativa aberta vai para a URL: assim
+   * recarregar a página não perde o caso, e dá para mandar o link para um
+   * colega já apontando para a tratativa certa.
+   */
+  const [modoDividido, setModoDividido] = useState(() => {
+    try { return localStorage.getItem('portalcrc_tratativas_modo') !== 'tabela'; }
+    catch { return true; }
+  });
+
+  const [abertaId, setAbertaId] = useState(() => {
+    try { return new URLSearchParams(window.location.search).get('aberta'); }
+    catch { return null; }
+  });
+
+  const alternarModo = () => {
+    setModoDividido((atual) => {
+      const proximo = !atual;
+      try { localStorage.setItem('portalcrc_tratativas_modo', proximo ? 'dividido' : 'tabela'); }
+      catch { /* sem armazenamento */ }
+      return proximo;
+    });
+  };
+
+  const abrirTratativa = (id) => {
+    setAbertaId(id);
+    // replaceState em vez de push: percorrer a fila com as setas não deve
+    // encher o histórico do navegador de uma entrada por tratativa.
+    const url = new URL(window.location.href);
+    if (id) url.searchParams.set('aberta', id); else url.searchParams.delete('aberta');
+    window.history.replaceState({}, '', url);
+  };
 
   const isAdmin = user?.role === 'admin' || isGestor;
 
@@ -527,6 +569,16 @@ export default function Tratativas() {
         icon={ClipboardList}
         actions={
           <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={alternarModo}
+              title={modoDividido ? 'Ver tabela completa' : 'Ver lista e detalhe lado a lado'}
+            >
+              {modoDividido
+                ? <><Rows3 className="mr-2 h-4 w-4" />Tabela completa</>
+                : <><Columns2 className="mr-2 h-4 w-4" />Lista e detalhe</>}
+            </Button>
             <ImportExportCSV tratativas={filteredTratativas} />
             <Button onClick={() => setDialogOpen(true)} className="bg-primary hover:bg-primary/90">
               <Plus className="w-4 h-4 mr-2" />
@@ -625,16 +677,51 @@ export default function Tratativas() {
         />
       )}
 
-      <DataTable
-        columns={allColumns}
-        data={filteredTratativas}
-        isLoading={isLoading}
-        emptyIcon={ClipboardList}
-        emptyTitle="Nenhuma tratativa encontrada"
-        emptyDescription="Registre a primeira tratativa clicando no botão acima."
-        emptyAction={() => setDialogOpen(true)}
-        emptyActionLabel="Nova Tratativa"
-      />
+      {modoDividido ? (
+        <div className="grid gap-4 lg:grid-cols-[340px_minmax(0,1fr)] xl:grid-cols-[380px_minmax(0,1fr)]">
+          <Card className="max-h-[calc(100vh-15rem)] overflow-y-auto border shadow-none">
+            <div className="sticky top-0 z-10 border-b border-border bg-card px-3 py-2">
+              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                {filteredTratativas.length} tratativa{filteredTratativas.length === 1 ? '' : 's'}
+              </p>
+            </div>
+            {isLoading ? (
+              <p className="px-4 py-8 text-center text-sm text-muted-foreground">Carregando...</p>
+            ) : (
+              <ListaTratativas
+                tratativas={filteredTratativas}
+                selecionadaId={abertaId}
+                onSelecionar={abrirTratativa}
+              />
+            )}
+          </Card>
+
+          <Card className="min-w-0 border p-4 shadow-none">
+            {abertaId ? (
+              <TratativaDetalhe idExterno={abertaId} embutido />
+            ) : (
+              <div className="flex h-full min-h-[24rem] flex-col items-center justify-center gap-2 text-center">
+                <ClipboardList className="h-8 w-8 text-muted-foreground" aria-hidden="true" />
+                <p className="text-sm font-medium text-foreground">Selecione uma tratativa</p>
+                <p className="max-w-xs text-sm text-muted-foreground">
+                  Escolha um caso na lista ao lado. As setas do teclado percorrem a fila.
+                </p>
+              </div>
+            )}
+          </Card>
+        </div>
+      ) : (
+        <DataTable
+          columns={allColumns}
+          data={filteredTratativas}
+          isLoading={isLoading}
+          emptyIcon={ClipboardList}
+          emptyTitle="Nenhuma tratativa encontrada"
+          emptyDescription="Registre a primeira tratativa clicando no botão acima."
+          emptyAction={() => setDialogOpen(true)}
+          emptyActionLabel="Nova Tratativa"
+        />
+      )}
 
       {/* Dialog de Nova Tratativa */}
       <Dialog open={dialogOpen} onOpenChange={(open) => {

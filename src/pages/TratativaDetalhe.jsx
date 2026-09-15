@@ -61,7 +61,22 @@ const STATUS_LABELS_EXTRA = {
   aguardando_financeiro: 'Aguardando Retorno Financeiro'
 };
 
-export default function TratativaDetalhe() {
+/**
+ * Detalhe da tratativa.
+ *
+ * Serve a dois contextos:
+ *   - rota própria (/TratativaDetalhe?id=...), para link direto e para a
+ *     busca global;
+ *   - painel da direita no master-detail da tela de Tratativas.
+ *
+ * `idExterno` vem do painel; sem ele, o id continua saindo da URL, então a
+ * rota antiga segue funcionando sem alteração.
+ *
+ * `embutido` esconde o cabeçalho de página: dentro do painel ele seria um
+ * segundo título competindo com o da tela, e o "Voltar" não faria sentido —
+ * não há para onde voltar quando a lista está ao lado.
+ */
+export default function TratativaDetalhe({ idExterno = null, embutido = false }) {
   const [confirmDialog, setConfirmDialog] = useState({ open: false, action: null, title: '', description: '' });
   const [dialogExclusao, setDialogExclusao] = useState(false);
   const [justificativaExclusao, setJustificativaExclusao] = useState('');
@@ -98,7 +113,7 @@ export default function TratativaDetalhe() {
   const [diasRestantes, setDiasRestantes] = useState(null);
 
   const urlParams = new URLSearchParams(window.location.search);
-  const tratativaId = urlParams.get('id');
+  const tratativaId = idExterno || urlParams.get('id');
 
   const queryClient = useQueryClient();
 
@@ -587,6 +602,7 @@ export default function TratativaDetalhe() {
 
   return (
     <div className="space-y-6">
+      {!embutido && (
       <PageHeader 
         title="Detalhe da Tratativa"
         subtitle={tratativa.id_interno || `#${tratativa.id?.substring(0, 8)}`}
@@ -605,6 +621,7 @@ export default function TratativaDetalhe() {
           )
         }
       />
+      )}
 
       {/* Alerta de Tratativa Excluída */}
       {isExcluida && (
