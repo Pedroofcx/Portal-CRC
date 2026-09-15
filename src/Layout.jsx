@@ -6,6 +6,7 @@ import { createPageUrl } from '@/utils';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import WelcomeScreen from '@/components/ui/WelcomeScreen';
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
+import BuscaGlobal from '@/components/ui/BuscaGlobal';
 import {
   LayoutDashboard as Home,
   Users,
@@ -19,9 +20,7 @@ import {
   Settings,
   LogOut,
   Menu,
-  X,
   ChevronDown,
-  Target,
   Award,
   Search,
   GraduationCap,
@@ -46,7 +45,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 
@@ -445,6 +443,9 @@ export default function Layout({ children, currentPageName }) {
       {/* Main Content - Wrapped in nested ErrorBoundary for page isolation */}
       <main className={`transition-[padding] duration-150 ${menuRecolhido ? 'lg:pl-16' : 'lg:pl-64'}`}>
         <div className="min-h-screen pt-16 lg:pt-0">
+          <div className="hidden border-b border-border bg-card px-8 py-3 lg:block">
+            <BuscaGlobal />
+          </div>
           <div className="p-4 lg:p-8">
             <ErrorBoundary>
               {children}

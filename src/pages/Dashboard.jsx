@@ -5,11 +5,11 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { formatDateSP, getCurrentTrimester } from '@/components/utils/helpers';
-import PageHeader from '@/components/ui/PageHeader';
 import StatCard from '@/components/ui/StatCard';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
-import MotivationalQuote from '@/components/ui/MotivationalQuote';
 import StatusBadge from '@/components/ui/StatusBadge';
+import CardBoasVindas from '@/components/dashboard/CardBoasVindas';
+import SecaoDashboard from '@/components/dashboard/SecaoDashboard';
 import MinhasAnotacoes from '@/components/dashboard/MinhasAnotacoes';
 import DistribuicaoTratativas from '@/components/dashboard/DistribuicaoTratativas';
 import RankingTrimestral from '@/components/dashboard/RankingTrimestral';
@@ -23,7 +23,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
-  LayoutDashboard,
   ClipboardList,
   TrendingUp,
   Clock,
@@ -35,11 +34,8 @@ import {
   Award,
   Target,
   MessageSquare,
-  X,
   CheckSquare,
   Star,
-  Phone,
-  MessageCircle,
   BarChart2,
   Eye,
   Activity,
@@ -581,87 +577,54 @@ export default function Dashboard() {
   return (
     <ErrorBoundary>
       <div className="space-y-8">
-      <PageHeader 
-        title={`Olá, ${user?.full_name?.split(' ')[0] || 'Usuário'}`}
-        subtitle={`${formatDateSP(new Date(), 'DD/MM/YYYY')} • ${isGestor ? 'Visão Gerencial' : 'Visão do Agente'}`}
-        icon={LayoutDashboard}
+      <CardBoasVindas
+        nome={user?.full_name}
+        papel={colaborador?.papel}
+        facilitadorInterno={colaborador?.is_facilitador_interno}
+        fiExpiracao={colaborador?.fi_expiracao}
       />
 
-      {/* Card Facilitador Interno */}
-      {colaborador?.is_facilitador_interno && (
-        <Card className="border-0 shadow-sm bg-gradient-to-r from-purple-600 to-blue-600 text-white">
-          <CardContent className="py-6">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
-                <Star className="w-6 h-6" />
-              </div>
-              <div>
-                <p className="font-bold text-lg">Você é Facilitador Interno</p>
-                <p className="text-white/90 text-sm">Durante este período, você está como Facilitador Interno da equipe</p>
-                {colaborador?.fi_expiracao && (
-                  <p className="text-white/70 text-xs mt-1">
-                    Válido até: {formatDateSP(colaborador.fi_expiracao, 'DD/MM/YYYY')}
-                  </p>
-                )}
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Frase Motivacional */}
-      <MotivationalQuote />
-
-      {/* Stats Cards — Gestor vê painel executivo, agente vê suas próprias tratativas */}
-      {isGestor ? (
-        <div className="space-y-4">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="cursor-pointer" onClick={() => navigate(createPageUrl('Tratativas') + '?status=critica')}>
-              <StatCard title="Críticas Abertas" value={stats.criticas} icon={AlertCircle} color="red" />
-            </div>
-            <div className="cursor-pointer" onClick={() => navigate(createPageUrl('Tratativas'))}>
-              <StatCard title="Fora do SLA" value={metricas?.foraSLA ?? 0} icon={Clock} color="amber" />
-            </div>
-            <div className="cursor-pointer" onClick={() => navigate(createPageUrl('Tratativas') + '?status=em_andamento')}>
-              <StatCard title="Em Andamento" value={stats.emAndamento} icon={Activity} color="blue" />
-            </div>
-            <div className="cursor-pointer" onClick={() => navigate(createPageUrl('Tratativas') + '?status=encerrada')}>
-              <StatCard title="Encerradas" value={stats.encerradas} icon={CheckCircle} color="green" />
-            </div>
-          </div>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <StatCard title="PDIs Ativos" value={metricas?.pdisAtivos ?? 0} icon={Target} color="purple" subtitle="em andamento" />
-            <StatCard title="Feedbacks do Mês" value={metricas?.feedbacksMes ?? 0} icon={MessageSquare} color="green" />
-            <StatCard title="Total Tratativas" value={stats.total} icon={ClipboardList} color="blue" />
-            <Card className="border-0 shadow-sm bg-gradient-to-br from-slate-700 to-slate-800 text-white">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-slate-300 text-sm">Performance Op.</span>
-                  <Zap className="w-4 h-4 text-yellow-400" />
-                </div>
-                <div className="text-3xl font-bold">
-                  {stats.total > 0 ? Math.round((stats.encerradas / stats.total) * 100) : 0}%
-                </div>
-                <p className="text-slate-400 text-xs mt-1">resolução geral</p>
-              </CardContent>
-            </Card>
-          </div>
+      {/* Indicadores — os quatro números que importam, iguais para os dois
+          papéis. O gestor recebe uma segunda faixa com o que só ele acompanha. */}
+      <SecaoDashboard
+        titulo="Panorama"
+        descricao={isGestor ? 'Operação inteira' : 'Suas tratativas'}
+        verMais={createPageUrl('Tratativas')}
+        verMaisLabel="Abrir tratativas"
+      >
+        <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+          <button type="button" className="text-left" onClick={() => navigate(createPageUrl('Tratativas'))}>
+            <StatCard title="Total de Tratativas" value={stats.total} icon={ClipboardList} tom="info" />
+          </button>
+          <button type="button" className="text-left" onClick={() => navigate(createPageUrl('Tratativas') + '?status=em_andamento')}>
+            <StatCard title="Em Andamento" value={stats.emAndamento} icon={Activity} tom="warning" />
+          </button>
+          <button type="button" className="text-left" onClick={() => navigate(createPageUrl('Tratativas') + '?status=encerrada')}>
+            <StatCard title="Encerradas" value={stats.encerradas} icon={CheckCircle} tom="success" />
+          </button>
+          <StatCard
+            title="Performance Operacional"
+            value={`${stats.total > 0 ? Math.round((stats.encerradas / stats.total) * 100) : 0}%`}
+            subtitle="resolução geral"
+            icon={Zap}
+            tom="info"
+          />
         </div>
-      ) : (
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="cursor-pointer" onClick={() => navigate(createPageUrl('Tratativas'))}>
-            <StatCard title="Total de Tratativas" value={stats.total} icon={ClipboardList} color="blue" />
+      </SecaoDashboard>
+
+      {isGestor && (
+        <SecaoDashboard titulo="Requer atenção" descricao="O que não pode esperar">
+          <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+            <button type="button" className="text-left" onClick={() => navigate(createPageUrl('Tratativas') + '?status=critica')}>
+              <StatCard title="Críticas Abertas" value={stats.criticas} icon={AlertCircle} tom="critical" />
+            </button>
+            <button type="button" className="text-left" onClick={() => navigate(createPageUrl('Tratativas'))}>
+              <StatCard title="Fora do SLA" value={metricas?.foraSLA ?? 0} icon={Clock} tom="critical" />
+            </button>
+            <StatCard title="PDIs Ativos" value={metricas?.pdisAtivos ?? 0} icon={Target} tom="info" subtitle="em andamento" />
+            <StatCard title="Feedbacks do Mês" value={metricas?.feedbacksMes ?? 0} icon={MessageSquare} tom="neutral" />
           </div>
-          <div className="cursor-pointer" onClick={() => navigate(createPageUrl('Tratativas') + '?status=em_andamento')}>
-            <StatCard title="Em Andamento" value={stats.emAndamento} icon={Clock} color="amber" />
-          </div>
-          <div className="cursor-pointer" onClick={() => navigate(createPageUrl('Tratativas') + '?status=encerrada')}>
-            <StatCard title="Encerradas" value={stats.encerradas} icon={CheckCircle} color="green" />
-          </div>
-          <div className="cursor-pointer" onClick={() => navigate(createPageUrl('Tratativas') + '?status=critica')}>
-            <StatCard title="Críticas Abertas" value={stats.criticas} icon={AlertCircle} color="red" />
-          </div>
-        </div>
+        </SecaoDashboard>
       )}
 
       {/* Card Horas de Implantação */}
