@@ -10,11 +10,11 @@ está no documento de migração compartilhado com o responsável pelo projeto.
 
 | Fase | O quê | Situação |
 |------|-------|----------|
-| 00 | Recuperar os dados do Base44 | **Pendente** — acesso ao construtor perdido, ver trilhas abaixo |
+| 00 | Recuperar os dados do Base44 | **Concluída** — 2.269 registros importados e conferidos |
 | 01 | Banco novo a partir dos schemas | **Concluída** — 48 tabelas aplicadas no Supabase |
 | 02 | Adaptador (`src/api/db.js`) | **Concluída** — app roda no Supabase, com login próprio |
 | 03 | Segurança (RLS) | **Concluída** — 9 testes de invasão passando |
-| 04 | Regras de negócio no servidor | Próxima |
+| 04 | Regras de negócio no servidor | Próxima — agora com dados reais para validar |
 | 05 | Frontend e design | Não iniciada |
 | 06 | Publicação e backup automático | Não iniciada |
 
