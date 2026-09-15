@@ -74,8 +74,10 @@
     --input: 214 18% 84%;
     --ring: 221 83% 53%;            /* foco: azul institucional, nítido */
 
-    /* Cantos discretos. As regras proíbem arredondamento exagerado. */
-    --radius: 0.25rem;
+    /* Cantos macios, sem exagero. A referência de design pedida usa
+       cantos mais generosos que as regras originais; 8px é o ponto que
+       moderniza sem virar "pílula". Cards usam 12px (rounded-xl). */
+    --radius: 0.5rem;
 
     /* Altura de linha de tabela: compacta, porém respirável. */
     --linha-tabela: 44px;
@@ -93,14 +95,20 @@
     --chart-5: 262 52% 52%;
 
     /* --- Menu lateral ------------------------------------------- */
-    --sidebar-background: 217 33% 17%;
-    --sidebar-foreground: 210 20% 92%;
+    /* Claro, como na referência: a navegação recua e o conteúdo de
+       trabalho fica sendo a parte mais escura e densa da tela. */
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 0 0% 20%;
     --sidebar-primary: 221 83% 53%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 217 30% 24%;
-    --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 217 25% 27%;
+    --sidebar-accent: 214 95% 96%;
+    --sidebar-accent-foreground: 221 83% 40%;
+    --sidebar-border: 214 18% 90%;
     --sidebar-ring: 221 83% 53%;
+
+    /* Larguras do menu lateral, para a transição ter um só lugar. */
+    --sidebar-largura: 16rem;
+    --sidebar-largura-recolhida: 4rem;
   }
 }
 

@@ -60,3 +60,44 @@ O registro de tratativas exige baixo esforço cognitivo e acesso rápido ao hist
 ## 6. Microinterações Funcionais
 * **Feedback de Ação:** Toda ação (salvar, enviar) deve mudar o botão para estado de `Loading` e, ao concluir, exibir um *Toast* (notificação no canto da tela) verde e discreto confirmando o sucesso.
 * **Zero Animações Decorativas:** Transições devem ser rápidas (máximo `150ms` a `200ms`). Em sistemas de trabalho diário, animações longas irritam e atrasam o usuário.
+---
+
+## 7. Revisão de 15/09/2026 — Direção visual
+
+Esta seção registra uma mudança de direção decidida pelo responsável pelo
+produto, que **altera regras das seções anteriores**. Ela existe para o
+documento não contradizer o que o sistema faz.
+
+**Motivação:** foi apresentada uma referência de dashboard moderno (padrão SaaS
+contemporâneo: menu lateral claro e recolhível, conteúdo em cards agrupados por
+categoria, cantos macios, respiro generoso, card de destaque com gradiente).
+
+### O que muda em relação à seção 1 e 5
+
+* **Cantos:** o raio base sobe de 4px para **8px**; cards podem usar **12px**.
+  A proibição passa a valer para o exagero (pílulas, raios acima de 16px em
+  containers), não para o arredondamento em si.
+* **Menu lateral:** passa a ser **claro** (fundo branco), com a navegação
+  recuando visualmente para o conteúdo de trabalho ganhar peso. Deve ser
+  **recolhível**, com a preferência lembrada entre sessões, e permanecer
+  **dividido em categorias**.
+* **Respiro:** a regra "evite grandes áreas vazias" continua valendo para
+  **telas operacionais** (listas, formulários, tratativas). No **Dashboard**,
+  que é tela de leitura e panorama, o respiro é permitido.
+* **Gradiente:** permitido **exclusivamente** em cards de destaque do
+  Dashboard. Continua proibido em botões, cabeçalhos, ícones de indicador,
+  selos de status e qualquer elemento de tela operacional.
+
+### O que NÃO muda
+
+Estas continuam sendo regras absolutas, porque servem à operação e não à
+estética:
+
+* Densidade de tabela entre 40px e 48px por linha.
+* Labels permanentes; placeholder nunca substitui label.
+* Validação no `onBlur`, com mensagem literal.
+* Formulário inteiro operável por `Tab` e `Enter`, com foco visível.
+* Vermelho restrito a ação destrutiva e à marca Meteoro.
+* Sem emoji na interface.
+* Transições de no máximo 200ms; nenhuma animação decorativa.
+* Reaproveitar componente existente em vez de criar um novo equivalente.

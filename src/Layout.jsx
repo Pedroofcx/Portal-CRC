@@ -33,7 +33,9 @@ import {
   Palmtree,
   Clock,
   ShieldCheck,
-  Wrench
+  Wrench,
+  PanelLeft,
+  PanelLeftClose
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -103,7 +105,7 @@ const menuItems = [
   }
 ];
 
-function Sidebar({ user, colaborador, currentPageName, onNavigate, isMobile = false, permissoesModulo = [] }) {
+function Sidebar({ user, colaborador, currentPageName, onNavigate, isMobile = false, permissoesModulo = [], recolhido = false, onAlternar }) {
   const isGestor = colaborador?.papel === 'gestor';
   const isFI = colaborador?.is_facilitador_interno;
 
@@ -122,22 +124,39 @@ function Sidebar({ user, colaborador, currentPageName, onNavigate, isMobile = fa
   };
 
   return (
-    <div className="flex h-full flex-col bg-sidebar text-sidebar-foreground">
+    <div className="flex h-full flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground">
       {/* Logo */}
-      <div className="border-b border-sidebar-border px-4 py-4">
-        <Link to={createPageUrl('Dashboard')} className="flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded bg-sidebar-primary text-base font-bold text-sidebar-primary-foreground">
+      <div className="flex items-center gap-2 border-b border-sidebar-border px-3 py-3">
+        <Link
+          to={createPageUrl('Dashboard')}
+          className="flex min-w-0 flex-1 items-center gap-2.5"
+          title={recolhido ? 'Portal CRC' : undefined}
+        >
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-sidebar-primary text-base font-bold text-sidebar-primary-foreground">
             C
           </div>
-          <div className="min-w-0">
-            <p className="truncate text-sm font-semibold tracking-tight text-sidebar-foreground">Portal CRC</p>
-            <p className="truncate text-xs text-sidebar-foreground/55">Central de Relacionamento</p>
-          </div>
+          {!recolhido && (
+            <div className="min-w-0">
+              <p className="truncate text-sm font-semibold tracking-tight text-sidebar-foreground">Portal CRC</p>
+              <p className="truncate text-xs text-sidebar-foreground/55">Central de Relacionamento</p>
+            </div>
+          )}
         </Link>
+        {!isMobile && (
+          <button
+            type="button"
+            onClick={onAlternar}
+            aria-label={recolhido ? 'Expandir menu' : 'Recolher menu'}
+            title={recolhido ? 'Expandir menu' : 'Recolher menu'}
+            className="shrink-0 rounded-md p-1.5 text-sidebar-foreground/50 transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+          >
+            {recolhido ? <PanelLeft className="h-4 w-4" /> : <PanelLeftClose className="h-4 w-4" />}
+          </button>
+        )}
       </div>
 
       {/* FI Card */}
-      {isFI && (
+      {isFI && !recolhido && (
         <div className="mx-3 mt-3 flex items-center gap-2 rounded border-l-2 border-sidebar-primary bg-sidebar-accent px-3 py-2">
           <Star className="h-4 w-4 shrink-0 text-sidebar-primary" aria-hidden="true" />
           <span className="text-sm font-medium text-sidebar-accent-foreground">Você é o Facilitador Interno</span>
@@ -158,9 +177,13 @@ function Sidebar({ user, colaborador, currentPageName, onNavigate, isMobile = fa
 
             return (
               <div key={section.section}>
-                <p className="mb-1.5 px-3 text-[11px] font-semibold uppercase tracking-wider text-sidebar-foreground/45">
-                  {section.section}
-                </p>
+                {recolhido ? (
+                  <div className="mx-3 mb-2 border-t border-sidebar-border" aria-hidden="true" />
+                ) : (
+                  <p className="mb-1.5 px-3 text-[11px] font-semibold uppercase tracking-wider text-sidebar-foreground/45">
+                    {section.section}
+                  </p>
+                )}
                 <div className="space-y-1">
                   {visibleItems.map((item) => {
                     const isActive = currentPageName === item.page;
@@ -170,16 +193,18 @@ function Sidebar({ user, colaborador, currentPageName, onNavigate, isMobile = fa
                         to={createPageUrl(item.page)}
                         onClick={onNavigate}
                         aria-current={isActive ? 'page' : undefined}
+                        title={recolhido ? item.name : undefined}
                         className={`
-                          flex items-center gap-3 rounded border-l-2 px-3 py-2 transition-colors
+                          flex items-center gap-3 rounded-lg py-2 transition-colors
+                          ${recolhido ? 'justify-center px-0' : 'px-3'}
                           ${isActive
-                            ? 'border-sidebar-primary bg-sidebar-accent font-medium text-sidebar-accent-foreground'
-                            : 'border-transparent text-sidebar-foreground/70 hover:bg-sidebar-accent/60 hover:text-sidebar-foreground'
+                            ? 'bg-sidebar-accent font-medium text-sidebar-accent-foreground'
+                            : 'text-sidebar-foreground/70 hover:bg-sidebar-accent/60 hover:text-sidebar-foreground'
                           }
                         `}
                       >
                         <item.icon className="h-[18px] w-[18px] shrink-0" aria-hidden="true" />
-                        <span className="truncate text-sm">{item.name}</span>
+                        {!recolhido && <span className="truncate text-sm">{item.name}</span>}
                       </Link>
                     );
                   })}
@@ -194,18 +219,25 @@ function Sidebar({ user, colaborador, currentPageName, onNavigate, isMobile = fa
       <div className="border-t border-sidebar-border p-3">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <button className="flex w-full items-center gap-3 rounded p-2 transition-colors hover:bg-sidebar-accent">
+            <button
+              title={recolhido ? (user?.full_name || 'Usuário') : undefined}
+              className={`flex w-full items-center gap-3 rounded-lg p-2 transition-colors hover:bg-sidebar-accent ${recolhido ? 'justify-center' : ''}`}
+            >
               <Avatar className="h-9 w-9">
                 <AvatarImage src={colaborador?.foto_url} />
                 <AvatarFallback className="bg-sidebar-primary text-sm text-sidebar-primary-foreground">
                   {user?.full_name?.charAt(0) || 'U'}
                 </AvatarFallback>
               </Avatar>
-              <div className="flex-1 text-left">
-                <p className="truncate text-sm font-medium text-sidebar-foreground">{user?.full_name || 'Usuário'}</p>
-                <p className="text-xs capitalize text-sidebar-foreground/55">{colaborador?.papel || 'Agente'}</p>
-              </div>
-              <ChevronDown className="h-4 w-4 text-sidebar-foreground/55" aria-hidden="true" />
+              {!recolhido && (
+                <>
+                  <div className="flex-1 text-left">
+                    <p className="truncate text-sm font-medium text-sidebar-foreground">{user?.full_name || 'Usuário'}</p>
+                    <p className="text-xs capitalize text-sidebar-foreground/55">{colaborador?.papel || 'Agente'}</p>
+                  </div>
+                  <ChevronDown className="h-4 w-4 text-sidebar-foreground/55" aria-hidden="true" />
+                </>
+              )}
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56">
@@ -229,6 +261,22 @@ function Sidebar({ user, colaborador, currentPageName, onNavigate, isMobile = fa
 
 export default function Layout({ children, currentPageName }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  // Menu recolhido: preferência de quem usa, lembrada entre sessões.
+  // Em navegador anônimo ou com armazenamento bloqueado, o acesso falha —
+  // por isso o try/catch: a preferência é conveniência, não pode derrubar a tela.
+  const [menuRecolhido, setMenuRecolhido] = useState(() => {
+    try { return localStorage.getItem('portalcrc_menu_recolhido') === '1'; }
+    catch { return false; }
+  });
+
+  const alternarMenu = () => {
+    setMenuRecolhido((atual) => {
+      const proximo = !atual;
+      try { localStorage.setItem('portalcrc_menu_recolhido', proximo ? '1' : '0'); } catch { /* sem armazenamento */ }
+      return proximo;
+    });
+  };
   const [showWelcome, setShowWelcome] = useState(false);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -342,20 +390,24 @@ export default function Layout({ children, currentPageName }) {
         />
       )}
       
-      <div className="min-h-screen bg-slate-50">
+      <div className="min-h-screen bg-background">
       {/* Desktop Sidebar */}
-      <aside className="hidden lg:fixed lg:inset-y-0 lg:left-0 lg:z-50 lg:block lg:w-64">
-        <Sidebar 
-          user={user} 
-          colaborador={colaborador} 
+      <aside
+        className={`hidden transition-[width] duration-150 lg:fixed lg:inset-y-0 lg:left-0 lg:z-50 lg:block ${menuRecolhido ? 'lg:w-16' : 'lg:w-64'}`}
+      >
+        <Sidebar
+          user={user}
+          colaborador={colaborador}
           currentPageName={currentPageName}
           permissoesModulo={permissoesModulo}
+          recolhido={menuRecolhido}
+          onAlternar={alternarMenu}
         />
       </aside>
 
       {/* Mobile Header & Sidebar */}
       <div className="lg:hidden">
-        <div className="fixed top-0 left-0 right-0 z-40 bg-white border-b border-slate-200 px-4 py-3">
+        <div className="fixed left-0 right-0 top-0 z-40 border-b border-border bg-card px-4 py-3">
           <div className="flex items-center justify-between">
             <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
               <SheetTrigger asChild>
@@ -375,14 +427,14 @@ export default function Layout({ children, currentPageName }) {
               </SheetContent>
             </Sheet>
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">C</span>
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
+                <span className="text-sm font-bold text-primary-foreground">C</span>
               </div>
-              <span className="font-bold text-slate-900">Portal CRC</span>
+              <span className="font-semibold text-foreground">Portal CRC</span>
             </div>
             <Avatar className="h-8 w-8">
               <AvatarImage src={colaborador?.foto_url} />
-              <AvatarFallback className="bg-blue-600 text-white text-xs">
+              <AvatarFallback className="bg-primary text-xs text-primary-foreground">
                 {user?.full_name?.charAt(0) || 'U'}
               </AvatarFallback>
             </Avatar>
@@ -391,7 +443,7 @@ export default function Layout({ children, currentPageName }) {
       </div>
 
       {/* Main Content - Wrapped in nested ErrorBoundary for page isolation */}
-      <main className="lg:pl-64">
+      <main className={`transition-[padding] duration-150 ${menuRecolhido ? 'lg:pl-16' : 'lg:pl-64'}`}>
         <div className="min-h-screen pt-16 lg:pt-0">
           <div className="p-4 lg:p-8">
             <ErrorBoundary>
