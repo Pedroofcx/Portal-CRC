@@ -1,1 +1,6 @@
-export const db = { auth: { isAuthenticated: async ()=>false, me: async ()=>null }, entities: new Proxy({}, { get:()=>({ filter:async()=>[], get:async()=>null, create:async()=>({}), update:async()=>({}), delete:async()=>({}) }) }), integrations:{ Core:{ UploadFile:async()=>({ file_url:'' }) } } }; export const base44=db; export default db;
+/**
+ * Compatibilidade. O cliente real agora é o adaptador em src/api/db.js.
+ * Este arquivo existe só para não quebrar importações antigas.
+ */
+export { db, base44, entities, auth, integrations, supabase } from './db';
+export { default } from './db';

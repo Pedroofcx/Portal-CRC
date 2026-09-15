@@ -11,8 +11,8 @@ está no documento de migração compartilhado com o responsável pelo projeto.
 | Fase | O quê | Situação |
 |------|-------|----------|
 | 00 | Recuperar os dados do Base44 | **Pendente** — acesso ao construtor perdido, ver trilhas abaixo |
-| 01 | Banco novo a partir dos schemas | **Em andamento** — SQL gerado, falta aplicar no Supabase |
-| 02 | Adaptador (`src/api/db.js`) | Não iniciada |
+| 01 | Banco novo a partir dos schemas | **Concluída** — 48 tabelas aplicadas no Supabase |
+| 02 | Adaptador (`src/api/db.js`) | **Em andamento** — escrito, build passa, falta testar com dados |
 | 03 | Segurança (RLS) | Não iniciada |
 | 04 | Regras de negócio no servidor | Não iniciada |
 | 05 | Frontend e design | Não iniciada |
@@ -52,7 +52,12 @@ Se um schema mudar, rode de novo. Editar o SQL diretamente faz o próximo
    exposta na API pública; este arquivo garante que isso nunca aconteça por
    descuido. As regras de quem vê o quê entram na Fase 03.
 
-3. **`03_restricoes.sql`** — campos obrigatórios (`NOT NULL`).
+3. **`03_ajuste_datas.sql`** — dá `default now()` a `created_date` e `updated_date`
+   em bancos criados antes desse ajuste. O app ordena por `-created_date` em
+   108 chamadas; sem default, todo registro novo nasceria com data nula e
+   apareceria fora de ordem. Seguro rodar mais de uma vez.
+
+4. **`99_restricoes_pos_importacao.sql`** — campos obrigatórios (`NOT NULL`).
    **Aplicar somente depois da importação dos dados.** Dado histórico costuma
    ter campos em branco que hoje são obrigatórios; se estas restrições
    existissem antes, a importação falharia linha a linha.
@@ -75,5 +80,16 @@ O acesso ao construtor foi perdido. Trilhas de recuperação, em ordem de custo:
 
 ```bash
 npm install
+cp .env.local.example .env.local   # e preencha com os dados do Supabase
 npm run dev
 ```
+
+## Pendências conhecidas
+
+- **`src/pages/JornadaCliente.jsx`** — o export do Base44 truncou o arquivo na
+  linha 50. O trecho recuperado está em `JornadaCliente.jsx.truncado`; os
+  componentes em `src/components/jornada/` estão todos íntegros. A página hoje
+  mostra um aviso no lugar do conteúdo.
+- **`InvokeLLM`** — falha com mensagem explícita. Passa a rodar numa Edge
+  Function na Fase 04, porque a chave da API não pode ficar no navegador.
+  Dois pontos de uso: `ResumoIAEtapa` e `RelatorioJornadaDiretoria`.

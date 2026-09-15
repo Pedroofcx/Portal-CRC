@@ -1,0 +1,105 @@
+-- ============================================================
+-- PORTAL CRC — gerado por ferramentas/gerar-sql.py
+-- Não edite à mão: altere o schema ou o gerador e rode de novo.
+-- ============================================================
+
+
+-- Dá default às datas do sistema em bancos já criados.
+-- Seguro rodar mais de uma vez; inofensivo em banco novo.
+
+alter table public."acionamento_lider_tecnico" alter column "created_date" set default now();
+alter table public."acionamento_lider_tecnico" alter column "updated_date" set default now();
+alter table public."acionamento_n2" alter column "created_date" set default now();
+alter table public."acionamento_n2" alter column "updated_date" set default now();
+alter table public."agente_n2" alter column "created_date" set default now();
+alter table public."agente_n2" alter column "updated_date" set default now();
+alter table public."anotacao_pessoal" alter column "created_date" set default now();
+alter table public."anotacao_pessoal" alter column "updated_date" set default now();
+alter table public."apuracao" alter column "created_date" set default now();
+alter table public."apuracao" alter column "updated_date" set default now();
+alter table public."aviso" alter column "created_date" set default now();
+alter table public."aviso" alter column "updated_date" set default now();
+alter table public."aviso_leitura" alter column "created_date" set default now();
+alter table public."aviso_leitura" alter column "updated_date" set default now();
+alter table public."categoria_tratativa" alter column "created_date" set default now();
+alter table public."categoria_tratativa" alter column "updated_date" set default now();
+alter table public."ciclo_ferias" alter column "created_date" set default now();
+alter table public."ciclo_ferias" alter column "updated_date" set default now();
+alter table public."ciclo_trimestral" alter column "created_date" set default now();
+alter table public."ciclo_trimestral" alter column "updated_date" set default now();
+alter table public."colaborador" alter column "created_date" set default now();
+alter table public."colaborador" alter column "updated_date" set default now();
+alter table public."config_estorno" alter column "created_date" set default now();
+alter table public."config_estorno" alter column "updated_date" set default now();
+alter table public."configuracao" alter column "created_date" set default now();
+alter table public."configuracao" alter column "updated_date" set default now();
+alter table public."configuracao_home_office" alter column "created_date" set default now();
+alter table public."configuracao_home_office" alter column "updated_date" set default now();
+alter table public."curso" alter column "created_date" set default now();
+alter table public."curso" alter column "updated_date" set default now();
+alter table public."curso_matricula" alter column "created_date" set default now();
+alter table public."curso_matricula" alter column "updated_date" set default now();
+alter table public."distribuicao_tratativa" alter column "created_date" set default now();
+alter table public."distribuicao_tratativa" alter column "updated_date" set default now();
+alter table public."elegibilidade_premio" alter column "created_date" set default now();
+alter table public."elegibilidade_premio" alter column "updated_date" set default now();
+alter table public."equipe" alter column "created_date" set default now();
+alter table public."equipe" alter column "updated_date" set default now();
+alter table public."escala" alter column "created_date" set default now();
+alter table public."escala" alter column "updated_date" set default now();
+alter table public."escala_atribuicao" alter column "created_date" set default now();
+alter table public."escala_atribuicao" alter column "updated_date" set default now();
+alter table public."escala_turno" alter column "created_date" set default now();
+alter table public."escala_turno" alter column "updated_date" set default now();
+alter table public."estorno_parcial" alter column "created_date" set default now();
+alter table public."estorno_parcial" alter column "updated_date" set default now();
+alter table public."etapa_jornada" alter column "created_date" set default now();
+alter table public."etapa_jornada" alter column "updated_date" set default now();
+alter table public."frase_motivacional" alter column "created_date" set default now();
+alter table public."frase_motivacional" alter column "updated_date" set default now();
+alter table public."hansei_comentario" alter column "created_date" set default now();
+alter table public."hansei_comentario" alter column "updated_date" set default now();
+alter table public."hansei_envio" alter column "created_date" set default now();
+alter table public."hansei_envio" alter column "updated_date" set default now();
+alter table public."lider_tecnico" alter column "created_date" set default now();
+alter table public."lider_tecnico" alter column "updated_date" set default now();
+alter table public."log_auditoria" alter column "created_date" set default now();
+alter table public."log_auditoria" alter column "updated_date" set default now();
+alter table public."motivo_tratativa" alter column "created_date" set default now();
+alter table public."motivo_tratativa" alter column "updated_date" set default now();
+alter table public."observacao" alter column "created_date" set default now();
+alter table public."observacao" alter column "updated_date" set default now();
+alter table public."oraculo_lancamento" alter column "created_date" set default now();
+alter table public."oraculo_lancamento" alter column "updated_date" set default now();
+alter table public."oraculo_palavra" alter column "created_date" set default now();
+alter table public."oraculo_palavra" alter column "updated_date" set default now();
+alter table public."pdi" alter column "created_date" set default now();
+alter table public."pdi" alter column "updated_date" set default now();
+alter table public."permissao_modulo" alter column "created_date" set default now();
+alter table public."permissao_modulo" alter column "updated_date" set default now();
+alter table public."pesquisa" alter column "created_date" set default now();
+alter table public."pesquisa" alter column "updated_date" set default now();
+alter table public."plano_setorial" alter column "created_date" set default now();
+alter table public."plano_setorial" alter column "updated_date" set default now();
+alter table public."pontuacao" alter column "created_date" set default now();
+alter table public."pontuacao" alter column "updated_date" set default now();
+alter table public."pop" alter column "created_date" set default now();
+alter table public."pop" alter column "updated_date" set default now();
+alter table public."resposta_pesquisa" alter column "created_date" set default now();
+alter table public."resposta_pesquisa" alter column "updated_date" set default now();
+alter table public."saldo_ferias" alter column "created_date" set default now();
+alter table public."saldo_ferias" alter column "updated_date" set default now();
+alter table public."skill_mestre" alter column "created_date" set default now();
+alter table public."skill_mestre" alter column "updated_date" set default now();
+alter table public."solicitacao_apoio" alter column "created_date" set default now();
+alter table public."solicitacao_apoio" alter column "updated_date" set default now();
+alter table public."solicitacao_ferias" alter column "created_date" set default now();
+alter table public."solicitacao_ferias" alter column "updated_date" set default now();
+alter table public."solicitacao_home_office" alter column "created_date" set default now();
+alter table public."solicitacao_home_office" alter column "updated_date" set default now();
+alter table public."tipo_observacao" alter column "created_date" set default now();
+alter table public."tipo_observacao" alter column "updated_date" set default now();
+alter table public."tipo_tratativa" alter column "created_date" set default now();
+alter table public."tipo_tratativa" alter column "updated_date" set default now();
+alter table public."tratativa" alter column "created_date" set default now();
+alter table public."tratativa" alter column "updated_date" set default now();

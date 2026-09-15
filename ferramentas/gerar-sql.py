@@ -9,7 +9,8 @@ Uso:  python ferramentas/gerar-sql.py
 Gera, em supabase/migrations/:
   01_tabelas.sql       tabelas, tipos, defaults, índices
   02_rls.sql           bloqueio total (nada é público por acidente)
-  03_restricoes.sql    NOT NULL e chaves estrangeiras — aplicar DEPOIS da importação
+  03_ajuste_datas.sql  patch para bancos criados antes deste ajuste
+  99_restricoes_pos_importacao.sql   NOT NULL — aplicar DEPOIS da importação
 """
 
 import json
@@ -125,8 +126,8 @@ def main() -> None:
         linhas = [
             '  "id" uuid primary key default gen_random_uuid()',
             '  "base44_id" text unique',            # a ponte com o sistema antigo
-            '  "created_date" timestamptz',         # datas originais do Base44
-            '  "updated_date" timestamptz',
+            '  "created_date" timestamptz not null default now()',  # o app ordena por este campo
+            '  "updated_date" timestamptz not null default now()',
             '  "created_by" text',
             '  "importado_em" timestamptz',
             '  "criado_em" timestamptz not null default now()',
@@ -172,7 +173,31 @@ def main() -> None:
 
     (SAIDA / "01_tabelas.sql").write_text("\n".join(tabelas_sql), encoding="utf-8")
     (SAIDA / "02_rls.sql").write_text("\n".join(rls_sql) + "\n", encoding="utf-8")
-    (SAIDA / "03_restricoes.sql").write_text("\n".join(restricoes_sql) + "\n", encoding="utf-8")
+    (SAIDA / "99_restricoes_pos_importacao.sql").write_text("\n".join(restricoes_sql) + "\n", encoding="utf-8")
+
+    # Patch para bancos que já rodaram a versão anterior do 01_tabelas.sql
+    patch = [
+        cabecalho,
+        "-- Dá default às datas do sistema em bancos já criados.\n"
+        "-- Seguro rodar mais de uma vez; inofensivo em banco novo.\n",
+    ]
+    for _, tab, _, _ in resumo:
+        for col in ("created_date", "updated_date"):
+            patch.append(f'alter table public."{tab}" alter column "{col}" set default now();')
+    (SAIDA / "03_ajuste_datas.sql").write_text("\n".join(patch) + "\n", encoding="utf-8")
+
+    # Mapa entidade -> tabela, consumido pelo adaptador (src/api/db.js).
+    # Gerado junto com o SQL para que os dois nunca discordem.
+    mapa = RAIZ / "src" / "api" / "tabelas.js"
+    linhas_mapa = [
+        "// Gerado por ferramentas/gerar-sql.py — não edite à mão.",
+        "// Mapa: nome da entidade no Base44 -> nome da tabela no Postgres.",
+        "export const TABELAS = {",
+    ]
+    for ent, tab, _, _ in resumo:
+        linhas_mapa.append(f"  {ent}: '{tab}',")
+    linhas_mapa += ["};", ""]
+    mapa.write_text("\n".join(linhas_mapa), encoding="utf-8")
 
     largura = max(len(e) for e, _, _, _ in resumo)
     print(f"{len(resumo)} tabelas geradas em supabase/migrations/\n")

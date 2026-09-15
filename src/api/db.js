@@ -1,0 +1,267 @@
+/**
+ * PORTAL CRC — ADAPTADOR SUPABASE
+ *
+ * Reproduz a interface do SDK do Base44 sobre o Postgres do Supabase.
+ * É o único arquivo do sistema que sabe que o banco mudou: as 38 páginas
+ * continuam chamando db.entities.Tratativa.filter(...) exatamente como antes.
+ *
+ * Superfície reproduzida (levantada do código real, nada a mais):
+ *   entities.<Entidade>.list(sort?, limit?)
+ *   entities.<Entidade>.filter(where, sort?, limit?)
+ *   entities.<Entidade>.get(id)
+ *   entities.<Entidade>.create(dados)
+ *   entities.<Entidade>.update(id, dados)
+ *   entities.<Entidade>.delete(id)
+ *   entities.<Entidade>.bulkCreate([dados])
+ *   auth.me() | auth.isAuthenticated() | auth.logout() | auth.redirectToLogin()
+ *   integrations.Core.UploadFile({ file })
+ *   integrations.Core.InvokeLLM(...)
+ */
+
+import { createClient } from '@supabase/supabase-js';
+import { TABELAS } from './tabelas';
+
+const URL = import.meta.env.VITE_SUPABASE_URL;
+const CHAVE = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+if (!URL || !CHAVE) {
+  throw new Error(
+    'Faltam VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY no arquivo .env.local. ' +
+    'Copie .env.local.example e preencha com os valores do painel do Supabase ' +
+    '(Project Settings > API).'
+  );
+}
+
+export const supabase = createClient(URL, CHAVE, {
+  auth: { persistSession: true, autoRefreshToken: true },
+});
+
+/** Teto do PostgREST por requisição. Acima disso é preciso paginar. */
+const PAGINA = 1000;
+
+/**
+ * Traduz o sort do Base44 ('-created_date') para o do PostgREST.
+ * Prefixo '-' significa decrescente.
+ */
+function aplicarOrdem(consulta, sort) {
+  if (!sort) return consulta;
+  const desc = sort.startsWith('-');
+  const campo = desc ? sort.slice(1) : sort;
+  return consulta.order(campo, { ascending: !desc, nullsFirst: false });
+}
+
+/**
+ * Remove chaves com valor undefined. O Base44 ignorava; o PostgREST
+ * transformaria em NULL e apagaria o valor que já estava gravado.
+ */
+function limpar(dados) {
+  const saida = {};
+  for (const [k, v] of Object.entries(dados || {})) {
+    if (v !== undefined) saida[k] = v;
+  }
+  delete saida.id;            // o id é do banco, nunca do cliente
+  delete saida.criado_em;
+  delete saida.atualizado_em;
+  return saida;
+}
+
+function erro(acao, entidade, e) {
+  const msg = e?.message || String(e);
+  throw new Error(`[${entidade}.${acao}] ${msg}`);
+}
+
+function criarEntidade(entidade) {
+  const tabela = TABELAS[entidade];
+
+  /**
+   * Busca paginada.
+   *
+   * Detalhe que importa: 85 chamadas no código usam list() SEM limite.
+   * No Base44 isso trazia tudo. No PostgREST, o teto é 1000 por requisição —
+   * sem paginar, uma tela mostraria dados parciais em silêncio, que é a
+   * pior forma de erro possível num sistema de indicadores.
+   */
+  async function buscar({ where, sort, limit, acao }) {
+    const linhas = [];
+    let inicio = 0;
+
+    while (true) {
+      const restante = limit == null ? PAGINA : Math.min(PAGINA, limit - linhas.length);
+      if (restante <= 0) break;
+
+      let consulta = supabase.from(tabela).select('*');
+      if (where) {
+        for (const [campo, valor] of Object.entries(where)) {
+          consulta = valor === null ? consulta.is(campo, null) : consulta.eq(campo, valor);
+        }
+      }
+      consulta = aplicarOrdem(consulta, sort);
+      consulta = consulta.range(inicio, inicio + restante - 1);
+
+      const { data, error } = await consulta;
+      if (error) erro(acao, entidade, error);
+
+      linhas.push(...data);
+      if (data.length < restante) break;   // acabaram os registros
+      inicio += data.length;
+    }
+
+    return linhas;
+  }
+
+  return {
+    list: (sort, limit) => buscar({ sort, limit, acao: 'list' }),
+
+    filter: (where = {}, sort, limit) => buscar({ where, sort, limit, acao: 'filter' }),
+
+    async get(id) {
+      const { data, error } = await supabase
+        .from(tabela).select('*').eq('id', id).maybeSingle();
+      if (error) erro('get', entidade, error);
+      return data;
+    },
+
+    async create(dados) {
+      const { data, error } = await supabase
+        .from(tabela).insert(limpar(dados)).select().single();
+      if (error) erro('create', entidade, error);
+      return data;
+    },
+
+    async update(id, dados) {
+      const { data, error } = await supabase
+        .from(tabela)
+        .update({ ...limpar(dados), updated_date: new Date().toISOString(), atualizado_em: new Date().toISOString() })
+        .eq('id', id).select().single();
+      if (error) erro('update', entidade, error);
+      return data;
+    },
+
+    async delete(id) {
+      const { error } = await supabase.from(tabela).delete().eq('id', id);
+      if (error) erro('delete', entidade, error);
+      return { success: true };
+    },
+
+    async bulkCreate(registros) {
+      if (!registros?.length) return [];
+      const criados = [];
+      // Em lotes, para não estourar o limite de tamanho da requisição.
+      for (let i = 0; i < registros.length; i += 500) {
+        const lote = registros.slice(i, i + 500).map(limpar);
+        const { data, error } = await supabase.from(tabela).insert(lote).select();
+        if (error) erro('bulkCreate', entidade, error);
+        criados.push(...data);
+      }
+      return criados;
+    },
+  };
+}
+
+/** Cache das entidades já construídas. */
+const cache = {};
+
+export const entities = new Proxy({}, {
+  get(_, entidade) {
+    if (typeof entidade !== 'string') return undefined;
+    if (!TABELAS[entidade]) {
+      throw new Error(
+        `Entidade desconhecida: "${entidade}". ` +
+        `As entidades válidas estão em src/api/tabelas.js, gerado a partir de base44/entities/.`
+      );
+    }
+    return (cache[entidade] ||= criarEntidade(entidade));
+  },
+});
+
+/* ------------------------------------------------------------------ *
+ * AUTENTICAÇÃO
+ * ------------------------------------------------------------------ */
+
+export const auth = {
+  /**
+   * Devolve o usuário no formato que o app espera: { id, email, full_name, role }.
+   *
+   * Sobre o `role`: no código ele aparece sempre como `papel === 'gestor' ||
+   * role === 'admin'` — nunca sozinho. Então o padrão 'user' nunca tira acesso
+   * de ninguém; ele só deixa de conceder a escalada extra de administrador da
+   * plataforma. Quem for admin de fato precisa ser marcado explicitamente no
+   * metadata do usuário, porque isso é decisão de segurança e não se adivinha.
+   */
+  async me() {
+    const { data: { user }, error } = await supabase.auth.getUser();
+    if (error || !user) return null;
+    const meta = user.user_metadata || {};
+    return {
+      id: user.id,
+      email: user.email,
+      full_name: meta.full_name || meta.nome_completo || user.email,
+      role: user.app_metadata?.role || meta.role || 'user',
+    };
+  },
+
+  async isAuthenticated() {
+    const { data: { session } } = await supabase.auth.getSession();
+    return Boolean(session);
+  },
+
+  async logout() {
+    await supabase.auth.signOut();
+    window.location.href = '/login';
+  },
+
+  redirectToLogin() {
+    window.location.href = '/login';
+  },
+
+  /** Usados pela tela de login do sistema novo. */
+  async signIn(email, senha) {
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password: senha });
+    if (error) throw new Error(error.message);
+    return data;
+  },
+};
+
+/* ------------------------------------------------------------------ *
+ * INTEGRAÇÕES
+ * ------------------------------------------------------------------ */
+
+const BUCKET = 'arquivos';
+
+export const integrations = {
+  Core: {
+    /** Sobe o arquivo para o Storage e devolve { file_url }, como o Base44 fazia. */
+    async UploadFile({ file }) {
+      if (!file) throw new Error('UploadFile: nenhum arquivo recebido.');
+      const ext = file.name?.split('.').pop() || 'bin';
+      const caminho = `${crypto.randomUUID()}.${ext}`;
+
+      const { error } = await supabase.storage
+        .from(BUCKET).upload(caminho, file, { cacheControl: '3600', upsert: false });
+      if (error) throw new Error(`UploadFile: ${error.message}`);
+
+      const { data } = supabase.storage.from(BUCKET).getPublicUrl(caminho);
+      return { file_url: data.publicUrl };
+    },
+
+    /**
+     * Ainda não implementado — e de propósito.
+     *
+     * Chamar um modelo pelo navegador exigiria a chave da API no frontend,
+     * onde qualquer usuário a leria e poderia gastar na sua conta. Isso passa
+     * a rodar numa Edge Function na Fase 04. Até lá, falha alto em vez de
+     * falhar em silêncio: são só 2 pontos de uso no sistema inteiro
+     * (ResumoIAEtapa e RelatorioJornadaDiretoria).
+     */
+    async InvokeLLM() {
+      throw new Error(
+        'InvokeLLM ainda não foi migrado. Ele passa a rodar no servidor na Fase 04, ' +
+        'porque a chave da API não pode ficar no navegador.'
+      );
+    },
+  },
+};
+
+export const db = { entities, auth, integrations };
+export const base44 = db;
+export default db;
