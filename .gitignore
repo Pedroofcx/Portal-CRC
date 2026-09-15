@@ -33,3 +33,6 @@ base44/.app.jsonc
 # Dados extraidos do Base44 - nunca versionar (contem salario e dados de cliente)
 dados-base44/
 portalcrc-dados-*.json
+
+# Chave service_role - ignora toda a seguranca, so para importacao local
+.env.import
