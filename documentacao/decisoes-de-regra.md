@@ -50,6 +50,25 @@ na base. Alterar em `sla_horas`.
 
 ---
 
+## Custo operacional — duas réguas de tempo (15/09/2026)
+
+**Decisão:** SLA e custo medem coisas diferentes e usam relógios diferentes.
+
+| | Mede | Relógio |
+|---|---|---|
+| **SLA** | A espera do cliente | Tempo **corrido**, menos congelamento formal |
+| **Custo** | O esforço da equipe | Tempo **efetivo**: só `tratativa_iniciada` e `em_andamento` |
+
+Confundir as duas é o erro fácil aqui. Uma tratativa pode estourar o SLA — o
+cliente esperou 10 dias — e custar pouco — a equipe trabalhou 40 minutos. As
+duas afirmações estão certas ao mesmo tempo, e cada indicador responde a uma
+pergunta diferente.
+
+**Onde vive:** `supabase/migrations/10_custo_operacional.sql`, funções
+`tempo_efetivo_minutos` e `custo_operacional`.
+
+---
+
 ## Custo operacional — salário ausente (15/09/2026)
 
 **Decisão:** salário não cadastrado resulta em custo zero e aviso na tela, não

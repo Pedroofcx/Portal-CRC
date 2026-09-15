@@ -2,7 +2,7 @@ import db from '@/api/db';
 import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
-import { formatDateSP, tipoTratativaLabels, statusLabels, calculateTratativaPoints, calcularDiasRestantesReabertura, calcularCustoOperacional, formatBRL } from '@/components/utils/helpers';
+import { formatDateSP, tipoTratativaLabels, statusLabels, calculateTratativaPoints, calcularDiasRestantesReabertura, formatBRL } from '@/components/utils/helpers';
 import { CurrencyInput } from '@/components/ui/CurrencyInput';
 import PageHeader from '@/components/ui/PageHeader';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
@@ -392,11 +392,11 @@ export default function TratativaDetalhe({ idExterno = null, embutido = false })
           // Cálculo automático de pontuação ao encerrar
           const tratativaAtualizada = { ...tratativa, ...updateData, id: tratativaId };
           await calcularEAtribuirPontuacao(tratativaAtualizada);
-          // Custo operacional só é definitivo quando o status final é "encerrada"
-          // (reclamação interna só chega nesse estado depois da confirmação de reabertura)
-          if (updateData.status === 'encerrada') {
-            await aplicarCustoOperacional(tratativaAtualizada);
-          }
+          // O custo operacional passou a ser calculado pelo servidor, no
+          // gatilho calcula_custo_ao_encerrar (migration 10). O navegador não
+          // grava mais: dependia de a lista de colaboradores estar carregada
+          // e mandava o salário de volta ao banco dentro de uma conta feita
+          // na máquina de quem encerrou.
         }
       }
     );
@@ -423,30 +423,14 @@ export default function TratativaDetalhe({ idExterno = null, embutido = false })
     updateMutation.mutate(
       { data: updateData },
       {
-        onSuccess: async () => {
-          const tratativaAtualizada = { ...tratativa, ...updateData, id: tratativaId };
-          await aplicarCustoOperacional(tratativaAtualizada);
+        onSuccess: () => {
+          // Custo calculado pelo servidor — ver migration 10.
         }
       }
     );
   };
 
   // ── Custo operacional automático ao atingir o status definitivo "encerrada" ──
-  const aplicarCustoOperacional = async (tratativaAtualizada) => {
-    if (tratativaAtualizada.custo_operacional_reais) return; // já calculado, evita reprocessar
-    if (!tratativaAtualizada.agente_responsavel_id) return;
-    const agente = colaboradores.find(c => c.id === tratativaAtualizada.agente_responsavel_id);
-    if (!agente) return;
-
-    const custo = calcularCustoOperacional(tratativaAtualizada, agente);
-    try {
-      await db.entities.Tratativa.update(tratativaAtualizada.id, { custo_operacional_reais: custo });
-      queryClient.invalidateQueries(['tratativa', tratativaId]);
-    } catch (e) {
-      console.error('Erro ao calcular custo operacional:', e);
-    }
-  };
-
   const isEncerrada = tratativa.status === 'encerrada';
   const isAguardandoReabertura = tratativa.status === 'aguardando_confirmacao_reabertura';
   const isExcluida = tratativa.status === 'excluida';
