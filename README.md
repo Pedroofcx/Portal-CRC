@@ -97,10 +97,6 @@ Preparação em `ferramentas/preparar-teste-seguranca.sql`.
 
 ## Pendências conhecidas
 
-- **`src/pages/JornadaCliente.jsx`** — o export do Base44 truncou o arquivo na
-  linha 50. O trecho recuperado está em `JornadaCliente.jsx.truncado`; os
-  componentes em `src/components/jornada/` estão todos íntegros. A página hoje
-  mostra um aviso no lugar do conteúdo.
 - **`InvokeLLM`** — falha com mensagem explícita. Passa a rodar numa Edge
   Function na Fase 04, porque a chave da API não pode ficar no navegador.
   Dois pontos de uso: `ResumoIAEtapa` e `RelatorioJornadaDiretoria`.
