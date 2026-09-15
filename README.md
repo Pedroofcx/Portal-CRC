@@ -13,7 +13,7 @@ está no documento de migração compartilhado com o responsável pelo projeto.
 | 00 | Recuperar os dados do Base44 | **Pendente** — acesso ao construtor perdido, ver trilhas abaixo |
 | 01 | Banco novo a partir dos schemas | **Concluída** — 48 tabelas aplicadas no Supabase |
 | 02 | Adaptador (`src/api/db.js`) | **Concluída** — app roda no Supabase, com login próprio |
-| 03 | Segurança (RLS) | **Em andamento** — políticas e máscaras geradas, falta aplicar |
+| 03 | Segurança (RLS) | **Aplicada** — falta rodar o teste de invasão |
 | 04 | Regras de negócio no servidor | Não iniciada |
 | 05 | Frontend e design | Não iniciada |
 | 06 | Publicação e backup automático | Não iniciada |
@@ -83,6 +83,17 @@ npm install
 cp .env.local.example .env.local   # e preencha com os dados do Supabase
 npm run dev
 ```
+
+## Teste de segurança
+
+Fecha a Fase 03. Entra como agente comum, com a mesma chave que vai no
+navegador dos usuários, e tenta fazer o que agente não deveria conseguir.
+
+```bash
+node ferramentas/testar-seguranca.mjs <email-do-agente> <senha>
+```
+
+Preparação em `ferramentas/preparar-teste-seguranca.sql`.
 
 ## Pendências conhecidas
 
