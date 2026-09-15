@@ -21,10 +21,10 @@ const TIPOS_LABEL = {
 
 function InsightCard({ ins }) {
   const config = {
-    danger: { bg: 'bg-red-50 border-red-200', icon: <AlertTriangle className="w-4 h-4 text-red-600 flex-shrink-0" />, title: 'text-red-900', desc: 'text-red-700' },
-    warning: { bg: 'bg-amber-50 border-amber-200', icon: <AlertTriangle className="w-4 h-4 text-amber-500 flex-shrink-0" />, title: 'text-amber-900', desc: 'text-amber-700' },
-    success: { bg: 'bg-green-50 border-green-200', icon: <CheckCircle className="w-4 h-4 text-green-600 flex-shrink-0" />, title: 'text-green-900', desc: 'text-green-700' },
-    info: { bg: 'bg-blue-50 border-blue-200', icon: <Info className="w-4 h-4 text-blue-600 flex-shrink-0" />, title: 'text-blue-900', desc: 'text-blue-700' },
+    danger: { bg: 'bg-destructive/10 border-destructive/25', icon: <AlertTriangle className="w-4 h-4 text-destructive flex-shrink-0" />, title: 'text-destructive', desc: 'text-destructive' },
+    warning: { bg: 'bg-warning-soft border-warning/25', icon: <AlertTriangle className="w-4 h-4 text-warning flex-shrink-0" />, title: 'text-warning', desc: 'text-warning' },
+    success: { bg: 'bg-success-soft border-success/25', icon: <CheckCircle className="w-4 h-4 text-success flex-shrink-0" />, title: 'text-success', desc: 'text-success' },
+    info: { bg: 'bg-info-soft border-info/25', icon: <Info className="w-4 h-4 text-primary flex-shrink-0" />, title: 'text-primary', desc: 'text-primary' },
   }[ins.tipo] || {};
   return (
     <div className={`flex gap-2 p-3 border rounded-lg ${config.bg}`}>
@@ -96,37 +96,37 @@ export default function HanseiVisualizarDialog({
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <BarChart3 className="w-5 h-5 text-blue-600" />
+            <BarChart3 className="w-5 h-5 text-primary" />
             Hansei — {envio.colaborador_nome || 'Meus Resultados'}
           </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-6 mt-2">
           {/* Cabeçalho do período */}
-          <div className="flex flex-wrap gap-2 items-center p-3 bg-slate-50 rounded-lg">
+          <div className="flex flex-wrap gap-2 items-center p-3 bg-muted rounded-lg">
             <Badge variant="outline" className="capitalize">{envio.periodicidade}</Badge>
-            <span className="text-sm text-slate-700 font-medium">
+            <span className="text-sm text-foreground font-medium">
               {formatDateSP(envio.periodo_inicio, 'DD/MM/YYYY')} → {formatDateSP(envio.periodo_fim, 'DD/MM/YYYY')}
             </span>
-            <span className="text-xs text-slate-500 ml-auto">Enviado por {envio.enviado_por_nome} em {formatDateSP(envio.data_envio)}</span>
+            <span className="text-xs text-muted-foreground ml-auto">Enviado por {envio.enviado_por_nome} em {formatDateSP(envio.data_envio)}</span>
           </div>
 
           {/* KPIs principais */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {[
-              { icon: CheckCircle, label: 'Solucionadas', value: d.tratativas_solucionadas || 0, color: 'text-green-700', bg: 'bg-green-50' },
-              { icon: Clock, label: 'Em Aberto', value: d.tratativas_em_aberto || 0, color: 'text-amber-700', bg: 'bg-amber-50' },
-              { icon: Target, label: 'Performance', value: `${d.performance_percentual || 0}%`, color: (d.performance_percentual || 0) >= 80 ? 'text-green-700' : 'text-red-600', bg: (d.performance_percentual || 0) >= 80 ? 'bg-green-50' : 'bg-red-50' },
-              { icon: Award, label: 'CSAT', value: `${d.csat_individual || 0}%`, color: (d.csat_individual || 0) >= 85 ? 'text-green-700' : 'text-amber-700', bg: 'bg-blue-50' },
-              { icon: CheckCircle, label: 'SLA Cumprido', value: slaPct ? `${slaPct}%` : 'N/A', color: slaPct >= 80 ? 'text-green-700' : 'text-red-600', bg: slaPct >= 80 ? 'bg-green-50' : 'bg-red-50' },
-              { icon: MessageSquare, label: 'Chats', value: d.chats_atendidos || 0, color: 'text-purple-700', bg: 'bg-purple-50' },
-              { icon: BarChart3, label: 'Ligações', value: d.ligacoes_atendidas || 0, color: 'text-blue-700', bg: 'bg-blue-50' },
-              { icon: Award, label: 'Pontos/Trim.', value: (d.pontuacao_trimestre || 0).toFixed(0), color: 'text-orange-700', bg: 'bg-orange-50' },
+              { icon: CheckCircle, label: 'Solucionadas', value: d.tratativas_solucionadas || 0, color: 'text-success', bg: 'bg-success-soft' },
+              { icon: Clock, label: 'Em Aberto', value: d.tratativas_em_aberto || 0, color: 'text-warning', bg: 'bg-warning-soft' },
+              { icon: Target, label: 'Performance', value: `${d.performance_percentual || 0}%`, color: (d.performance_percentual || 0) >= 80 ? 'text-success' : 'text-destructive', bg: (d.performance_percentual || 0) >= 80 ? 'bg-success-soft' : 'bg-destructive/10' },
+              { icon: Award, label: 'CSAT', value: `${d.csat_individual || 0}%`, color: (d.csat_individual || 0) >= 85 ? 'text-success' : 'text-warning', bg: 'bg-info-soft' },
+              { icon: CheckCircle, label: 'SLA Cumprido', value: slaPct ? `${slaPct}%` : 'N/A', color: slaPct >= 80 ? 'text-success' : 'text-destructive', bg: slaPct >= 80 ? 'bg-success-soft' : 'bg-destructive/10' },
+              { icon: MessageSquare, label: 'Chats', value: d.chats_atendidos || 0, color: 'text-primary', bg: 'bg-info-soft' },
+              { icon: BarChart3, label: 'Ligações', value: d.ligacoes_atendidas || 0, color: 'text-primary', bg: 'bg-info-soft' },
+              { icon: Award, label: 'Pontos/Trim.', value: (d.pontuacao_trimestre || 0).toFixed(0), color: 'text-critical', bg: 'bg-critical-soft' },
             ].map(item => (
               <div key={item.label} className={`p-3 rounded-xl ${item.bg}`}>
                 <div className="flex items-center gap-1 mb-1">
                   <item.icon className={`w-4 h-4 ${item.color}`} />
-                  <p className="text-xs text-slate-600">{item.label}</p>
+                  <p className="text-xs text-muted-foreground">{item.label}</p>
                 </div>
                 <p className={`text-2xl font-bold ${item.color}`}>{item.value}</p>
               </div>
@@ -187,23 +187,23 @@ export default function HanseiVisualizarDialog({
           {((d.contestacoes_total || 0) > 0 || (d.reaberturas || 0) > 0 || (d.cx_nota_media || 0) > 0) && (
             <div className="grid sm:grid-cols-3 gap-3">
               {(d.contestacoes_total || 0) > 0 && (
-                <div className="p-3 bg-slate-50 border rounded-lg">
-                  <p className="text-xs text-slate-600">Contestações</p>
-                  <p className="text-lg font-bold text-slate-900">{d.contestacoes_resolvidas}/{d.contestacoes_total}</p>
-                  {(d.valor_recuperado_total || 0) > 0 && <p className="text-xs text-green-700">R$ {d.valor_recuperado_total.toFixed(2)} recuperado</p>}
+                <div className="p-3 bg-muted border rounded-lg">
+                  <p className="text-xs text-muted-foreground">Contestações</p>
+                  <p className="text-lg font-bold text-foreground">{d.contestacoes_resolvidas}/{d.contestacoes_total}</p>
+                  {(d.valor_recuperado_total || 0) > 0 && <p className="text-xs text-success">R$ {d.valor_recuperado_total.toFixed(2)} recuperado</p>}
                 </div>
               )}
               {(d.reaberturas || 0) > 0 && (
-                <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg">
-                  <p className="text-xs text-amber-700">Reaberturas</p>
-                  <p className="text-lg font-bold text-amber-900">{d.reaberturas}</p>
+                <div className="p-3 bg-warning-soft border border-warning/25 rounded-lg">
+                  <p className="text-xs text-warning">Reaberturas</p>
+                  <p className="text-lg font-bold text-warning">{d.reaberturas}</p>
                 </div>
               )}
               {(d.cx_nota_media || 0) > 0 && (
-                <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                  <p className="text-xs text-blue-700">Nota CX Média</p>
-                  <p className="text-lg font-bold text-blue-900">{d.cx_nota_media}</p>
-                  <p className="text-xs text-blue-600">{d.cx_total_avaliacoes} avaliações</p>
+                <div className="p-3 bg-info-soft border border-info/25 rounded-lg">
+                  <p className="text-xs text-primary">Nota CX Média</p>
+                  <p className="text-lg font-bold text-primary">{d.cx_nota_media}</p>
+                  <p className="text-xs text-primary">{d.cx_total_avaliacoes} avaliações</p>
                 </div>
               )}
             </div>
@@ -212,8 +212,8 @@ export default function HanseiVisualizarDialog({
           {/* Insights */}
           {insights.length > 0 && (
             <div>
-              <p className="text-sm font-semibold text-slate-700 mb-2 flex items-center gap-2">
-                <Lightbulb className="w-4 h-4 text-amber-500" />
+              <p className="text-sm font-semibold text-foreground mb-2 flex items-center gap-2">
+                <Lightbulb className="w-4 h-4 text-warning" />
                 Insights & Pontos de Atenção
               </p>
               <div className="space-y-2">
@@ -224,9 +224,9 @@ export default function HanseiVisualizarDialog({
 
           {/* Comentário do gestor */}
           {envio.comentario_gestor && (
-            <Card className="border-0 bg-blue-50 border border-blue-200">
-              <CardHeader className="pb-2"><CardTitle className="text-sm text-blue-900">Comentário do Gestor</CardTitle></CardHeader>
-              <CardContent><p className="text-sm text-slate-700 whitespace-pre-wrap">{envio.comentario_gestor}</p></CardContent>
+            <Card className="border-0 bg-info-soft border border-info/25">
+              <CardHeader className="pb-2"><CardTitle className="text-sm text-primary">Comentário do Gestor</CardTitle></CardHeader>
+              <CardContent><p className="text-sm text-foreground whitespace-pre-wrap">{envio.comentario_gestor}</p></CardContent>
             </Card>
           )}
 
@@ -236,40 +236,40 @@ export default function HanseiVisualizarDialog({
           {!isGestor && (
             <>
               {/* Seção de Reflexão Guiada */}
-              <Card className="border-0 shadow-sm border border-purple-100 bg-purple-50/40">
+              <Card className="border-0 shadow-sm border border-purple-100 bg-info-soft/40">
                 <CardHeader className="pb-3">
-                  <CardTitle className="text-sm flex items-center gap-2 text-purple-900">
-                    <Lightbulb className="w-4 h-4 text-purple-600" />
+                  <CardTitle className="text-sm flex items-center gap-2 text-primary">
+                    <Lightbulb className="w-4 h-4 text-primary" />
                     Reflexão Hansei
                   </CardTitle>
-                  <p className="text-xs text-purple-700">Responda com honestidade. Suas respostas orientam sua melhoria contínua.</p>
+                  <p className="text-xs text-primary">Responda com honestidade. Suas respostas orientam sua melhoria contínua.</p>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
-                    <Label className="text-sm font-medium text-slate-700">O que funcionou bem nesta semana?</Label>
+                    <Label className="text-sm font-medium text-foreground">O que funcionou bem nesta semana?</Label>
                     <Textarea
                       rows={2}
-                      className="mt-1 bg-white"
+                      className="mt-1 bg-card"
                       value={reflexao.q1}
                       onChange={e => setReflexao(r => ({ ...r, q1: e.target.value }))}
                       placeholder="Ex: consegui resolver os casos mais complexos com mais agilidade..."
                     />
                   </div>
                   <div>
-                    <Label className="text-sm font-medium text-slate-700">O que poderia ter sido melhor na execução dos atendimentos?</Label>
+                    <Label className="text-sm font-medium text-foreground">O que poderia ter sido melhor na execução dos atendimentos?</Label>
                     <Textarea
                       rows={2}
-                      className="mt-1 bg-white"
+                      className="mt-1 bg-card"
                       value={reflexao.q2}
                       onChange={e => setReflexao(r => ({ ...r, q2: e.target.value }))}
                       placeholder="Ex: preciso investigar mais antes de encerrar, algumas soluções não foram efetivas..."
                     />
                   </div>
                   <div>
-                    <Label className="text-sm font-medium text-slate-700">Qual ajuste ou melhoria você pretende aplicar na próxima semana?</Label>
+                    <Label className="text-sm font-medium text-foreground">Qual ajuste ou melhoria você pretende aplicar na próxima semana?</Label>
                     <Textarea
                       rows={2}
-                      className="mt-1 bg-white"
+                      className="mt-1 bg-card"
                       value={reflexao.q3}
                       onChange={e => setReflexao(r => ({ ...r, q3: e.target.value }))}
                       placeholder="Ex: vou confirmar com o cliente se o problema foi resolvido antes de encerrar..."
@@ -279,13 +279,13 @@ export default function HanseiVisualizarDialog({
               </Card>
 
               {/* Ação de Melhoria */}
-              <Card className="border-0 shadow-sm border border-amber-100 bg-amber-50/40">
+              <Card className="border-0 shadow-sm border border-amber-100 bg-warning-soft/40">
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-sm flex items-center gap-2 text-amber-900">
-                    <Zap className="w-4 h-4 text-amber-600" />
+                  <CardTitle className="text-sm flex items-center gap-2 text-warning">
+                    <Zap className="w-4 h-4 text-warning" />
                     Ação de Melhoria
                   </CardTitle>
-                  <p className="text-xs text-amber-700">Selecione a prática que você vai priorizar no próximo período.</p>
+                  <p className="text-xs text-warning">Selecione a prática que você vai priorizar no próximo período.</p>
                 </CardHeader>
                 <CardContent>
                   <div className="flex flex-wrap gap-2">
@@ -296,8 +296,8 @@ export default function HanseiVisualizarDialog({
                         onClick={() => setAcaoSelecionada(acaoSelecionada === acao ? '' : acao)}
                         className={`text-xs px-3 py-1.5 rounded-full border transition-all ${
                           acaoSelecionada === acao
-                            ? 'bg-amber-500 border-amber-500 text-white font-medium'
-                            : 'bg-white border-amber-300 text-amber-800 hover:bg-amber-100'
+                            ? 'bg-warning border-amber-500 text-white font-medium'
+                            : 'bg-card border-warning/30 text-warning hover:bg-warning-soft'
                         }`}
                       >
                         {acao}
@@ -318,12 +318,12 @@ export default function HanseiVisualizarDialog({
                   {envioComentarios.length > 0 && (
                     <div className="space-y-2 mb-3">
                       {envioComentarios.map(c => (
-                        <div key={c.id} className="p-3 bg-slate-50 rounded-lg text-sm">
+                        <div key={c.id} className="p-3 bg-muted rounded-lg text-sm">
                           <div className="flex gap-2 mb-1">
                             <Badge variant="outline" className="text-xs capitalize">{c.sentimento}</Badge>
-                            <span className="text-xs text-slate-500">{formatDateSP(c.data_comentario)}</span>
+                            <span className="text-xs text-muted-foreground">{formatDateSP(c.data_comentario)}</span>
                           </div>
-                          <p className="text-slate-700 whitespace-pre-wrap">{c.comentario}</p>
+                          <p className="text-foreground whitespace-pre-wrap">{c.comentario}</p>
                         </div>
                       ))}
                     </div>
@@ -345,7 +345,7 @@ export default function HanseiVisualizarDialog({
                   <Button
                     onClick={handleEnviarFeedbackCompleto}
                     disabled={(!feedbackForm.comentario.trim() && !reflexao.q1.trim() && !reflexao.q2.trim() && !reflexao.q3.trim() && !acaoSelecionada) || isEnviandoFeedback}
-                    className="w-full bg-blue-600 hover:bg-blue-700"
+                    className="w-full bg-primary hover:bg-primary/90"
                   >
                     <Send className="w-4 h-4 mr-2" />
                     {isEnviandoFeedback ? 'Enviando...' : 'Enviar Reflexão'}
@@ -358,15 +358,15 @@ export default function HanseiVisualizarDialog({
           {/* Comentários para gestor (somente leitura) */}
           {isGestor && envioComentarios.length > 0 && (
             <div>
-              <p className="text-sm font-semibold text-slate-700 mb-2">Reflexões do Colaborador</p>
+              <p className="text-sm font-semibold text-foreground mb-2">Reflexões do Colaborador</p>
               <div className="space-y-2">
                 {envioComentarios.map(c => (
-                  <div key={c.id} className="p-3 bg-slate-50 border rounded-lg text-sm">
+                  <div key={c.id} className="p-3 bg-muted border rounded-lg text-sm">
                     <div className="flex gap-2 mb-1">
                       <Badge variant="outline" className="text-xs capitalize">{c.sentimento}</Badge>
-                      <span className="text-xs text-slate-500">{formatDateSP(c.data_comentario)}</span>
+                      <span className="text-xs text-muted-foreground">{formatDateSP(c.data_comentario)}</span>
                     </div>
-                    <p className="text-slate-700 whitespace-pre-wrap">{c.comentario}</p>
+                    <p className="text-foreground whitespace-pre-wrap">{c.comentario}</p>
                   </div>
                 ))}
               </div>

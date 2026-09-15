@@ -35,7 +35,7 @@ export default function ImpactoPorPeriodo({ tratativas, colaboradores, params })
   if (dadosMes.length === 0) {
     return (
       <Card className="border-0 shadow-sm">
-        <CardContent className="py-10 text-center text-slate-500">
+        <CardContent className="py-10 text-center text-muted-foreground">
           Nenhum dado disponível para análise temporal.
         </CardContent>
       </Card>
@@ -48,41 +48,41 @@ export default function ImpactoPorPeriodo({ tratativas, colaboradores, params })
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <Card className="border-0 shadow-sm">
           <CardContent className="pt-5">
-            <div className="flex items-center gap-2 text-slate-500 text-xs uppercase mb-1">
+            <div className="flex items-center gap-2 text-muted-foreground text-xs uppercase mb-1">
               <Calendar className="w-3.5 h-3.5" /> Impacto Real (histórico)
             </div>
-            <p className="text-2xl font-bold text-slate-900">{formatBRL(totalReal)}</p>
-            <p className="text-xs text-slate-500 mt-1">{dadosMes.length} mês(es) analisado(s)</p>
+            <p className="text-2xl font-bold text-foreground">{formatBRL(totalReal)}</p>
+            <p className="text-xs text-muted-foreground mt-1">{dadosMes.length} mês(es) analisado(s)</p>
           </CardContent>
         </Card>
         <Card className="border-0 shadow-sm">
           <CardContent className="pt-5">
-            <div className="flex items-center gap-2 text-slate-500 text-xs uppercase mb-1">
+            <div className="flex items-center gap-2 text-muted-foreground text-xs uppercase mb-1">
               <TrendingUp className="w-3.5 h-3.5" /> Projeção (3 meses)
             </div>
-            <p className="text-2xl font-bold text-orange-600">{formatBRL(totalProj)}</p>
-            <p className="text-xs text-slate-500 mt-1">Baseado em média móvel + tendência</p>
+            <p className="text-2xl font-bold text-critical">{formatBRL(totalProj)}</p>
+            <p className="text-xs text-muted-foreground mt-1">Baseado em média móvel + tendência</p>
           </CardContent>
         </Card>
         <Card className="border-0 shadow-sm">
           <CardContent className="pt-5">
-            <div className="flex items-center gap-2 text-slate-500 text-xs uppercase mb-1">
-              {tendencia >= 0 ? <TrendingUp className="w-3.5 h-3.5 text-red-500" /> : <TrendingDown className="w-3.5 h-3.5 text-green-500" />}
+            <div className="flex items-center gap-2 text-muted-foreground text-xs uppercase mb-1">
+              {tendencia >= 0 ? <TrendingUp className="w-3.5 h-3.5 text-destructive" /> : <TrendingDown className="w-3.5 h-3.5 text-success" />}
               Tendência Mensal
             </div>
-            <p className={`text-2xl font-bold ${tendencia >= 0 ? 'text-red-600' : 'text-green-600'}`}>
+            <p className={`text-2xl font-bold ${tendencia >= 0 ? 'text-destructive' : 'text-success'}`}>
               {tendencia >= 0 ? '+' : ''}{tendencia.toFixed(1)}%
             </p>
-            <p className="text-xs text-slate-500 mt-1">{tendencia >= 0 ? 'Crescimento de perdas' : 'Redução de perdas'}</p>
+            <p className="text-xs text-muted-foreground mt-1">{tendencia >= 0 ? 'Crescimento de perdas' : 'Redução de perdas'}</p>
           </CardContent>
         </Card>
         <Card className="border-0 shadow-sm">
           <CardContent className="pt-5">
-            <div className="flex items-center gap-2 text-slate-500 text-xs uppercase mb-1">
+            <div className="flex items-center gap-2 text-muted-foreground text-xs uppercase mb-1">
               <Calendar className="w-3.5 h-3.5" /> Tolerância Mensal
             </div>
-            <p className="text-2xl font-bold text-slate-900">{formatBRL(toleranciaReais / 12)}</p>
-            <p className="text-xs text-slate-500 mt-1">1/12 da tolerância anual</p>
+            <p className="text-2xl font-bold text-foreground">{formatBRL(toleranciaReais / 12)}</p>
+            <p className="text-xs text-muted-foreground mt-1">1/12 da tolerância anual</p>
           </CardContent>
         </Card>
       </div>
@@ -91,10 +91,10 @@ export default function ImpactoPorPeriodo({ tratativas, colaboradores, params })
       <Card className="border-0 shadow-sm">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base">
-            <TrendingUp className="w-5 h-5 text-blue-600" />
+            <TrendingUp className="w-5 h-5 text-primary" />
             Tendência de Impacto e Projeção
           </CardTitle>
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-muted-foreground">
             Barras azuis = impacto real por mês | Linha tracejada = projeção para os próximos 3 meses | Linha vermelha = tolerância mensal.
           </p>
         </CardHeader>
@@ -124,7 +124,7 @@ export default function ImpactoPorPeriodo({ tratativas, colaboradores, params })
         <CardContent>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="bg-slate-50 border-y text-xs text-slate-500 uppercase">
+              <thead className="bg-muted border-y text-xs text-muted-foreground uppercase">
                 <tr>
                   <th className="p-3 text-left">Mês</th>
                   <th className="p-3 text-center">Casos</th>
@@ -135,14 +135,14 @@ export default function ImpactoPorPeriodo({ tratativas, colaboradores, params })
               </thead>
               <tbody>
                 {dadosGrafico.map((d, i) => (
-                  <tr key={i} className="border-b hover:bg-slate-50">
+                  <tr key={i} className="border-b hover:bg-muted">
                     <td className="p-3 font-medium">{d.mes}</td>
                     <td className="p-3 text-center">{d.casos}</td>
-                    <td className="p-3 text-right text-red-600">{formatBRL(d.valorDevolvido || 0)}</td>
-                    <td className="p-3 text-right font-bold text-slate-900">{formatBRL(d.total)}</td>
+                    <td className="p-3 text-right text-destructive">{formatBRL(d.valorDevolvido || 0)}</td>
+                    <td className="p-3 text-right font-bold text-foreground">{formatBRL(d.total)}</td>
                     <td className="p-3 text-center">
                       <Badge variant={d.tipo === 'Projeção' ? 'outline' : 'default'}
-                        className={d.tipo === 'Projeção' ? 'border-orange-300 text-orange-700' : ''}>
+                        className={d.tipo === 'Projeção' ? 'border-orange-300 text-critical' : ''}>
                         {d.tipo}
                       </Badge>
                     </td>

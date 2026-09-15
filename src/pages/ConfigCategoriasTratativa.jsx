@@ -126,7 +126,7 @@ export default function ConfigCategoriasTratativa() {
     { 
       key: 'descricao', 
       label: 'Descrição',
-      render: (cat) => <span className="text-slate-600">{cat.descricao || '-'}</span>
+      render: (cat) => <span className="text-muted-foreground">{cat.descricao || '-'}</span>
     },
     {
       key: 'ativa',
@@ -137,9 +137,9 @@ export default function ConfigCategoriasTratativa() {
           className="cursor-pointer"
         >
           {cat.ativa ? (
-            <Badge className="bg-green-100 text-green-700">Ativa</Badge>
+            <Badge className="bg-success-soft text-success">Ativa</Badge>
           ) : (
-            <Badge variant="outline" className="text-slate-500">Inativa</Badge>
+            <Badge variant="outline" className="text-muted-foreground">Inativa</Badge>
           )}
         </button>
       )
@@ -156,7 +156,7 @@ export default function ConfigCategoriasTratativa() {
             variant="ghost" 
             size="sm" 
             onClick={() => setConfirmDialog({ open: true, id: cat.id })}
-            className="text-red-600 hover:text-red-700 hover:bg-red-50"
+            className="text-destructive hover:text-destructive hover:bg-destructive/10"
           >
             <Trash2 className="w-4 h-4" />
           </Button>
@@ -177,11 +177,11 @@ export default function ConfigCategoriasTratativa() {
                 <Tag className="w-5 h-5" />
                 Categorias de Tratativas
               </CardTitle>
-              <p className="text-sm text-slate-500 mt-1">
+              <p className="text-sm text-muted-foreground mt-1">
                 Defina as categorias disponíveis para classificar tratativas
               </p>
             </div>
-            <Button onClick={() => setShowForm(!showForm)} className="bg-blue-600 hover:bg-blue-700">
+            <Button onClick={() => setShowForm(!showForm)} className="bg-primary hover:bg-primary/90">
               <Plus className="w-4 h-4 mr-2" />
               {showForm ? 'Cancelar' : 'Nova Categoria'}
             </Button>
@@ -190,11 +190,11 @@ export default function ConfigCategoriasTratativa() {
 
         {categoriasAtivas < 2 && (
           <div className="mx-6 mb-4">
-            <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg flex items-start gap-3">
-              <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+            <div className="p-4 bg-warning-soft border border-warning/25 rounded-lg flex items-start gap-3">
+              <AlertTriangle className="w-5 h-5 text-warning flex-shrink-0 mt-0.5" />
               <div className="text-sm">
-                <p className="font-medium text-amber-900">Atenção: Categorias Insuficientes</p>
-                <p className="text-amber-700 mt-1">
+                <p className="font-medium text-warning">Atenção: Categorias Insuficientes</p>
+                <p className="text-warning mt-1">
                   É obrigatório ter pelo menos 2 categorias ativas para gerar dados no sistema.
                   Atualmente você tem {categoriasAtivas} categoria{categoriasAtivas !== 1 ? 's' : ''} ativa{categoriasAtivas !== 1 ? 's' : ''}.
                 </p>
@@ -237,7 +237,7 @@ export default function ConfigCategoriasTratativa() {
               </div>
 
               <div className="flex gap-2">
-                <Button type="submit" className="bg-green-600 hover:bg-green-700">
+                <Button type="submit" className="bg-success hover:bg-success/90">
                   <CheckCircle className="w-4 h-4 mr-2" />
                   {editingCategoria ? 'Atualizar' : 'Criar'} Categoria
                 </Button>

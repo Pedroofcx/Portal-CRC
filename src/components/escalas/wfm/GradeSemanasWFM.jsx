@@ -65,8 +65,8 @@ export default function GradeSemanasWFM({
                 : '';
               return (
                 <div key={dia} className="text-center">
-                  <p className="text-sm font-bold text-slate-800">{DIAS_LABEL[dia]}</p>
-                  <p className="text-xs text-slate-400">{dataFmt}</p>
+                  <p className="text-sm font-bold text-foreground">{DIAS_LABEL[dia]}</p>
+                  <p className="text-xs text-muted-foreground">{dataFmt}</p>
                 </div>
               );
             })}
@@ -79,7 +79,7 @@ export default function GradeSemanasWFM({
               <div className="grid grid-cols-6 gap-2 mb-1.5">
                 <div className={cn(
                   'flex items-center px-2 py-1 rounded text-xs font-bold text-white',
-                  periodo === 'manha' ? 'bg-amber-500' : 'bg-indigo-500'
+                  periodo === 'manha' ? 'bg-warning' : 'bg-primary'
                 )}>
                   {periodo === 'manha' ? 'Manhã' : 'Tarde'}
                 </div>

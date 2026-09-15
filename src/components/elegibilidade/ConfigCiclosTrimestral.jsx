@@ -94,15 +94,15 @@ export default function ConfigCiclosTrimestral() {
     <div className="space-y-6">
       {/* Ciclo Ativo */}
       {cicloAtivo && (
-        <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-xl p-4 flex items-center gap-4">
-          <CheckCircle2 className="w-8 h-8 text-green-600 flex-shrink-0" />
+        <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-success/25 rounded-xl p-4 flex items-center gap-4">
+          <CheckCircle2 className="w-8 h-8 text-success flex-shrink-0" />
           <div className="flex-1">
-            <p className="font-semibold text-green-800">{cicloAtivo.nome}</p>
-            <p className="text-sm text-green-700">
+            <p className="font-semibold text-success">{cicloAtivo.nome}</p>
+            <p className="text-sm text-success">
               Avaliação: {fmtDate(cicloAtivo.data_inicio)} → {fmtDate(cicloAtivo.data_fim)} &nbsp;•&nbsp; Pagamento: {fmtMes(cicloAtivo.mes_pagamento)}
             </p>
           </div>
-          <Badge className="bg-green-600 text-white">Ciclo Ativo</Badge>
+          <Badge className="bg-success text-white">Ciclo Ativo</Badge>
         </div>
       )}
 
@@ -111,10 +111,10 @@ export default function ConfigCiclosTrimestral() {
           <div className="flex items-center justify-between flex-wrap gap-3">
             <div>
               <CardTitle className="text-base flex items-center gap-2">
-                <CalendarDays className="w-5 h-5 text-blue-600" />
+                <CalendarDays className="w-5 h-5 text-primary" />
                 Ciclos Trimestrais de Premiação
               </CardTitle>
-              <p className="text-sm text-slate-500 mt-1">Configure os períodos de avaliação e meses de pagamento</p>
+              <p className="text-sm text-muted-foreground mt-1">Configure os períodos de avaliação e meses de pagamento</p>
             </div>
             <div className="flex gap-2">
               {ciclos.length === 0 && (
@@ -131,7 +131,7 @@ export default function ConfigCiclosTrimestral() {
         </CardHeader>
         <CardContent>
           {ciclos.length === 0 ? (
-            <div className="text-center py-10 text-slate-400">
+            <div className="text-center py-10 text-muted-foreground">
               <CalendarDays className="w-10 h-10 mx-auto mb-3 opacity-40" />
               <p className="font-medium">Nenhum ciclo configurado</p>
               <p className="text-sm mt-1">Crie ciclos padrão ou adicione manualmente</p>
@@ -142,7 +142,7 @@ export default function ConfigCiclosTrimestral() {
                 <div
                   key={ciclo.id}
                   className={`flex items-center justify-between p-4 rounded-xl border transition-all ${
-                    ciclo.ativo ? 'bg-green-50 border-green-200' : 'bg-slate-50 border-slate-200'
+                    ciclo.ativo ? 'bg-success-soft border-success/25' : 'bg-muted border-border'
                   }`}
                 >
                   <div className="flex items-center gap-3">
@@ -152,25 +152,25 @@ export default function ConfigCiclosTrimestral() {
                       title="Ativar este ciclo"
                     >
                       {ciclo.ativo
-                        ? <CheckCircle2 className="w-5 h-5 text-green-600" />
-                        : <Circle className="w-5 h-5 text-slate-300 hover:text-green-500 transition-colors" />
+                        ? <CheckCircle2 className="w-5 h-5 text-success" />
+                        : <Circle className="w-5 h-5 text-muted-foreground hover:text-success transition-colors" />
                       }
                     </button>
                     <div>
                       <p className="font-medium text-sm">{ciclo.nome}</p>
-                      <p className="text-xs text-slate-500 mt-0.5">
+                      <p className="text-xs text-muted-foreground mt-0.5">
                         Avaliação: <strong>{fmtDate(ciclo.data_inicio)}</strong> → <strong>{fmtDate(ciclo.data_fim)}</strong>
                         &nbsp;•&nbsp; Pagamento: <strong>{fmtMes(ciclo.mes_pagamento)}</strong>
                       </p>
-                      {ciclo.descricao && <p className="text-xs text-slate-400 mt-0.5 italic">{ciclo.descricao}</p>}
+                      {ciclo.descricao && <p className="text-xs text-muted-foreground mt-0.5 italic">{ciclo.descricao}</p>}
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    {ciclo.ativo && <Badge className="bg-green-600 text-white text-xs">Ativo</Badge>}
+                    {ciclo.ativo && <Badge className="bg-success text-white text-xs">Ativo</Badge>}
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-7 w-7 text-red-400 hover:text-red-600"
+                      className="h-7 w-7 text-red-400 hover:text-destructive"
                       onClick={() => { if (confirm('Remover este ciclo?')) deleteMutation.mutate(ciclo.id); }}
                     >
                       <Trash2 className="w-3.5 h-3.5" />
@@ -217,7 +217,7 @@ export default function ConfigCiclosTrimestral() {
                 onChange={e => setForm(f => ({ ...f, mes_pagamento: e.target.value }))}
                 className="mt-1"
               />
-              <p className="text-xs text-slate-500 mt-1">Mês em que a premiação será paga</p>
+              <p className="text-xs text-muted-foreground mt-1">Mês em que a premiação será paga</p>
             </div>
             <div>
               <Label>Observação</Label>

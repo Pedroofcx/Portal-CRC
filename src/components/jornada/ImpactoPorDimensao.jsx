@@ -7,11 +7,11 @@ import { agruparImpactoPorDimensao, classificarRisco, calcularToleranciaReais } 
 import { formatBRL } from '@/components/utils/helpers';
 
 const RISCO_CORES = {
-  green: 'bg-green-100 text-green-700',
-  amber: 'bg-amber-100 text-amber-700',
-  orange: 'bg-orange-100 text-orange-700',
-  red: 'bg-red-100 text-red-700',
-  slate: 'bg-slate-100 text-slate-700',
+  green: 'bg-success-soft text-success',
+  amber: 'bg-warning-soft text-warning',
+  orange: 'bg-critical-soft text-critical',
+  red: 'bg-destructive/10 text-destructive',
+  slate: 'bg-muted text-foreground',
 };
 
 export default function ImpactoPorDimensao({ tratativas, colaboradores, params, dimKey, dimLabel, labelMap }) {
@@ -30,7 +30,7 @@ export default function ImpactoPorDimensao({ tratativas, colaboradores, params, 
   if (dados.length === 0) {
     return (
       <Card className="border-0 shadow-sm">
-        <CardContent className="py-10 text-center text-slate-500">
+        <CardContent className="py-10 text-center text-muted-foreground">
           Nenhum dado disponível para esta dimensão.
         </CardContent>
       </Card>
@@ -41,17 +41,17 @@ export default function ImpactoPorDimensao({ tratativas, colaboradores, params, 
     <Card className="border-0 shadow-sm">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-base">
-          <AlertTriangle className="w-5 h-5 text-amber-500" />
+          <AlertTriangle className="w-5 h-5 text-warning" />
           Impacto Financeiro por {dimLabel}
         </CardTitle>
-        <p className="text-xs text-slate-500">
+        <p className="text-xs text-muted-foreground">
           Cruza devoluções + custo operacional + perda de receita + risco reputacional + retrabalho.
           Tolerância da empresa: {formatBRL(toleranciaReais)}.
         </p>
       </CardHeader>
       <CardContent>
         <div className="relative mb-4">
-          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
           <Input
             placeholder={`Buscar por ${dimLabel.toLowerCase()}...`}
             value={busca}
@@ -62,8 +62,8 @@ export default function ImpactoPorDimensao({ tratativas, colaboradores, params, 
 
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
-            <thead className="bg-slate-50 border-y">
-              <tr className="text-left text-xs text-slate-500 uppercase">
+            <thead className="bg-muted border-y">
+              <tr className="text-left text-xs text-muted-foreground uppercase">
                 <th className="p-3">{dimLabel}</th>
                 <th className="p-3 text-center">Casos</th>
                 <th className="p-3 text-right">Devolvido</th>
@@ -80,16 +80,16 @@ export default function ImpactoPorDimensao({ tratativas, colaboradores, params, 
               {dadosFiltrados.map((d) => {
                 const risco = classificarRisco(d.total, toleranciaReais);
                 return (
-                  <tr key={d.key} className="border-b hover:bg-slate-50">
-                    <td className="p-3 font-medium text-slate-900">{d.key}</td>
+                  <tr key={d.key} className="border-b hover:bg-muted">
+                    <td className="p-3 font-medium text-foreground">{d.key}</td>
                     <td className="p-3 text-center">{d.casos}</td>
-                    <td className="p-3 text-right text-red-600">{formatBRL(d.valorDevolvido)}</td>
-                    <td className="p-3 text-right text-orange-600">{formatBRL(d.custoOperacional)}</td>
-                    <td className="p-3 text-right text-pink-600">{formatBRL(d.perdaReceita)}</td>
-                    <td className="p-3 text-right text-purple-600">{formatBRL(d.riscoReputacional)}</td>
-                    <td className="p-3 text-right text-amber-600">{formatBRL(d.custoRetrabalho)}</td>
-                    <td className="p-3 text-right text-slate-600">{formatBRL(d.faturamento)}</td>
-                    <td className="p-3 text-right font-bold text-slate-900">{formatBRL(d.total)}</td>
+                    <td className="p-3 text-right text-destructive">{formatBRL(d.valorDevolvido)}</td>
+                    <td className="p-3 text-right text-critical">{formatBRL(d.custoOperacional)}</td>
+                    <td className="p-3 text-right text-primary">{formatBRL(d.perdaReceita)}</td>
+                    <td className="p-3 text-right text-primary">{formatBRL(d.riscoReputacional)}</td>
+                    <td className="p-3 text-right text-warning">{formatBRL(d.custoRetrabalho)}</td>
+                    <td className="p-3 text-right text-muted-foreground">{formatBRL(d.faturamento)}</td>
+                    <td className="p-3 text-right font-bold text-foreground">{formatBRL(d.total)}</td>
                     <td className="p-3 text-center">
                       <Badge className={RISCO_CORES[risco.cor]}>
                         {risco.label}
@@ -100,17 +100,17 @@ export default function ImpactoPorDimensao({ tratativas, colaboradores, params, 
                 );
               })}
             </tbody>
-            <tfoot className="bg-slate-100 font-bold">
+            <tfoot className="bg-muted font-bold">
               <tr>
                 <td className="p-3">TOTAL</td>
                 <td className="p-3 text-center">{dadosFiltrados.reduce((a, d) => a + d.casos, 0)}</td>
-                <td className="p-3 text-right text-red-600">{formatBRL(dadosFiltrados.reduce((a, d) => a + d.valorDevolvido, 0))}</td>
-                <td className="p-3 text-right text-orange-600">{formatBRL(dadosFiltrados.reduce((a, d) => a + d.custoOperacional, 0))}</td>
-                <td className="p-3 text-right text-pink-600">{formatBRL(dadosFiltrados.reduce((a, d) => a + d.perdaReceita, 0))}</td>
-                <td className="p-3 text-right text-purple-600">{formatBRL(dadosFiltrados.reduce((a, d) => a + d.riscoReputacional, 0))}</td>
-                <td className="p-3 text-right text-amber-600">{formatBRL(dadosFiltrados.reduce((a, d) => a + d.custoRetrabalho, 0))}</td>
-                <td className="p-3 text-right text-slate-600">{formatBRL(dadosFiltrados.reduce((a, d) => a + d.faturamento, 0))}</td>
-                <td className="p-3 text-right text-slate-900">{formatBRL(dadosFiltrados.reduce((a, d) => a + d.total, 0))}</td>
+                <td className="p-3 text-right text-destructive">{formatBRL(dadosFiltrados.reduce((a, d) => a + d.valorDevolvido, 0))}</td>
+                <td className="p-3 text-right text-critical">{formatBRL(dadosFiltrados.reduce((a, d) => a + d.custoOperacional, 0))}</td>
+                <td className="p-3 text-right text-primary">{formatBRL(dadosFiltrados.reduce((a, d) => a + d.perdaReceita, 0))}</td>
+                <td className="p-3 text-right text-primary">{formatBRL(dadosFiltrados.reduce((a, d) => a + d.riscoReputacional, 0))}</td>
+                <td className="p-3 text-right text-warning">{formatBRL(dadosFiltrados.reduce((a, d) => a + d.custoRetrabalho, 0))}</td>
+                <td className="p-3 text-right text-muted-foreground">{formatBRL(dadosFiltrados.reduce((a, d) => a + d.faturamento, 0))}</td>
+                <td className="p-3 text-right text-foreground">{formatBRL(dadosFiltrados.reduce((a, d) => a + d.total, 0))}</td>
                 <td className="p-3"></td>
               </tr>
             </tfoot>

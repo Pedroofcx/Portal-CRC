@@ -177,7 +177,7 @@ export default function Universidade() {
         icon={GraduationCap}
         actions={
           isGestor && (
-            <Button onClick={() => setDialogOpen(true)} className="bg-blue-600 hover:bg-blue-700">
+            <Button onClick={() => setDialogOpen(true)} className="bg-primary hover:bg-primary/90">
               <Plus className="w-4 h-4 mr-2" />
               Novo Curso
             </Button>
@@ -190,12 +190,12 @@ export default function Universidade() {
         <Card className="border-0 shadow-sm">
           <CardContent className="pt-6">
             <div className="flex items-center gap-3">
-              <div className="p-2.5 bg-blue-100 rounded-xl">
-                <BookOpen className="w-5 h-5 text-blue-600" />
+              <div className="p-2.5 bg-info-soft rounded-xl">
+                <BookOpen className="w-5 h-5 text-primary" />
               </div>
               <div>
                 <p className="text-2xl font-bold">{cursosInscritos}</p>
-                <p className="text-sm text-slate-500">Cursos inscritos</p>
+                <p className="text-sm text-muted-foreground">Cursos inscritos</p>
               </div>
             </div>
           </CardContent>
@@ -203,12 +203,12 @@ export default function Universidade() {
         <Card className="border-0 shadow-sm">
           <CardContent className="pt-6">
             <div className="flex items-center gap-3">
-              <div className="p-2.5 bg-green-100 rounded-xl">
-                <CheckCircle className="w-5 h-5 text-green-600" />
+              <div className="p-2.5 bg-success-soft rounded-xl">
+                <CheckCircle className="w-5 h-5 text-success" />
               </div>
               <div>
                 <p className="text-2xl font-bold">{cursosConcluidos}</p>
-                <p className="text-sm text-slate-500">Concluídos</p>
+                <p className="text-sm text-muted-foreground">Concluídos</p>
               </div>
             </div>
           </CardContent>
@@ -216,12 +216,12 @@ export default function Universidade() {
         <Card className="border-0 shadow-sm">
           <CardContent className="pt-6">
             <div className="flex items-center gap-3">
-              <div className="p-2.5 bg-purple-100 rounded-xl">
-                <Clock className="w-5 h-5 text-purple-600" />
+              <div className="p-2.5 bg-info-soft rounded-xl">
+                <Clock className="w-5 h-5 text-primary" />
               </div>
               <div>
                 <p className="text-2xl font-bold">{horasConcluidas}h</p>
-                <p className="text-sm text-slate-500">Horas concluídas</p>
+                <p className="text-sm text-muted-foreground">Horas concluídas</p>
               </div>
             </div>
           </CardContent>
@@ -239,9 +239,9 @@ export default function Universidade() {
           {cursos.length === 0 ? (
             <Card className="border-0 shadow-sm">
               <CardContent className="py-16 text-center">
-                <GraduationCap className="w-12 h-12 mx-auto mb-4 text-slate-300" />
+                <GraduationCap className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
                 <h3 className="text-lg font-semibold mb-2">Nenhum curso disponível</h3>
-                <p className="text-slate-500">Aguarde novos cursos serem publicados</p>
+                <p className="text-muted-foreground">Aguarde novos cursos serem publicados</p>
               </CardContent>
             </Card>
           ) : (
@@ -259,13 +259,13 @@ export default function Universidade() {
                           )}
                         </div>
                         {curso.obrigatorio && (
-                          <Badge className="bg-red-100 text-red-700 border-red-200">Obrigatório</Badge>
+                          <Badge className="bg-destructive/10 text-destructive border-destructive/25">Obrigatório</Badge>
                         )}
                       </div>
                     </CardHeader>
                     <CardContent>
-                      <p className="text-sm text-slate-600 line-clamp-2 mb-4">{curso.descricao}</p>
-                      <div className="flex items-center gap-4 text-sm text-slate-500 mb-4">
+                      <p className="text-sm text-muted-foreground line-clamp-2 mb-4">{curso.descricao}</p>
+                      <div className="flex items-center gap-4 text-sm text-muted-foreground mb-4">
                         <span className="flex items-center gap-1">
                           <Clock className="w-4 h-4" />
                           {curso.carga_horaria}h
@@ -280,7 +280,7 @@ export default function Universidade() {
                           </div>
                           <Progress value={matricula.progresso} className="h-2" />
                           {matricula.status === 'concluido' ? (
-                            <Badge className="bg-green-100 text-green-700 w-full justify-center">
+                            <Badge className="bg-success-soft text-success w-full justify-center">
                               <CheckCircle className="w-3 h-3 mr-1" />
                               Concluído
                             </Badge>
@@ -309,7 +309,7 @@ export default function Universidade() {
                         </div>
                       ) : (
                         <Button 
-                          className="w-full bg-blue-600 hover:bg-blue-700"
+                          className="w-full bg-primary hover:bg-primary/90"
                           onClick={() => inscreverMutation.mutate(curso)}
                           disabled={inscreverMutation.isPending}
                         >
@@ -329,9 +329,9 @@ export default function Universidade() {
           {minhasMatriculas.length === 0 ? (
             <Card className="border-0 shadow-sm">
               <CardContent className="py-16 text-center">
-                <BookOpen className="w-12 h-12 mx-auto mb-4 text-slate-300" />
+                <BookOpen className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
                 <h3 className="text-lg font-semibold mb-2">Nenhuma inscrição</h3>
-                <p className="text-slate-500">Inscreva-se em um curso do catálogo</p>
+                <p className="text-muted-foreground">Inscreva-se em um curso do catálogo</p>
               </CardContent>
             </Card>
           ) : (
@@ -344,17 +344,17 @@ export default function Universidade() {
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-4">
                           <div className={`p-3 rounded-xl ${
-                            matricula.status === 'concluido' ? 'bg-green-100' : 'bg-blue-100'
+                            matricula.status === 'concluido' ? 'bg-success-soft' : 'bg-info-soft'
                           }`}>
                             {matricula.status === 'concluido' ? (
-                              <CheckCircle className="w-6 h-6 text-green-600" />
+                              <CheckCircle className="w-6 h-6 text-success" />
                             ) : (
-                              <BookOpen className="w-6 h-6 text-blue-600" />
+                              <BookOpen className="w-6 h-6 text-primary" />
                             )}
                           </div>
                           <div>
                             <p className="font-medium">{matricula.curso_titulo}</p>
-                            <p className="text-sm text-slate-500">
+                            <p className="text-sm text-muted-foreground">
                               {matricula.status === 'concluido' 
                                 ? `Concluído em ${formatDateSP(matricula.data_conclusao, 'DD/MM/YYYY')}`
                                 : `Inscrito em ${formatDateSP(matricula.data_inscricao, 'DD/MM/YYYY')}`
@@ -436,21 +436,21 @@ export default function Universidade() {
                 placeholder="https://..."
               />
             </div>
-            <div className="flex items-center gap-3 p-3 bg-amber-50 rounded-lg">
+            <div className="flex items-center gap-3 p-3 bg-warning-soft rounded-lg">
               <Switch
                 checked={formData.obrigatorio}
                 onCheckedChange={(checked) => setFormData({ ...formData, obrigatorio: checked })}
               />
               <div>
                 <Label>Curso Obrigatório</Label>
-                <p className="text-xs text-amber-600">Será destacado para todos os colaboradores</p>
+                <p className="text-xs text-warning">Será destacado para todos os colaboradores</p>
               </div>
             </div>
             <div className="flex justify-end gap-3 pt-4">
               <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
                 Cancelar
               </Button>
-              <Button type="submit" className="bg-blue-600 hover:bg-blue-700" disabled={createCursoMutation.isPending}>
+              <Button type="submit" className="bg-primary hover:bg-primary/90" disabled={createCursoMutation.isPending}>
                 {createCursoMutation.isPending ? 'Salvando...' : 'Criar Curso'}
               </Button>
             </div>

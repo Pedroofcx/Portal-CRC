@@ -392,11 +392,11 @@ export default function RelatoriosApuracao() {
             </CardHeader>
             <CardContent>
               {dadosAgregados.length === 0 ? (
-                <p className="text-center text-slate-500 py-8">Nenhum dado disponível para os filtros selecionados</p>
+                <p className="text-center text-muted-foreground py-8">Nenhum dado disponível para os filtros selecionados</p>
               ) : (
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
-                    <thead className="bg-slate-100">
+                    <thead className="bg-muted">
                       <tr>
                         <th className="text-left p-3 font-medium">Agente</th>
                         <th className="text-left p-3 font-medium">Período</th>
@@ -414,7 +414,7 @@ export default function RelatoriosApuracao() {
                     </thead>
                     <tbody>
                       {dadosAgregados.map((agg, idx) => (
-                        <tr key={idx} className="border-t hover:bg-slate-50">
+                        <tr key={idx} className="border-t hover:bg-muted">
                           <td className="p-3 font-medium whitespace-nowrap">{agg.agente}</td>
                           <td className="p-3 whitespace-nowrap">{agg.periodo}</td>
                           <td className="text-center p-3">{agg.telefone.total_ligacoes}</td>
@@ -424,18 +424,18 @@ export default function RelatoriosApuracao() {
                           <td className="text-center p-3">{agg.telefone.nota5 || 0}</td>
                           <td className="text-center p-3 font-medium">{agg.telefone.total_positivas}</td>
                           <td className="text-center p-3">
-                            <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-300">
+                            <Badge variant="outline" className="bg-warning-soft text-warning border-warning/30">
                               {agg.telefone.transferencias}
                             </Badge>
                           </td>
                           <td className="text-center p-3">
-                            <Badge variant="outline" className="bg-green-50 text-green-700">{agg.telefone.performance.toFixed(1)}%</Badge>
+                            <Badge variant="outline" className="bg-success-soft text-success">{agg.telefone.performance.toFixed(1)}%</Badge>
                           </td>
                           <td className="text-center p-3">
-                            <Badge variant="outline" className="bg-amber-50 text-amber-700">{agg.telefone.percentual_avaliados.toFixed(1)}%</Badge>
+                            <Badge variant="outline" className="bg-warning-soft text-warning">{agg.telefone.percentual_avaliados.toFixed(1)}%</Badge>
                           </td>
                           <td className="text-center p-3">
-                            <Badge variant="outline" className="bg-blue-50 text-blue-700">{agg.telefone.csat.toFixed(1)}%</Badge>
+                            <Badge variant="outline" className="bg-info-soft text-primary">{agg.telefone.csat.toFixed(1)}%</Badge>
                           </td>
                         </tr>
                       ))}
@@ -444,9 +444,9 @@ export default function RelatoriosApuracao() {
                 </div>
               )}
               {dadosAgregados.length > 0 && (
-                <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg text-sm">
+                <div className="mt-4 p-3 bg-warning-soft border border-warning/25 rounded-lg text-sm">
                   <span className="font-medium">Transferências totais (excluídas dos cálculos de avaliação): </span>
-                  <span className="font-bold text-amber-700">{dadosAgregados.reduce((acc, agg) => acc + (agg.telefone.transferencias || 0), 0)}</span>
+                  <span className="font-bold text-warning">{dadosAgregados.reduce((acc, agg) => acc + (agg.telefone.transferencias || 0), 0)}</span>
                 </div>
               )}
             </CardContent>
@@ -461,11 +461,11 @@ export default function RelatoriosApuracao() {
             </CardHeader>
             <CardContent>
               {dadosAgregados.length === 0 ? (
-                <p className="text-center text-slate-500 py-8">Nenhum dado disponível</p>
+                <p className="text-center text-muted-foreground py-8">Nenhum dado disponível</p>
               ) : (
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
-                    <thead className="bg-slate-100">
+                    <thead className="bg-muted">
                       <tr>
                         <th className="text-left p-3 font-medium">Agente</th>
                         <th className="text-left p-3 font-medium">Período</th>
@@ -478,7 +478,7 @@ export default function RelatoriosApuracao() {
                     </thead>
                     <tbody>
                       {dadosAgregados.map((agg, idx) => (
-                        <tr key={idx} className="border-t hover:bg-slate-50">
+                        <tr key={idx} className="border-t hover:bg-muted">
                           <td className="p-3 font-medium">{agg.agente}</td>
                           <td className="p-3">{agg.periodo}</td>
                           <td className="text-center p-3">{agg.chat.total_chats}</td>
@@ -506,37 +506,37 @@ export default function RelatoriosApuracao() {
             {/* KPIs resumo */}
             {consolidacao && (
               <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                <Card className="bg-blue-50 border-blue-200">
+                <Card className="bg-info-soft border-info/25">
                   <CardContent className="pt-6">
-                    <p className="text-sm text-slate-600 mb-1">Performance Telefone</p>
-                    <p className="text-3xl font-bold text-blue-900">{consolidacao.performanceMedia.toFixed(1)}%</p>
-                    <p className="text-xs text-slate-500 mt-1">Média do período</p>
+                    <p className="text-sm text-muted-foreground mb-1">Performance Telefone</p>
+                    <p className="text-3xl font-bold text-primary">{consolidacao.performanceMedia.toFixed(1)}%</p>
+                    <p className="text-xs text-muted-foreground mt-1">Média do período</p>
                   </CardContent>
                 </Card>
-                <Card className="bg-green-50 border-green-200">
+                <Card className="bg-success-soft border-success/25">
                   <CardContent className="pt-6">
-                    <p className="text-sm text-slate-600 mb-1">Satisfação Média (Ambos Canais)</p>
-                    <p className="text-3xl font-bold text-green-900">{consolidacao.satisfacaoMedia.toFixed(1)}%</p>
-                    <p className="text-xs text-slate-500 mt-1">(CSAT Tel + CSAT Chat) / 2</p>
+                    <p className="text-sm text-muted-foreground mb-1">Satisfação Média (Ambos Canais)</p>
+                    <p className="text-3xl font-bold text-success">{consolidacao.satisfacaoMedia.toFixed(1)}%</p>
+                    <p className="text-xs text-muted-foreground mt-1">(CSAT Tel + CSAT Chat) / 2</p>
                   </CardContent>
                 </Card>
-                <Card className="bg-purple-50 border-purple-200">
+                <Card className="bg-info-soft border-info/25">
                   <CardContent className="pt-6">
-                    <p className="text-sm text-slate-600 mb-1">% Avaliados Consolidado</p>
-                    <p className="text-3xl font-bold text-purple-900">{consolidacao.avaliadosMedia.toFixed(1)}%</p>
-                    <p className="text-xs text-slate-500 mt-1">(% Aval. Tel + % Aval. Chat) / 2</p>
+                    <p className="text-sm text-muted-foreground mb-1">% Avaliados Consolidado</p>
+                    <p className="text-3xl font-bold text-primary">{consolidacao.avaliadosMedia.toFixed(1)}%</p>
+                    <p className="text-xs text-muted-foreground mt-1">(% Aval. Tel + % Aval. Chat) / 2</p>
                   </CardContent>
                 </Card>
-                <Card className="bg-slate-50 border-slate-200">
+                <Card className="bg-muted border-border">
                   <CardContent className="pt-6">
-                    <p className="text-sm text-slate-600 mb-1">CSAT Telefone</p>
-                    <p className="text-3xl font-bold text-slate-900">{consolidacao.csatTelefoneMedia.toFixed(1)}%</p>
+                    <p className="text-sm text-muted-foreground mb-1">CSAT Telefone</p>
+                    <p className="text-3xl font-bold text-foreground">{consolidacao.csatTelefoneMedia.toFixed(1)}%</p>
                   </CardContent>
                 </Card>
-                <Card className="bg-slate-50 border-slate-200">
+                <Card className="bg-muted border-border">
                   <CardContent className="pt-6">
-                    <p className="text-sm text-slate-600 mb-1">CSAT Chat</p>
-                    <p className="text-3xl font-bold text-slate-900">{consolidacao.csatChatMedia.toFixed(1)}%</p>
+                    <p className="text-sm text-muted-foreground mb-1">CSAT Chat</p>
+                    <p className="text-3xl font-bold text-foreground">{consolidacao.csatChatMedia.toFixed(1)}%</p>
                   </CardContent>
                 </Card>
               </div>
@@ -549,47 +549,47 @@ export default function RelatoriosApuracao() {
               </CardHeader>
               <CardContent>
                 {consolidadoSemanal.length === 0 ? (
-                  <p className="text-center text-slate-500 py-8">Nenhum dado disponível</p>
+                  <p className="text-center text-muted-foreground py-8">Nenhum dado disponível</p>
                 ) : (
                   <div className="overflow-x-auto">
                     <table className="w-full text-sm">
-                      <thead className="bg-slate-100">
+                      <thead className="bg-muted">
                         <tr>
                           <th className="text-left p-3 font-medium">Período</th>
-                          <th className="text-center p-3 font-medium bg-blue-50">Tel: Ligações</th>
-                          <th className="text-center p-3 font-medium bg-blue-50">Tel: Atendidas</th>
-                          <th className="text-center p-3 font-medium bg-blue-50">Tel: Avaliadas</th>
-                          <th className="text-center p-3 font-medium bg-blue-50">Tel: Positivas</th>
-                          <th className="text-center p-3 font-medium bg-blue-50">Tel: CSAT %</th>
-                          <th className="text-center p-3 font-medium bg-blue-50">Tel: % Aval.</th>
-                          <th className="text-center p-3 font-medium bg-blue-50">Tel: Perf. %</th>
-                          <th className="text-center p-3 font-medium bg-purple-50">Chat: Total</th>
-                          <th className="text-center p-3 font-medium bg-purple-50">Chat: Aval.</th>
-                          <th className="text-center p-3 font-medium bg-purple-50">Chat: Positivos</th>
-                          <th className="text-center p-3 font-medium bg-purple-50">Chat: CSAT %</th>
-                          <th className="text-center p-3 font-medium bg-purple-50">Chat: % Aval.</th>
-                          <th className="text-center p-3 font-medium bg-green-50">Satisf. Média</th>
-                          <th className="text-center p-3 font-medium bg-green-50">% Aval. Comb.</th>
+                          <th className="text-center p-3 font-medium bg-info-soft">Tel: Ligações</th>
+                          <th className="text-center p-3 font-medium bg-info-soft">Tel: Atendidas</th>
+                          <th className="text-center p-3 font-medium bg-info-soft">Tel: Avaliadas</th>
+                          <th className="text-center p-3 font-medium bg-info-soft">Tel: Positivas</th>
+                          <th className="text-center p-3 font-medium bg-info-soft">Tel: CSAT %</th>
+                          <th className="text-center p-3 font-medium bg-info-soft">Tel: % Aval.</th>
+                          <th className="text-center p-3 font-medium bg-info-soft">Tel: Perf. %</th>
+                          <th className="text-center p-3 font-medium bg-info-soft">Chat: Total</th>
+                          <th className="text-center p-3 font-medium bg-info-soft">Chat: Aval.</th>
+                          <th className="text-center p-3 font-medium bg-info-soft">Chat: Positivos</th>
+                          <th className="text-center p-3 font-medium bg-info-soft">Chat: CSAT %</th>
+                          <th className="text-center p-3 font-medium bg-info-soft">Chat: % Aval.</th>
+                          <th className="text-center p-3 font-medium bg-success-soft">Satisf. Média</th>
+                          <th className="text-center p-3 font-medium bg-success-soft">% Aval. Comb.</th>
                         </tr>
                       </thead>
                       <tbody>
                         {consolidadoSemanal.map((s, idx) => (
-                          <tr key={idx} className="border-t hover:bg-slate-50">
+                          <tr key={idx} className="border-t hover:bg-muted">
                             <td className="p-3 text-xs font-medium whitespace-nowrap">{s.rotulo}</td>
                             <td className="text-center p-3">{s.telefone.total_ligacoes}</td>
                             <td className="text-center p-3">{s.telefone.total_atendidas}</td>
                             <td className="text-center p-3">{s.telefone.total_avaliadas}</td>
                             <td className="text-center p-3">{s.telefone.total_positivas}</td>
-                            <td className="text-center p-3 font-semibold text-blue-700">{s.telefone.csat.toFixed(1)}%</td>
-                            <td className="text-center p-3 font-semibold text-amber-700">{s.telefone.percentual_avaliados.toFixed(1)}%</td>
-                            <td className="text-center p-3 font-semibold text-green-700">{s.telefone.performance.toFixed(1)}%</td>
+                            <td className="text-center p-3 font-semibold text-primary">{s.telefone.csat.toFixed(1)}%</td>
+                            <td className="text-center p-3 font-semibold text-warning">{s.telefone.percentual_avaliados.toFixed(1)}%</td>
+                            <td className="text-center p-3 font-semibold text-success">{s.telefone.performance.toFixed(1)}%</td>
                             <td className="text-center p-3">{s.chat.total_chats}</td>
                             <td className="text-center p-3">{s.chat.total_avaliados}</td>
                             <td className="text-center p-3">{s.chat.total_positivos}</td>
-                            <td className="text-center p-3 font-semibold text-purple-700">{s.chat.csat.toFixed(1)}%</td>
-                            <td className="text-center p-3 font-semibold text-purple-700">{s.chat.percentual_avaliados.toFixed(1)}%</td>
-                            <td className="text-center p-3 font-bold text-green-800">{s.satisfacao_media.toFixed(1)}%</td>
-                            <td className="text-center p-3 font-bold text-green-800">{s.percentual_avaliados_medio.toFixed(1)}%</td>
+                            <td className="text-center p-3 font-semibold text-primary">{s.chat.csat.toFixed(1)}%</td>
+                            <td className="text-center p-3 font-semibold text-primary">{s.chat.percentual_avaliados.toFixed(1)}%</td>
+                            <td className="text-center p-3 font-bold text-success">{s.satisfacao_media.toFixed(1)}%</td>
+                            <td className="text-center p-3 font-bold text-success">{s.percentual_avaliados_medio.toFixed(1)}%</td>
                           </tr>
                         ))}
                       </tbody>

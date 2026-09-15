@@ -14,9 +14,9 @@ export default function ApuracaoWizard({ currentStep, steps }) {
                 <div
                   className={cn(
                     "w-10 h-10 rounded-full flex items-center justify-center font-medium transition-all",
-                    index < currentStep && "bg-green-600 text-white",
-                    index === currentStep && "bg-blue-600 text-white",
-                    index > currentStep && "bg-slate-200 text-slate-500"
+                    index < currentStep && "bg-success text-white",
+                    index === currentStep && "bg-primary text-white",
+                    index > currentStep && "bg-muted text-muted-foreground"
                   )}
                 >
                   {index < currentStep ? (
@@ -27,7 +27,7 @@ export default function ApuracaoWizard({ currentStep, steps }) {
                 </div>
                 <p className={cn(
                   "text-xs mt-2 font-medium text-center",
-                  index <= currentStep ? "text-slate-900" : "text-slate-500"
+                  index <= currentStep ? "text-foreground" : "text-muted-foreground"
                 )}>
                   {step.label}
                 </p>
@@ -36,7 +36,7 @@ export default function ApuracaoWizard({ currentStep, steps }) {
                 <div
                   className={cn(
                     "flex-1 h-0.5 mx-4 transition-all",
-                    index < currentStep ? "bg-green-600" : "bg-slate-200"
+                    index < currentStep ? "bg-success" : "bg-muted"
                   )}
                 />
               )}

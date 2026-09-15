@@ -26,12 +26,12 @@ export default function PerfilComercialCliente({ tratativa }) {
       <Card className="border-0 shadow-sm">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base">
-            <Building2 className="w-5 h-5 text-slate-400" />
+            <Building2 className="w-5 h-5 text-muted-foreground" />
             Perfil Comercial do Cliente
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-sm text-slate-400 text-center py-4">
+          <p className="text-sm text-muted-foreground text-center py-4">
             Nenhum dado comercial registrado para este cliente.
           </p>
         </CardContent>
@@ -48,46 +48,46 @@ export default function PerfilComercialCliente({ tratativa }) {
     <Card className="border-0 shadow-sm bg-gradient-to-br from-emerald-50 to-teal-50">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-base">
-          <Building2 className="w-5 h-5 text-emerald-600" />
+          <Building2 className="w-5 h-5 text-success" />
           Perfil Comercial do Cliente
-          <span className="text-sm font-normal text-slate-500 ml-2">{tratativa.nome_cliente}</span>
+          <span className="text-sm font-normal text-muted-foreground ml-2">{tratativa.nome_cliente}</span>
         </CardTitle>
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
           <div className="flex items-start gap-2">
-            <Tag className="w-4 h-4 text-emerald-600 mt-0.5 flex-shrink-0" />
+            <Tag className="w-4 h-4 text-success mt-0.5 flex-shrink-0" />
             <div>
-              <p className="text-xs text-slate-500">Plano</p>
-              <p className="font-semibold text-slate-900">{tratativa.plano_cliente || '-'}</p>
+              <p className="text-xs text-muted-foreground">Plano</p>
+              <p className="font-semibold text-foreground">{tratativa.plano_cliente || '-'}</p>
             </div>
           </div>
           <div className="flex items-start gap-2">
-            <Receipt className="w-4 h-4 text-emerald-600 mt-0.5 flex-shrink-0" />
+            <Receipt className="w-4 h-4 text-success mt-0.5 flex-shrink-0" />
             <div>
-              <p className="text-xs text-slate-500">Modalidade do Plano</p>
-              <p className="font-semibold text-slate-900">{tratativa.modalidade_plano || '-'}</p>
+              <p className="text-xs text-muted-foreground">Modalidade do Plano</p>
+              <p className="font-semibold text-foreground">{tratativa.modalidade_plano || '-'}</p>
             </div>
           </div>
           <div className="flex items-start gap-2">
-            <DollarSign className="w-4 h-4 text-emerald-600 mt-0.5 flex-shrink-0" />
+            <DollarSign className="w-4 h-4 text-success mt-0.5 flex-shrink-0" />
             <div>
-              <p className="text-xs text-slate-500">Valor da Contratação do Plano Atual</p>
-              <p className="font-semibold text-slate-900">{tratativa.valor_contratacao_plano_atual ? formatBRL(tratativa.valor_contratacao_plano_atual) : '-'}</p>
+              <p className="text-xs text-muted-foreground">Valor da Contratação do Plano Atual</p>
+              <p className="font-semibold text-foreground">{tratativa.valor_contratacao_plano_atual ? formatBRL(tratativa.valor_contratacao_plano_atual) : '-'}</p>
             </div>
           </div>
           <div className="flex items-start gap-2">
-            <Clock className="w-4 h-4 text-emerald-600 mt-0.5 flex-shrink-0" />
+            <Clock className="w-4 h-4 text-success mt-0.5 flex-shrink-0" />
             <div>
-              <p className="text-xs text-slate-500">Tempo de Relacionamento</p>
-              <p className="font-semibold text-slate-900">{tempoMeses !== null ? formatarTempoContrato(tempoMeses) : '-'}</p>
+              <p className="text-xs text-muted-foreground">Tempo de Relacionamento</p>
+              <p className="font-semibold text-foreground">{tempoMeses !== null ? formatarTempoContrato(tempoMeses) : '-'}</p>
             </div>
           </div>
           <div className="flex items-start gap-2">
-            <Building2 className="w-4 h-4 text-emerald-600 mt-0.5 flex-shrink-0" />
+            <Building2 className="w-4 h-4 text-success mt-0.5 flex-shrink-0" />
             <div>
-              <p className="text-xs text-slate-500">Segmento</p>
-              <p className="font-semibold text-slate-900">{tratativa.segmento_cliente || '-'}</p>
+              <p className="text-xs text-muted-foreground">Segmento</p>
+              <p className="font-semibold text-foreground">{tratativa.segmento_cliente || '-'}</p>
             </div>
           </div>
         </div>
@@ -95,20 +95,20 @@ export default function PerfilComercialCliente({ tratativa }) {
         {/* Valores Equivalentes — calculados dinamicamente, não contratuais */}
         {temValorContratado && (
           <div className="mt-3 pt-3 border-t border-emerald-200">
-            <p className="text-xs font-semibold text-emerald-700 uppercase mb-2">Valores Equivalentes (calculados)</p>
+            <p className="text-xs font-semibold text-success uppercase mb-2">Valores Equivalentes (calculados)</p>
             <div className="grid grid-cols-2 gap-4">
               <div className="flex items-center gap-2">
-                <DollarSign className="w-3.5 h-3.5 text-emerald-500" />
+                <DollarSign className="w-3.5 h-3.5 text-success" />
                 <div>
-                  <p className="text-xs text-slate-500">Receita Mensal Equivalente</p>
-                  <p className="text-sm font-medium text-slate-700">{formatBRL(receitaMensalEq)}</p>
+                  <p className="text-xs text-muted-foreground">Receita Mensal Equivalente</p>
+                  <p className="text-sm font-medium text-foreground">{formatBRL(receitaMensalEq)}</p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <DollarSign className="w-3.5 h-3.5 text-emerald-500" />
+                <DollarSign className="w-3.5 h-3.5 text-success" />
                 <div>
-                  <p className="text-xs text-slate-500">Receita Anual Equivalente</p>
-                  <p className="text-sm font-medium text-slate-700">{formatBRL(receitaAnualEq)}</p>
+                  <p className="text-xs text-muted-foreground">Receita Anual Equivalente</p>
+                  <p className="text-sm font-medium text-foreground">{formatBRL(receitaAnualEq)}</p>
                 </div>
               </div>
             </div>
@@ -120,16 +120,16 @@ export default function PerfilComercialCliente({ tratativa }) {
           <div className="flex flex-wrap items-center gap-4 mt-3 pt-3 border-t border-emerald-200">
             {tratativa.data_primeira_contratacao && (
               <div className="flex items-center gap-2">
-                <Calendar className="w-3.5 h-3.5 text-emerald-600" />
-                <span className="text-xs text-slate-600">
+                <Calendar className="w-3.5 h-3.5 text-success" />
+                <span className="text-xs text-muted-foreground">
                   Primeira contratação: {new Date(tratativa.data_primeira_contratacao + 'T00:00:00').toLocaleDateString('pt-BR')}
                 </span>
               </div>
             )}
             {tratativa.data_contratacao_plano_atual && (
               <div className="flex items-center gap-2">
-                <Calendar className="w-3.5 h-3.5 text-emerald-600" />
-                <span className="text-xs text-slate-600">
+                <Calendar className="w-3.5 h-3.5 text-success" />
+                <span className="text-xs text-muted-foreground">
                   Plano atual desde: {new Date(tratativa.data_contratacao_plano_atual + 'T00:00:00').toLocaleDateString('pt-BR')}
                 </span>
               </div>

@@ -119,16 +119,16 @@ export default function FluxoJornadaVisual({ etapas = [], tratativas = [], motiv
                     <Card 
                       className={`relative border-2 transition-all cursor-pointer hover:shadow-lg ${
                         isCritica 
-                          ? 'border-red-300 bg-red-50/50' 
+                          ? 'border-destructive/30 bg-destructive/10/50' 
                           : intensidade > 60 
-                            ? 'border-orange-300 bg-orange-50/30'
-                            : 'border-slate-200 hover:border-blue-300'
+                            ? 'border-orange-300 bg-critical-soft/30'
+                            : 'border-border hover:border-info/30'
                       }`}
                       onClick={() => handleEtapaClick(etapa.id)}
                     >
                       {isCritica && (
                         <div className="absolute -top-2 -right-2">
-                          <Badge className="bg-red-600 text-white animate-pulse">
+                          <Badge className="bg-destructive text-white animate-pulse">
                             <AlertTriangle className="w-3 h-3 mr-1" />
                             Crítico
                           </Badge>
@@ -147,49 +147,49 @@ export default function FluxoJornadaVisual({ etapas = [], tratativas = [], motiv
 
                       <CardContent className="pt-8 pb-4">
                         <div className="text-center space-y-3">
-                          <h3 className="font-semibold text-slate-900">{etapa.nome}</h3>
+                          <h3 className="font-semibold text-foreground">{etapa.nome}</h3>
                           
                           {/* Volume */}
                           <div className="space-y-1">
                             <div className="text-3xl font-bold" style={{ color: etapa.cor || '#3B82F6' }}>
                               {metricas.total || 0}
                             </div>
-                            <p className="text-xs text-slate-500">tratativas</p>
+                            <p className="text-xs text-muted-foreground">tratativas</p>
                           </div>
 
                           {/* Indicador de intensidade */}
                           <div className="space-y-1">
-                            <div className="w-full bg-slate-100 rounded-full h-2">
+                            <div className="w-full bg-muted rounded-full h-2">
                               <motion.div 
                                 className={`h-2 rounded-full ${
-                                  intensidade > 80 ? 'bg-red-500' :
-                                  intensidade > 60 ? 'bg-orange-500' :
-                                  intensidade > 40 ? 'bg-yellow-500' :
-                                  'bg-green-500'
+                                  intensidade > 80 ? 'bg-destructive' :
+                                  intensidade > 60 ? 'bg-critical' :
+                                  intensidade > 40 ? 'bg-warning' :
+                                  'bg-success'
                                 }`}
                                 initial={{ width: 0 }}
                                 animate={{ width: `${intensidade}%` }}
                                 transition={{ duration: 0.8, delay: index * 0.1 }}
                               />
                             </div>
-                            <p className="text-xs text-slate-400">
+                            <p className="text-xs text-muted-foreground">
                               {intensidade}% do volume total
                             </p>
                           </div>
 
                           {/* Quick Stats */}
                           <div className="grid grid-cols-2 gap-2 pt-2">
-                            <div className="text-center p-2 bg-slate-50 rounded">
-                              <div className="text-sm font-semibold text-slate-700">
+                            <div className="text-center p-2 bg-muted rounded">
+                              <div className="text-sm font-semibold text-foreground">
                                 {metricas.criticas || 0}
                               </div>
-                              <p className="text-xs text-slate-500">críticas</p>
+                              <p className="text-xs text-muted-foreground">críticas</p>
                             </div>
-                            <div className="text-center p-2 bg-slate-50 rounded">
-                              <div className="text-sm font-semibold text-slate-700">
+                            <div className="text-center p-2 bg-muted rounded">
+                              <div className="text-sm font-semibold text-foreground">
                                 {metricas.taxaSLA || 0}%
                               </div>
-                              <p className="text-xs text-slate-500">SLA</p>
+                              <p className="text-xs text-muted-foreground">SLA</p>
                             </div>
                           </div>
 
@@ -212,7 +212,7 @@ export default function FluxoJornadaVisual({ etapas = [], tratativas = [], motiv
                     {/* Seta conectora */}
                     {index < etapas.length - 1 && (
                       <div className="hidden lg:block absolute top-20 -right-8 z-20">
-                        <ArrowRight className="w-6 h-6 text-slate-300" />
+                        <ArrowRight className="w-6 h-6 text-muted-foreground" />
                       </div>
                     )}
                   </motion.div>
@@ -227,15 +227,15 @@ export default function FluxoJornadaVisual({ etapas = [], tratativas = [], motiv
         <Card className="border-0 shadow-sm bg-gradient-to-br from-red-50 to-orange-50">
           <CardContent className="p-4">
             <div className="flex items-start gap-3">
-              <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
-                <AlertTriangle className="w-5 h-5 text-red-600" />
+              <div className="w-10 h-10 bg-destructive/10 rounded-full flex items-center justify-center">
+                <AlertTriangle className="w-5 h-5 text-destructive" />
               </div>
               <div className="flex-1">
-                <p className="text-sm font-medium text-slate-900">Ponto de Maior Atrito</p>
-                <p className="text-lg font-bold text-red-600 mt-1">
+                <p className="text-sm font-medium text-foreground">Ponto de Maior Atrito</p>
+                <p className="text-lg font-bold text-destructive mt-1">
                   {etapaCritica?.etapa?.nome || 'N/A'}
                 </p>
-                <p className="text-xs text-slate-600 mt-1">
+                <p className="text-xs text-muted-foreground mt-1">
                   {etapaCritica?.total || 0} casos registrados
                 </p>
               </div>
@@ -246,12 +246,12 @@ export default function FluxoJornadaVisual({ etapas = [], tratativas = [], motiv
         <Card className="border-0 shadow-sm bg-gradient-to-br from-blue-50 to-cyan-50">
           <CardContent className="p-4">
             <div className="flex items-start gap-3">
-              <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                <Target className="w-5 h-5 text-blue-600" />
+              <div className="w-10 h-10 bg-info-soft rounded-full flex items-center justify-center">
+                <Target className="w-5 h-5 text-primary" />
               </div>
               <div className="flex-1">
-                <p className="text-sm font-medium text-slate-900">Taxa Média de SLA</p>
-                <p className="text-lg font-bold text-blue-600 mt-1">
+                <p className="text-sm font-medium text-foreground">Taxa Média de SLA</p>
+                <p className="text-lg font-bold text-primary mt-1">
                   {Object.values(metricasPorEtapa).length > 0
                     ? Math.round(
                         Object.values(metricasPorEtapa).reduce((sum, m) => sum + (m.taxaSLA || 0), 0) /
@@ -259,7 +259,7 @@ export default function FluxoJornadaVisual({ etapas = [], tratativas = [], motiv
                       )
                     : 0}%
                 </p>
-                <p className="text-xs text-slate-600 mt-1">
+                <p className="text-xs text-muted-foreground mt-1">
                   Performance geral da jornada
                 </p>
               </div>
@@ -270,15 +270,15 @@ export default function FluxoJornadaVisual({ etapas = [], tratativas = [], motiv
         <Card className="border-0 shadow-sm bg-gradient-to-br from-green-50 to-emerald-50">
           <CardContent className="p-4">
             <div className="flex items-start gap-3">
-              <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-                <TrendingUp className="w-5 h-5 text-green-600" />
+              <div className="w-10 h-10 bg-success-soft rounded-full flex items-center justify-center">
+                <TrendingUp className="w-5 h-5 text-success" />
               </div>
               <div className="flex-1">
-                <p className="text-sm font-medium text-slate-900">Oportunidade de Melhoria</p>
-                <p className="text-sm font-semibold text-green-600 mt-1">
+                <p className="text-sm font-medium text-foreground">Oportunidade de Melhoria</p>
+                <p className="text-sm font-semibold text-success mt-1">
                   Automatizar etapa crítica
                 </p>
-                <p className="text-xs text-slate-600 mt-1">
+                <p className="text-xs text-muted-foreground mt-1">
                   Pode reduzir até 30% dos casos
                 </p>
               </div>
@@ -306,26 +306,26 @@ export default function FluxoJornadaVisual({ etapas = [], tratativas = [], motiv
               <div className="grid grid-cols-3 gap-4">
                 <Card className="border-0 shadow-sm">
                   <CardContent className="p-4 text-center">
-                    <div className="text-2xl font-bold text-blue-600">
+                    <div className="text-2xl font-bold text-primary">
                       {etapaSelecionada.total}
                     </div>
-                    <p className="text-xs text-slate-500 mt-1">Total de Casos</p>
+                    <p className="text-xs text-muted-foreground mt-1">Total de Casos</p>
                   </CardContent>
                 </Card>
                 <Card className="border-0 shadow-sm">
                   <CardContent className="p-4 text-center">
-                    <div className="text-2xl font-bold text-green-600">
+                    <div className="text-2xl font-bold text-success">
                       {etapaSelecionada.encerradas}
                     </div>
-                    <p className="text-xs text-slate-500 mt-1">Resolvidos</p>
+                    <p className="text-xs text-muted-foreground mt-1">Resolvidos</p>
                   </CardContent>
                 </Card>
                 <Card className="border-0 shadow-sm">
                   <CardContent className="p-4 text-center">
-                    <div className="text-2xl font-bold text-red-600">
+                    <div className="text-2xl font-bold text-destructive">
                       {etapaSelecionada.criticas}
                     </div>
-                    <p className="text-xs text-slate-500 mt-1">Críticos</p>
+                    <p className="text-xs text-muted-foreground mt-1">Críticos</p>
                   </CardContent>
                 </Card>
               </div>
@@ -335,7 +335,7 @@ export default function FluxoJornadaVisual({ etapas = [], tratativas = [], motiv
                 <CardContent className="p-4 space-y-4">
                   <div>
                     <div className="flex justify-between text-sm mb-2">
-                      <span className="text-slate-600">Taxa de Resolução</span>
+                      <span className="text-muted-foreground">Taxa de Resolução</span>
                       <span className="font-semibold">
                         {etapaSelecionada.total > 0 
                           ? Math.round((etapaSelecionada.encerradas / etapaSelecionada.total) * 100) 
@@ -351,16 +351,16 @@ export default function FluxoJornadaVisual({ etapas = [], tratativas = [], motiv
 
                   <div>
                     <div className="flex justify-between text-sm mb-2">
-                      <span className="text-slate-600">Taxa de SLA</span>
+                      <span className="text-muted-foreground">Taxa de SLA</span>
                       <span className="font-semibold">{etapaSelecionada.taxaSLA}%</span>
                     </div>
                     <Progress value={etapaSelecionada.taxaSLA} />
                   </div>
 
                   {etapaSelecionada.tempoMedioResolucao > 0 && (
-                    <div className="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
-                      <span className="text-sm text-slate-600">Tempo Médio de Resolução</span>
-                      <span className="font-semibold text-blue-700">
+                    <div className="flex justify-between items-center p-3 bg-info-soft rounded-lg">
+                      <span className="text-sm text-muted-foreground">Tempo Médio de Resolução</span>
+                      <span className="font-semibold text-primary">
                         {Math.floor(etapaSelecionada.tempoMedioResolucao / 60)}h {etapaSelecionada.tempoMedioResolucao % 60}min
                       </span>
                     </div>
@@ -372,8 +372,8 @@ export default function FluxoJornadaVisual({ etapas = [], tratativas = [], motiv
               {Object.keys(etapaSelecionada.motivosTop).length > 0 && (
                 <Card className="border-0 shadow-sm">
                   <CardContent className="p-4">
-                    <h4 className="font-semibold text-slate-900 mb-3 flex items-center gap-2">
-                      <Zap className="w-4 h-4 text-orange-500" />
+                    <h4 className="font-semibold text-foreground mb-3 flex items-center gap-2">
+                      <Zap className="w-4 h-4 text-critical" />
                       Principais Motivos
                     </h4>
                     <div className="space-y-2">
@@ -381,8 +381,8 @@ export default function FluxoJornadaVisual({ etapas = [], tratativas = [], motiv
                         .sort(([, a], [, b]) => b - a)
                         .slice(0, 5)
                         .map(([motivo, count]) => (
-                          <div key={motivo} className="flex items-center justify-between p-2 bg-slate-50 rounded">
-                            <span className="text-sm text-slate-700">{motivo}</span>
+                          <div key={motivo} className="flex items-center justify-between p-2 bg-muted rounded">
+                            <span className="text-sm text-foreground">{motivo}</span>
                             <Badge variant="outline">{count} casos</Badge>
                           </div>
                         ))}
@@ -393,28 +393,28 @@ export default function FluxoJornadaVisual({ etapas = [], tratativas = [], motiv
 
               {/* Causas Primárias */}
               {Object.keys(etapaSelecionada.causasTop).length > 0 && (
-                <Card className="border-0 shadow-sm bg-red-50/30">
+                <Card className="border-0 shadow-sm bg-destructive/10/30">
                   <CardContent className="p-4">
-                    <h4 className="font-semibold text-slate-900 mb-3 flex items-center gap-2">
-                      <AlertTriangle className="w-4 h-4 text-red-500" />
+                    <h4 className="font-semibold text-foreground mb-3 flex items-center gap-2">
+                      <AlertTriangle className="w-4 h-4 text-destructive" />
                       Causas Primárias Identificadas
                     </h4>
                     <div className="space-y-2">
                       {Object.entries(etapaSelecionada.causasTop)
                         .sort(([, a], [, b]) => b - a)
                         .map(([causa, count]) => (
-                          <div key={causa} className="flex items-center justify-between p-2 bg-white rounded">
-                            <span className="text-sm text-slate-700">
+                          <div key={causa} className="flex items-center justify-between p-2 bg-card rounded">
+                            <span className="text-sm text-foreground">
                               {causaPrimariaLabels[causa] || causa}
                             </span>
                             <div className="flex items-center gap-2">
-                              <div className="w-24 bg-slate-100 rounded-full h-1.5">
+                              <div className="w-24 bg-muted rounded-full h-1.5">
                                 <div 
-                                  className="bg-red-500 h-1.5 rounded-full" 
+                                  className="bg-destructive h-1.5 rounded-full" 
                                   style={{ width: `${(count / etapaSelecionada.total) * 100}%` }}
                                 />
                               </div>
-                              <Badge className="bg-red-100 text-red-700">{count}</Badge>
+                              <Badge className="bg-destructive/10 text-destructive">{count}</Badge>
                             </div>
                           </div>
                         ))}
@@ -426,25 +426,25 @@ export default function FluxoJornadaVisual({ etapas = [], tratativas = [], motiv
               {/* Recomendações */}
               <Card className="border-0 shadow-sm bg-gradient-to-br from-purple-50 to-pink-50">
                 <CardContent className="p-4">
-                  <h4 className="font-semibold text-purple-900 mb-3 flex items-center gap-2">
+                  <h4 className="font-semibold text-primary mb-3 flex items-center gap-2">
                     <CheckCircle className="w-4 h-4" />
                     Recomendações de Melhoria
                   </h4>
-                  <ul className="space-y-2 text-sm text-slate-700">
+                  <ul className="space-y-2 text-sm text-foreground">
                     {etapaSelecionada.total > 10 && (
                       <li className="flex items-start gap-2">
-                        <span className="text-purple-600 mt-0.5">•</span>
+                        <span className="text-primary mt-0.5">•</span>
                         <span>Alto volume de casos nesta etapa sugere necessidade de revisão de processo</span>
                       </li>
                     )}
                     {etapaSelecionada.taxaSLA < 80 && (
                       <li className="flex items-start gap-2">
-                        <span className="text-purple-600 mt-0.5">•</span>
+                        <span className="text-primary mt-0.5">•</span>
                         <span>Taxa de SLA abaixo do ideal - considere aumentar recursos ou otimizar fluxo</span>
                       </li>
                     )}
                     <li className="flex items-start gap-2">
-                      <span className="text-purple-600 mt-0.5">•</span>
+                      <span className="text-primary mt-0.5">•</span>
                       <span>Identifique padrões nos motivos recorrentes para ações preventivas</span>
                     </li>
                   </ul>

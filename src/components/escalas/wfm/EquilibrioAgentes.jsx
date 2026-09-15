@@ -26,9 +26,9 @@ export default function EquilibrioAgentes({ escala, colaboradores, historicoMes 
   if (stats.length === 0) return null;
 
   return (
-    <Card className="border border-slate-200 shadow-sm">
+    <Card className="border border-border shadow-sm">
       <CardContent className="p-4">
-        <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Equilíbrio de Turnos (Mês)</p>
+        <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-3">Equilíbrio de Turnos (Mês)</p>
         <div className="space-y-2">
           {stats.map(({ ag, manhas, tardes, pctManha }) => {
             const desequilibrado = Math.abs(manhas - tardes) > 1;
@@ -36,22 +36,22 @@ export default function EquilibrioAgentes({ escala, colaboradores, historicoMes 
               <div key={ag.id} className="flex items-center gap-3">
                 <Avatar className="h-7 w-7 flex-shrink-0">
                   <AvatarImage src={ag.foto_url} />
-                  <AvatarFallback className="text-[10px] bg-slate-200">
+                  <AvatarFallback className="text-[10px] bg-muted">
                     {ag.nome_completo?.charAt(0)}
                   </AvatarFallback>
                 </Avatar>
-                <span className="text-xs text-slate-700 w-20 truncate flex-shrink-0">
+                <span className="text-xs text-foreground w-20 truncate flex-shrink-0">
                   {ag.nome_completo?.split(' ')[0]}
                 </span>
-                <div className="flex-1 h-4 bg-slate-100 rounded-full overflow-hidden">
+                <div className="flex-1 h-4 bg-muted rounded-full overflow-hidden">
                   <div
-                    className="h-full bg-green-500 transition-all"
+                    className="h-full bg-success transition-all"
                     style={{ width: `${pctManha}%` }}
                   />
                 </div>
                 <span className={cn(
                   'text-[11px] font-semibold w-20 text-right flex-shrink-0',
-                  desequilibrado ? 'text-amber-600' : 'text-slate-500'
+                  desequilibrado ? 'text-warning' : 'text-muted-foreground'
                 )}>
                   M:{manhas} T:{tardes} {desequilibrado && ''}
                 </span>
@@ -61,12 +61,12 @@ export default function EquilibrioAgentes({ escala, colaboradores, historicoMes 
         </div>
         <div className="flex items-center gap-3 mt-3 pt-3 border-t">
           <div className="flex items-center gap-1.5">
-            <div className="w-3 h-3 rounded-sm bg-green-500" />
-            <span className="text-[11px] text-slate-500">Manhã</span>
+            <div className="w-3 h-3 rounded-sm bg-success" />
+            <span className="text-[11px] text-muted-foreground">Manhã</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <div className="w-3 h-3 rounded-sm bg-slate-200" />
-            <span className="text-[11px] text-slate-500">Tarde</span>
+            <div className="w-3 h-3 rounded-sm bg-muted" />
+            <span className="text-[11px] text-muted-foreground">Tarde</span>
           </div>
         </div>
       </CardContent>

@@ -38,7 +38,7 @@ export function ResultadosVisuaisCSAT({ respostas }) {
   if (!stats) {
     return (
       <Card>
-        <CardContent className="p-6 text-center text-slate-500">
+        <CardContent className="p-6 text-center text-muted-foreground">
           Nenhuma resposta recebida ainda
         </CardContent>
       </Card>
@@ -46,15 +46,15 @@ export function ResultadosVisuaisCSAT({ respostas }) {
   }
 
   const getCorNota = (nota) => {
-    if (nota >= 4) return 'text-green-600 bg-green-50';
-    if (nota >= 3) return 'text-yellow-600 bg-yellow-50';
-    return 'text-red-600 bg-red-50';
+    if (nota >= 4) return 'text-success bg-success-soft';
+    if (nota >= 3) return 'text-warning bg-warning-soft';
+    return 'text-destructive bg-destructive/10';
   };
 
   const getEmojiNota = (nota) => {
-    if (nota >= 4) return <Smile className="w-8 h-8 text-green-600" />;
-    if (nota >= 3) return <Meh className="w-8 h-8 text-yellow-600" />;
-    return <Frown className="w-8 h-8 text-red-600" />;
+    if (nota >= 4) return <Smile className="w-8 h-8 text-success" />;
+    if (nota >= 3) return <Meh className="w-8 h-8 text-warning" />;
+    return <Frown className="w-8 h-8 text-destructive" />;
   };
 
   const percentualPositivo = ((stats.distribuicao.positivo / stats.total) * 100).toFixed(1);
@@ -68,18 +68,18 @@ export function ResultadosVisuaisCSAT({ respostas }) {
             <div className="flex items-center gap-4">
               {getEmojiNota(stats.media)}
               <div>
-                <p className="text-sm text-slate-600">CSAT - Satisfação Média</p>
+                <p className="text-sm text-muted-foreground">CSAT - Satisfação Média</p>
                 <div className="flex items-baseline gap-2 mt-1">
                   <span className={`text-5xl font-bold ${getCorNota(stats.media)}`}>
                     {stats.media.toFixed(1)}
                   </span>
-                  <span className="text-2xl text-slate-400">/5.0</span>
+                  <span className="text-2xl text-muted-foreground">/5.0</span>
                 </div>
               </div>
             </div>
             <div className="text-right">
-              <p className="text-sm text-slate-600">Respostas</p>
-              <p className="text-3xl font-bold text-slate-900">{stats.total}</p>
+              <p className="text-sm text-muted-foreground">Respostas</p>
+              <p className="text-3xl font-bold text-foreground">{stats.total}</p>
             </div>
           </div>
         </CardContent>
@@ -93,42 +93,42 @@ export function ResultadosVisuaisCSAT({ respostas }) {
         <CardContent className="space-y-3">
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2 w-32">
-              <ThumbsUp className="w-5 h-5 text-green-600" />
+              <ThumbsUp className="w-5 h-5 text-success" />
               <span className="text-sm font-medium">Satisfeitos</span>
             </div>
             <Progress value={(stats.distribuicao.positivo / stats.total) * 100} className="flex-1 h-3" />
-            <span className="text-sm font-bold text-green-600 w-16 text-right">
+            <span className="text-sm font-bold text-success w-16 text-right">
               {((stats.distribuicao.positivo / stats.total) * 100).toFixed(0)}%
             </span>
-            <span className="text-sm text-slate-500 w-12 text-right">
+            <span className="text-sm text-muted-foreground w-12 text-right">
               ({stats.distribuicao.positivo})
             </span>
           </div>
 
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2 w-32">
-              <Minus className="w-5 h-5 text-yellow-600" />
+              <Minus className="w-5 h-5 text-warning" />
               <span className="text-sm font-medium">Neutros</span>
             </div>
             <Progress value={(stats.distribuicao.neutro / stats.total) * 100} className="flex-1 h-3" />
-            <span className="text-sm font-bold text-yellow-600 w-16 text-right">
+            <span className="text-sm font-bold text-warning w-16 text-right">
               {((stats.distribuicao.neutro / stats.total) * 100).toFixed(0)}%
             </span>
-            <span className="text-sm text-slate-500 w-12 text-right">
+            <span className="text-sm text-muted-foreground w-12 text-right">
               ({stats.distribuicao.neutro})
             </span>
           </div>
 
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2 w-32">
-              <ThumbsDown className="w-5 h-5 text-red-600" />
+              <ThumbsDown className="w-5 h-5 text-destructive" />
               <span className="text-sm font-medium">Insatisfeitos</span>
             </div>
             <Progress value={(stats.distribuicao.negativo / stats.total) * 100} className="flex-1 h-3" />
-            <span className="text-sm font-bold text-red-600 w-16 text-right">
+            <span className="text-sm font-bold text-destructive w-16 text-right">
               {((stats.distribuicao.negativo / stats.total) * 100).toFixed(0)}%
             </span>
-            <span className="text-sm text-slate-500 w-12 text-right">
+            <span className="text-sm text-muted-foreground w-12 text-right">
               ({stats.distribuicao.negativo})
             </span>
           </div>
@@ -137,23 +137,23 @@ export function ResultadosVisuaisCSAT({ respostas }) {
 
       {/* Métrica Resumida */}
       <div className="grid grid-cols-2 gap-4">
-        <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200">
+        <Card className="bg-gradient-to-br from-green-50 to-green-100 border-success/25">
           <CardContent className="p-4">
             <div className="flex items-center gap-2 mb-1">
-              <Star className="w-4 h-4 text-green-700" />
-              <p className="text-xs font-medium text-green-700">Taxa de Satisfação</p>
+              <Star className="w-4 h-4 text-success" />
+              <p className="text-xs font-medium text-success">Taxa de Satisfação</p>
             </div>
-            <p className="text-2xl font-bold text-green-900">{percentualPositivo}%</p>
+            <p className="text-2xl font-bold text-success">{percentualPositivo}%</p>
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
+        <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-info/25">
           <CardContent className="p-4">
             <div className="flex items-center gap-2 mb-1">
-              <TrendingUp className="w-4 h-4 text-blue-700" />
-              <p className="text-xs font-medium text-blue-700">Taxa de Resposta</p>
+              <TrendingUp className="w-4 h-4 text-primary" />
+              <p className="text-xs font-medium text-primary">Taxa de Resposta</p>
             </div>
-            <p className="text-2xl font-bold text-blue-900">
+            <p className="text-2xl font-bold text-primary">
               {stats.total > 0 ? '100%' : '0%'}
             </p>
           </CardContent>
@@ -192,7 +192,7 @@ export function ResultadosVisuaisNPS({ respostas }) {
   if (!stats) {
     return (
       <Card>
-        <CardContent className="p-6 text-center text-slate-500">
+        <CardContent className="p-6 text-center text-muted-foreground">
           Nenhuma resposta recebida ainda
         </CardContent>
       </Card>
@@ -200,10 +200,10 @@ export function ResultadosVisuaisNPS({ respostas }) {
   }
 
   const getCorNPS = (nps) => {
-    if (nps >= 75) return { cor: 'text-green-600', bg: 'bg-green-50', label: 'Excelente', emoji: '' };
-    if (nps >= 50) return { cor: 'text-green-600', bg: 'bg-green-50', label: 'Muito Bom', emoji: '' };
-    if (nps >= 0) return { cor: 'text-yellow-600', bg: 'bg-yellow-50', label: 'Bom', emoji: '' };
-    return { cor: 'text-red-600', bg: 'bg-red-50', label: 'Crítico', emoji: '' };
+    if (nps >= 75) return { cor: 'text-success', bg: 'bg-success-soft', label: 'Excelente', emoji: '' };
+    if (nps >= 50) return { cor: 'text-success', bg: 'bg-success-soft', label: 'Muito Bom', emoji: '' };
+    if (nps >= 0) return { cor: 'text-warning', bg: 'bg-warning-soft', label: 'Bom', emoji: '' };
+    return { cor: 'text-destructive', bg: 'bg-destructive/10', label: 'Crítico', emoji: '' };
   };
 
   const classificacao = getCorNPS(stats.nps);
@@ -215,7 +215,7 @@ export function ResultadosVisuaisNPS({ respostas }) {
         <CardContent className="p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-slate-600 mb-2">Net Promoter Score (NPS)</p>
+              <p className="text-sm text-muted-foreground mb-2">Net Promoter Score (NPS)</p>
               <div className="flex items-baseline gap-3">
                 <span className={`text-6xl font-bold ${classificacao.cor}`}>
                   {stats.nps}
@@ -229,8 +229,8 @@ export function ResultadosVisuaisNPS({ respostas }) {
               </div>
             </div>
             <div className="text-right">
-              <p className="text-sm text-slate-600">Respostas</p>
-              <p className="text-3xl font-bold text-slate-900">{stats.total}</p>
+              <p className="text-sm text-muted-foreground">Respostas</p>
+              <p className="text-3xl font-bold text-foreground">{stats.total}</p>
             </div>
           </div>
         </CardContent>
@@ -244,14 +244,14 @@ export function ResultadosVisuaisNPS({ respostas }) {
         <CardContent className="space-y-3">
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2 w-32">
-              <div className="w-3 h-3 rounded-full bg-green-600"></div>
+              <div className="w-3 h-3 rounded-full bg-success"></div>
               <span className="text-sm font-medium">Promotores</span>
             </div>
             <Progress value={(stats.promotores / stats.total) * 100} className="flex-1 h-3" />
-            <span className="text-sm font-bold text-green-600 w-16 text-right">
+            <span className="text-sm font-bold text-success w-16 text-right">
               {((stats.promotores / stats.total) * 100).toFixed(0)}%
             </span>
-            <span className="text-sm text-slate-500 w-12 text-right">
+            <span className="text-sm text-muted-foreground w-12 text-right">
               ({stats.promotores})
             </span>
           </div>
@@ -262,24 +262,24 @@ export function ResultadosVisuaisNPS({ respostas }) {
               <span className="text-sm font-medium">Neutros</span>
             </div>
             <Progress value={(stats.neutros / stats.total) * 100} className="flex-1 h-3" />
-            <span className="text-sm font-bold text-yellow-600 w-16 text-right">
+            <span className="text-sm font-bold text-warning w-16 text-right">
               {((stats.neutros / stats.total) * 100).toFixed(0)}%
             </span>
-            <span className="text-sm text-slate-500 w-12 text-right">
+            <span className="text-sm text-muted-foreground w-12 text-right">
               ({stats.neutros})
             </span>
           </div>
 
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2 w-32">
-              <div className="w-3 h-3 rounded-full bg-red-600"></div>
+              <div className="w-3 h-3 rounded-full bg-destructive"></div>
               <span className="text-sm font-medium">Detratores</span>
             </div>
             <Progress value={(stats.detratores / stats.total) * 100} className="flex-1 h-3" />
-            <span className="text-sm font-bold text-red-600 w-16 text-right">
+            <span className="text-sm font-bold text-destructive w-16 text-right">
               {((stats.detratores / stats.total) * 100).toFixed(0)}%
             </span>
-            <span className="text-sm text-slate-500 w-12 text-right">
+            <span className="text-sm text-muted-foreground w-12 text-right">
               ({stats.detratores})
             </span>
           </div>
@@ -287,12 +287,12 @@ export function ResultadosVisuaisNPS({ respostas }) {
       </Card>
 
       {/* Legenda */}
-      <Card className="bg-slate-50">
+      <Card className="bg-muted">
         <CardContent className="p-4 text-xs space-y-1">
-          <p className="font-medium text-slate-700">Classificação:</p>
-          <p className="text-slate-600">• Promotores: Notas 9-10 (clientes leais)</p>
-          <p className="text-slate-600">• Neutros: Notas 7-8 (satisfeitos, mas vulneráveis)</p>
-          <p className="text-slate-600">• Detratores: Notas 0-6 (insatisfeitos, risco de churn)</p>
+          <p className="font-medium text-foreground">Classificação:</p>
+          <p className="text-muted-foreground">• Promotores: Notas 9-10 (clientes leais)</p>
+          <p className="text-muted-foreground">• Neutros: Notas 7-8 (satisfeitos, mas vulneráveis)</p>
+          <p className="text-muted-foreground">• Detratores: Notas 0-6 (insatisfeitos, risco de churn)</p>
         </CardContent>
       </Card>
     </div>

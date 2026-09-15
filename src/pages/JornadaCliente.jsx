@@ -194,11 +194,11 @@ export default function JornadaCliente() {
   if (isLoading) {
     return (
       <div className="space-y-6">
-        <div className="flex items-center gap-3 p-4 bg-blue-50 border border-blue-200 rounded-xl">
+        <div className="flex items-center gap-3 p-4 bg-info-soft border border-info/25 rounded-xl">
           <div className="w-5 h-5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin flex-shrink-0" />
           <div>
-            <p className="text-sm font-medium text-blue-900">Carregando dados da jornada...</p>
-            <p className="text-xs text-blue-600">Buscando histórico completo de tratativas</p>
+            <p className="text-sm font-medium text-primary">Carregando dados da jornada...</p>
+            <p className="text-xs text-primary">Buscando histórico completo de tratativas</p>
           </div>
         </div>
         <LoadingSpinner text="Carregando jornada do cliente..." />
@@ -214,7 +214,7 @@ export default function JornadaCliente() {
         icon={Map}
         actions={
           <div className="flex gap-2 flex-wrap">
-            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 rounded-lg text-xs text-slate-600">
+            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-muted rounded-lg text-xs text-muted-foreground">
               <Database className="w-3.5 h-3.5" />
               {tratativas.length} tratativas carregadas
             </div>
@@ -362,13 +362,13 @@ export default function JornadaCliente() {
           />
 
           <div>
-            <h3 className="text-lg font-semibold text-slate-900 mb-3">Resumos &amp; Planos de Ação por Etapa (IA)</h3>
+            <h3 className="text-lg font-semibold text-foreground mb-3">Resumos &amp; Planos de Ação por Etapa (IA)</h3>
             <div className="grid lg:grid-cols-2 gap-4">
               {Object.entries(tratativasPorEtapaPeriodo).map(([etapa, lista]) => (
                 <ResumoIAEtapa key={etapa} etapa={etapa} tratativas={lista} />
               ))}
               {Object.keys(tratativasPorEtapaPeriodo).length === 0 && (
-                <p className="text-slate-500 text-sm">Nenhuma tratativa no período selecionado.</p>
+                <p className="text-muted-foreground text-sm">Nenhuma tratativa no período selecionado.</p>
               )}
             </div>
           </div>
@@ -414,15 +414,15 @@ export default function JornadaCliente() {
                 <CardContent className="space-y-4">
                   {/* Motivos mais recorrentes */}
                   <div>
-                    <p className="text-sm font-medium text-slate-700 mb-2">Principais Motivos</p>
+                    <p className="text-sm font-medium text-foreground mb-2">Principais Motivos</p>
                     <div className="space-y-2">
                       {Object.entries(dados.motivos)
                         .sort(([, a], [, b]) => b - a)
                         .slice(0, 3)
                         .map(([motivo, count]) => (
                           <div key={motivo} className="flex items-center justify-between text-sm">
-                            <span className="text-slate-600">{motivo}</span>
-                            <Badge className="bg-blue-100 text-blue-700">{count}</Badge>
+                            <span className="text-muted-foreground">{motivo}</span>
+                            <Badge className="bg-info-soft text-primary">{count}</Badge>
                           </div>
                         ))}
                     </div>
@@ -430,18 +430,18 @@ export default function JornadaCliente() {
 
                   {/* Causas primárias */}
                   <div>
-                    <p className="text-sm font-medium text-slate-700 mb-2">Causas Primárias</p>
+                    <p className="text-sm font-medium text-foreground mb-2">Causas Primárias</p>
                     <div className="space-y-2">
                       {Object.entries(dados.causas)
                         .sort(([, a], [, b]) => b - a)
                         .slice(0, 3)
                         .map(([causa, count]) => (
                           <div key={causa} className="flex items-center justify-between text-sm">
-                            <span className="text-slate-600">{causaPrimariaLabels[causa] || causa}</span>
+                            <span className="text-muted-foreground">{causaPrimariaLabels[causa] || causa}</span>
                             <div className="flex items-center gap-2">
-                              <div className="w-24 bg-slate-100 rounded-full h-1.5">
+                              <div className="w-24 bg-muted rounded-full h-1.5">
                                 <div
-                                  className="bg-red-500 h-1.5 rounded-full"
+                                  className="bg-destructive h-1.5 rounded-full"
                                   style={{ width: `${(count / dados.total) * 100}%` }}
                                 />
                               </div>
@@ -455,7 +455,7 @@ export default function JornadaCliente() {
                   {/* Taxa de conclusão */}
                   <div className="pt-2 border-t">
                     <div className="flex justify-between text-sm mb-1">
-                      <span className="text-slate-500">Taxa de Conclusão</span>
+                      <span className="text-muted-foreground">Taxa de Conclusão</span>
                       <span className="font-medium">
                         {dados.total > 0 ? Math.round((dados.encerradas / dados.total) * 100) : 0}%
                       </span>
@@ -471,7 +471,7 @@ export default function JornadaCliente() {
           <Card className="border-0 shadow-sm bg-gradient-to-br from-red-50 to-orange-50">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <AlertCircle className="w-5 h-5 text-red-600" />
+                <AlertCircle className="w-5 h-5 text-destructive" />
                 Causas Primárias Mais Recorrentes
               </CardTitle>
             </CardHeader>
@@ -480,18 +480,18 @@ export default function JornadaCliente() {
                 {Object.entries(analiseJornada.porCausa)
                   .sort(([, a], [, b]) => b - a)
                   .map(([causa, count]) => (
-                    <div key={causa} className="flex items-center justify-between p-3 bg-white rounded-lg">
-                      <span className="font-medium text-slate-700">
+                    <div key={causa} className="flex items-center justify-between p-3 bg-card rounded-lg">
+                      <span className="font-medium text-foreground">
                         {causaPrimariaLabels[causa] || causa}
                       </span>
                       <div className="flex items-center gap-3">
-                        <div className="w-32 bg-slate-100 rounded-full h-2">
+                        <div className="w-32 bg-muted rounded-full h-2">
                           <div
-                            className="bg-red-500 h-2 rounded-full"
+                            className="bg-destructive h-2 rounded-full"
                             style={{ width: `${(count / analiseJornada.total) * 100}%` }}
                           />
                         </div>
-                        <Badge className="bg-red-100 text-red-700">
+                        <Badge className="bg-destructive/10 text-destructive">
                           {count} casos ({Math.round((count / analiseJornada.total) * 100)}%)
                         </Badge>
                       </div>

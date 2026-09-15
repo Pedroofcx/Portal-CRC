@@ -322,10 +322,10 @@ export default function Layout({ children, currentPageName }) {
   // Mostrar loading enquanto carrega dados essenciais
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+      <div className="min-h-screen bg-muted flex items-center justify-center">
         <div className="text-center">
           <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-slate-600">Carregando Portal CRC...</p>
+          <p className="text-muted-foreground">Carregando Portal CRC...</p>
         </div>
       </div>
     );

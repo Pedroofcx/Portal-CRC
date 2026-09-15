@@ -123,7 +123,7 @@ export default function ConfigEtapasJornada() {
     {
       header: 'Status',
       render: (row) => (
-        <Badge className={row.ativa !== false ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-500'}>
+        <Badge className={row.ativa !== false ? 'bg-success-soft text-success' : 'bg-muted text-muted-foreground'}>
           {row.ativa !== false ? 'Ativa' : 'Inativa'}
         </Badge>
       )
@@ -138,7 +138,7 @@ export default function ConfigEtapasJornada() {
           <Button 
             variant="ghost" 
             size="icon" 
-            className="text-red-600"
+            className="text-destructive"
             onClick={() => { setSelected(row); setDeleteDialogOpen(true); }}
           >
             <Trash2 className="w-4 h-4" />
@@ -156,7 +156,7 @@ export default function ConfigEtapasJornada() {
         icon={Map}
         backTo="Configuracoes"
         actions={
-          <Button onClick={openCreate} className="bg-blue-600 hover:bg-blue-700">
+          <Button onClick={openCreate} className="bg-primary hover:bg-primary/90">
             <Plus className="w-4 h-4 mr-2" />
             Nova Etapa
           </Button>
@@ -219,7 +219,7 @@ export default function ConfigEtapasJornada() {
               <Button type="button" variant="outline" onClick={closeDialog}>
                 Cancelar
               </Button>
-              <Button type="submit" className="bg-blue-600 hover:bg-blue-700">
+              <Button type="submit" className="bg-primary hover:bg-primary/90">
                 {selected ? 'Atualizar' : 'Criar'}
               </Button>
             </div>

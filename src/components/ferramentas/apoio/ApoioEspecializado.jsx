@@ -98,14 +98,14 @@ export default function ApoioEspecializado() {
           <LifeBuoy className="w-6 h-6" />
         </div>
         <div>
-          <h2 className="text-xl font-bold text-slate-900">Solicitação de Apoio Especializado</h2>
-          <p className="text-slate-500 text-sm mt-0.5">Solicite apoio do time de Implantação — Treinamento, Consultoria ou Implantação</p>
+          <h2 className="text-xl font-bold text-foreground">Solicitação de Apoio Especializado</h2>
+          <p className="text-muted-foreground text-sm mt-0.5">Solicite apoio do time de Implantação — Treinamento, Consultoria ou Implantação</p>
         </div>
       </div>
 
       {isLoading ? (
         <div className="flex items-center justify-center py-20">
-          <div className="w-8 h-8 border-4 border-violet-200 border-t-violet-600 rounded-full animate-spin" />
+          <div className="w-8 h-8 border-4 border-info/25 border-t-violet-600 rounded-full animate-spin" />
         </div>
       ) : (
         <>

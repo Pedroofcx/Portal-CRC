@@ -1,10 +1,10 @@
 // Configurações de tipos e pesos operacionais
 export const TIPOS_CONFIG = {
-  reclamacao_interna:  { label: 'Reclamação Interna',    color: 'bg-amber-100 text-amber-700',   colorSolid: '#f59e0b', peso: 1, pontos: 2 },
-  reclame_aqui:        { label: 'Reclame Aqui',          color: 'bg-green-100 text-green-700',   colorSolid: '#22c55e', peso: 2, pontos: 4 },
-  google_meu_negocio:  { label: 'Google Meu Negócio',    color: 'bg-blue-100 text-blue-700',     colorSolid: '#3b82f6', peso: 2, pontos: 3 },
-  contestacao_compra:  { label: 'Contestação de Compra', color: 'bg-purple-100 text-purple-700', colorSolid: '#a855f7', peso: 3, pontos: 5 },
-  procon:              { label: 'PROCON',                 color: 'bg-red-100 text-red-700',       colorSolid: '#ef4444', peso: 4, pontos: 6 },
+  reclamacao_interna:  { label: 'Reclamação Interna',    color: 'bg-warning-soft text-warning',   colorSolid: '#f59e0b', peso: 1, pontos: 2 },
+  reclame_aqui:        { label: 'Reclame Aqui',          color: 'bg-success-soft text-success',   colorSolid: '#22c55e', peso: 2, pontos: 4 },
+  google_meu_negocio:  { label: 'Google Meu Negócio',    color: 'bg-info-soft text-primary',     colorSolid: '#3b82f6', peso: 2, pontos: 3 },
+  contestacao_compra:  { label: 'Contestação de Compra', color: 'bg-info-soft text-primary', colorSolid: '#a855f7', peso: 3, pontos: 5 },
+  procon:              { label: 'PROCON',                 color: 'bg-destructive/10 text-destructive',       colorSolid: '#ef4444', peso: 4, pontos: 6 },
 };
 
 export const PRIORIDADE_CONFIG = {
@@ -62,9 +62,9 @@ export function calcularConcentracao(distribuicoes) {
  * Status operacional do agente
  */
 export function getStatusOperacional(saturacao) {
-  if (saturacao >= LIMIAR_CRITICO) return { label: 'Sobrecarga', icon: '', class: 'text-red-600',   bg: 'bg-red-50 border-red-200' };
-  if (saturacao >= LIMIAR_ATENCAO) return { label: 'Atenção',    icon: '', class: 'text-amber-600', bg: 'bg-amber-50 border-amber-200' };
-  return                                  { label: 'Saudável',   icon: '', class: 'text-green-600', bg: 'bg-green-50 border-green-200' };
+  if (saturacao >= LIMIAR_CRITICO) return { label: 'Sobrecarga', icon: '', class: 'text-destructive',   bg: 'bg-destructive/10 border-destructive/25' };
+  if (saturacao >= LIMIAR_ATENCAO) return { label: 'Atenção',    icon: '', class: 'text-warning', bg: 'bg-warning-soft border-warning/25' };
+  return                                  { label: 'Saudável',   icon: '', class: 'text-success', bg: 'bg-success-soft border-success/25' };
 }
 
 /**

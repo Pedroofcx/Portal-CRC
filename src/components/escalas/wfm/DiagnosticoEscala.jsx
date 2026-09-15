@@ -44,52 +44,52 @@ export default function DiagnosticoEscala({ escala, agentes, historicoMes = [] }
   const pct = totalSlots > 0 ? Math.round((slotsCheios / totalSlots) * 100) : 0;
 
   return (
-    <Card className="border border-slate-200 shadow-sm">
+    <Card className="border border-border shadow-sm">
       <CardContent className="p-4">
-        <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Diagnóstico da Semana</p>
+        <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-3">Diagnóstico da Semana</p>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
 
           {/* Slots cheios */}
           <div className="flex items-center gap-2">
-            <div className={`p-1.5 rounded-lg ${erros.length === 0 ? 'bg-green-100' : 'bg-red-100'}`}>
-              <CheckCircle2 className={`w-4 h-4 ${erros.length === 0 ? 'text-green-600' : 'text-red-500'}`} />
+            <div className={`p-1.5 rounded-lg ${erros.length === 0 ? 'bg-success-soft' : 'bg-destructive/10'}`}>
+              <CheckCircle2 className={`w-4 h-4 ${erros.length === 0 ? 'text-success' : 'text-destructive'}`} />
             </div>
             <div>
-              <p className="text-xs text-slate-500">Preenchimento</p>
-              <p className="text-sm font-bold text-slate-800">{slotsCheios}/{totalSlots} ({pct}%)</p>
+              <p className="text-xs text-muted-foreground">Preenchimento</p>
+              <p className="text-sm font-bold text-foreground">{slotsCheios}/{totalSlots} ({pct}%)</p>
             </div>
           </div>
 
           {/* Alertas */}
           <div className="flex items-center gap-2">
-            <div className={`p-1.5 rounded-lg ${alertas.length > 0 ? 'bg-amber-100' : 'bg-slate-100'}`}>
-              <AlertTriangle className={`w-4 h-4 ${alertas.length > 0 ? 'text-amber-600' : 'text-slate-400'}`} />
+            <div className={`p-1.5 rounded-lg ${alertas.length > 0 ? 'bg-warning-soft' : 'bg-muted'}`}>
+              <AlertTriangle className={`w-4 h-4 ${alertas.length > 0 ? 'text-warning' : 'text-muted-foreground'}`} />
             </div>
             <div>
-              <p className="text-xs text-slate-500">Alertas</p>
-              <p className="text-sm font-bold text-slate-800">{alertas.length}</p>
+              <p className="text-xs text-muted-foreground">Alertas</p>
+              <p className="text-sm font-bold text-foreground">{alertas.length}</p>
             </div>
           </div>
 
           {/* Travados */}
           <div className="flex items-center gap-2">
-            <div className="p-1.5 rounded-lg bg-amber-100">
-              <Lock className="w-4 h-4 text-amber-600" />
+            <div className="p-1.5 rounded-lg bg-warning-soft">
+              <Lock className="w-4 h-4 text-warning" />
             </div>
             <div>
-              <p className="text-xs text-slate-500">Travados</p>
-              <p className="text-sm font-bold text-slate-800">{travados.length}</p>
+              <p className="text-xs text-muted-foreground">Travados</p>
+              <p className="text-sm font-bold text-foreground">{travados.length}</p>
             </div>
           </div>
 
           {/* Equilíbrio */}
           <div className="flex items-center gap-2">
-            <div className={`p-1.5 rounded-lg ${maxDesvio.diff <= 1 ? 'bg-green-100' : 'bg-amber-100'}`}>
-              <Scale className={`w-4 h-4 ${maxDesvio.diff <= 1 ? 'text-green-600' : 'text-amber-600'}`} />
+            <div className={`p-1.5 rounded-lg ${maxDesvio.diff <= 1 ? 'bg-success-soft' : 'bg-warning-soft'}`}>
+              <Scale className={`w-4 h-4 ${maxDesvio.diff <= 1 ? 'text-success' : 'text-warning'}`} />
             </div>
             <div>
-              <p className="text-xs text-slate-500">Equilíbrio</p>
-              <p className="text-sm font-bold text-slate-800">
+              <p className="text-xs text-muted-foreground">Equilíbrio</p>
+              <p className="text-sm font-bold text-foreground">
                 {maxDesvio.diff <= 1 ? 'OK' : `${maxDesvio.nome} +${maxDesvio.diff}`}
               </p>
             </div>
@@ -109,7 +109,7 @@ export default function DiagnosticoEscala({ escala, agentes, historicoMes = [] }
         {alertas.length > 0 && (
           <div className="mt-2 flex flex-wrap gap-1">
             {alertas.map((a, i) => (
-              <Badge key={i} className="text-xs bg-amber-100 text-amber-800 border border-amber-300">
+              <Badge key={i} className="text-xs bg-warning-soft text-warning border border-warning/30">
                 {a.dia}: {a.mensagem}
               </Badge>
             ))}

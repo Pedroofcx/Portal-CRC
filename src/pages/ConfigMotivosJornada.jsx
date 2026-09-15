@@ -157,7 +157,7 @@ export default function ConfigMotivosJornada() {
               <Badge key={i} variant="outline" className="text-xs">{sub}</Badge>
             ))
           ) : (
-            <span className="text-slate-400 text-sm">Nenhum</span>
+            <span className="text-muted-foreground text-sm">Nenhum</span>
           )}
         </div>
       )
@@ -167,13 +167,13 @@ export default function ConfigMotivosJornada() {
       render: (row) => row.esforco_correcao_ti ? (
         <Badge variant="outline" className="text-xs">{row.esforco_correcao_ti}</Badge>
       ) : (
-        <span className="text-slate-400 text-sm">-</span>
+        <span className="text-muted-foreground text-sm">-</span>
       )
     },
     {
       header: 'Status',
       render: (row) => (
-        <Badge className={row.ativo !== false ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-500'}>
+        <Badge className={row.ativo !== false ? 'bg-success-soft text-success' : 'bg-muted text-muted-foreground'}>
           {row.ativo !== false ? 'Ativo' : 'Inativo'}
         </Badge>
       )
@@ -188,7 +188,7 @@ export default function ConfigMotivosJornada() {
           <Button 
             variant="ghost" 
             size="icon" 
-            className="text-red-600"
+            className="text-destructive"
             onClick={() => { setSelected(row); setDeleteDialogOpen(true); }}
           >
             <Trash2 className="w-4 h-4" />
@@ -206,7 +206,7 @@ export default function ConfigMotivosJornada() {
         icon={Settings}
         backTo="Configuracoes"
         actions={
-          <Button onClick={openCreate} className="bg-blue-600 hover:bg-blue-700">
+          <Button onClick={openCreate} className="bg-primary hover:bg-primary/90">
             <Plus className="w-4 h-4 mr-2" />
             Novo Motivo
           </Button>
@@ -231,10 +231,10 @@ export default function ConfigMotivosJornada() {
         <CardContent>
           <div className="space-y-2">
             {etapas.length === 0 ? (
-              <p className="text-slate-500 text-center py-4">Nenhuma etapa cadastrada</p>
+              <p className="text-muted-foreground text-center py-4">Nenhuma etapa cadastrada</p>
             ) : (
               etapas.map(etapa => (
-                <div key={etapa.id} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                <div key={etapa.id} className="flex items-center justify-between p-3 bg-muted rounded-lg">
                   <div className="flex items-center gap-2">
                     <div 
                       className="w-3 h-3 rounded-full" 
@@ -289,12 +289,12 @@ export default function ConfigMotivosJornada() {
               </div>
               <div className="flex flex-wrap gap-2 mt-3">
                 {formData.submotivos.map((sub, i) => (
-                  <Badge key={i} className="bg-blue-100 text-blue-700">
+                  <Badge key={i} className="bg-info-soft text-primary">
                     {sub}
                     <button
                       type="button"
                       onClick={() => removeSubmotivo(i)}
-                      className="ml-2 hover:text-red-600"
+                      className="ml-2 hover:text-destructive"
                     >
                       ×
                     </button>
@@ -335,13 +335,13 @@ export default function ConfigMotivosJornada() {
                   <SelectItem value="Alto">Alto</SelectItem>
                 </SelectContent>
               </Select>
-              <p className="text-xs text-slate-500 mt-1">Usado na Matriz de Esforço x Impacto (Jornada do Cliente)</p>
+              <p className="text-xs text-muted-foreground mt-1">Usado na Matriz de Esforço x Impacto (Jornada do Cliente)</p>
             </div>
             <div className="flex justify-end gap-3 pt-4">
               <Button type="button" variant="outline" onClick={closeDialog}>
                 Cancelar
               </Button>
-              <Button type="submit" className="bg-blue-600 hover:bg-blue-700">
+              <Button type="submit" className="bg-primary hover:bg-primary/90">
                 {selected ? 'Atualizar' : 'Criar'}
               </Button>
             </div>

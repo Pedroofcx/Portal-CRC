@@ -14,12 +14,12 @@ import { toast } from 'sonner';
 import { parseDataLocal, fmtDate, identificarCiclo, calcularStatus } from '@/pages/GestaoFerias';
 
 const STATUS_CONFIG = {
-  em_aquisicao: { label: 'Em Aquisição', cls: 'bg-slate-100 text-slate-600' },
-  disponivel: { label: 'Disponível', cls: 'bg-green-100 text-green-700' },
-  parcialmente_utilizado: { label: 'Parcial', cls: 'bg-blue-100 text-blue-700' },
-  utilizado: { label: 'Utilizado', cls: 'bg-slate-200 text-slate-600' },
-  vencendo: { label: 'Vencendo ', cls: 'bg-amber-100 text-amber-700' },
-  vencido: { label: 'Vencido ', cls: 'bg-red-100 text-red-700' },
+  em_aquisicao: { label: 'Em Aquisição', cls: 'bg-muted text-muted-foreground' },
+  disponivel: { label: 'Disponível', cls: 'bg-success-soft text-success' },
+  parcialmente_utilizado: { label: 'Parcial', cls: 'bg-info-soft text-primary' },
+  utilizado: { label: 'Utilizado', cls: 'bg-muted text-muted-foreground' },
+  vencendo: { label: 'Vencendo ', cls: 'bg-warning-soft text-warning' },
+  vencido: { label: 'Vencido ', cls: 'bg-destructive/10 text-destructive' },
 };
 
 // ── Dialog: Registrar Férias ─────────────────────────────────────────────────
@@ -79,7 +79,7 @@ function RegistrarFeriasDialog({ open, onOpenChange, ciclos, onSalvar, loading }
           </div>
 
           {diasCalc > 0 && (
-            <div className={`p-3 rounded-lg text-sm font-medium ${diasCalc >= 14 ? 'bg-green-50 text-green-700' : diasCalc >= 5 ? 'bg-blue-50 text-blue-700' : 'bg-red-50 text-red-700'}`}>
+            <div className={`p-3 rounded-lg text-sm font-medium ${diasCalc >= 14 ? 'bg-success-soft text-success' : diasCalc >= 5 ? 'bg-info-soft text-primary' : 'bg-destructive/10 text-destructive'}`}>
               {diasCalc} dias de férias
               {diasCalc >= 14 && <span className="ml-2 text-xs opacity-70">(✓ mínimo 14 dias CLT)</span>}
             </div>
@@ -88,18 +88,18 @@ function RegistrarFeriasDialog({ open, onOpenChange, ciclos, onSalvar, loading }
           {/* Identificação automática do ciclo */}
           {form.data_inicio && (
             cicloAlvo ? (
-              <Alert className="bg-blue-50 border-blue-200">
-                <Info className="w-4 h-4 text-blue-600" />
-                <AlertDescription className="text-blue-900 text-sm">
+              <Alert className="bg-info-soft border-info/25">
+                <Info className="w-4 h-4 text-primary" />
+                <AlertDescription className="text-primary text-sm">
                   <strong>Período aquisitivo identificado automaticamente:</strong><br />
                   {fmtDate(cicloAlvo.aquisitivo_inicio)} — {fmtDate(cicloAlvo.aquisitivo_fim)}<br />
                   <span className="text-xs opacity-70">{disponiveis} dias disponíveis · {fragmentosAtuais}/3 períodos registrados</span>
                 </AlertDescription>
               </Alert>
             ) : (
-              <Alert className="bg-red-50 border-red-200">
-                <AlertTriangle className="w-4 h-4 text-red-600" />
-                <AlertDescription className="text-red-900 text-sm">
+              <Alert className="bg-destructive/10 border-destructive/25">
+                <AlertTriangle className="w-4 h-4 text-destructive" />
+                <AlertDescription className="text-destructive text-sm">
                   Não foi encontrado período aquisitivo para esta data. Verifique se o ciclo correspondente existe.
                 </AlertDescription>
               </Alert>
@@ -107,12 +107,12 @@ function RegistrarFeriasDialog({ open, onOpenChange, ciclos, onSalvar, loading }
           )}
 
           {/* Abono Pecuniário */}
-          <div className="border border-slate-200 rounded-xl p-4 space-y-3 bg-amber-50">
+          <div className="border border-border rounded-xl p-4 space-y-3 bg-warning-soft">
             <div className="flex items-center gap-2">
-              <DollarSign className="w-4 h-4 text-amber-600" />
-              <Label className="font-semibold text-amber-800">Abono Pecuniário (Venda de Dias)</Label>
+              <DollarSign className="w-4 h-4 text-warning" />
+              <Label className="font-semibold text-warning">Abono Pecuniário (Venda de Dias)</Label>
             </div>
-            <p className="text-xs text-amber-700">O colaborador pode vender até 10 dias do período de férias.</p>
+            <p className="text-xs text-warning">O colaborador pode vender até 10 dias do período de férias.</p>
             <div className="flex gap-3">
               {[0, 10].map(dias => (
                 <button
@@ -121,8 +121,8 @@ function RegistrarFeriasDialog({ open, onOpenChange, ciclos, onSalvar, loading }
                   onClick={() => setForm(f => ({ ...f, abono_dias: dias }))}
                   className={`flex-1 py-2.5 rounded-lg border-2 text-sm font-semibold transition-all ${
                     form.abono_dias === dias
-                      ? 'border-amber-500 bg-amber-500 text-white'
-                      : 'border-slate-200 bg-white text-slate-700 hover:border-amber-300'
+                      ? 'border-amber-500 bg-warning text-white'
+                      : 'border-border bg-card text-foreground hover:border-warning/30'
                   }`}
                 >
                   {dias === 0 ? 'Sem abono' : `Vender 10 dias`}
@@ -130,7 +130,7 @@ function RegistrarFeriasDialog({ open, onOpenChange, ciclos, onSalvar, loading }
               ))}
             </div>
             {form.abono_dias === 10 && (
-              <p className="text-xs text-amber-700 bg-amber-100 rounded-lg p-2">
+              <p className="text-xs text-warning bg-warning-soft rounded-lg p-2">
                 O colaborador receberá o valor de 10 dias adicionais na remuneração de férias.
               </p>
             )}
@@ -157,7 +157,7 @@ function RegistrarFeriasDialog({ open, onOpenChange, ciclos, onSalvar, loading }
 
           <div className="flex justify-end gap-3">
             <Button variant="outline" onClick={() => onOpenChange(false)}>Cancelar</Button>
-            <Button onClick={handleSalvar} disabled={loading || !cicloAlvo} className="bg-green-600 hover:bg-green-700">
+            <Button onClick={handleSalvar} disabled={loading || !cicloAlvo} className="bg-success hover:bg-success/90">
               {loading ? 'Salvando...' : 'Registrar Férias'}
             </Button>
           </div>
@@ -184,13 +184,13 @@ export default function DetalheColaboradorFerias({ colaborador, ciclos, onBack, 
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-3">
-        <Button variant="ghost" size="sm" onClick={onBack} className="text-slate-500">
+        <Button variant="ghost" size="sm" onClick={onBack} className="text-muted-foreground">
           <ArrowLeft className="w-4 h-4 mr-1" />Voltar
         </Button>
       </div>
 
       {/* Perfil */}
-      <div className="bg-white border border-slate-200 rounded-2xl p-6">
+      <div className="bg-card border border-border rounded-2xl p-6">
         <div className="flex flex-col sm:flex-row sm:items-center gap-4">
           <Avatar className="h-16 w-16">
             <AvatarImage src={colaborador.foto_url} />
@@ -199,13 +199,13 @@ export default function DetalheColaboradorFerias({ colaborador, ciclos, onBack, 
             </AvatarFallback>
           </Avatar>
           <div className="flex-1">
-            <h2 className="text-xl font-bold text-slate-900">{colaborador.nome_completo}</h2>
-            <p className="text-slate-500 text-sm">{colaborador.cargo_atual}{colaborador.equipe_nome && ` • ${colaborador.equipe_nome}`}</p>
+            <h2 className="text-xl font-bold text-foreground">{colaborador.nome_completo}</h2>
+            <p className="text-muted-foreground text-sm">{colaborador.cargo_atual}{colaborador.equipe_nome && ` • ${colaborador.equipe_nome}`}</p>
             {colaborador.data_admissao && (
-              <p className="text-xs text-slate-400 mt-1">Admissão: <strong>{fmtDate(colaborador.data_admissao)}</strong> — ciclos gerados automaticamente</p>
+              <p className="text-xs text-muted-foreground mt-1">Admissão: <strong>{fmtDate(colaborador.data_admissao)}</strong> — ciclos gerados automaticamente</p>
             )}
           </div>
-          <Button onClick={() => setDialogFerias(true)} className="bg-green-600 hover:bg-green-700 self-start sm:self-center">
+          <Button onClick={() => setDialogFerias(true)} className="bg-success hover:bg-success/90 self-start sm:self-center">
             <Plus className="w-4 h-4 mr-2" />Registrar Férias
           </Button>
         </div>
@@ -213,10 +213,10 @@ export default function DetalheColaboradorFerias({ colaborador, ciclos, onBack, 
 
       {/* Lista de ciclos */}
       {ciclosOrdenados.length === 0 ? (
-        <div className="text-center py-16 bg-white border border-slate-200 rounded-xl">
-          <Calendar className="w-10 h-10 text-slate-300 mx-auto mb-3" />
-          <p className="text-slate-500 font-medium">Nenhum ciclo cadastrado</p>
-          <p className="text-xs text-slate-400 mt-1">Os ciclos são gerados automaticamente ao abrir o perfil com data de admissão.</p>
+        <div className="text-center py-16 bg-card border border-border rounded-xl">
+          <Calendar className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
+          <p className="text-muted-foreground font-medium">Nenhum ciclo cadastrado</p>
+          <p className="text-xs text-muted-foreground mt-1">Os ciclos são gerados automaticamente ao abrir o perfil com data de admissão.</p>
         </div>
       ) : ciclosOrdenados.map(ciclo => {
         const status = calcularStatus(ciclo);
@@ -238,10 +238,10 @@ export default function DetalheColaboradorFerias({ colaborador, ciclos, onBack, 
                   <CardTitle className="text-base">
                     {fmtDate(ciclo.aquisitivo_inicio)} — {fmtDate(ciclo.aquisitivo_fim)}
                   </CardTitle>
-                  <p className="text-xs text-slate-500 mt-0.5">
+                  <p className="text-xs text-muted-foreground mt-0.5">
                     Concessivo até: <strong>{fmtDate(ciclo.concessivo_fim)}</strong>
                     {diasConcessivo !== null && diasConcessivo <= 90 && status !== 'utilizado' && (
-                      <span className="ml-2 text-red-500">{diasConcessivo < 0 ? '(VENCIDO)' : `(${diasConcessivo} dias)`}</span>
+                      <span className="ml-2 text-destructive">{diasConcessivo < 0 ? '(VENCIDO)' : `(${diasConcessivo} dias)`}</span>
                     )}
                   </p>
                 </div>
@@ -255,65 +255,65 @@ export default function DetalheColaboradorFerias({ colaborador, ciclos, onBack, 
             </CardHeader>
             <CardContent className="space-y-4">
               {(status === 'vencendo' || status === 'vencido') && (
-                <Alert className="border-amber-300 bg-amber-50">
-                  <AlertTriangle className="w-4 h-4 text-amber-600" />
-                  <AlertDescription className="text-amber-900 text-sm">
+                <Alert className="border-warning/30 bg-warning-soft">
+                  <AlertTriangle className="w-4 h-4 text-warning" />
+                  <AlertDescription className="text-warning text-sm">
                     {status === 'vencido' ? 'Férias vencidas! Risco trabalhista.' : `Férias devem ser concedidas até ${fmtDate(ciclo.concessivo_fim)}.`}
                   </AlertDescription>
                 </Alert>
               )}
 
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                <div className="bg-slate-50 rounded-xl p-3 text-center">
-                  <p className="text-xl font-bold text-slate-700">{diasDireito}</p>
-                  <p className="text-xs text-slate-500">dias de direito</p>
+                <div className="bg-muted rounded-xl p-3 text-center">
+                  <p className="text-xl font-bold text-foreground">{diasDireito}</p>
+                  <p className="text-xs text-muted-foreground">dias de direito</p>
                 </div>
-                <div className="bg-amber-50 rounded-xl p-3 text-center">
-                  <p className="text-xl font-bold text-amber-700">{abono}</p>
-                  <p className="text-xs text-amber-600">abono (vendidos)</p>
+                <div className="bg-warning-soft rounded-xl p-3 text-center">
+                  <p className="text-xl font-bold text-warning">{abono}</p>
+                  <p className="text-xs text-warning">abono (vendidos)</p>
                 </div>
-                <div className="bg-blue-50 rounded-xl p-3 text-center">
-                  <p className="text-xl font-bold text-blue-700">{utilizados}</p>
-                  <p className="text-xs text-blue-600">férias usufruídas</p>
+                <div className="bg-info-soft rounded-xl p-3 text-center">
+                  <p className="text-xl font-bold text-primary">{utilizados}</p>
+                  <p className="text-xs text-primary">férias usufruídas</p>
                 </div>
-                <div className={`rounded-xl p-3 text-center ${restantes > 0 ? 'bg-green-50' : 'bg-slate-50'}`}>
-                  <p className={`text-xl font-bold ${restantes > 0 ? 'text-green-700' : 'text-slate-400'}`}>{restantes}</p>
-                  <p className="text-xs text-slate-500">restantes</p>
+                <div className={`rounded-xl p-3 text-center ${restantes > 0 ? 'bg-success-soft' : 'bg-muted'}`}>
+                  <p className={`text-xl font-bold ${restantes > 0 ? 'text-success' : 'text-muted-foreground'}`}>{restantes}</p>
+                  <p className="text-xs text-muted-foreground">restantes</p>
                 </div>
               </div>
 
               <div>
-                <div className="w-full bg-slate-100 rounded-full h-2">
+                <div className="w-full bg-muted rounded-full h-2">
                   <div
-                    className={`h-2 rounded-full ${barPercent >= 100 ? 'bg-slate-400' : barPercent > 70 ? 'bg-amber-400' : 'bg-blue-500'}`}
+                    className={`h-2 rounded-full ${barPercent >= 100 ? 'bg-slate-400' : barPercent > 70 ? 'bg-amber-400' : 'bg-primary'}`}
                     style={{ width: `${barPercent}%` }}
                   />
                 </div>
-                <p className="text-xs text-slate-400 mt-1">{Math.round(barPercent)}% utilizado</p>
+                <p className="text-xs text-muted-foreground mt-1">{Math.round(barPercent)}% utilizado</p>
               </div>
 
               {/* Fragmentos */}
               <div>
-                <p className="text-sm font-medium text-slate-700 mb-2">Períodos registrados ({(ciclo.fragmentos || []).length}/3)</p>
+                <p className="text-sm font-medium text-foreground mb-2">Períodos registrados ({(ciclo.fragmentos || []).length}/3)</p>
                 {(ciclo.fragmentos || []).length === 0 ? (
-                  <p className="text-xs text-slate-400 italic">Nenhum período de férias registrado</p>
+                  <p className="text-xs text-muted-foreground italic">Nenhum período de férias registrado</p>
                 ) : (
                   <div className="space-y-2">
                     {(ciclo.fragmentos || []).map((frag, idx) => (
-                      <div key={frag.id || idx} className="flex items-center justify-between p-3 bg-green-50 border border-green-100 rounded-lg">
+                      <div key={frag.id || idx} className="flex items-center justify-between p-3 bg-success-soft border border-green-100 rounded-lg">
                         <div className="flex items-center gap-3 text-sm">
-                          <span className="w-6 h-6 rounded-full bg-green-200 text-green-800 flex items-center justify-center text-xs font-bold flex-shrink-0">{idx + 1}</span>
+                          <span className="w-6 h-6 rounded-full bg-green-200 text-success flex items-center justify-center text-xs font-bold flex-shrink-0">{idx + 1}</span>
                           <div>
                             <span className="font-medium">{fmtDate(frag.data_inicio)}</span>
-                            <span className="text-slate-500 mx-1">→</span>
+                            <span className="text-muted-foreground mx-1">→</span>
                             <span className="font-medium">{fmtDate(frag.data_fim)}</span>
-                            <Badge className="ml-2 bg-green-100 text-green-700 text-xs">{frag.dias} dias</Badge>
+                            <Badge className="ml-2 bg-success-soft text-success text-xs">{frag.dias} dias</Badge>
                             {frag.status && frag.status !== 'agendado' && (
-                              <Badge className={`ml-2 text-xs ${frag.status === 'em_execucao' ? 'bg-blue-100 text-blue-700' : 'bg-amber-100 text-amber-700'}`}>
+                              <Badge className={`ml-2 text-xs ${frag.status === 'em_execucao' ? 'bg-info-soft text-primary' : 'bg-warning-soft text-warning'}`}>
                                 {frag.status === 'em_execucao' ? 'Em execução' : 'Pendente'}
                               </Badge>
                             )}
-                            {frag.observacao && <span className="ml-2 text-slate-500 italic text-xs">{frag.observacao}</span>}
+                            {frag.observacao && <span className="ml-2 text-muted-foreground italic text-xs">{frag.observacao}</span>}
                           </div>
                         </div>
                         <Button variant="ghost" size="icon" className="h-7 w-7 text-red-400 flex-shrink-0" onClick={() => onRemoverFragmento(ciclo, frag.id)}>

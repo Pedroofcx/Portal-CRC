@@ -286,13 +286,13 @@ export default function Configuracoes() {
           <div className="grid sm:grid-cols-2 gap-6">
             <Card className="border-0 shadow-sm">
               <CardContent className="p-6">
-                <Tag className="w-10 h-10 text-blue-600 mb-3" />
+                <Tag className="w-10 h-10 text-primary mb-3" />
                 <h3 className="font-semibold mb-2">Motivos & Submotivos</h3>
-                <p className="text-sm text-slate-600 mb-4">
+                <p className="text-sm text-muted-foreground mb-4">
                   Configure os motivos principais e submotivos das tratativas
                 </p>
                 <Link to={createPageUrl('ConfigMotivosJornada')}>
-                  <Button className="w-full bg-blue-600 hover:bg-blue-700">
+                  <Button className="w-full bg-primary hover:bg-primary/90">
                     Gerenciar Motivos
                   </Button>
                 </Link>
@@ -300,13 +300,13 @@ export default function Configuracoes() {
             </Card>
             <Card className="border-0 shadow-sm">
               <CardContent className="p-6">
-                <Target className="w-10 h-10 text-purple-600 mb-3" />
+                <Target className="w-10 h-10 text-primary mb-3" />
                 <h3 className="font-semibold mb-2">Etapas da Jornada</h3>
-                <p className="text-sm text-slate-600 mb-4">
+                <p className="text-sm text-muted-foreground mb-4">
                   Defina as etapas que o cliente percorre
                 </p>
                 <Link to={createPageUrl('ConfigEtapasJornada')}>
-                  <Button className="w-full bg-purple-600 hover:bg-purple-700">
+                  <Button className="w-full bg-primary hover:bg-purple-700">
                     Gerenciar Etapas
                   </Button>
                 </Link>
@@ -344,13 +344,13 @@ export default function Configuracoes() {
         <TabsContent value="permissoes" className="mt-6">
           <Card className="border-0 shadow-sm">
             <CardContent className="p-6">
-              <Shield className="w-10 h-10 text-blue-600 mb-3" />
+              <Shield className="w-10 h-10 text-primary mb-3" />
               <h3 className="font-semibold mb-2">Permissões de Visualização de Módulos</h3>
-              <p className="text-sm text-slate-600 mb-4">
+              <p className="text-sm text-muted-foreground mb-4">
                 Configure quais módulos cada perfil (agente/gestor) pode visualizar e defina exceções individuais
               </p>
               <Link to={createPageUrl('ConfigPermissoes')}>
-                <Button className="w-full bg-blue-600 hover:bg-blue-700">
+                <Button className="w-full bg-primary hover:bg-primary/90">
                   Gerenciar Permissões
                 </Button>
               </Link>
@@ -364,25 +364,25 @@ export default function Configuracoes() {
             <Card className="border-0 shadow-sm">
               <CardHeader>
                 <CardTitle className="text-base flex items-center gap-2">
-                  <Trophy className="w-5 h-5 text-yellow-500" />
+                  <Trophy className="w-5 h-5 text-warning" />
                   Controle do Ranking Trimestral
                 </CardTitle>
-                <p className="text-sm text-slate-500 mt-1">
+                <p className="text-sm text-muted-foreground mt-1">
                   Configure a visibilidade do ranking para os agentes no Dashboard
                 </p>
               </CardHeader>
               <CardContent>
-                <div className="flex items-center justify-between p-4 bg-slate-50 rounded-xl border border-slate-200">
+                <div className="flex items-center justify-between p-4 bg-muted rounded-xl border border-border">
                   <div className="flex items-center gap-3">
                     {rankingVisivel
-                      ? <Eye className="w-5 h-5 text-green-600" />
-                      : <EyeOff className="w-5 h-5 text-slate-400" />
+                      ? <Eye className="w-5 h-5 text-success" />
+                      : <EyeOff className="w-5 h-5 text-muted-foreground" />
                     }
                     <div>
-                      <p className="font-semibold text-slate-900 text-sm">
+                      <p className="font-semibold text-foreground text-sm">
                         Ranking visível para agentes
                       </p>
-                      <p className="text-xs text-slate-500 mt-0.5">
+                      <p className="text-xs text-muted-foreground mt-0.5">
                         {rankingVisivel
                           ? 'Os agentes podem ver o ranking no Dashboard'
                           : 'O ranking está oculto para os agentes'}
@@ -394,7 +394,7 @@ export default function Configuracoes() {
                     onCheckedChange={handleToggleRanking}
                   />
                 </div>
-                <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-100 text-xs text-blue-700">
+                <div className="mt-4 p-3 bg-info-soft rounded-lg border border-blue-100 text-xs text-primary">
                   O gestor sempre vê o ranking completo, independente desta configuração.
                 </div>
               </CardContent>
@@ -402,7 +402,7 @@ export default function Configuracoes() {
 
             {/* Preview do ranking */}
             <div>
-              <p className="text-sm font-semibold text-slate-700 mb-3">Prévia do ranking atual:</p>
+              <p className="text-sm font-semibold text-foreground mb-3">Prévia do ranking atual:</p>
               <RankingTrimestral visivel={true} />
             </div>
           </div>
@@ -418,11 +418,11 @@ export default function Configuracoes() {
                     <Target className="w-5 h-5" />
                     Metas de Performance
                   </CardTitle>
-                  <p className="text-sm text-slate-500 mt-1">
+                  <p className="text-sm text-muted-foreground mt-1">
                     Configure as metas mínimas de desempenho
                   </p>
                 </div>
-                <Button onClick={handleSalvarMetas} className="bg-blue-600 hover:bg-blue-700">
+                <Button onClick={handleSalvarMetas} className="bg-primary hover:bg-primary/90">
                   <Save className="w-4 h-4 mr-2" />
                   Salvar
                 </Button>
@@ -439,7 +439,7 @@ export default function Configuracoes() {
                     onChange={(e) => setMetas({ ...metas, csat_minimo: e.target.value })}
                     placeholder="85"
                   />
-                  <p className="text-xs text-slate-500 mt-1">Meta mínima de satisfação do cliente</p>
+                  <p className="text-xs text-muted-foreground mt-1">Meta mínima de satisfação do cliente</p>
                 </div>
                 <div>
                   <Label>Performance Mínima (%)</Label>
@@ -450,7 +450,7 @@ export default function Configuracoes() {
                     onChange={(e) => setMetas({ ...metas, performance_minimo: e.target.value })}
                     placeholder="95"
                   />
-                  <p className="text-xs text-slate-500 mt-1">Meta mínima de performance</p>
+                  <p className="text-xs text-muted-foreground mt-1">Meta mínima de performance</p>
                 </div>
                 <div>
                   <Label>Avaliação CX Mínima</Label>
@@ -461,12 +461,12 @@ export default function Configuracoes() {
                     onChange={(e) => setMetas({ ...metas, avaliacao_cx_minimo: e.target.value })}
                     placeholder="4.2"
                   />
-                  <p className="text-xs text-slate-500 mt-1">Nota mínima CX (1-5)</p>
+                  <p className="text-xs text-muted-foreground mt-1">Nota mínima CX (1-5)</p>
                 </div>
               </div>
 
-              <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
-                <p className="text-sm text-blue-800">
+              <div className="p-4 bg-info-soft rounded-lg border border-info/25">
+                <p className="text-sm text-primary">
                   <strong>Dica:</strong> Essas metas são usadas como referência nos relatórios e análises de performance.
                 </p>
               </div>
@@ -476,13 +476,13 @@ export default function Configuracoes() {
 
         {/* EXCLUSÃO DE DADOS */}
         <TabsContent value="exclusao" className="mt-6">
-          <Card className="border-0 shadow-sm border-red-200">
+          <Card className="border-0 shadow-sm border-destructive/25">
             <CardHeader>
-              <CardTitle className="text-base flex items-center gap-2 text-red-600">
+              <CardTitle className="text-base flex items-center gap-2 text-destructive">
                 <Trash2 className="w-5 h-5" />
                 Exclusão de Dados do Sistema
               </CardTitle>
-              <p className="text-sm text-slate-600 mt-2">
+              <p className="text-sm text-muted-foreground mt-2">
                 <strong>ATENÇÃO:</strong> Esta ação é irreversível. Recomenda-se fazer backup antes de excluir dados.
               </p>
             </CardHeader>
@@ -490,7 +490,7 @@ export default function Configuracoes() {
               <div className="grid sm:grid-cols-2 gap-3">
                 <Button 
                   variant="outline" 
-                  className="border-red-300 text-red-600 hover:bg-red-50"
+                  className="border-destructive/30 text-destructive hover:bg-destructive/10"
                   onClick={() => { setDeleteModulo('tratativas'); setDeleteDialogOpen(true); }}
                 >
                   <Trash2 className="w-4 h-4 mr-2" />
@@ -498,7 +498,7 @@ export default function Configuracoes() {
                 </Button>
                 <Button 
                   variant="outline" 
-                  className="border-red-300 text-red-600 hover:bg-red-50"
+                  className="border-destructive/30 text-destructive hover:bg-destructive/10"
                   onClick={() => { setDeleteModulo('apuracoes'); setDeleteDialogOpen(true); }}
                 >
                   <Trash2 className="w-4 h-4 mr-2" />
@@ -506,7 +506,7 @@ export default function Configuracoes() {
                 </Button>
                 <Button 
                   variant="outline" 
-                  className="border-red-300 text-red-600 hover:bg-red-50"
+                  className="border-destructive/30 text-destructive hover:bg-destructive/10"
                   onClick={() => { setDeleteModulo('observacoes'); setDeleteDialogOpen(true); }}
                 >
                   <Trash2 className="w-4 h-4 mr-2" />
@@ -514,7 +514,7 @@ export default function Configuracoes() {
                 </Button>
                 <Button 
                   variant="outline" 
-                  className="border-red-300 text-red-600 hover:bg-red-50"
+                  className="border-destructive/30 text-destructive hover:bg-destructive/10"
                   onClick={() => { setDeleteModulo('pdis'); setDeleteDialogOpen(true); }}
                 >
                   <Trash2 className="w-4 h-4 mr-2" />
@@ -522,7 +522,7 @@ export default function Configuracoes() {
                 </Button>
                 <Button 
                   variant="outline" 
-                  className="border-red-300 text-red-600 hover:bg-red-50"
+                  className="border-destructive/30 text-destructive hover:bg-destructive/10"
                   onClick={() => { setDeleteModulo('escalas'); setDeleteDialogOpen(true); }}
                 >
                   <Trash2 className="w-4 h-4 mr-2" />
@@ -530,7 +530,7 @@ export default function Configuracoes() {
                 </Button>
                 <Button 
                   variant="outline" 
-                  className="border-red-300 text-red-600 hover:bg-red-50"
+                  className="border-destructive/30 text-destructive hover:bg-destructive/10"
                   onClick={() => { setDeleteModulo('pontuacoes'); setDeleteDialogOpen(true); }}
                 >
                   <Trash2 className="w-4 h-4 mr-2" />
@@ -540,7 +540,7 @@ export default function Configuracoes() {
               <div className="pt-4 border-t">
                 <Button 
                   variant="destructive" 
-                  className="w-full bg-red-600 hover:bg-red-700"
+                  className="w-full bg-destructive hover:bg-destructive/90"
                   onClick={() => { setDeleteModulo('todos'); setDeleteDialogOpen(true); }}
                 >
                   <Trash2 className="w-4 h-4 mr-2" />
@@ -562,10 +562,10 @@ export default function Configuracoes() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-sm text-slate-600 mb-4">
+                <p className="text-sm text-muted-foreground mb-4">
                   Exporta todos os dados do sistema incluindo tratativas, colaboradores, pontuações, etc.
                 </p>
-                <Button onClick={() => handleBackup('completo')} className="w-full bg-blue-600 hover:bg-blue-700">
+                <Button onClick={() => handleBackup('completo')} className="w-full bg-primary hover:bg-primary/90">
                   <Download className="w-4 h-4 mr-2" />
                   Gerar Backup Completo
                 </Button>
@@ -580,7 +580,7 @@ export default function Configuracoes() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-sm text-slate-600 mb-4">
+                <p className="text-sm text-muted-foreground mb-4">
                   Exporta apenas as configurações do sistema (categorias, metas, etc.)
                 </p>
                 <Button onClick={() => handleBackup('configuracoes')} variant="outline" className="w-full">
@@ -599,21 +599,21 @@ export default function Configuracoes() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <ul className="space-y-2 text-sm text-slate-600">
+              <ul className="space-y-2 text-sm text-muted-foreground">
                 <li className="flex items-start gap-2">
-                  <span className="text-blue-600">•</span>
+                  <span className="text-primary">•</span>
                   <span>Backups são exportados em formato JSON</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="text-blue-600">•</span>
+                  <span className="text-primary">•</span>
                   <span>Recomenda-se realizar backup completo semanalmente</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="text-blue-600">•</span>
+                  <span className="text-primary">•</span>
                   <span>Os arquivos são salvos localmente no seu computador</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="text-blue-600">•</span>
+                  <span className="text-primary">•</span>
                   <span>Para restaurar, entre em contato com o suporte técnico</span>
                 </li>
               </ul>
@@ -629,11 +629,11 @@ export default function Configuracoes() {
             </CardHeader>
             <CardContent>
               {logs.length === 0 ? (
-                <p className="text-slate-500 text-center py-8">Nenhum log registrado</p>
+                <p className="text-muted-foreground text-center py-8">Nenhum log registrado</p>
               ) : (
                 <div className="space-y-2 max-h-96 overflow-y-auto">
                   {logs.map((log) => (
-                    <div key={log.id} className="p-3 bg-slate-50 rounded-lg text-sm">
+                    <div key={log.id} className="p-3 bg-muted rounded-lg text-sm">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           <Badge variant="outline" className="capitalize">
@@ -641,11 +641,11 @@ export default function Configuracoes() {
                           </Badge>
                           <span className="font-medium">{log.usuario_nome}</span>
                         </div>
-                        <span className="text-xs text-slate-500">
+                        <span className="text-xs text-muted-foreground">
                           {log.data_hora ? formatDateSP(log.data_hora) : '-'}
                         </span>
                       </div>
-                      <p className="text-slate-600 mt-1">
+                      <p className="text-muted-foreground mt-1">
                         {log.modulo} {log.entidade ? `• ${log.entidade}` : ''}
                       </p>
                     </div>

@@ -219,7 +219,7 @@ export default function SolicitarHomeOfficeDialog({
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Home className="w-5 h-5 text-blue-600" />
+            <Home className="w-5 h-5 text-primary" />
             Solicitar Home Office por Escolha
           </DialogTitle>
         </DialogHeader>
@@ -274,15 +274,15 @@ export default function SolicitarHomeOfficeDialog({
             {semanaInicio && (
               <div>
                 <Label>Escolha 2 Dias para Home Office</Label>
-                <p className="text-xs text-slate-500 mb-2">Você manterá 3 dias presenciais</p>
+                <p className="text-xs text-muted-foreground mb-2">Você manterá 3 dias presenciais</p>
                 <div className="space-y-2">
                   {diasDaSemana.map(dia => (
                     <div 
                       key={dia.data}
                       className={`
                         p-3 border rounded-lg flex items-center justify-between
-                        ${!dia.elegivel ? 'bg-slate-50 opacity-60' : 'hover:bg-blue-50 cursor-pointer'}
-                        ${diasSelecionados.includes(dia.data) ? 'border-blue-500 bg-blue-50' : ''}
+                        ${!dia.elegivel ? 'bg-muted opacity-60' : 'hover:bg-info-soft cursor-pointer'}
+                        ${diasSelecionados.includes(dia.data) ? 'border-blue-500 bg-info-soft' : ''}
                       `}
                       onClick={() => dia.elegivel && toggleDia(dia.data)}
                     >
@@ -294,7 +294,7 @@ export default function SolicitarHomeOfficeDialog({
                         />
                         <div>
                           <p className="font-medium text-sm">{dia.label}</p>
-                          <p className="text-xs text-slate-500">{dia.data}</p>
+                          <p className="text-xs text-muted-foreground">{dia.data}</p>
                         </div>
                       </div>
                       {!dia.elegivel && dia.motivoBloqueio && (
@@ -303,7 +303,7 @@ export default function SolicitarHomeOfficeDialog({
                         </Badge>
                       )}
                       {dia.elegivel && diasSelecionados.includes(dia.data) && (
-                        <Badge className="bg-blue-600 text-xs">
+                        <Badge className="bg-primary text-xs">
                           <Home className="w-3 h-3 mr-1" />
                           Home Office
                         </Badge>
@@ -312,7 +312,7 @@ export default function SolicitarHomeOfficeDialog({
                   ))}
                 </div>
                 {diasSelecionados.length > 0 && (
-                  <p className="text-xs text-slate-600 mt-2">
+                  <p className="text-xs text-muted-foreground mt-2">
                     {diasSelecionados.length} de 2 dias selecionados
                   </p>
                 )}
@@ -346,9 +346,9 @@ export default function SolicitarHomeOfficeDialog({
 
             {/* Resumo */}
             {podeSubmeter && (
-              <Alert className="bg-green-50 border-green-200">
-                <CheckCircle2 className="w-4 h-4 text-green-600" />
-                <AlertDescription className="text-sm text-green-800">
+              <Alert className="bg-success-soft border-success/25">
+                <CheckCircle2 className="w-4 h-4 text-success" />
+                <AlertDescription className="text-sm text-success">
                   <p className="font-medium mb-1">Resumo da sua solicitação:</p>
                   <ul className="text-xs space-y-0.5">
                     <li>• Semana: {semanasDoMes.find(s => s.inicio === semanaInicio)?.label}</li>
@@ -367,7 +367,7 @@ export default function SolicitarHomeOfficeDialog({
               <Button 
                 onClick={handleSubmit}
                 disabled={!podeSubmeter}
-                className="bg-blue-600 hover:bg-blue-700"
+                className="bg-primary hover:bg-primary/90"
               >
                 Enviar Solicitação
               </Button>

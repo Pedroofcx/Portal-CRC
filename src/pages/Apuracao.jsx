@@ -445,39 +445,39 @@ export default function Apuracao() {
                 onClick={() => setTipoApuracao('telefone')}
                 className={`p-6 border-2 rounded-lg transition-all ${
                   tipoApuracao === 'telefone' 
-                    ? 'border-blue-600 bg-blue-50' 
-                    : 'border-slate-200 hover:border-slate-300'
+                    ? 'border-blue-600 bg-info-soft' 
+                    : 'border-border hover:border-border'
                 }`}
               >
-                <Phone className="w-8 h-8 mx-auto mb-3 text-green-600" />
+                <Phone className="w-8 h-8 mx-auto mb-3 text-success" />
                 <p className="font-medium">Telefone</p>
-                <p className="text-xs text-slate-500 mt-1">Atendimento Telefônico</p>
+                <p className="text-xs text-muted-foreground mt-1">Atendimento Telefônico</p>
               </button>
 
               <button
                 onClick={() => setTipoApuracao('chat')}
                 className={`p-6 border-2 rounded-lg transition-all ${
                   tipoApuracao === 'chat' 
-                    ? 'border-blue-600 bg-blue-50' 
-                    : 'border-slate-200 hover:border-slate-300'
+                    ? 'border-blue-600 bg-info-soft' 
+                    : 'border-border hover:border-border'
                 }`}
               >
-                <MessageSquare className="w-8 h-8 mx-auto mb-3 text-purple-600" />
+                <MessageSquare className="w-8 h-8 mx-auto mb-3 text-primary" />
                 <p className="font-medium">Chat Zendesk</p>
-                <p className="text-xs text-slate-500 mt-1">Atendimento Chat</p>
+                <p className="text-xs text-muted-foreground mt-1">Atendimento Chat</p>
               </button>
 
               <button
                 onClick={() => setTipoApuracao('cx')}
                 className={`p-6 border-2 rounded-lg transition-all ${
                   tipoApuracao === 'cx' 
-                    ? 'border-blue-600 bg-blue-50' 
-                    : 'border-slate-200 hover:border-slate-300'
+                    ? 'border-blue-600 bg-info-soft' 
+                    : 'border-border hover:border-border'
                 }`}
               >
-                <Star className="w-8 h-8 mx-auto mb-3 text-amber-600" />
+                <Star className="w-8 h-8 mx-auto mb-3 text-warning" />
                 <p className="font-medium">Avaliação CX</p>
-                <p className="text-xs text-slate-500 mt-1">Planilha CX</p>
+                <p className="text-xs text-muted-foreground mt-1">Planilha CX</p>
               </button>
             </div>
 
@@ -485,7 +485,7 @@ export default function Apuracao() {
               <Button
                 onClick={() => setCurrentStep(1)}
                 disabled={!canProceedStep1()}
-                className="bg-blue-600 hover:bg-blue-700"
+                className="bg-primary hover:bg-primary/90"
               >
                 Próximo
                 <ArrowRight className="w-4 h-4 ml-2" />
@@ -579,7 +579,7 @@ export default function Apuracao() {
               <Button
                 onClick={() => setCurrentStep(2)}
                 disabled={!canProceedStep2()}
-                className="bg-blue-600 hover:bg-blue-700"
+                className="bg-primary hover:bg-primary/90"
               >
                 Próximo
                 <ArrowRight className="w-4 h-4 ml-2" />
@@ -599,11 +599,11 @@ export default function Apuracao() {
             {dadosExtraidos.length === 0 ? (
               <div>
                 <Label htmlFor="file-upload" className="cursor-pointer">
-                  <div className="border-2 border-dashed border-slate-300 rounded-lg p-12 text-center hover:border-blue-500 hover:bg-blue-50 transition-all">
-                    <FileSpreadsheet className="w-16 h-16 mx-auto mb-4 text-slate-400" />
+                  <div className="border-2 border-dashed border-border rounded-lg p-12 text-center hover:border-blue-500 hover:bg-info-soft transition-all">
+                    <FileSpreadsheet className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
                     <p className="text-base font-medium mb-2">Clique para fazer upload da planilha CSV</p>
-                    <p className="text-sm text-slate-500">Apenas formato CSV é aceito</p>
-                    <p className="text-xs text-slate-400 mt-2">Separadores aceitos: vírgula (,) ou ponto-e-vírgula (;)</p>
+                    <p className="text-sm text-muted-foreground">Apenas formato CSV é aceito</p>
+                    <p className="text-xs text-muted-foreground mt-2">Separadores aceitos: vírgula (,) ou ponto-e-vírgula (;)</p>
                   </div>
                   <Input
                     id="file-upload"
@@ -622,18 +622,18 @@ export default function Apuracao() {
               </div>
             ) : (
               <div className="space-y-4">
-                <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+                <div className="p-4 bg-success-soft border border-success/25 rounded-lg">
                   <div className="flex items-center gap-2">
-                    <CheckCircle2 className="w-5 h-5 text-green-600" />
+                    <CheckCircle2 className="w-5 h-5 text-success" />
                     <div>
-                      <p className="font-medium text-green-900">
+                      <p className="font-medium text-success">
                         {dadosExtraidos.length} linhas e {colunas.length} colunas detectadas
                       </p>
                     </div>
                   </div>
                 </div>
 
-                <div className="border rounded-lg p-4 bg-slate-50">
+                <div className="border rounded-lg p-4 bg-muted">
                   <p className="text-sm font-medium mb-2">Colunas detectadas:</p>
                   <div className="flex flex-wrap gap-2">
                     {colunas.map((col, idx) => (
@@ -652,7 +652,7 @@ export default function Apuracao() {
               <Button
                 onClick={() => setCurrentStep(3)}
                 disabled={!canProceedStep3()}
-                className="bg-blue-600 hover:bg-blue-700"
+                className="bg-primary hover:bg-primary/90"
               >
                 Próximo
                 <ArrowRight className="w-4 h-4 ml-2" />
@@ -669,8 +669,8 @@ export default function Apuracao() {
             <CardTitle>Etapa 4: Mapeamento de Colunas</CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
-            <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg">
-              <p className="text-sm text-amber-800">
+            <div className="p-4 bg-warning-soft border border-warning/25 rounded-lg">
+              <p className="text-sm text-warning">
                 <strong>Importante:</strong> Mapeie cada campo lógico para a coluna correspondente na planilha.
               </p>
             </div>
@@ -706,7 +706,7 @@ export default function Apuracao() {
               <Button
                 onClick={calcularResultados}
                 disabled={!canProceedStep4()}
-                className="bg-blue-600 hover:bg-blue-700"
+                className="bg-primary hover:bg-primary/90"
               >
                 Calcular
                 <ArrowRight className="w-4 h-4 ml-2" />
@@ -723,8 +723,8 @@ export default function Apuracao() {
             <CardTitle>Etapa 5: Resultados da Apuração</CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
-            <div className="flex items-center justify-between p-4 bg-green-50 border border-green-200 rounded-lg">
-              <p className="text-sm font-medium text-green-900">
+            <div className="flex items-center justify-between p-4 bg-success-soft border border-success/25 rounded-lg">
+              <p className="text-sm font-medium text-success">
                 ✓ Apuração calculada para {Object.keys(resultados).length} agentes — {dadosExtraidos.length} registros importados
               </p>
               {tipoApuracao === 'telefone' && (
@@ -741,13 +741,13 @@ export default function Apuracao() {
 
             {/* Alertas de consistência */}
             {tipoApuracao === 'telefone' && Object.keys(resultados).some(a => !resultados[a].validacao?.ok) && (
-              <div className="p-4 bg-red-50 border border-red-200 rounded-lg space-y-2">
-                <p className="text-sm font-bold text-red-800">Alertas de Inconsistência</p>
+              <div className="p-4 bg-destructive/10 border border-destructive/25 rounded-lg space-y-2">
+                <p className="text-sm font-bold text-destructive">Alertas de Inconsistência</p>
                 {Object.keys(resultados).map(agente => {
                   const v = resultados[agente].validacao;
                   if (!v || v.ok) return null;
                   return v.alertas.map((alerta, i) => (
-                    <p key={`${agente}-${i}`} className="text-xs text-red-700">• <strong>{agente}:</strong> {alerta}</p>
+                    <p key={`${agente}-${i}`} className="text-xs text-destructive">• <strong>{agente}:</strong> {alerta}</p>
                   ));
                 })}
               </div>
@@ -766,24 +766,24 @@ export default function Apuracao() {
                         <span>{agente}</span>
                         {!r.validacao?.ok && <span className="text-xs bg-amber-900 px-2 py-0.5 rounded">Verificar</span>}
                       </div>
-                      <div className="p-3 bg-slate-50 grid grid-cols-4 gap-2 text-xs text-center">
-                        <div><p className="text-slate-500">Importados</p><p className="font-bold">{v?.registros_importados}</p></div>
-                        <div><p className="text-slate-500">Ligações</p><p className="font-bold">{v?.total_ligacoes}</p></div>
-                        <div><p className="text-slate-500">c/ Transf.</p><p className="font-bold text-amber-700">{v?.total_transferencias}</p></div>
-                        <div><p className="text-slate-500">s/ Transf.</p><p className="font-bold">{v?.total_sem_transferencia}</p></div>
-                        <div><p className="text-slate-500">Atendidas</p><p className="font-bold">{v?.total_atendidas}</p></div>
-                        <div><p className="text-slate-500">Avaliadas</p><p className="font-bold">{v?.total_avaliadas}</p></div>
-                        <div><p className="text-slate-500">Positivas</p><p className="font-bold text-green-700">{v?.total_positivas}</p></div>
-                        <div><p className="text-slate-500">Negativas</p><p className="font-bold text-red-700">{v?.total_negativas}</p></div>
-                        <div><p className="text-slate-500">Nota 4</p><p className="font-bold">{v?.nota4}</p></div>
-                        <div><p className="text-slate-500">Nota 5</p><p className="font-bold">{v?.nota5}</p></div>
-                        <div><p className="text-slate-500">CSAT</p><p className="font-bold text-blue-700">{r.csatPercentual?.toFixed(1)}%</p></div>
-                        <div><p className="text-slate-500">Perf.</p><p className="font-bold text-green-700">{r.performance?.toFixed(1)}%</p></div>
+                      <div className="p-3 bg-muted grid grid-cols-4 gap-2 text-xs text-center">
+                        <div><p className="text-muted-foreground">Importados</p><p className="font-bold">{v?.registros_importados}</p></div>
+                        <div><p className="text-muted-foreground">Ligações</p><p className="font-bold">{v?.total_ligacoes}</p></div>
+                        <div><p className="text-muted-foreground">c/ Transf.</p><p className="font-bold text-warning">{v?.total_transferencias}</p></div>
+                        <div><p className="text-muted-foreground">s/ Transf.</p><p className="font-bold">{v?.total_sem_transferencia}</p></div>
+                        <div><p className="text-muted-foreground">Atendidas</p><p className="font-bold">{v?.total_atendidas}</p></div>
+                        <div><p className="text-muted-foreground">Avaliadas</p><p className="font-bold">{v?.total_avaliadas}</p></div>
+                        <div><p className="text-muted-foreground">Positivas</p><p className="font-bold text-success">{v?.total_positivas}</p></div>
+                        <div><p className="text-muted-foreground">Negativas</p><p className="font-bold text-destructive">{v?.total_negativas}</p></div>
+                        <div><p className="text-muted-foreground">Nota 4</p><p className="font-bold">{v?.nota4}</p></div>
+                        <div><p className="text-muted-foreground">Nota 5</p><p className="font-bold">{v?.nota5}</p></div>
+                        <div><p className="text-muted-foreground">CSAT</p><p className="font-bold text-primary">{r.csatPercentual?.toFixed(1)}%</p></div>
+                        <div><p className="text-muted-foreground">Perf.</p><p className="font-bold text-success">{r.performance?.toFixed(1)}%</p></div>
                       </div>
                       {/* Campos editáveis */}
                       {modoEdicao && ed && (
-                        <div className="p-3 border-t bg-white space-y-2">
-                          <p className="text-xs font-semibold text-slate-600 mb-2">Ajuste manual dos valores:</p>
+                        <div className="p-3 border-t bg-card space-y-2">
+                          <p className="text-xs font-semibold text-muted-foreground mb-2">Ajuste manual dos valores:</p>
                           <div className="grid grid-cols-2 gap-2">
                             {[
                               { key: 'totalLigacoes', label: 'Total Lig.' },
@@ -795,7 +795,7 @@ export default function Apuracao() {
                               { key: 'nota5', label: 'Nota 5' },
                             ].map(({ key, label }) => (
                               <div key={key} className="flex items-center gap-1">
-                                <label className="text-xs text-slate-500 w-16 flex-shrink-0">{label}</label>
+                                <label className="text-xs text-muted-foreground w-16 flex-shrink-0">{label}</label>
                                 <Input
                                   type="number"
                                   min="0"
@@ -809,7 +809,7 @@ export default function Apuracao() {
                           </div>
                           <Button
                             size="sm"
-                            className={`w-full mt-2 ${ed.confirmado ? 'bg-green-600' : 'bg-blue-600'}`}
+                            className={`w-full mt-2 ${ed.confirmado ? 'bg-success' : 'bg-primary'}`}
                             onClick={() => setResultadosEditaveis(prev => ({
                               ...prev,
                               [agente]: { ...prev[agente], confirmado: !prev[agente].confirmado }
@@ -831,7 +831,7 @@ export default function Apuracao() {
                 {/* Vinculação de agentes — resumo */}
                 <div className="overflow-x-auto border rounded-lg">
                   <table className="w-full text-sm">
-                    <thead className="bg-slate-100">
+                    <thead className="bg-muted">
                       <tr>
                         <th className="text-left p-3 font-medium">Nome na Planilha</th>
                         <th className="text-left p-3 font-medium">Vincular Agente *</th>
@@ -852,7 +852,7 @@ export default function Apuracao() {
                       {Object.keys(resultados).map(agente => {
                         const r = resultados[agente];
                         return (
-                          <tr key={agente} className="border-t hover:bg-slate-50">
+                          <tr key={agente} className="border-t hover:bg-muted">
                             <td className="p-3 font-medium whitespace-nowrap">{agente}</td>
                             <td className="p-3 min-w-[180px]">
                               <Select
@@ -876,11 +876,11 @@ export default function Apuracao() {
                             <td className="text-center p-3">{r.nota5 || 0}</td>
                             <td className="text-center p-3">{r.totalPositivas}</td>
                             <td className="text-center p-3">
-                              <Badge variant="outline" className="bg-amber-50 text-amber-700">{r.totalTransferencias}</Badge>
+                              <Badge variant="outline" className="bg-warning-soft text-warning">{r.totalTransferencias}</Badge>
                             </td>
-                            <td className="text-center p-3 font-semibold text-blue-700">{r.csatPercentual.toFixed(1)}%</td>
-                            <td className="text-center p-3 font-semibold text-amber-700">{r.percentualAvaliados.toFixed(1)}%</td>
-                            <td className="text-center p-3 font-semibold text-green-700">{r.performance.toFixed(1)}%</td>
+                            <td className="text-center p-3 font-semibold text-primary">{r.csatPercentual.toFixed(1)}%</td>
+                            <td className="text-center p-3 font-semibold text-warning">{r.percentualAvaliados.toFixed(1)}%</td>
+                            <td className="text-center p-3 font-semibold text-success">{r.performance.toFixed(1)}%</td>
                             <td className="text-center p-3">{r.consolidadoSemanal?.length || 0}</td>
                           </tr>
                         );
@@ -899,7 +899,7 @@ export default function Apuracao() {
                       <div className="bg-slate-700 text-white px-4 py-2 text-sm font-semibold">{agente} — Consolidação Semanal</div>
                       <div className="overflow-x-auto">
                         <table className="w-full text-sm">
-                          <thead className="bg-slate-100">
+                          <thead className="bg-muted">
                             <tr>
                               <th className="text-left p-3 font-medium">Período</th>
                               <th className="text-center p-3 font-medium">Ligações</th>
@@ -916,8 +916,8 @@ export default function Apuracao() {
                           </thead>
                           <tbody>
                             {semanas.map((s, idx) => (
-                              <tr key={idx} className="border-t hover:bg-slate-50">
-                                <td className="p-3 text-xs text-slate-600 whitespace-nowrap">{s.rotulo}</td>
+                              <tr key={idx} className="border-t hover:bg-muted">
+                                <td className="p-3 text-xs text-muted-foreground whitespace-nowrap">{s.rotulo}</td>
                                 <td className="text-center p-3">{s.total_ligacoes}</td>
                                 <td className="text-center p-3">{s.total_atendidas}</td>
                                 <td className="text-center p-3">{s.total_avaliadas}</td>
@@ -925,25 +925,25 @@ export default function Apuracao() {
                                 <td className="text-center p-3">{s.nota5 || 0}</td>
                                 <td className="text-center p-3">{s.total_positivas}</td>
                                 <td className="text-center p-3">
-                                  <Badge variant="outline" className="bg-amber-50 text-amber-700">{s.transferencias || 0}</Badge>
+                                  <Badge variant="outline" className="bg-warning-soft text-warning">{s.transferencias || 0}</Badge>
                                 </td>
-                                <td className="text-center p-3 font-semibold text-blue-700">{s.csat.toFixed(1)}%</td>
-                                <td className="text-center p-3 font-semibold text-amber-700">{s.percentual_avaliados.toFixed(1)}%</td>
-                                <td className="text-center p-3 font-semibold text-green-700">{s.performance.toFixed(1)}%</td>
+                                <td className="text-center p-3 font-semibold text-primary">{s.csat.toFixed(1)}%</td>
+                                <td className="text-center p-3 font-semibold text-warning">{s.percentual_avaliados.toFixed(1)}%</td>
+                                <td className="text-center p-3 font-semibold text-success">{s.performance.toFixed(1)}%</td>
                               </tr>
                             ))}
-                            <tr className="border-t-2 border-slate-400 bg-slate-50 font-bold">
-                              <td className="p-3 text-slate-800">Média Mensal</td>
-                              <td className="text-center p-3 text-slate-500">{r.totalLigacoes}</td>
-                              <td className="text-center p-3 text-slate-500">{r.totalAtendidas}</td>
-                              <td className="text-center p-3 text-slate-500">{r.totalAvaliadas}</td>
-                              <td className="text-center p-3 text-slate-500">{r.nota4 || 0}</td>
-                              <td className="text-center p-3 text-slate-500">{r.nota5 || 0}</td>
-                              <td className="text-center p-3 text-slate-500">{r.totalPositivas}</td>
-                              <td className="text-center p-3 text-slate-500">{r.totalTransferencias}</td>
-                              <td className="text-center p-3 text-blue-700">{r.csatPercentual.toFixed(1)}%</td>
-                              <td className="text-center p-3 text-amber-700">{r.percentualAvaliados.toFixed(1)}%</td>
-                              <td className="text-center p-3 text-green-700">{r.performance.toFixed(1)}%</td>
+                            <tr className="border-t-2 border-border bg-muted font-bold">
+                              <td className="p-3 text-foreground">Média Mensal</td>
+                              <td className="text-center p-3 text-muted-foreground">{r.totalLigacoes}</td>
+                              <td className="text-center p-3 text-muted-foreground">{r.totalAtendidas}</td>
+                              <td className="text-center p-3 text-muted-foreground">{r.totalAvaliadas}</td>
+                              <td className="text-center p-3 text-muted-foreground">{r.nota4 || 0}</td>
+                              <td className="text-center p-3 text-muted-foreground">{r.nota5 || 0}</td>
+                              <td className="text-center p-3 text-muted-foreground">{r.totalPositivas}</td>
+                              <td className="text-center p-3 text-muted-foreground">{r.totalTransferencias}</td>
+                              <td className="text-center p-3 text-primary">{r.csatPercentual.toFixed(1)}%</td>
+                              <td className="text-center p-3 text-warning">{r.percentualAvaliados.toFixed(1)}%</td>
+                              <td className="text-center p-3 text-success">{r.performance.toFixed(1)}%</td>
                             </tr>
                           </tbody>
                         </table>
@@ -957,7 +957,7 @@ export default function Apuracao() {
                 {/* Vinculação + resumo */}
                 <div className="border rounded-lg overflow-hidden">
                   <table className="w-full text-sm">
-                    <thead className="bg-slate-100">
+                    <thead className="bg-muted">
                       <tr>
                         <th className="text-left p-3 font-medium">Nome na Planilha</th>
                         <th className="text-left p-3 font-medium">Vincular Agente *</th>
@@ -970,7 +970,7 @@ export default function Apuracao() {
                       {Object.keys(resultados).map(agente => {
                         const r = resultados[agente];
                         return (
-                          <tr key={agente} className="border-t hover:bg-slate-50">
+                          <tr key={agente} className="border-t hover:bg-muted">
                             <td className="p-3 font-medium">{agente}</td>
                             <td className="p-3">
                               <Select
@@ -987,8 +987,8 @@ export default function Apuracao() {
                                 </SelectContent>
                               </Select>
                             </td>
-                            <td className="text-center p-3 font-semibold text-blue-700">{r.csatPercentual.toFixed(1)}%</td>
-                            <td className="text-center p-3 font-semibold text-amber-700">{r.percentualAvaliados.toFixed(1)}%</td>
+                            <td className="text-center p-3 font-semibold text-primary">{r.csatPercentual.toFixed(1)}%</td>
+                            <td className="text-center p-3 font-semibold text-warning">{r.percentualAvaliados.toFixed(1)}%</td>
                             <td className="text-center p-3">{r.consolidadoSemanal?.length || 0}</td>
                           </tr>
                         );
@@ -1006,7 +1006,7 @@ export default function Apuracao() {
                     <div key={agente} className="border rounded-lg overflow-hidden">
                       <div className="bg-purple-700 text-white px-4 py-2 text-sm font-semibold">{agente} — Consolidação Semanal (Chat)</div>
                       <table className="w-full text-sm">
-                        <thead className="bg-slate-100">
+                        <thead className="bg-muted">
                           <tr>
                             <th className="text-left p-3 font-medium">Semana</th>
                             <th className="text-center p-3 font-medium">Total Chats</th>
@@ -1018,23 +1018,23 @@ export default function Apuracao() {
                         </thead>
                         <tbody>
                           {semanas.map((s, idx) => (
-                            <tr key={idx} className="border-t hover:bg-slate-50">
-                              <td className="p-3 text-xs text-slate-600">{s.rotulo}</td>
+                            <tr key={idx} className="border-t hover:bg-muted">
+                              <td className="p-3 text-xs text-muted-foreground">{s.rotulo}</td>
                               <td className="text-center p-3">{s.total_chats}</td>
                               <td className="text-center p-3">{s.total_avaliados}</td>
                               <td className="text-center p-3">{s.total_positivos}</td>
-                              <td className="text-center p-3 font-semibold text-blue-700">{s.csat.toFixed(1)}%</td>
-                              <td className="text-center p-3 font-semibold text-amber-700">{s.percentual_avaliados.toFixed(1)}%</td>
+                              <td className="text-center p-3 font-semibold text-primary">{s.csat.toFixed(1)}%</td>
+                              <td className="text-center p-3 font-semibold text-warning">{s.percentual_avaliados.toFixed(1)}%</td>
                             </tr>
                           ))}
                           {/* Linha de consolidação mensal */}
-                          <tr className="border-t-2 border-slate-400 bg-slate-50 font-bold">
-                            <td className="p-3 text-slate-800">Média Mensal</td>
-                            <td className="text-center p-3 text-slate-500">—</td>
-                            <td className="text-center p-3 text-slate-500">—</td>
-                            <td className="text-center p-3 text-slate-500">—</td>
-                            <td className="text-center p-3 text-blue-700">{r.csatPercentual.toFixed(1)}%</td>
-                            <td className="text-center p-3 text-amber-700">{r.percentualAvaliados.toFixed(1)}%</td>
+                          <tr className="border-t-2 border-border bg-muted font-bold">
+                            <td className="p-3 text-foreground">Média Mensal</td>
+                            <td className="text-center p-3 text-muted-foreground">—</td>
+                            <td className="text-center p-3 text-muted-foreground">—</td>
+                            <td className="text-center p-3 text-muted-foreground">—</td>
+                            <td className="text-center p-3 text-primary">{r.csatPercentual.toFixed(1)}%</td>
+                            <td className="text-center p-3 text-warning">{r.percentualAvaliados.toFixed(1)}%</td>
                           </tr>
                         </tbody>
                       </table>
@@ -1045,7 +1045,7 @@ export default function Apuracao() {
             ) : (
             <div className="border rounded-lg overflow-hidden">
               <table className="w-full text-sm">
-                <thead className="bg-slate-100">
+                <thead className="bg-muted">
                   <tr>
                     <th className="text-left p-3 font-medium">Nome na Planilha</th>
                     <th className="text-left p-3 font-medium">Vincular Agente *</th>
@@ -1061,7 +1061,7 @@ export default function Apuracao() {
                   {Object.keys(resultados).map(agente => {
                     const r = resultados[agente];
                     return (
-                      <tr key={agente} className="border-t hover:bg-slate-50">
+                      <tr key={agente} className="border-t hover:bg-muted">
                         <td className="p-3 font-medium">{agente}</td>
                         <td className="p-3">
                           <Select
@@ -1099,7 +1099,7 @@ export default function Apuracao() {
               <Button
                 onClick={salvarApuracao}
                 disabled={saveMutation.isPending}
-                className="bg-green-600 hover:bg-green-700"
+                className="bg-success hover:bg-success/90"
               >
                 {saveMutation.isPending ? (
                   <>
@@ -1126,16 +1126,16 @@ export default function Apuracao() {
           </CardHeader>
           <CardContent>
             {apuracoes.length === 0 ? (
-              <p className="text-center text-slate-500 py-8">Nenhuma apuração registrada</p>
+              <p className="text-center text-muted-foreground py-8">Nenhuma apuração registrada</p>
             ) : (
               <div className="space-y-3">
                 {apuracoes.slice(0, 10).map(ap => (
-                  <div key={ap.id} className="p-3 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors">
+                  <div key={ap.id} className="p-3 bg-muted rounded-lg hover:bg-muted transition-colors">
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center gap-2">
-                        {ap.tipo_apuracao === 'telefone' && <Phone className="w-4 h-4 text-green-600" />}
-                        {ap.tipo_apuracao === 'chat' && <MessageSquare className="w-4 h-4 text-purple-600" />}
-                        {ap.tipo_apuracao === 'cx' && <Star className="w-4 h-4 text-amber-600" />}
+                        {ap.tipo_apuracao === 'telefone' && <Phone className="w-4 h-4 text-success" />}
+                        {ap.tipo_apuracao === 'chat' && <MessageSquare className="w-4 h-4 text-primary" />}
+                        {ap.tipo_apuracao === 'cx' && <Star className="w-4 h-4 text-warning" />}
                         <span className="font-medium">{ap.colaborador_nome}</span>
                       </div>
                       <Badge variant="outline" className="capitalize">{ap.tipo_apuracao}</Badge>
@@ -1143,25 +1143,25 @@ export default function Apuracao() {
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-sm">
                       {ap.canal_telefone && (
                         <>
-                          <div><span className="text-slate-500">CSAT:</span> <span className="font-medium">{ap.canal_telefone.csat?.toFixed(1)}%</span></div>
-                          <div><span className="text-slate-500">FCR:</span> <span className="font-medium">{ap.canal_telefone.fcr?.toFixed(1)}%</span></div>
-                          <div><span className="text-slate-500">Performance:</span> <span className="font-medium">{ap.canal_telefone.performance?.toFixed(1)}%</span></div>
+                          <div><span className="text-muted-foreground">CSAT:</span> <span className="font-medium">{ap.canal_telefone.csat?.toFixed(1)}%</span></div>
+                          <div><span className="text-muted-foreground">FCR:</span> <span className="font-medium">{ap.canal_telefone.fcr?.toFixed(1)}%</span></div>
+                          <div><span className="text-muted-foreground">Performance:</span> <span className="font-medium">{ap.canal_telefone.performance?.toFixed(1)}%</span></div>
                         </>
                       )}
                       {ap.canal_chat && (
                         <>
-                          <div><span className="text-slate-500">CSAT:</span> <span className="font-medium">{ap.canal_chat.csat?.toFixed(1)}%</span></div>
-                          <div><span className="text-slate-500">Chats:</span> <span className="font-medium">{ap.canal_chat.total_atendimentos}</span></div>
+                          <div><span className="text-muted-foreground">CSAT:</span> <span className="font-medium">{ap.canal_chat.csat?.toFixed(1)}%</span></div>
+                          <div><span className="text-muted-foreground">Chats:</span> <span className="font-medium">{ap.canal_chat.total_atendimentos}</span></div>
                         </>
                       )}
                       {ap.avaliacao_cx && (
                         <>
-                          <div><span className="text-slate-500">Média CX:</span> <span className="font-medium">{ap.avaliacao_cx.nota_media?.toFixed(2)}</span></div>
-                          <div><span className="text-slate-500">Avaliações:</span> <span className="font-medium">{ap.avaliacao_cx.total_avaliacoes}</span></div>
+                          <div><span className="text-muted-foreground">Média CX:</span> <span className="font-medium">{ap.avaliacao_cx.nota_media?.toFixed(2)}</span></div>
+                          <div><span className="text-muted-foreground">Avaliações:</span> <span className="font-medium">{ap.avaliacao_cx.total_avaliacoes}</span></div>
                         </>
                       )}
                     </div>
-                    <div className="text-xs text-slate-400 mt-2">
+                    <div className="text-xs text-muted-foreground mt-2">
                       Período: {formatDateSP(ap.periodo_inicio, 'DD/MM/YYYY')} - {formatDateSP(ap.periodo_fim, 'DD/MM/YYYY')}
                     </div>
                   </div>

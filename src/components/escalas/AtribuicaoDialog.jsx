@@ -7,31 +7,31 @@ import { Badge } from '@/components/ui/badge';
 import { X } from 'lucide-react';
 
 const statusConfig = {
-  home_office: { label: 'Home Office', cor: 'bg-green-500' },
-  presencial: { label: 'Presencial', cor: 'bg-blue-500' },
-  hibrido: { label: 'Híbrido', cor: 'bg-purple-500' },
+  home_office: { label: 'Home Office', cor: 'bg-success' },
+  presencial: { label: 'Presencial', cor: 'bg-primary' },
+  hibrido: { label: 'Híbrido', cor: 'bg-primary' },
   ferias: { label: 'Férias', cor: 'bg-cyan-400' },
   day_off: { label: 'Day Off', cor: 'bg-amber-400' },
-  falta: { label: 'Falta', cor: 'bg-red-500' },
-  treinamento: { label: 'Treinamento', cor: 'bg-indigo-500' },
+  falta: { label: 'Falta', cor: 'bg-destructive' },
+  treinamento: { label: 'Treinamento', cor: 'bg-primary' },
   evento_especial: { label: 'Evento', cor: 'bg-pink-500' }
 };
 
 const ColaboradorItem = React.memo(({ colab, isSelected, onToggle }) => {
   return (
     <div
-      className="flex items-center gap-3 p-2 hover:bg-slate-50 rounded cursor-pointer transition-colors"
+      className="flex items-center gap-3 p-2 hover:bg-muted rounded cursor-pointer transition-colors"
       onClick={() => onToggle(colab.id)}
     >
       <input
         type="checkbox"
         checked={isSelected}
         onChange={() => {}}
-        className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+        className="w-4 h-4 rounded border-border text-primary focus:ring-blue-500"
       />
       <div className="flex-1">
         <p className="font-medium text-sm">{colab.nome_completo}</p>
-        <p className="text-xs text-slate-500">{colab.equipe_nome || 'Sem equipe'}</p>
+        <p className="text-xs text-muted-foreground">{colab.equipe_nome || 'Sem equipe'}</p>
       </div>
       {colab.equipe_nome && (
         <Badge variant="outline" className="text-xs">{colab.equipe_nome}</Badge>
@@ -133,7 +133,7 @@ export default function AtribuicaoDialog({
                   className={`p-3 rounded-lg border-2 transition-all ${
                     form.tipoEvento === tipo 
                       ? `${config.cor} text-white border-transparent` 
-                      : 'bg-white border-slate-200 hover:border-slate-300'
+                      : 'bg-card border-border hover:border-border'
                   }`}
                 >
                   <span className="font-medium text-sm">{config.label}</span>
@@ -143,14 +143,14 @@ export default function AtribuicaoDialog({
           </div>
 
           {selectedIds.size > 0 && (
-            <div className="flex flex-wrap gap-2 p-3 bg-blue-50 rounded-lg">
+            <div className="flex flex-wrap gap-2 p-3 bg-info-soft rounded-lg">
               {selectedColabs.map(colab => (
                 <Badge key={colab.id} variant="secondary" className="gap-1">
                   {colab.nome_completo}
                   <button
                     type="button"
                     onClick={() => handleRemove(colab.id)}
-                    className="ml-1 hover:bg-slate-300 rounded-full p-0.5"
+                    className="ml-1 hover:bg-muted rounded-full p-0.5"
                   >
                     <X className="w-3 h-3" />
                   </button>
@@ -180,7 +180,7 @@ export default function AtribuicaoDialog({
             <Button 
               onClick={handleSubmit}
               disabled={!form.dataInicio || selectedIds.size === 0}
-              className="bg-blue-600 hover:bg-blue-700"
+              className="bg-primary hover:bg-primary/90"
             >
               Atribuir
             </Button>

@@ -253,8 +253,8 @@ export default function Cadastro() {
             rounded={true}
           />
           <div>
-            <p className="font-medium text-slate-900">{row.nome_completo}</p>
-            <p className="text-sm text-slate-500">{row.email}</p>
+            <p className="font-medium text-foreground">{row.nome_completo}</p>
+            <p className="text-sm text-muted-foreground">{row.email}</p>
           </div>
         </div>
       )
@@ -271,7 +271,7 @@ export default function Cadastro() {
             {papelLabels[row.papel] || row.papel}
           </Badge>
           {row.is_facilitador_interno && (
-            <Badge className="bg-purple-100 text-purple-700 border-purple-200">
+            <Badge className="bg-info-soft text-primary border-info/25">
               <Star className="w-3 h-3 mr-1" /> FI
             </Badge>
           )}
@@ -287,11 +287,11 @@ export default function Cadastro() {
       render: (row) => (
         <div className="flex items-center gap-2">
           {row.ativo !== false ? (
-            <Badge className="bg-green-100 text-green-700 border-green-200">
+            <Badge className="bg-success-soft text-success border-success/25">
               <UserCheck className="w-3 h-3 mr-1" /> Ativo
             </Badge>
           ) : (
-            <Badge className="bg-slate-100 text-slate-500 border-slate-200">
+            <Badge className="bg-muted text-muted-foreground border-border">
               <UserX className="w-3 h-3 mr-1" /> Inativo
             </Badge>
           )}
@@ -312,7 +312,7 @@ export default function Cadastro() {
           <Button
             variant="ghost"
             size="icon"
-            className="text-red-600 hover:text-red-700 hover:bg-red-50"
+            className="text-destructive hover:text-destructive hover:bg-destructive/10"
             onClick={(e) => {
               e.stopPropagation();
               setSelectedColaborador(row);
@@ -333,7 +333,7 @@ export default function Cadastro() {
         subtitle={`${colaboradores.length} colaboradores registrados`}
         icon={Users}
         actions={
-          <Button onClick={openCreateDialog} className="bg-blue-600 hover:bg-blue-700">
+          <Button onClick={openCreateDialog} className="bg-primary hover:bg-primary/90">
             <Plus className="w-4 h-4 mr-2" />
             Novo Colaborador
           </Button>
@@ -417,7 +417,7 @@ export default function Cadastro() {
                       <Label>Foto do Colaborador</Label>
                       <div className="space-y-3">
                         {/* Upload Interno */}
-                        <div className="p-4 border border-dashed border-slate-300 rounded-lg bg-slate-50">
+                        <div className="p-4 border border-dashed border-border rounded-lg bg-muted">
                           <input
                             type="file"
                             accept="image/*"
@@ -450,11 +450,11 @@ export default function Cadastro() {
                           />
                           <label htmlFor="foto-upload-input" className="cursor-pointer">
                             <div className="text-center">
-                              <div className="w-12 h-12 mx-auto bg-blue-100 rounded-full flex items-center justify-center mb-2">
-                                <Upload className="w-6 h-6 text-blue-600" />
+                              <div className="w-12 h-12 mx-auto bg-info-soft rounded-full flex items-center justify-center mb-2">
+                                <Upload className="w-6 h-6 text-primary" />
                               </div>
-                              <p className="text-sm font-medium text-slate-700">Clique para fazer upload</p>
-                              <p className="text-xs text-slate-500 mt-1">JPG, PNG, GIF (máx. 5MB)</p>
+                              <p className="text-sm font-medium text-foreground">Clique para fazer upload</p>
+                              <p className="text-xs text-muted-foreground mt-1">JPG, PNG, GIF (máx. 5MB)</p>
                             </div>
                           </label>
                         </div>
@@ -462,10 +462,10 @@ export default function Cadastro() {
                         {/* OU Inserir URL */}
                         <div className="relative">
                           <div className="absolute inset-0 flex items-center">
-                            <div className="w-full border-t border-slate-200"></div>
+                            <div className="w-full border-t border-border"></div>
                           </div>
                           <div className="relative flex justify-center text-xs">
-                            <span className="bg-white px-2 text-slate-500">ou insira uma URL</span>
+                            <span className="bg-card px-2 text-muted-foreground">ou insira uma URL</span>
                           </div>
                         </div>
 
@@ -486,8 +486,8 @@ export default function Cadastro() {
                         {imageUrlValidation && (
                           <div className={`flex items-start gap-2 p-2 rounded-lg text-xs ${
                             imageUrlValidation.valid
-                              ? 'bg-green-50 text-green-700'
-                              : 'bg-amber-50 text-amber-700'
+                              ? 'bg-success-soft text-success'
+                              : 'bg-warning-soft text-warning'
                           }`}>
                             {imageUrlValidation.valid ? (
                               <CheckCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
@@ -498,8 +498,8 @@ export default function Cadastro() {
                           </div>
                         )}
                         {formData.foto_url && (
-                          <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg border border-slate-200">
-                            <Label className="text-xs text-slate-500">Preview:</Label>
+                          <div className="flex items-center gap-3 p-3 bg-muted rounded-lg border border-border">
+                            <Label className="text-xs text-muted-foreground">Preview:</Label>
                             <ExternalImage
                               src={formData.foto_url}
                               alt="Preview"
@@ -508,7 +508,7 @@ export default function Cadastro() {
                             />
                           </div>
                         )}
-                        <p className="text-xs text-slate-500">
+                        <p className="text-xs text-muted-foreground">
                           Google Drive: Compartilhe como "Qualquer pessoa com o link"
                         </p>
                       </div>
@@ -562,7 +562,7 @@ export default function Cadastro() {
                       />
                       <Label>Ativo</Label>
                     </div>
-                    <div className="col-span-2 p-4 bg-purple-50 rounded-lg border border-purple-200">
+                    <div className="col-span-2 p-4 bg-info-soft rounded-lg border border-info/25">
                       <div className="flex items-center gap-4">
                         <Switch
                           checked={formData.is_facilitador_interno}
@@ -570,10 +570,10 @@ export default function Cadastro() {
                         />
                         <div className="flex-1">
                           <Label className="flex items-center gap-2">
-                            <Star className="w-4 h-4 text-purple-600" />
+                            <Star className="w-4 h-4 text-primary" />
                             Facilitador Interno (FI)
                           </Label>
-                          <p className="text-xs text-purple-600 mt-1">Papel temporário com acesso especial</p>
+                          <p className="text-xs text-primary mt-1">Papel temporário com acesso especial</p>
                         </div>
                       </div>
                       {formData.is_facilitador_interno && (
@@ -594,7 +594,7 @@ export default function Cadastro() {
                     </Button>
                     <Button
                       type="submit"
-                      className="bg-blue-600 hover:bg-blue-700"
+                      className="bg-primary hover:bg-primary/90"
                       disabled={createMutation.isPending || updateMutation.isPending}
                     >
                       {createMutation.isPending || updateMutation.isPending ? 'Salvando...' : 'Salvar'}
@@ -606,12 +606,12 @@ export default function Cadastro() {
               <TabsContent value="promocoes" className="mt-4">
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
-                    <h3 className="text-sm font-medium text-slate-700">Histórico de Promoções</h3>
+                    <h3 className="text-sm font-medium text-foreground">Histórico de Promoções</h3>
                     <Button
                       type="button"
                       size="sm"
                       onClick={() => setPromocaoDialog(true)}
-                      className="bg-purple-600 hover:bg-purple-700"
+                      className="bg-primary hover:bg-purple-700"
                     >
                       <TrendingUp className="w-4 h-4 mr-2" />
                       Nova Promoção
@@ -621,30 +621,30 @@ export default function Cadastro() {
                   {selectedColaborador?.promocoes && selectedColaborador.promocoes.length > 0 ? (
                     <div className="space-y-3">
                       {selectedColaborador.promocoes.map((prom, idx) => (
-                        <div key={idx} className="p-4 bg-slate-50 rounded-lg border border-slate-200">
+                        <div key={idx} className="p-4 bg-muted rounded-lg border border-border">
                           <div className="flex items-start justify-between mb-2">
                             <div>
-                              <p className="font-medium text-slate-900">
+                              <p className="font-medium text-foreground">
                                 {prom.cargo_anterior} → {prom.cargo_novo}
                               </p>
-                              <p className="text-xs text-slate-500 mt-1">
+                              <p className="text-xs text-muted-foreground mt-1">
                                 {formatDateSP(prom.data_promocao, 'DD/MM/YYYY')}
                               </p>
                             </div>
-                            <Badge className="bg-green-100 text-green-700 border-green-200">
+                            <Badge className="bg-success-soft text-success border-success/25">
                               Promoção #{selectedColaborador.promocoes.length - idx}
                             </Badge>
                           </div>
                           {(prom.salario_anterior || prom.salario_novo) && isGestor && (
-                            <div className="mt-2 p-2 bg-white rounded border border-slate-200">
-                              <p className="text-sm text-slate-600">
+                            <div className="mt-2 p-2 bg-card rounded border border-border">
+                              <p className="text-sm text-muted-foreground">
                                 <strong>Salário:</strong> {prom.salario_anterior ? formatBRL(prom.salario_anterior) : '---'} → {prom.salario_novo ? formatBRL(prom.salario_novo) : '---'}
                               </p>
                             </div>
                           )}
                           {prom.observacoes && (
-                            <div className="mt-2 p-2 bg-blue-50 rounded border border-blue-200">
-                              <p className="text-sm text-slate-700">
+                            <div className="mt-2 p-2 bg-info-soft rounded border border-info/25">
+                              <p className="text-sm text-foreground">
                                 <strong>Observações:</strong> {prom.observacoes}
                               </p>
                             </div>
@@ -653,8 +653,8 @@ export default function Cadastro() {
                       ))}
                     </div>
                   ) : (
-                    <div className="text-center py-8 text-slate-500">
-                      <TrendingUp className="w-12 h-12 mx-auto mb-3 text-slate-300" />
+                    <div className="text-center py-8 text-muted-foreground">
+                      <TrendingUp className="w-12 h-12 mx-auto mb-3 text-muted-foreground" />
                       <p className="text-sm">Nenhuma promoção registrada</p>
                       <Button
                         type="button"
@@ -672,28 +672,28 @@ export default function Cadastro() {
 
               <TabsContent value="historico" className="mt-4">
                 <div className="space-y-4">
-                  <h3 className="text-sm font-medium text-slate-700">Histórico de Cargos</h3>
+                  <h3 className="text-sm font-medium text-foreground">Histórico de Cargos</h3>
 
                   {selectedColaborador?.historico_cargos && selectedColaborador.historico_cargos.length > 0 ? (
                     <div className="space-y-2">
                       {/* Cargo Atual */}
-                      <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
+                      <div className="p-3 bg-info-soft rounded-lg border border-info/25">
                         <div className="flex items-center justify-between">
                           <div>
-                            <p className="font-medium text-slate-900">{selectedColaborador.cargo_atual}</p>
-                            <p className="text-xs text-slate-500 mt-1">Cargo Atual</p>
+                            <p className="font-medium text-foreground">{selectedColaborador.cargo_atual}</p>
+                            <p className="text-xs text-muted-foreground mt-1">Cargo Atual</p>
                           </div>
-                          <Badge className="bg-blue-600 text-white">Atual</Badge>
+                          <Badge className="bg-primary text-white">Atual</Badge>
                         </div>
                       </div>
 
                       {/* Cargos Anteriores */}
                       {[...selectedColaborador.historico_cargos].reverse().map((hist, idx) => (
-                        <div key={idx} className="p-3 bg-slate-50 rounded-lg border border-slate-200">
+                        <div key={idx} className="p-3 bg-muted rounded-lg border border-border">
                           <div className="flex items-center justify-between">
                             <div>
-                              <p className="font-medium text-slate-700">{hist.cargo}</p>
-                              <p className="text-xs text-slate-500 mt-1">
+                              <p className="font-medium text-foreground">{hist.cargo}</p>
+                              <p className="text-xs text-muted-foreground mt-1">
                                 {formatDateSP(hist.data_inicio, 'DD/MM/YYYY')} - {formatDateSP(hist.data_fim, 'DD/MM/YYYY')}
                               </p>
                             </div>
@@ -703,42 +703,42 @@ export default function Cadastro() {
                       ))}
                     </div>
                   ) : (
-                    <div className="text-center py-8 text-slate-500">
-                      <FileText className="w-12 h-12 mx-auto mb-3 text-slate-300" />
+                    <div className="text-center py-8 text-muted-foreground">
+                      <FileText className="w-12 h-12 mx-auto mb-3 text-muted-foreground" />
                       <p className="text-sm">Sem histórico de cargos anteriores</p>
                     </div>
                   )}
 
                   {/* Informações Adicionais */}
-                  <div className="mt-6 pt-6 border-t border-slate-200">
-                    <h3 className="text-sm font-medium text-slate-700 mb-3">Informações de Cadastro</h3>
+                  <div className="mt-6 pt-6 border-t border-border">
+                    <h3 className="text-sm font-medium text-foreground mb-3">Informações de Cadastro</h3>
                     <div className="space-y-2 text-sm">
-                      <div className="flex justify-between py-2 border-b border-slate-100">
-                        <span className="text-slate-600">Data de Admissão:</span>
+                      <div className="flex justify-between py-2 border-b border-border">
+                        <span className="text-muted-foreground">Data de Admissão:</span>
                         <span className="font-medium">{formatDateSP(selectedColaborador.data_admissao, 'DD/MM/YYYY')}</span>
                       </div>
-                      <div className="flex justify-between py-2 border-b border-slate-100">
-                        <span className="text-slate-600">E-mail:</span>
+                      <div className="flex justify-between py-2 border-b border-border">
+                        <span className="text-muted-foreground">E-mail:</span>
                         <span className="font-medium">{selectedColaborador.email}</span>
                       </div>
-                      <div className="flex justify-between py-2 border-b border-slate-100">
-                        <span className="text-slate-600">Papel:</span>
+                      <div className="flex justify-between py-2 border-b border-border">
+                        <span className="text-muted-foreground">Papel:</span>
                         <span className="font-medium capitalize">{papelLabels[selectedColaborador.papel]}</span>
                       </div>
                       {selectedColaborador.equipe_nome && (
-                        <div className="flex justify-between py-2 border-b border-slate-100">
-                          <span className="text-slate-600">Equipe:</span>
+                        <div className="flex justify-between py-2 border-b border-border">
+                          <span className="text-muted-foreground">Equipe:</span>
                           <span className="font-medium">{selectedColaborador.equipe_nome}</span>
                         </div>
                       )}
                       {isGestor && selectedColaborador.salario && (
-                        <div className="flex justify-between py-2 border-b border-slate-100">
-                          <span className="text-slate-600">Salário Atual:</span>
+                        <div className="flex justify-between py-2 border-b border-border">
+                          <span className="text-muted-foreground">Salário Atual:</span>
                           <span className="font-medium">{formatBRL(selectedColaborador.salario)}</span>
                         </div>
                       )}
                       <div className="flex justify-between py-2">
-                        <span className="text-slate-600">Status:</span>
+                        <span className="text-muted-foreground">Status:</span>
                         <StatusBadge status={selectedColaborador.ativo !== false ? 'ativo' : 'inativo'} />
                       </div>
                     </div>
@@ -794,7 +794,7 @@ export default function Cadastro() {
                 <div className="col-span-2">
                   <Label>Foto do Colaborador</Label>
                   <div className="space-y-3">
-                    <div className="p-4 border border-dashed border-slate-300 rounded-lg bg-slate-50">
+                    <div className="p-4 border border-dashed border-border rounded-lg bg-muted">
                       <input
                         type="file"
                         accept="image/*"
@@ -827,21 +827,21 @@ export default function Cadastro() {
                       />
                       <label htmlFor="foto-upload-input" className="cursor-pointer">
                         <div className="text-center">
-                          <div className="w-12 h-12 mx-auto bg-blue-100 rounded-full flex items-center justify-center mb-2">
-                            <Upload className="w-6 h-6 text-blue-600" />
+                          <div className="w-12 h-12 mx-auto bg-info-soft rounded-full flex items-center justify-center mb-2">
+                            <Upload className="w-6 h-6 text-primary" />
                           </div>
-                          <p className="text-sm font-medium text-slate-700">Clique para fazer upload</p>
-                          <p className="text-xs text-slate-500 mt-1">JPG, PNG, GIF (máx. 5MB)</p>
+                          <p className="text-sm font-medium text-foreground">Clique para fazer upload</p>
+                          <p className="text-xs text-muted-foreground mt-1">JPG, PNG, GIF (máx. 5MB)</p>
                         </div>
                       </label>
                     </div>
 
                     <div className="relative">
                       <div className="absolute inset-0 flex items-center">
-                        <div className="w-full border-t border-slate-200"></div>
+                        <div className="w-full border-t border-border"></div>
                       </div>
                       <div className="relative flex justify-center text-xs">
-                        <span className="bg-white px-2 text-slate-500">ou insira uma URL</span>
+                        <span className="bg-card px-2 text-muted-foreground">ou insira uma URL</span>
                       </div>
                     </div>
 
@@ -862,8 +862,8 @@ export default function Cadastro() {
                     {imageUrlValidation && (
                       <div className={`flex items-start gap-2 p-2 rounded-lg text-xs ${
                         imageUrlValidation.valid
-                          ? 'bg-green-50 text-green-700'
-                          : 'bg-amber-50 text-amber-700'
+                          ? 'bg-success-soft text-success'
+                          : 'bg-warning-soft text-warning'
                       }`}>
                         {imageUrlValidation.valid ? (
                           <CheckCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
@@ -874,8 +874,8 @@ export default function Cadastro() {
                       </div>
                     )}
                     {formData.foto_url && (
-                      <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg border border-slate-200">
-                        <Label className="text-xs text-slate-500">Preview:</Label>
+                      <div className="flex items-center gap-3 p-3 bg-muted rounded-lg border border-border">
+                        <Label className="text-xs text-muted-foreground">Preview:</Label>
                         <ExternalImage
                           src={formData.foto_url}
                           alt="Preview"
@@ -884,7 +884,7 @@ export default function Cadastro() {
                         />
                       </div>
                     )}
-                    <p className="text-xs text-slate-500">
+                    <p className="text-xs text-muted-foreground">
                       Google Drive: Compartilhe como "Qualquer pessoa com o link"
                     </p>
                   </div>
@@ -938,7 +938,7 @@ export default function Cadastro() {
                   />
                   <Label>Ativo</Label>
                 </div>
-                <div className="col-span-2 p-4 bg-purple-50 rounded-lg border border-purple-200">
+                <div className="col-span-2 p-4 bg-info-soft rounded-lg border border-info/25">
                   <div className="flex items-center gap-4">
                     <Switch
                       checked={formData.is_facilitador_interno}
@@ -946,10 +946,10 @@ export default function Cadastro() {
                     />
                     <div className="flex-1">
                       <Label className="flex items-center gap-2">
-                        <Star className="w-4 h-4 text-purple-600" />
+                        <Star className="w-4 h-4 text-primary" />
                         Facilitador Interno (FI)
                       </Label>
-                      <p className="text-xs text-purple-600 mt-1">Papel temporário com acesso especial</p>
+                      <p className="text-xs text-primary mt-1">Papel temporário com acesso especial</p>
                     </div>
                   </div>
                   {formData.is_facilitador_interno && (
@@ -970,7 +970,7 @@ export default function Cadastro() {
                 </Button>
                 <Button
                   type="submit"
-                  className="bg-blue-600 hover:bg-blue-700"
+                  className="bg-primary hover:bg-primary/90"
                   disabled={createMutation.isPending || updateMutation.isPending}
                 >
                   {createMutation.isPending || updateMutation.isPending ? 'Salvando...' : 'Salvar'}
@@ -986,31 +986,31 @@ export default function Cadastro() {
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <TrendingUp className="w-5 h-5 text-purple-600" />
+              <TrendingUp className="w-5 h-5 text-primary" />
               Registrar Promoção
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4 mt-4">
             {selectedColaborador && (
               <>
-                <div className="p-3 bg-blue-50 rounded-lg">
-                  <p className="text-sm text-slate-700">
+                <div className="p-3 bg-info-soft rounded-lg">
+                  <p className="text-sm text-foreground">
                     <strong>Colaborador:</strong> {selectedColaborador.nome_completo}
                   </p>
-                  <p className="text-sm text-slate-600 mt-1">
+                  <p className="text-sm text-muted-foreground mt-1">
                     <strong>Cargo Atual:</strong> {selectedColaborador.cargo_atual}
                   </p>
                 </div>
 
                 {/* Histórico de Promoções */}
                 {selectedColaborador.promocoes && selectedColaborador.promocoes.length > 0 && (
-                  <div className="border border-slate-200 rounded-lg p-3 max-h-64 overflow-y-auto">
-                    <p className="text-sm font-medium text-slate-700 mb-2">Histórico de Promoções</p>
+                  <div className="border border-border rounded-lg p-3 max-h-64 overflow-y-auto">
+                    <p className="text-sm font-medium text-foreground mb-2">Histórico de Promoções</p>
                     <div className="space-y-2">
                       {selectedColaborador.promocoes.map((prom, idx) => (
-                        <div key={idx} className="p-2 bg-slate-50 rounded text-xs space-y-1">
+                        <div key={idx} className="p-2 bg-muted rounded text-xs space-y-1">
                           <div className="flex items-center justify-between">
-                            <span className="font-medium text-slate-900">
+                            <span className="font-medium text-foreground">
                               {prom.cargo_anterior} → {prom.cargo_novo}
                             </span>
                             <Badge variant="outline" className="text-xs">
@@ -1018,12 +1018,12 @@ export default function Cadastro() {
                             </Badge>
                           </div>
                           {(prom.salario_anterior || prom.salario_novo) && (
-                            <p className="text-slate-600">
+                            <p className="text-muted-foreground">
                               Salário: {prom.salario_anterior ? formatBRL(prom.salario_anterior) : '---'} → {prom.salario_novo ? formatBRL(prom.salario_novo) : '---'}
                             </p>
                           )}
                           {prom.observacoes && (
-                            <p className="text-slate-500 italic">{prom.observacoes}</p>
+                            <p className="text-muted-foreground italic">{prom.observacoes}</p>
                           )}
                         </div>
                       ))}
@@ -1067,7 +1067,7 @@ export default function Cadastro() {
               <Button type="button" variant="outline" onClick={() => setPromocaoDialog(false)}>
                 Cancelar
               </Button>
-              <Button onClick={handlePromocao} className="bg-purple-600 hover:bg-purple-700">
+              <Button onClick={handlePromocao} className="bg-primary hover:bg-purple-700">
                 Registrar Promoção
               </Button>
             </div>

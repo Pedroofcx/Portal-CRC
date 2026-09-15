@@ -143,7 +143,7 @@ export default function OraculoWizard({
     <div className="space-y-6">
       {/* Progress Bar */}
       <div className="space-y-2">
-        <div className="flex justify-between text-sm text-slate-600">
+        <div className="flex justify-between text-sm text-muted-foreground">
           <span>Passo {step} de {totalSteps}</span>
           <span>{Math.round(progress)}%</span>
         </div>
@@ -152,36 +152,36 @@ export default function OraculoWizard({
 
       {/* Card 1 - Contexto */}
       {step === 1 && (
-        <Card className="border-blue-200">
+        <Card className="border-info/25">
           <CardHeader>
             <div className="flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-blue-600" />
+              <Sparkles className="w-5 h-5 text-primary" />
               <CardTitle>Contexto do Colaborador</CardTitle>
             </div>
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
               <h3 className="font-semibold text-lg mb-2">{colaborador.nome_completo}</h3>
-              <p className="text-sm text-slate-600">{colaborador.cargo_atual}</p>
+              <p className="text-sm text-muted-foreground">{colaborador.cargo_atual}</p>
             </div>
 
             {contexto && (
-              <div className="grid grid-cols-3 gap-4 p-4 bg-blue-50 rounded-lg">
+              <div className="grid grid-cols-3 gap-4 p-4 bg-info-soft rounded-lg">
                 <div>
-                  <div className="text-xs text-slate-600">CSAT Recente</div>
-                  <div className="text-xl font-bold text-blue-600">
+                  <div className="text-xs text-muted-foreground">CSAT Recente</div>
+                  <div className="text-xl font-bold text-primary">
                     {contexto.csat_recente?.toFixed(1) || '-'}%
                   </div>
                 </div>
                 <div>
-                  <div className="text-xs text-slate-600">Tratativas</div>
-                  <div className="text-xl font-bold text-blue-600">
+                  <div className="text-xs text-muted-foreground">Tratativas</div>
+                  <div className="text-xl font-bold text-primary">
                     {contexto.tratativas_periodo || 0}
                   </div>
                 </div>
                 <div>
-                  <div className="text-xs text-slate-600">Pontos (Trimestre)</div>
-                  <div className="text-xl font-bold text-blue-600">
+                  <div className="text-xs text-muted-foreground">Pontos (Trimestre)</div>
+                  <div className="text-xl font-bold text-primary">
                     {contexto.pontos_trimestre?.toFixed(1) || 0}
                   </div>
                 </div>
@@ -193,7 +193,7 @@ export default function OraculoWizard({
                 <h4 className="text-sm font-medium mb-2">Sinais Recentes</h4>
                 <div className="space-y-2">
                   {contexto.sinais_recentes.map((sinal, idx) => (
-                    <div key={idx} className="text-sm p-2 bg-slate-50 rounded">
+                    <div key={idx} className="text-sm p-2 bg-muted rounded">
                       • {sinal}
                     </div>
                   ))}
@@ -206,20 +206,20 @@ export default function OraculoWizard({
 
       {/* Card 2 - Pergunta Estratégica */}
       {step === 2 && (
-        <Card className="border-purple-200">
+        <Card className="border-info/25">
           <CardHeader>
             <div className="flex items-center gap-2">
-              <MessageSquare className="w-5 h-5 text-purple-600" />
+              <MessageSquare className="w-5 h-5 text-primary" />
               <CardTitle>Reflexão Estratégica</CardTitle>
             </div>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="p-6 bg-purple-50 rounded-lg border-l-4 border-purple-500">
-              <p className="text-lg font-medium text-slate-800">
+            <div className="p-6 bg-info-soft rounded-lg border-l-4 border-purple-500">
+              <p className="text-lg font-medium text-foreground">
                 {data.pergunta_gerada}
               </p>
             </div>
-            <p className="text-sm text-slate-600">
+            <p className="text-sm text-muted-foreground">
               Esta pergunta foi gerada com base no histórico e contexto do colaborador.
               Use-a como reflexão para o próximo passo.
             </p>
@@ -229,13 +229,13 @@ export default function OraculoWizard({
 
       {/* Card 3 - Palavras-chave */}
       {step === 3 && (
-        <Card className="border-green-200">
+        <Card className="border-success/25">
           <CardHeader>
             <div className="flex items-center gap-2">
-              <Target className="w-5 h-5 text-green-600" />
+              <Target className="w-5 h-5 text-success" />
               <CardTitle>Palavras-chave (Percepções)</CardTitle>
             </div>
-            <p className="text-sm text-slate-600 mt-2">
+            <p className="text-sm text-muted-foreground mt-2">
               Selecione quantas palavras forem necessárias. Não há limite.
             </p>
           </CardHeader>
@@ -249,7 +249,7 @@ export default function OraculoWizard({
               }, {})
             ).map(([categoria, palavras]) => (
               <div key={categoria}>
-                <h4 className="text-xs font-semibold text-slate-600 mb-2 uppercase">
+                <h4 className="text-xs font-semibold text-muted-foreground mb-2 uppercase">
                   {categoria.replace(/_/g, ' ')}
                 </h4>
                 <div className="flex flex-wrap gap-2">
@@ -263,8 +263,8 @@ export default function OraculoWizard({
                         variant={selecionada ? 'default' : 'outline'}
                         className={cn(
                           'cursor-pointer transition-all',
-                          selecionada && 'bg-green-600 hover:bg-green-700',
-                          palavra.valenca === 'atencao' && !selecionada && 'border-amber-400 text-amber-700'
+                          selecionada && 'bg-success hover:bg-success/90',
+                          palavra.valenca === 'atencao' && !selecionada && 'border-warning/40 text-warning'
                         )}
                         onClick={() => togglePalavra(palavra)}
                       >
@@ -279,13 +279,13 @@ export default function OraculoWizard({
 
             {/* Palavras selecionadas */}
             {data.palavras_selecionadas.length > 0 && (
-              <div className="mt-4 p-4 bg-green-50 rounded-lg">
+              <div className="mt-4 p-4 bg-success-soft rounded-lg">
                 <h4 className="text-sm font-medium mb-2">
                   Selecionadas ({data.palavras_selecionadas.length})
                 </h4>
                 <div className="flex flex-wrap gap-2">
                   {data.palavras_selecionadas.map((p, idx) => (
-                    <Badge key={idx} className="bg-green-600">
+                    <Badge key={idx} className="bg-success">
                       {p.palavra}
                     </Badge>
                   ))}
@@ -329,13 +329,13 @@ export default function OraculoWizard({
 
       {/* Card 4 - Pontuação de Skills */}
       {step === 4 && (
-        <Card className="border-amber-200">
+        <Card className="border-warning/25">
           <CardHeader>
             <div className="flex items-center gap-2">
-              <TrendingUp className="w-5 h-5 text-amber-600" />
+              <TrendingUp className="w-5 h-5 text-warning" />
               <CardTitle>Pontuação de Habilidades</CardTitle>
             </div>
-            <p className="text-sm text-slate-600 mt-2">
+            <p className="text-sm text-muted-foreground mt-2">
               Escala de 1 a 5. Use para leitura analítica, não punitiva.
             </p>
           </CardHeader>
@@ -347,7 +347,7 @@ export default function OraculoWizard({
                 <div key={skill} className="mb-4">
                   <div className="flex justify-between mb-2">
                     <span className="text-sm">{skill}</span>
-                    <span className="text-sm font-medium text-amber-600">
+                    <span className="text-sm font-medium text-warning">
                       {data.soft_skills[skill] || '-'}
                     </span>
                   </div>
@@ -359,8 +359,8 @@ export default function OraculoWizard({
                         className={cn(
                           'flex-1 py-2 rounded border transition-colors',
                           data.soft_skills[skill] === valor
-                            ? 'bg-amber-600 text-white border-amber-600'
-                            : 'border-slate-300 hover:border-amber-400'
+                            ? 'bg-warning text-white border-amber-600'
+                            : 'border-border hover:border-warning/40'
                         )}
                       >
                         {valor}
@@ -378,7 +378,7 @@ export default function OraculoWizard({
                 <div key={skill} className="mb-4">
                   <div className="flex justify-between mb-2">
                     <span className="text-sm">{skill}</span>
-                    <span className="text-sm font-medium text-amber-600">
+                    <span className="text-sm font-medium text-warning">
                       {data.hard_skills[skill] || '-'}
                     </span>
                   </div>
@@ -390,8 +390,8 @@ export default function OraculoWizard({
                         className={cn(
                           'flex-1 py-2 rounded border transition-colors',
                           data.hard_skills[skill] === valor
-                            ? 'bg-amber-600 text-white border-amber-600'
-                            : 'border-slate-300 hover:border-amber-400'
+                            ? 'bg-warning text-white border-amber-600'
+                            : 'border-border hover:border-warning/40'
                         )}
                       >
                         {valor}
@@ -410,10 +410,10 @@ export default function OraculoWizard({
         <Card className="border-indigo-200">
           <CardHeader>
             <div className="flex items-center gap-2">
-              <Edit3 className="w-5 h-5 text-indigo-600" />
+              <Edit3 className="w-5 h-5 text-primary" />
               <CardTitle>Observação Contextual (Opcional)</CardTitle>
             </div>
-            <p className="text-sm text-slate-600 mt-2">
+            <p className="text-sm text-muted-foreground mt-2">
               Adicione um contexto breve se necessário. Não obrigatório.
             </p>
           </CardHeader>
@@ -449,7 +449,7 @@ export default function OraculoWizard({
         ) : (
           <Button
             onClick={handleSubmit}
-            className="bg-green-600 hover:bg-green-700"
+            className="bg-success hover:bg-success/90"
           >
             <Check className="w-4 h-4 mr-2" />
             Concluir Lançamento

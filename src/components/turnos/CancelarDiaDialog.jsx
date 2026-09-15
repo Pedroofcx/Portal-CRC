@@ -50,9 +50,9 @@ export default function CancelarDiaDialog({ open, onClose, turno, diaIndex, esca
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             {jaCancelado ? (
-              <CheckCircle2 className="w-4 h-4 text-green-500" />
+              <CheckCircle2 className="w-4 h-4 text-success" />
             ) : (
-              <BanIcon className="w-4 h-4 text-red-500" />
+              <BanIcon className="w-4 h-4 text-destructive" />
             )}
             {jaCancelado ? 'Reativar Dia' : 'Cancelar Dia'} — {DIAS_PT[turno.dia]}
           </DialogTitle>
@@ -60,27 +60,27 @@ export default function CancelarDiaDialog({ open, onClose, turno, diaIndex, esca
 
         <div className="space-y-4 pt-1">
           {jaCancelado ? (
-            <div className="bg-green-50 border border-green-200 rounded-xl p-4 text-center">
-              <CheckCircle2 className="w-8 h-8 text-green-500 mx-auto mb-2" />
-              <p className="text-sm font-medium text-green-800">Este dia está cancelado</p>
-              <p className="text-xs text-green-600 mt-1">Deseja reativar os turnos normalmente?</p>
+            <div className="bg-success-soft border border-success/25 rounded-xl p-4 text-center">
+              <CheckCircle2 className="w-8 h-8 text-success mx-auto mb-2" />
+              <p className="text-sm font-medium text-success">Este dia está cancelado</p>
+              <p className="text-xs text-success mt-1">Deseja reativar os turnos normalmente?</p>
               {turno.motivo_cancelamento && (
-                <p className="text-xs text-green-700 mt-2 bg-green-100 rounded-lg px-2 py-1">
+                <p className="text-xs text-success mt-2 bg-success-soft rounded-lg px-2 py-1">
                   Motivo: {turno.motivo_cancelamento}
                 </p>
               )}
             </div>
           ) : (
             <>
-              <div className="bg-red-50 border border-red-200 rounded-xl p-3">
-                <p className="text-sm text-red-800 font-medium">Atenção</p>
-                <p className="text-xs text-red-600 mt-1">
+              <div className="bg-destructive/10 border border-destructive/25 rounded-xl p-3">
+                <p className="text-sm text-destructive font-medium">Atenção</p>
+                <p className="text-xs text-destructive mt-1">
                   Os turnos deste dia serão marcados como <strong>CANCELADOS</strong> e todos os colaboradores verão essa informação.
                 </p>
               </div>
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                  Motivo do cancelamento <span className="text-red-500">*</span>
+                <label className="block text-xs font-semibold text-foreground mb-1.5">
+                  Motivo do cancelamento <span className="text-destructive">*</span>
                 </label>
                 <Textarea
                   value={motivo}
@@ -99,7 +99,7 @@ export default function CancelarDiaDialog({ open, onClose, turno, diaIndex, esca
             </Button>
             <Button
               size="sm"
-              className={`flex-1 ${jaCancelado ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700'}`}
+              className={`flex-1 ${jaCancelado ? 'bg-success hover:bg-success/90' : 'bg-destructive hover:bg-destructive/90'}`}
               onClick={handleConfirmar}
               disabled={salvando}
             >

@@ -13,19 +13,19 @@ export default function RichTextViewer({
   className = '' 
 }) {
   if (!content) {
-    return <p className="text-slate-400 text-sm">-</p>;
+    return <p className="text-muted-foreground text-sm">-</p>;
   }
 
   return (
     <div 
       className={cn(
-        "w-full overflow-y-auto rounded-lg bg-white p-4 border border-slate-200",
+        "w-full overflow-y-auto rounded-lg bg-card p-4 border border-border",
         className
       )}
       style={{ maxHeight }}
     >
       <div 
-        className="prose prose-slate max-w-none text-slate-700 break-words"
+        className="prose prose-slate max-w-none text-foreground break-words"
         style={{ lineHeight: '1.7' }}
         dangerouslySetInnerHTML={{ __html: content }}
       />

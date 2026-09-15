@@ -199,7 +199,7 @@ export default function OraculoPage() {
 
   if (!isGestor) {
     return (
-      <div className="min-h-screen p-6 bg-slate-50">
+      <div className="min-h-screen p-6 bg-muted">
         <EmptyState
           icon={Eye}
           title="Acesso Restrito"
@@ -215,7 +215,7 @@ export default function OraculoPage() {
 
   if (showWizard && colaboradorSelecionado) {
     return (
-      <div className="min-h-screen p-6 bg-slate-50">
+      <div className="min-h-screen p-6 bg-muted">
         <div className="max-w-4xl mx-auto">
           <PageHeader
             title="Novo Lançamento - ORÁCULO CRC"
@@ -242,7 +242,7 @@ export default function OraculoPage() {
     : colaboradores.filter(c => c.id === filtroColaborador);
 
   return (
-    <div className="min-h-screen p-6 bg-slate-50">
+    <div className="min-h-screen p-6 bg-muted">
       <PageHeader
         title="ORÁCULO CRC"
         subtitle="Leitura Ativa de Pessoas - Módulo Exclusivo Gestores"
@@ -278,10 +278,10 @@ export default function OraculoPage() {
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
                         <h3 className="font-semibold text-lg">{colaborador.nome_completo}</h3>
-                        <p className="text-sm text-slate-600">{colaborador.cargo_atual}</p>
+                        <p className="text-sm text-muted-foreground">{colaborador.cargo_atual}</p>
                         
                         {ultimoLancamento && (
-                          <div className="mt-3 text-sm text-slate-500">
+                          <div className="mt-3 text-sm text-muted-foreground">
                             Último lançamento: {formatDateSP(ultimoLancamento.data_lancamento, 'DD/MM/YYYY')}
                           </div>
                         )}
@@ -306,13 +306,13 @@ export default function OraculoPage() {
                         <Button
                           size="sm"
                           onClick={() => handleNovoLancamento(colaborador)}
-                          className="bg-blue-600 hover:bg-blue-700"
+                          className="bg-primary hover:bg-primary/90"
                         >
                           <Plus className="w-4 h-4 mr-2" />
                           Novo Lançamento
                         </Button>
                         {lancamentosColaborador.length > 0 && (
-                          <Badge className="bg-slate-200 text-slate-700 justify-center">
+                          <Badge className="bg-muted text-foreground justify-center">
                             {lancamentosColaborador.length} lançamentos
                           </Badge>
                         )}
@@ -349,7 +349,7 @@ export default function OraculoPage() {
                     <div className="flex justify-between items-start">
                       <div>
                         <CardTitle className="text-base">{lanc.colaborador_nome}</CardTitle>
-                        <p className="text-sm text-slate-600">
+                        <p className="text-sm text-muted-foreground">
                           {formatDateSP(lanc.data_lancamento, 'DD/MM/YYYY HH:mm')} • 
                           Por {lanc.gestor_nome}
                         </p>
@@ -358,18 +358,18 @@ export default function OraculoPage() {
                   </CardHeader>
                   <CardContent className="space-y-3">
                     {lanc.pergunta_gerada && (
-                      <div className="p-3 bg-purple-50 rounded-lg text-sm italic">
+                      <div className="p-3 bg-info-soft rounded-lg text-sm italic">
                         "{lanc.pergunta_gerada}"
                       </div>
                     )}
                     
                     <div>
-                      <h4 className="text-xs font-semibold text-slate-600 mb-2">PALAVRAS-CHAVE</h4>
+                      <h4 className="text-xs font-semibold text-muted-foreground mb-2">PALAVRAS-CHAVE</h4>
                       <div className="flex flex-wrap gap-1">
                         {lanc.palavras_chave?.map((p, idx) => (
                           <Badge 
                             key={idx}
-                            className={p.origem === 'manual' ? 'bg-amber-600' : 'bg-green-600'}
+                            className={p.origem === 'manual' ? 'bg-warning' : 'bg-success'}
                           >
                             {p.palavra}
                             {p.origem === 'manual' && ' *'}
@@ -379,7 +379,7 @@ export default function OraculoPage() {
                     </div>
 
                     {lanc.texto_livre && (
-                      <div className="p-3 bg-slate-50 rounded text-sm">
+                      <div className="p-3 bg-muted rounded text-sm">
                         {lanc.texto_livre}
                       </div>
                     )}
@@ -404,7 +404,7 @@ export default function OraculoPage() {
                 <Card key={colabId}>
                   <CardHeader>
                     <CardTitle>{dados.colaborador_nome}</CardTitle>
-                    <p className="text-sm text-slate-600">
+                    <p className="text-sm text-muted-foreground">
                       {dados.total_lancamentos} lançamento(s) registrado(s)
                     </p>
                   </CardHeader>
@@ -417,7 +417,7 @@ export default function OraculoPage() {
                           .sort((a, b) => b[1] - a[1])
                           .slice(0, 10)
                           .map(([palavra, count]) => (
-                            <Badge key={palavra} className="bg-blue-600">
+                            <Badge key={palavra} className="bg-primary">
                               {palavra} ({count}x)
                             </Badge>
                           ))}
@@ -431,7 +431,7 @@ export default function OraculoPage() {
                         {Object.entries(dados.media_soft_skills).map(([skill, media]) => (
                           <div key={skill} className="flex justify-between text-sm mb-1">
                             <span>{skill}</span>
-                            <span className="font-medium text-amber-600">{media.toFixed(1)}</span>
+                            <span className="font-medium text-warning">{media.toFixed(1)}</span>
                           </div>
                         ))}
                       </div>
@@ -440,7 +440,7 @@ export default function OraculoPage() {
                         {Object.entries(dados.media_hard_skills).map(([skill, media]) => (
                           <div key={skill} className="flex justify-between text-sm mb-1">
                             <span>{skill}</span>
-                            <span className="font-medium text-amber-600">{media.toFixed(1)}</span>
+                            <span className="font-medium text-warning">{media.toFixed(1)}</span>
                           </div>
                         ))}
                       </div>

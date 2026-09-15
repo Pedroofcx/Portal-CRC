@@ -40,7 +40,7 @@ export default function HistoricoApoio({ solicitacoes, onStatusChange }) {
     <Card>
       <CardHeader>
         <CardTitle className="text-base flex items-center gap-2">
-          <History className="w-4 h-4 text-violet-500" />
+          <History className="w-4 h-4 text-primary" />
           Histórico de Solicitações
           <Badge variant="outline">{filtradas.length} registro(s)</Badge>
         </CardTitle>
@@ -60,7 +60,7 @@ export default function HistoricoApoio({ solicitacoes, onStatusChange }) {
             </SelectContent>
           </Select>
           <div className="relative">
-            <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
+            <Search className="w-3.5 h-3.5 text-muted-foreground absolute left-2.5 top-1/2 -translate-y-1/2" />
             <Input placeholder="Cliente..." value={filtroCliente} onChange={e => setFiltroCliente(e.target.value)} className="pl-8 text-xs" />
           </div>
           <Select value={filtroTipo} onValueChange={setFiltroTipo}>
@@ -80,12 +80,12 @@ export default function HistoricoApoio({ solicitacoes, onStatusChange }) {
         </div>
 
         {filtradas.length === 0 ? (
-          <p className="text-center text-slate-400 py-10 text-sm">Nenhuma solicitação encontrada.</p>
+          <p className="text-center text-muted-foreground py-10 text-sm">Nenhuma solicitação encontrada.</p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-xs">
               <thead>
-                <tr className="border-b border-slate-200 text-slate-500 text-left">
+                <tr className="border-b border-border text-muted-foreground text-left">
                   <th className="py-2 px-2 font-semibold">Data</th>
                   <th className="py-2 px-2 font-semibold">Cliente</th>
                   <th className="py-2 px-2 font-semibold">CNPJ</th>
@@ -102,7 +102,7 @@ export default function HistoricoApoio({ solicitacoes, onStatusChange }) {
                 {filtradas.map(s => {
                   const statusInfo = getStatusInfo(s.status);
                   return (
-                    <tr key={s.id} className="border-b border-slate-100 hover:bg-slate-50">
+                    <tr key={s.id} className="border-b border-border hover:bg-muted">
                       <td className="py-2 px-2 whitespace-nowrap">{s.data_solicitacao ? new Date(s.data_solicitacao + 'T00:00:00').toLocaleDateString('pt-BR') : '—'}</td>
                       <td className="py-2 px-2">{s.nome_cliente || '—'}</td>
                       <td className="py-2 px-2 whitespace-nowrap">{s.cnpj_cliente || '—'}</td>
@@ -113,7 +113,7 @@ export default function HistoricoApoio({ solicitacoes, onStatusChange }) {
                       <td className="py-2 px-2 whitespace-nowrap font-mono font-semibold">{formatMinutos(s.minutos_solicitados || 0)}</td>
                       <td className="py-2 px-2">
                         <Select value={s.status} onValueChange={v => onStatusChange(s, v)}>
-                          <SelectTrigger className="h-7 w-auto border-0 bg-transparent p-0 hover:bg-slate-100 rounded-md shadow-none">
+                          <SelectTrigger className="h-7 w-auto border-0 bg-transparent p-0 hover:bg-muted rounded-md shadow-none">
                             <span className={`inline-flex items-center px-2 py-0.5 rounded-md border text-xs font-semibold ${statusInfo.color}`}>
                               {statusInfo.label}
                             </span>
@@ -123,7 +123,7 @@ export default function HistoricoApoio({ solicitacoes, onStatusChange }) {
                           </SelectContent>
                         </Select>
                       </td>
-                      <td className="py-2 px-2 max-w-[200px] truncate text-slate-500" title={s.descricao_justificativa || s.observacoes || ''}>
+                      <td className="py-2 px-2 max-w-[200px] truncate text-muted-foreground" title={s.descricao_justificativa || s.observacoes || ''}>
                         {s.descricao_justificativa || s.observacoes || '—'}
                       </td>
                     </tr>

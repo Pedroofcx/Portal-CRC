@@ -283,14 +283,14 @@ export default function ImportExportCSV({ tratativas, onRefresh }) {
         <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <FileSpreadsheet className="w-5 h-5 text-blue-600" />
+              <FileSpreadsheet className="w-5 h-5 text-primary" />
               Importar Tratativas via CSV
             </DialogTitle>
           </DialogHeader>
 
           <div className="space-y-4 mt-2">
             {/* Info */}
-            <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-800 space-y-1">
+            <div className="p-3 bg-info-soft border border-info/25 rounded-lg text-sm text-primary space-y-1">
               <p><strong>Como funciona:</strong></p>
               <ul className="list-disc ml-4 space-y-0.5 text-xs">
                 <li>Se <code>id_interno</code> já existir no banco → <strong>atualiza</strong> os dados (apenas os campos preenchidos no CSV)</li>
@@ -304,10 +304,10 @@ export default function ImportExportCSV({ tratativas, onRefresh }) {
             {/* Upload */}
             <div>
               <label htmlFor="csv-import-input" className="cursor-pointer block">
-                <div className="border-2 border-dashed border-slate-300 rounded-lg p-8 text-center hover:border-blue-400 hover:bg-blue-50 transition-all">
-                  <Upload className="w-10 h-10 mx-auto mb-3 text-slate-400" />
-                  <p className="text-sm font-medium text-slate-700">Clique para selecionar o arquivo CSV</p>
-                  <p className="text-xs text-slate-400 mt-1">Separador: vírgula (,)</p>
+                <div className="border-2 border-dashed border-border rounded-lg p-8 text-center hover:border-primary/40 hover:bg-info-soft transition-all">
+                  <Upload className="w-10 h-10 mx-auto mb-3 text-muted-foreground" />
+                  <p className="text-sm font-medium text-foreground">Clique para selecionar o arquivo CSV</p>
+                  <p className="text-xs text-muted-foreground mt-1">Separador: vírgula (,)</p>
                 </div>
                 <Input
                   id="csv-import-input"
@@ -321,7 +321,7 @@ export default function ImportExportCSV({ tratativas, onRefresh }) {
             </div>
 
             {processando && (
-              <div className="text-center text-sm text-slate-500 flex items-center justify-center gap-2">
+              <div className="text-center text-sm text-muted-foreground flex items-center justify-center gap-2">
                 <Loader2 className="w-4 h-4 animate-spin" /> Processando arquivo...
               </div>
             )}
@@ -335,32 +335,32 @@ export default function ImportExportCSV({ tratativas, onRefresh }) {
               const semComercial = allRows.length - comPlano;
               return (
                 <div className="space-y-2">
-                  <div className="p-3 bg-green-50 border border-green-200 rounded-lg flex items-center gap-2">
-                    <CheckCircle2 className="w-5 h-5 text-green-600" />
-                    <span className="text-sm font-medium text-green-800">
+                  <div className="p-3 bg-success-soft border border-success/25 rounded-lg flex items-center gap-2">
+                    <CheckCircle2 className="w-5 h-5 text-success" />
+                    <span className="text-sm font-medium text-success">
                       {allRows.length} registro(s) lido(s) e pronto(s) para importação
                     </span>
                   </div>
                   <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
-                    <div className="p-2 bg-blue-50 border border-blue-200 rounded-lg text-center">
-                      <p className="text-xs text-blue-600 font-medium">Com Plano</p>
-                      <p className="text-lg font-bold text-blue-700">{comPlano}</p>
+                    <div className="p-2 bg-info-soft border border-info/25 rounded-lg text-center">
+                      <p className="text-xs text-primary font-medium">Com Plano</p>
+                      <p className="text-lg font-bold text-primary">{comPlano}</p>
                     </div>
-                    <div className="p-2 bg-purple-50 border border-purple-200 rounded-lg text-center">
-                      <p className="text-xs text-purple-600 font-medium">Com Valor</p>
-                      <p className="text-lg font-bold text-purple-700">{comValor}</p>
+                    <div className="p-2 bg-info-soft border border-info/25 rounded-lg text-center">
+                      <p className="text-xs text-primary font-medium">Com Valor</p>
+                      <p className="text-lg font-bold text-primary">{comValor}</p>
                     </div>
-                    <div className="p-2 bg-amber-50 border border-amber-200 rounded-lg text-center">
-                      <p className="text-xs text-amber-600 font-medium">Com Data Contrato</p>
-                      <p className="text-lg font-bold text-amber-700">{comData}</p>
+                    <div className="p-2 bg-warning-soft border border-warning/25 rounded-lg text-center">
+                      <p className="text-xs text-warning font-medium">Com Data Contrato</p>
+                      <p className="text-lg font-bold text-warning">{comData}</p>
                     </div>
-                    <div className="p-2 bg-teal-50 border border-teal-200 rounded-lg text-center">
-                      <p className="text-xs text-teal-600 font-medium">Com Segmento</p>
+                    <div className="p-2 bg-success-soft border border-teal-200 rounded-lg text-center">
+                      <p className="text-xs text-success font-medium">Com Segmento</p>
                       <p className="text-lg font-bold text-teal-700">{comSegmento}</p>
                     </div>
-                    <div className="p-2 bg-slate-50 border border-slate-200 rounded-lg text-center">
-                      <p className="text-xs text-slate-600 font-medium">Sem Comercial</p>
-                      <p className="text-lg font-bold text-slate-700">{semComercial}</p>
+                    <div className="p-2 bg-muted border border-border rounded-lg text-center">
+                      <p className="text-xs text-muted-foreground font-medium">Sem Comercial</p>
+                      <p className="text-lg font-bold text-foreground">{semComercial}</p>
                     </div>
                   </div>
                 </div>
@@ -369,13 +369,13 @@ export default function ImportExportCSV({ tratativas, onRefresh }) {
 
             {/* Erros de validação */}
             {erros.length > 0 && (
-              <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
+              <div className="p-3 bg-destructive/10 border border-destructive/25 rounded-lg">
                 <div className="flex items-center gap-2 mb-2">
-                  <AlertCircle className="w-4 h-4 text-red-600" />
-                  <span className="text-sm font-medium text-red-800">{erros.length} linha(s) com problema (serão ignoradas)</span>
+                  <AlertCircle className="w-4 h-4 text-destructive" />
+                  <span className="text-sm font-medium text-destructive">{erros.length} linha(s) com problema (serão ignoradas)</span>
                 </div>
                 <div className="space-y-1 max-h-24 overflow-y-auto">
-                  {erros.map((e, i) => <p key={i} className="text-xs text-red-700">{e}</p>)}
+                  {erros.map((e, i) => <p key={i} className="text-xs text-destructive">{e}</p>)}
                 </div>
               </div>
             )}
@@ -384,8 +384,8 @@ export default function ImportExportCSV({ tratativas, onRefresh }) {
             {importando && (
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
-                  <span className="text-slate-600">Importando... {progresso.atual} de {progresso.total}</span>
-                  <span className="font-medium text-blue-600">{progressoPct}%</span>
+                  <span className="text-muted-foreground">Importando... {progresso.atual} de {progresso.total}</span>
+                  <span className="font-medium text-primary">{progressoPct}%</span>
                 </div>
                 <Progress value={progressoPct} className="h-2" />
               </div>
@@ -397,30 +397,30 @@ export default function ImportExportCSV({ tratativas, onRefresh }) {
               const errCount = logImport.filter(l => l.status === 'erro').length;
               const comercialCount = logImport.filter(l => l.comercial).length;
               return (
-                <div className="p-3 bg-slate-50 border border-slate-200 rounded-lg">
+                <div className="p-3 bg-muted border border-border rounded-lg">
                   <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
                     <div className="flex items-center gap-2">
-                      <CheckCircle2 className="w-4 h-4 text-green-600" />
-                      <span className="text-sm font-medium text-slate-700">Log de processamento ({logImport.length} registros)</span>
+                      <CheckCircle2 className="w-4 h-4 text-success" />
+                      <span className="text-sm font-medium text-foreground">Log de processamento ({logImport.length} registros)</span>
                     </div>
                     <div className="flex gap-2 flex-wrap">
-                      <Badge className="bg-green-100 text-green-700 border-0">{okCount} OK</Badge>
-                      {comercialCount > 0 && <Badge className="bg-blue-100 text-blue-700 border-0">{comercialCount} comercial</Badge>}
-                      {errCount > 0 && <Badge className="bg-red-100 text-red-700 border-0">{errCount} erros</Badge>}
+                      <Badge className="bg-success-soft text-success border-0">{okCount} OK</Badge>
+                      {comercialCount > 0 && <Badge className="bg-info-soft text-primary border-0">{comercialCount} comercial</Badge>}
+                      {errCount > 0 && <Badge className="bg-destructive/10 text-destructive border-0">{errCount} erros</Badge>}
                     </div>
                   </div>
                   <div className="space-y-0.5 max-h-48 overflow-y-auto">
                     {logImport.slice(0, 200).map((l, i) => (
-                      <div key={i} className={`text-xs flex items-start gap-1 ${l.status === 'erro' ? 'text-red-600' : 'text-green-700'}`}>
+                      <div key={i} className={`text-xs flex items-start gap-1 ${l.status === 'erro' ? 'text-destructive' : 'text-success'}`}>
                         <span className="font-mono shrink-0">L{l.linha}:</span>
                         <span>{l.msg}</span>
                         {l.campos && (
-                          <span className="text-slate-400 ml-1 text-[10px]">({l.campos})</span>
+                          <span className="text-muted-foreground ml-1 text-[10px]">({l.campos})</span>
                         )}
                       </div>
                     ))}
                     {logImport.length > 200 && (
-                      <p className="text-xs text-slate-400 italic">... e mais {logImport.length - 200} registros. Verifique o toast para o resumo.</p>
+                      <p className="text-xs text-muted-foreground italic">... e mais {logImport.length - 200} registros. Verifique o toast para o resumo.</p>
                     )}
                   </div>
                 </div>
@@ -431,14 +431,14 @@ export default function ImportExportCSV({ tratativas, onRefresh }) {
             {preview.length > 0 && !importando && (
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-green-600" />
-                  <span className="text-sm font-medium text-green-800">
+                  <CheckCircle2 className="w-4 h-4 text-success" />
+                  <span className="text-sm font-medium text-success">
                     Preview (primeiros {preview.length} de {allRows.length} registros)
                   </span>
                 </div>
                 <div className="border rounded-lg overflow-auto max-h-40">
                   <table className="text-xs w-full">
-                    <thead className="bg-slate-100">
+                    <thead className="bg-muted">
                       <tr>
                         <th className="p-2 text-left">id_interno</th>
                         <th className="p-2 text-left">nome_cliente</th>
@@ -470,7 +470,7 @@ export default function ImportExportCSV({ tratativas, onRefresh }) {
               <Button
                 onClick={handleImportar}
                 disabled={allRows.length === 0 || importando}
-                className="bg-blue-600 hover:bg-blue-700"
+                className="bg-primary hover:bg-primary/90"
               >
                 {importando ? (
                   <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Importando {progressoPct}%</>

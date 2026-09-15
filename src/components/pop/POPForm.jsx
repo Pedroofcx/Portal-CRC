@@ -28,7 +28,7 @@ function RaciSelect({ value, onChange }) {
     <select
       value={value || ''}
       onChange={(e) => onChange(e.target.value)}
-      className="w-full text-xs border border-slate-200 rounded-md px-2 py-1.5 bg-white text-slate-700 focus:outline-none focus:ring-1 focus:ring-slate-400"
+      className="w-full text-xs border border-border rounded-md px-2 py-1.5 bg-card text-foreground focus:outline-none focus:ring-1 focus:ring-slate-400"
     >
       <option value="">—</option>
       {PARTICIPANTES.map((p) => (
@@ -76,12 +76,12 @@ export default function POPForm({ onSubmit, onCancel, isLoading }) {
 
   const SectionCard = ({ icon: Icon, title, color = 'slate', children }) => {
     const colors = {
-      slate: 'border-slate-200 bg-slate-50 text-slate-700',
-      blue: 'border-blue-200 bg-blue-50 text-blue-700',
-      emerald: 'border-emerald-200 bg-emerald-50 text-emerald-700',
-      amber: 'border-amber-200 bg-amber-50 text-amber-700',
-      violet: 'border-violet-200 bg-violet-50 text-violet-700',
-      indigo: 'border-indigo-200 bg-indigo-50 text-indigo-700',
+      slate: 'border-border bg-muted text-foreground',
+      blue: 'border-info/25 bg-info-soft text-primary',
+      emerald: 'border-emerald-200 bg-success-soft text-success',
+      amber: 'border-warning/25 bg-warning-soft text-warning',
+      violet: 'border-info/25 bg-info-soft text-primary',
+      indigo: 'border-indigo-200 bg-info-soft text-primary',
     };
     return (
       <div className="space-y-3">
@@ -99,7 +99,7 @@ export default function POPForm({ onSubmit, onCancel, isLoading }) {
       {/* Identificação */}
       <div className="grid grid-cols-3 gap-3">
         <div>
-          <Label className="text-xs text-slate-500 uppercase tracking-wide">Código *</Label>
+          <Label className="text-xs text-muted-foreground uppercase tracking-wide">Código *</Label>
           <Input
             value={form.codigo}
             onChange={(e) => set('codigo', e.target.value)}
@@ -109,7 +109,7 @@ export default function POPForm({ onSubmit, onCancel, isLoading }) {
           />
         </div>
         <div className="col-span-2">
-          <Label className="text-xs text-slate-500 uppercase tracking-wide">Título *</Label>
+          <Label className="text-xs text-muted-foreground uppercase tracking-wide">Título *</Label>
           <Input
             value={form.titulo}
             onChange={(e) => set('titulo', e.target.value)}
@@ -120,7 +120,7 @@ export default function POPForm({ onSubmit, onCancel, isLoading }) {
         </div>
       </div>
       <div>
-        <Label className="text-xs text-slate-500 uppercase tracking-wide">Categoria</Label>
+        <Label className="text-xs text-muted-foreground uppercase tracking-wide">Categoria</Label>
         <Input
           value={form.categoria}
           onChange={(e) => set('categoria', e.target.value)}
@@ -182,13 +182,13 @@ export default function POPForm({ onSubmit, onCancel, isLoading }) {
 
       {/* Tabela RACI */}
       <SectionCard icon={Users} title="Tabela RACI — Responsabilidades" color="indigo">
-        <div className="overflow-x-auto rounded-lg border border-slate-200">
+        <div className="overflow-x-auto rounded-lg border border-border">
           <table className="w-full text-xs">
             <thead>
-              <tr className="bg-slate-100 border-b border-slate-200">
-                <th className="text-left px-3 py-2 font-semibold text-slate-600 w-1/3">Atividade</th>
+              <tr className="bg-muted border-b border-border">
+                <th className="text-left px-3 py-2 font-semibold text-muted-foreground w-1/3">Atividade</th>
                 {RACI_COLUNAS.map((col) => (
-                  <th key={col} className="text-left px-2 py-2 font-semibold text-slate-600">
+                  <th key={col} className="text-left px-2 py-2 font-semibold text-muted-foreground">
                     {RACI_LABELS[col]}
                   </th>
                 ))}
@@ -197,7 +197,7 @@ export default function POPForm({ onSubmit, onCancel, isLoading }) {
             </thead>
             <tbody>
               {form.raci.map((row, i) => (
-                <tr key={i} className="border-b border-slate-100 last:border-0 hover:bg-slate-50">
+                <tr key={i} className="border-b border-border last:border-0 hover:bg-muted">
                   <td className="px-2 py-2">
                     <Input
                       value={row.atividade}
@@ -219,7 +219,7 @@ export default function POPForm({ onSubmit, onCancel, isLoading }) {
                       <button
                         type="button"
                         onClick={() => removeRaciRow(i)}
-                        className="p-1 text-slate-300 hover:text-red-500 transition-colors"
+                        className="p-1 text-muted-foreground hover:text-destructive transition-colors"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
@@ -242,11 +242,11 @@ export default function POPForm({ onSubmit, onCancel, isLoading }) {
       </SectionCard>
 
       {/* Ações */}
-      <div className="flex justify-end gap-3 pt-2 border-t border-slate-100">
+      <div className="flex justify-end gap-3 pt-2 border-t border-border">
         <Button type="button" variant="outline" onClick={onCancel}>
           Cancelar
         </Button>
-        <Button type="submit" className="bg-slate-800 hover:bg-slate-900" disabled={isLoading}>
+        <Button type="submit" className="bg-slate-800 superficie-escura hover:bg-slate-900" disabled={isLoading}>
           {isLoading ? 'Salvando...' : 'Salvar POP'}
         </Button>
       </div>

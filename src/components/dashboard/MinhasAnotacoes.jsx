@@ -16,19 +16,19 @@ import { StickyNote, X, Plus, Bell, CheckCircle, Clock } from 'lucide-react';
 import { toast } from 'sonner';
 
 const corPaleta = {
-  amarelo: 'bg-yellow-50 border border-yellow-200 text-yellow-900',
-  azul: 'bg-blue-50 border border-blue-200 text-blue-900',
-  verde: 'bg-green-50 border border-green-200 text-green-900',
-  rosa: 'bg-pink-50 border border-pink-200 text-pink-900',
-  roxo: 'bg-purple-50 border border-purple-200 text-purple-900',
+  amarelo: 'bg-warning-soft border border-yellow-200 text-yellow-900',
+  azul: 'bg-info-soft border border-info/25 text-primary',
+  verde: 'bg-success-soft border border-success/25 text-success',
+  rosa: 'bg-info-soft border border-pink-200 text-pink-900',
+  roxo: 'bg-info-soft border border-info/25 text-primary',
 };
 
 const corBadge = {
-  amarelo: 'bg-yellow-100 text-yellow-800',
-  azul: 'bg-blue-100 text-blue-800',
-  verde: 'bg-green-100 text-green-800',
-  rosa: 'bg-pink-100 text-pink-800',
-  roxo: 'bg-purple-100 text-purple-800',
+  amarelo: 'bg-warning-soft text-warning',
+  azul: 'bg-info-soft text-primary',
+  verde: 'bg-success-soft text-success',
+  rosa: 'bg-info-soft text-pink-800',
+  roxo: 'bg-info-soft text-primary',
 };
 
 export default function MinhasAnotacoes({ colaboradorId }) {
@@ -171,7 +171,7 @@ export default function MinhasAnotacoes({ colaboradorId }) {
         <Dialog open={true} onOpenChange={() => {}}>
           <DialogContent className="max-w-md" aria-describedby="lembrete-desc">
             <DialogHeader>
-              <DialogTitle className="flex items-center gap-2 text-amber-700">
+              <DialogTitle className="flex items-center gap-2 text-warning">
                 <Bell className="w-5 h-5 animate-bounce" />
                 Lembrete: {lembreteAtivo.titulo}
               </DialogTitle>
@@ -180,7 +180,7 @@ export default function MinhasAnotacoes({ colaboradorId }) {
               <div className={`p-4 rounded-lg border ${corPaleta[lembreteAtivo.cor] || corPaleta.amarelo}`}>
                 <p className="text-sm whitespace-pre-wrap">{lembreteAtivo.conteudo}</p>
               </div>
-              <div className="flex items-center gap-2 text-xs text-slate-500">
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
                 <Clock className="w-3 h-3" />
                 Agendado para: {new Date(`${lembreteAtivo.data_alerta}T00:00`).toLocaleDateString('pt-BR')}
                 {lembreteAtivo.hora_alerta && ` às ${lembreteAtivo.hora_alerta}`}
@@ -194,7 +194,7 @@ export default function MinhasAnotacoes({ colaboradorId }) {
                   Depois
                 </Button>
                 <Button
-                  className="flex-1 bg-amber-600 hover:bg-amber-700"
+                  className="flex-1 bg-warning hover:bg-amber-700"
                   onClick={() => dispensarLembrete(lembreteAtivo.id)}
                 >
                   <CheckCircle className="w-4 h-4 mr-2" />
@@ -210,22 +210,22 @@ export default function MinhasAnotacoes({ colaboradorId }) {
         <CardHeader className="pb-2 pt-4 px-4">
           <div className="flex items-center justify-between">
             <CardTitle className="text-sm font-semibold flex items-center gap-2">
-              <StickyNote className="w-4 h-4 text-yellow-600" />
+              <StickyNote className="w-4 h-4 text-warning" />
               Minhas Anotações
               {avisosPendentes.length > 0 && (
-                <span className="bg-red-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full leading-none">
+                <span className="bg-destructive text-white text-xs font-bold px-1.5 py-0.5 rounded-full leading-none">
                   {avisosPendentes.length}
                 </span>
               )}
             </CardTitle>
-            <Button size="sm" onClick={handleNovo} className="bg-yellow-500 hover:bg-yellow-600 h-7 w-7 p-0">
+            <Button size="sm" onClick={handleNovo} className="bg-warning hover:bg-yellow-600 h-7 w-7 p-0">
               <Plus className="w-3.5 h-3.5" />
             </Button>
           </div>
         </CardHeader>
         <CardContent className="px-4 pb-4 pt-1">
           {anotacoes.length === 0 ? (
-            <p className="text-slate-400 text-xs text-center py-3">Nenhuma anotação. Clique + para criar.</p>
+            <p className="text-muted-foreground text-xs text-center py-3">Nenhuma anotação. Clique + para criar.</p>
           ) : (
             <div className="space-y-1.5 max-h-48 overflow-y-auto">
               {anotacoes.map((anotacao) => (
@@ -252,7 +252,7 @@ export default function MinhasAnotacoes({ colaboradorId }) {
                       <Button size="icon" variant="ghost" className="h-6 w-6 opacity-60 hover:opacity-100" onClick={() => handleEditar(anotacao)}>
                         
                       </Button>
-                      <Button size="icon" variant="ghost" className="h-6 w-6 text-red-500 hover:bg-red-50 opacity-60 hover:opacity-100" onClick={() => deletarMutation.mutate(anotacao.id)}>
+                      <Button size="icon" variant="ghost" className="h-6 w-6 text-destructive hover:bg-destructive/10 opacity-60 hover:opacity-100" onClick={() => deletarMutation.mutate(anotacao.id)}>
                         <X className="w-3 h-3" />
                       </Button>
                     </div>
@@ -320,7 +320,7 @@ export default function MinhasAnotacoes({ colaboradorId }) {
                     onChange={(e) => setForm({ ...form, hora_alerta: e.target.value })}
                     placeholder="Ex: 09:00"
                   />
-                  <p className="text-xs text-slate-500 mt-1">Se não informar horário, o lembrete aparece assim que você entrar no sistema nesse dia.</p>
+                  <p className="text-xs text-muted-foreground mt-1">Se não informar horário, o lembrete aparece assim que você entrar no sistema nesse dia.</p>
                 </div>
               </div>
             )}

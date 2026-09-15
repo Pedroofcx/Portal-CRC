@@ -185,17 +185,17 @@ export default function RelatorioJornadaDiretoria() {
   if (!isGestor) {
     return (
       <div className="text-center py-16">
-        <ShieldAlert className="w-12 h-12 text-amber-500 mx-auto mb-4" />
+        <ShieldAlert className="w-12 h-12 text-warning mx-auto mb-4" />
         <h2 className="text-xl font-semibold mb-2">Acesso restrito</h2>
-        <p className="text-slate-500">Este relatório é acessível apenas a gestores.</p>
+        <p className="text-muted-foreground">Este relatório é acessível apenas a gestores.</p>
       </div>
     );
   }
 
   const esforcoBadgeClass = {
-    Baixo: 'bg-green-100 text-green-700 border-green-300',
-    Medio: 'bg-amber-100 text-amber-700 border-amber-300',
-    Alto: 'bg-red-100 text-red-700 border-red-300',
+    Baixo: 'bg-success-soft text-success border-success/30',
+    Medio: 'bg-warning-soft text-warning border-warning/30',
+    Alto: 'bg-destructive/10 text-destructive border-destructive/30',
   };
 
   return (
@@ -212,8 +212,8 @@ export default function RelatorioJornadaDiretoria() {
 
       <div className="flex items-center justify-between no-print">
         <div>
-          <h1 className="text-xl font-bold text-slate-900">Relatório Executivo de Jornada</h1>
-          <p className="text-sm text-slate-500">Visão restrita a gestores — foco em ROI e capacidade de equipe</p>
+          <h1 className="text-xl font-bold text-foreground">Relatório Executivo de Jornada</h1>
+          <p className="text-sm text-muted-foreground">Visão restrita a gestores — foco em ROI e capacidade de equipe</p>
         </div>
         <Button onClick={() => window.print()}>
           <Printer className="w-4 h-4 mr-2" />
@@ -221,27 +221,27 @@ export default function RelatorioJornadaDiretoria() {
         </Button>
       </div>
 
-      <div className="bg-white border border-slate-300 rounded-none sm:rounded-xl p-8 space-y-8">
+      <div className="bg-card border border-border rounded-none sm:rounded-xl p-8 space-y-8">
         {/* Cabeçalho formal */}
         <div className="text-center border-b-2 border-slate-900 pb-4">
-          <h2 className="text-2xl font-bold text-slate-900 uppercase tracking-wide">
+          <h2 className="text-2xl font-bold text-foreground uppercase tracking-wide">
             Relatório de Impacto Financeiro e Eficiência Operacional
           </h2>
-          <p className="text-sm text-slate-600 mt-1">Ouvidoria CRC</p>
-          <p className="text-xs text-slate-400 mt-1">Gerado em {new Date().toLocaleDateString('pt-BR')}</p>
+          <p className="text-sm text-muted-foreground mt-1">Ouvidoria CRC</p>
+          <p className="text-xs text-muted-foreground mt-1">Gerado em {new Date().toLocaleDateString('pt-BR')}</p>
         </div>
 
         {/* Seção 1: Glossário Executivo */}
         <div>
-          <h3 className="font-bold text-slate-900 mb-3 text-base border-b border-slate-200 pb-1 flex items-center gap-2">
+          <h3 className="font-bold text-foreground mb-3 text-base border-b border-border pb-1 flex items-center gap-2">
             <BookOpen className="w-4 h-4" />
             1. Glossário Executivo (O que é o quê)
           </h3>
           <div className="grid sm:grid-cols-2 gap-3">
             {GLOSSARIO.map((g) => (
-              <div key={g.termo} className="bg-slate-50 border border-slate-200 rounded-lg p-3">
-                <p className="text-xs font-semibold text-slate-900">{g.termo}</p>
-                <p className="text-xs text-slate-600 mt-1">{g.def}</p>
+              <div key={g.termo} className="bg-muted border border-border rounded-lg p-3">
+                <p className="text-xs font-semibold text-foreground">{g.termo}</p>
+                <p className="text-xs text-muted-foreground mt-1">{g.def}</p>
               </div>
             ))}
           </div>
@@ -249,13 +249,13 @@ export default function RelatorioJornadaDiretoria() {
 
         {/* Seção 2: Tabela de Prejuízo */}
         <div>
-          <h3 className="font-bold text-slate-900 mb-1 text-base border-b border-slate-200 pb-1">
+          <h3 className="font-bold text-foreground mb-1 text-base border-b border-border pb-1">
             2. Tabela de Prejuízo Aberto da Jornada
           </h3>
-          <p className="text-xs text-slate-500 mb-3 no-print">Clique em uma etapa para ver a causa raiz detalhada.</p>
+          <p className="text-xs text-muted-foreground mb-3 no-print">Clique em uma etapa para ver a causa raiz detalhada.</p>
           <table className="w-full text-sm border-collapse">
             <thead>
-              <tr className="bg-slate-900 text-white text-xs uppercase">
+              <tr className="bg-slate-900 superficie-escura text-white text-xs uppercase">
                 <th className="text-left p-2">Etapa da Jornada</th>
                 <th className="text-right p-2">Qtd. Reclamações</th>
                 <th className="text-right p-2">Dinheiro Devolvido</th>
@@ -270,7 +270,7 @@ export default function RelatorioJornadaDiretoria() {
                 return (
                   <React.Fragment key={e.etapa}>
                     <tr
-                      className={`${i % 2 === 0 ? 'bg-white' : 'bg-slate-50'} cursor-pointer hover:bg-blue-50 no-print-hover`}
+                      className={`${i % 2 === 0 ? 'bg-card' : 'bg-muted'} cursor-pointer hover:bg-info-soft no-print-hover`}
                       onClick={() => setEtapaAberta(aberta ? null : e.etapa)}
                     >
                       <td className="p-2 font-medium flex items-center gap-1">
@@ -282,7 +282,7 @@ export default function RelatorioJornadaDiretoria() {
                       <td className="p-2 text-right">{formatBRL(e.perdaReceita)}</td>
                       <td className="p-2 text-right">
                         {formatBRL(e.custoOperacional)}
-                        <p className="text-[10px] text-slate-400 italic font-normal">
+                        <p className="text-[10px] text-muted-foreground italic font-normal">
                           Média: {e.volumetria > 0 ? Math.round(e.minutosEfetivos / e.volumetria) : 0} min/caso
                         </p>
                       </td>
@@ -291,19 +291,19 @@ export default function RelatorioJornadaDiretoria() {
                     {aberta && (
                       <tr>
                         <td colSpan={6} className="p-0">
-                          <div className="p-4 bg-blue-50 border-y border-blue-200">
-                            <p className="text-xs font-semibold text-blue-900 mb-2">
+                          <div className="p-4 bg-info-soft border-y border-info/25">
+                            <p className="text-xs font-semibold text-primary mb-2">
                               Causa Raiz — Principais Motivos em "{e.etapa}"
                             </p>
                             {(causaRaizPorEtapa[e.etapa] || []).length === 0 ? (
-                              <p className="text-xs text-slate-500">Nenhum motivo detalhado para esta etapa.</p>
+                              <p className="text-xs text-muted-foreground">Nenhum motivo detalhado para esta etapa.</p>
                             ) : (
                               <div className="space-y-1.5">
                                 {(causaRaizPorEtapa[e.etapa] || []).map((m, idx) => (
-                                  <div key={idx} className="flex items-center justify-between bg-white rounded-md p-2 border border-blue-100 text-xs">
-                                    <span className="font-medium text-slate-900">{m.nome}</span>
+                                  <div key={idx} className="flex items-center justify-between bg-card rounded-md p-2 border border-blue-100 text-xs">
+                                    <span className="font-medium text-foreground">{m.nome}</span>
                                     <div className="flex items-center gap-3">
-                                      <span className="text-slate-500">{m.casos} caso(s)</span>
+                                      <span className="text-muted-foreground">{m.casos} caso(s)</span>
                                       <Badge variant="outline" className={esforcoBadgeClass[m.esforco] || ''}>
                                         Esforço de TI: {m.esforco}
                                       </Badge>
@@ -333,16 +333,16 @@ export default function RelatorioJornadaDiretoria() {
         {/* Seção 3.5: Análise Comercial — agrupamentos por Plano, Segmento e Categoria */}
         {analiseComercial.porPlano.length > 0 && (
           <div>
-            <h3 className="font-bold text-slate-900 mb-3 text-base border-b border-slate-200 pb-1 flex items-center gap-2">
+            <h3 className="font-bold text-foreground mb-3 text-base border-b border-border pb-1 flex items-center gap-2">
               <Building2 className="w-4 h-4" />
               3. Análise Comercial — Impacto por Plano e Segmento
             </h3>
 
             {/* Por Plano */}
-            <p className="text-xs font-semibold text-slate-700 mb-1">Reclamações e Impacto Financeiro por Plano</p>
+            <p className="text-xs font-semibold text-foreground mb-1">Reclamações e Impacto Financeiro por Plano</p>
             <table className="w-full text-sm border-collapse mb-4">
               <thead>
-                <tr className="bg-slate-100 text-slate-700 text-xs uppercase">
+                <tr className="bg-muted text-foreground text-xs uppercase">
                   <th className="text-left p-2">Plano</th>
                   <th className="text-right p-2">Reclamações</th>
                   <th className="text-right p-2">Impacto Financeiro</th>
@@ -352,7 +352,7 @@ export default function RelatorioJornadaDiretoria() {
               </thead>
               <tbody>
                 {analiseComercial.porPlano.map((p, i) => (
-                  <tr key={p.chave} className={i % 2 === 0 ? 'bg-white' : 'bg-slate-50'}>
+                  <tr key={p.chave} className={i % 2 === 0 ? 'bg-card' : 'bg-muted'}>
                     <td className="p-2 font-medium">{p.chave}</td>
                     <td className="p-2 text-right">{p.reclamacoes}</td>
                     <td className="p-2 text-right font-semibold">{formatBRL(p.impacto)}</td>
@@ -364,10 +364,10 @@ export default function RelatorioJornadaDiretoria() {
             </table>
 
             {/* Por Segmento */}
-            <p className="text-xs font-semibold text-slate-700 mb-1">Reclamações e Impacto Financeiro por Segmento</p>
+            <p className="text-xs font-semibold text-foreground mb-1">Reclamações e Impacto Financeiro por Segmento</p>
             <table className="w-full text-sm border-collapse mb-4">
               <thead>
-                <tr className="bg-slate-100 text-slate-700 text-xs uppercase">
+                <tr className="bg-muted text-foreground text-xs uppercase">
                   <th className="text-left p-2">Segmento</th>
                   <th className="text-right p-2">Reclamações</th>
                   <th className="text-right p-2">Impacto Financeiro</th>
@@ -377,7 +377,7 @@ export default function RelatorioJornadaDiretoria() {
               </thead>
               <tbody>
                 {analiseComercial.porSegmento.map((p, i) => (
-                  <tr key={p.chave} className={i % 2 === 0 ? 'bg-white' : 'bg-slate-50'}>
+                  <tr key={p.chave} className={i % 2 === 0 ? 'bg-card' : 'bg-muted'}>
                     <td className="p-2 font-medium">{p.chave}</td>
                     <td className="p-2 text-right">{p.reclamacoes}</td>
                     <td className="p-2 text-right font-semibold">{formatBRL(p.impacto)}</td>
@@ -389,10 +389,10 @@ export default function RelatorioJornadaDiretoria() {
             </table>
 
             {/* Receita por Categoria */}
-            <p className="text-xs font-semibold text-slate-700 mb-1">Receita Mensal e Anual Equivalente por Categoria de Reclamação</p>
+            <p className="text-xs font-semibold text-foreground mb-1">Receita Mensal e Anual Equivalente por Categoria de Reclamação</p>
             <table className="w-full text-sm border-collapse">
               <thead>
-                <tr className="bg-slate-100 text-slate-700 text-xs uppercase">
+                <tr className="bg-muted text-foreground text-xs uppercase">
                   <th className="text-left p-2">Categoria</th>
                   <th className="text-right p-2">Reclamações</th>
                   <th className="text-right p-2">Receita Mensal</th>
@@ -401,7 +401,7 @@ export default function RelatorioJornadaDiretoria() {
               </thead>
               <tbody>
                 {analiseComercial.receitaPorCategoria.map((p, i) => (
-                  <tr key={p.chave} className={i % 2 === 0 ? 'bg-white' : 'bg-slate-50'}>
+                  <tr key={p.chave} className={i % 2 === 0 ? 'bg-card' : 'bg-muted'}>
                     <td className="p-2 font-medium capitalize">{p.chave.replace(/_/g, ' ')}</td>
                     <td className="p-2 text-right">{p.reclamacoes}</td>
                     <td className="p-2 text-right">{formatBRL(p.receitaMensal)}</td>
@@ -415,15 +415,15 @@ export default function RelatorioJornadaDiretoria() {
 
         {/* Seção 4: Sumário Executivo de IA */}
         <div>
-          <h3 className="font-bold text-slate-900 mb-3 text-base border-b border-slate-200 pb-1 flex items-center gap-2">
+          <h3 className="font-bold text-foreground mb-3 text-base border-b border-border pb-1 flex items-center gap-2">
             <Sparkles className="w-4 h-4" />
             3. Sumário Executivo (IA)
           </h3>
-          <div className="bg-slate-50 border border-slate-200 rounded-lg p-5">
+          <div className="bg-muted border border-border rounded-lg p-5">
             {loadingInsight ? (
-              <p className="text-sm text-slate-400 italic">Gerando diagnóstico...</p>
+              <p className="text-sm text-muted-foreground italic">Gerando diagnóstico...</p>
             ) : (
-              <p className="text-sm text-slate-800 leading-relaxed whitespace-pre-line">
+              <p className="text-sm text-foreground leading-relaxed whitespace-pre-line">
                 {insight || (etapaMaisCustosa
                   ? `A etapa "${etapaMaisCustosa.etapa}" é a que mais gera prejuízo, somando ${formatBRL(etapaMaisCustosa.custoTotalDor)} e equivalendo a ${etapaMaisCustosa.ftePerdido.toFixed(2)} funcionários dedicados só a apagar incêndio.`
                   : 'Sem dados suficientes para gerar o diagnóstico.')}

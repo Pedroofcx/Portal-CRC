@@ -28,11 +28,11 @@ export default function RodizioAssistido({ agentesAtivos, distribuicoes }) {
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <CardTitle className="text-sm flex items-center gap-2">
-            <RotateCcw className="w-4 h-4 text-indigo-600" />
+            <RotateCcw className="w-4 h-4 text-primary" />
             Rodízio Assistido CRC
-            <Badge className="bg-indigo-100 text-indigo-700 text-xs">Sugestão Visual</Badge>
+            <Badge className="bg-info-soft text-primary text-xs">Sugestão Visual</Badge>
           </CardTitle>
-          <button onClick={() => setExpandido(e => !e)} className="p-1 hover:bg-slate-100 rounded">
+          <button onClick={() => setExpandido(e => !e)} className="p-1 hover:bg-muted rounded">
             {expandido ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
           </button>
         </div>
@@ -42,7 +42,7 @@ export default function RodizioAssistido({ agentesAtivos, distribuicoes }) {
         <CardContent className="space-y-4">
           {/* Seletor de tipo */}
           <div>
-            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Selecionar canal</p>
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">Selecionar canal</p>
             <div className="flex flex-wrap gap-2">
               {Object.entries(TIPOS_CONFIG).map(([key, cfg]) => (
                 <button
@@ -50,8 +50,8 @@ export default function RodizioAssistido({ agentesAtivos, distribuicoes }) {
                   onClick={() => setTipoSelecionado(key)}
                   className={`px-3 py-1.5 rounded-lg text-xs font-medium border-2 transition-all ${
                     tipoSelecionado === key
-                      ? 'border-indigo-500 bg-indigo-50 text-indigo-700'
-                      : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'
+                      ? 'border-indigo-500 bg-info-soft text-primary'
+                      : 'border-border bg-card text-muted-foreground hover:border-border'
                   }`}
                 >
                   {cfg.label}
@@ -61,29 +61,29 @@ export default function RodizioAssistido({ agentesAtivos, distribuicoes }) {
           </div>
 
           {/* Sugestão principal */}
-          <div className="p-4 bg-indigo-50 border-2 border-indigo-200 rounded-xl">
-            <p className="text-xs text-indigo-500 uppercase tracking-wide font-semibold mb-2 flex items-center gap-1">
+          <div className="p-4 bg-info-soft border-2 border-indigo-200 rounded-xl">
+            <p className="text-xs text-primary uppercase tracking-wide font-semibold mb-2 flex items-center gap-1">
               <User className="w-3 h-3" /> Próximo agente sugerido — {tipoConfig.label}
             </p>
             <div className="flex items-center justify-between gap-3">
               <div>
-                <p className="text-lg font-bold text-indigo-900">{sugerido?.nome_completo || '—'}</p>
+                <p className="text-lg font-bold text-primary">{sugerido?.nome_completo || '—'}</p>
                 {ultimaAtribuicao ? (
-                  <p className="text-xs text-indigo-600 mt-0.5 flex items-center gap-1">
+                  <p className="text-xs text-primary mt-0.5 flex items-center gap-1">
                     <Clock className="w-3 h-3" />
                     Última atribuição: Ticket #{ultimaAtribuicao.ticket_id} em {formatarData(ultimaAtribuicao)}
                   </p>
                 ) : (
-                  <p className="text-xs text-indigo-600 mt-0.5">Nunca recebeu uma tratativa deste tipo</p>
+                  <p className="text-xs text-primary mt-0.5">Nunca recebeu uma tratativa deste tipo</p>
                 )}
               </div>
-              <Badge className="bg-indigo-600 text-white text-xs flex-shrink-0">Sugerido</Badge>
+              <Badge className="bg-primary text-white text-xs flex-shrink-0">Sugerido</Badge>
             </div>
           </div>
 
           {/* Ordem do rodízio */}
           <div>
-            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Ordem do rodízio — {tipoConfig.label}</p>
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">Ordem do rodízio — {tipoConfig.label}</p>
             <div className="space-y-1.5">
               {ordenados.map((agente, idx) => {
                 const doTipo = distribuicoes.filter(d => d.agente_id === agente.id && d.tipo_tratativa === tipoSelecionado);
@@ -98,23 +98,23 @@ export default function RodizioAssistido({ agentesAtivos, distribuicoes }) {
                     key={agente.id}
                     className={`flex items-center justify-between p-2.5 rounded-lg border text-xs transition-all ${
                       idx === 0
-                        ? 'bg-indigo-50 border-indigo-300 font-medium'
-                        : 'bg-white border-slate-100'
+                        ? 'bg-info-soft border-indigo-300 font-medium'
+                        : 'bg-card border-border'
                     }`}
                   >
                     <div className="flex items-center gap-2">
                       <span className={`w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 ${
-                        idx === 0 ? 'bg-indigo-600 text-white' : 'bg-slate-200 text-slate-600'
+                        idx === 0 ? 'bg-primary text-white' : 'bg-muted text-muted-foreground'
                       }`}>
                         {idx + 1}
                       </span>
-                      <span className={idx === 0 ? 'text-indigo-900' : 'text-slate-700'}>{agente.nome_completo}</span>
+                      <span className={idx === 0 ? 'text-primary' : 'text-foreground'}>{agente.nome_completo}</span>
                     </div>
-                    <div className="text-right text-slate-400">
+                    <div className="text-right text-muted-foreground">
                       {ultimo ? (
                         <span>{ultimo.data_atribuicao}</span>
                       ) : (
-                        <span className="text-green-600 font-medium">Nunca recebeu</span>
+                        <span className="text-success font-medium">Nunca recebeu</span>
                       )}
                     </div>
                   </div>
@@ -123,8 +123,8 @@ export default function RodizioAssistido({ agentesAtivos, distribuicoes }) {
             </div>
           </div>
 
-          <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg">
-            <p className="text-xs text-amber-800 flex items-start gap-1.5">
+          <div className="p-3 bg-warning-soft border border-warning/25 rounded-lg">
+            <p className="text-xs text-warning flex items-start gap-1.5">
               <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" />
               <span>
                 <strong>Rodízio Assistido</strong> — apenas orientação visual. A decisão final de atribuição é sempre da liderança.

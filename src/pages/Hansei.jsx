@@ -120,7 +120,7 @@ export default function Hansei() {
         icon={TrendingUp}
         actions={
           isGestor && (
-            <Button onClick={() => setEnvioDialogOpen(true)} className="bg-blue-600 hover:bg-blue-700">
+            <Button onClick={() => setEnvioDialogOpen(true)} className="bg-primary hover:bg-primary/90">
               <Send className="w-4 h-4 mr-2" />
               Enviar Resultados
             </Button>
@@ -132,17 +132,17 @@ export default function Hansei() {
       {isGestor && statsGestor && (
         <div className="grid grid-cols-3 gap-4">
           {[
-            { label: 'Total de Envios', value: statsGestor.total, icon: Send, color: 'text-blue-600', bg: 'bg-blue-50' },
-            { label: 'Colaboradores', value: statsGestor.agentes, icon: Users, color: 'text-purple-600', bg: 'bg-purple-50' },
-            { label: 'Não Visualizados', value: statsGestor.naoVistos, icon: Eye, color: 'text-amber-600', bg: 'bg-amber-50' },
+            { label: 'Total de Envios', value: statsGestor.total, icon: Send, color: 'text-primary', bg: 'bg-info-soft' },
+            { label: 'Colaboradores', value: statsGestor.agentes, icon: Users, color: 'text-primary', bg: 'bg-info-soft' },
+            { label: 'Não Visualizados', value: statsGestor.naoVistos, icon: Eye, color: 'text-warning', bg: 'bg-warning-soft' },
           ].map(s => (
             <Card key={s.label} className="border-0 shadow-sm">
               <CardContent className="pt-5 pb-4">
                 <div className={`w-10 h-10 ${s.bg} rounded-xl flex items-center justify-center mb-3`}>
                   <s.icon className={`w-5 h-5 ${s.color}`} />
                 </div>
-                <p className="text-2xl font-bold text-slate-900">{s.value}</p>
-                <p className="text-xs text-slate-500">{s.label}</p>
+                <p className="text-2xl font-bold text-foreground">{s.value}</p>
+                <p className="text-xs text-muted-foreground">{s.label}</p>
               </CardContent>
             </Card>
           ))}
@@ -170,7 +170,7 @@ export default function Hansei() {
             <Card className="border-0 shadow-sm">
               <CardContent className="p-4">
                 <div className="flex flex-wrap gap-3 items-end">
-                  <div className="flex items-center gap-2 text-slate-600">
+                  <div className="flex items-center gap-2 text-muted-foreground">
                     <Filter className="w-4 h-4" />
                     <span className="text-sm font-medium">Filtros</span>
                   </div>
@@ -213,26 +213,26 @@ export default function Hansei() {
               </CardHeader>
               <CardContent>
                 {enviosFiltrados.length === 0 ? (
-                  <p className="text-center text-slate-500 py-8">Nenhum envio encontrado</p>
+                  <p className="text-center text-muted-foreground py-8">Nenhum envio encontrado</p>
                 ) : (
                   <div className="space-y-2">
                     {enviosFiltrados.map(envio => {
                       const d = envio.dados_consolidados || {};
                       return (
                         <div key={envio.id}
-                          className="p-4 bg-slate-50 hover:bg-slate-100 rounded-xl cursor-pointer transition-colors border border-transparent hover:border-slate-200"
+                          className="p-4 bg-muted hover:bg-muted rounded-xl cursor-pointer transition-colors border border-transparent hover:border-border"
                           onClick={() => handleVisualizar(envio)}>
                           <div className="flex items-center justify-between gap-4">
                             <div className="flex-1">
                               <div className="flex items-center gap-2 mb-1">
-                                <p className="font-medium text-slate-900">{envio.colaborador_nome}</p>
+                                <p className="font-medium text-foreground">{envio.colaborador_nome}</p>
                                 <Badge variant="outline" className="text-xs capitalize">{envio.periodicidade}</Badge>
                                 {envio.visualizado
-                                  ? <Badge className="bg-green-100 text-green-700 border-green-200 text-xs"><CheckCircle className="w-3 h-3 mr-1" />Visto</Badge>
-                                  : <Badge className="bg-amber-100 text-amber-700 text-xs">Não visto</Badge>
+                                  ? <Badge className="bg-success-soft text-success border-success/25 text-xs"><CheckCircle className="w-3 h-3 mr-1" />Visto</Badge>
+                                  : <Badge className="bg-warning-soft text-warning text-xs">Não visto</Badge>
                                 }
                               </div>
-                              <p className="text-xs text-slate-500">
+                              <p className="text-xs text-muted-foreground">
                                 <Calendar className="w-3 h-3 inline mr-1" />
                                 {formatDateSP(envio.periodo_inicio, 'DD/MM/YY')} – {formatDateSP(envio.periodo_fim, 'DD/MM/YY')}
                                 <span className="ml-3">Perf: <strong>{d.performance_percentual || 0}%</strong></span>
@@ -240,7 +240,7 @@ export default function Hansei() {
                                 <span className="ml-2 hidden sm:inline">Trat: <strong>{d.tratativas_solucionadas || 0}/{d.tratativas_total || 0}</strong></span>
                               </p>
                             </div>
-                            <Eye className="w-4 h-4 text-slate-400 flex-shrink-0" />
+                            <Eye className="w-4 h-4 text-muted-foreground flex-shrink-0" />
                           </div>
                         </div>
                       );

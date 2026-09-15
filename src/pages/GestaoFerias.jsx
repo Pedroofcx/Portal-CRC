@@ -335,9 +335,9 @@ export default function GestaoFerias() {
   if (!isGestor) {
     return (
       <div className="text-center py-16">
-        <Palmtree className="w-12 h-12 text-slate-300 mx-auto mb-4" />
+        <Palmtree className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
         <h2 className="text-xl font-semibold mb-2">Acesso Restrito</h2>
-        <p className="text-slate-500">Apenas gestores têm acesso à gestão de férias.</p>
+        <p className="text-muted-foreground">Apenas gestores têm acesso à gestão de férias.</p>
       </div>
     );
   }
@@ -376,9 +376,9 @@ export default function GestaoFerias() {
       />
 
       {alertasVencimento.length > 0 && (
-        <Alert className="border-amber-300 bg-amber-50">
-          <AlertTriangle className="w-4 h-4 text-amber-600" />
-          <AlertDescription className="text-amber-900">
+        <Alert className="border-warning/30 bg-warning-soft">
+          <AlertTriangle className="w-4 h-4 text-warning" />
+          <AlertDescription className="text-warning">
             <strong>{alertasVencimento.length} período(s)</strong> com férias vencendo ou vencidas:{' '}
             {alertasVencimento.map(c => `${c.colaborador_nome} (até ${fmtDate(c.concessivo_fim)})`).join(' • ')}
           </AlertDescription>
@@ -387,14 +387,14 @@ export default function GestaoFerias() {
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         {[
-          { label: 'Colaboradores', value: resumo.total, cls: 'text-slate-700', bg: 'bg-slate-50' },
-          { label: 'Disponíveis', value: resumo.disponiveis, cls: 'text-green-700', bg: 'bg-green-50' },
-          { label: 'Vencendo', value: resumo.vencendo, cls: 'text-amber-700', bg: 'bg-amber-50' },
-          { label: 'Vencidos', value: resumo.vencidos, cls: 'text-red-700', bg: 'bg-red-50' },
+          { label: 'Colaboradores', value: resumo.total, cls: 'text-foreground', bg: 'bg-muted' },
+          { label: 'Disponíveis', value: resumo.disponiveis, cls: 'text-success', bg: 'bg-success-soft' },
+          { label: 'Vencendo', value: resumo.vencendo, cls: 'text-warning', bg: 'bg-warning-soft' },
+          { label: 'Vencidos', value: resumo.vencidos, cls: 'text-destructive', bg: 'bg-destructive/10' },
         ].map(({ label, value, cls, bg }) => (
           <div key={label} className={`${bg} rounded-xl p-4 text-center`}>
             <p className={`text-2xl font-bold ${cls}`}>{value}</p>
-            <p className="text-xs text-slate-500 mt-1">{label}</p>
+            <p className="text-xs text-muted-foreground mt-1">{label}</p>
           </div>
         ))}
       </div>
@@ -408,7 +408,7 @@ export default function GestaoFerias() {
         <TabsContent value="colaboradores" className="space-y-4 mt-4">
           <div className="flex flex-col sm:flex-row gap-3">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input placeholder="Buscar colaborador..." value={busca} onChange={e => setBusca(e.target.value)} className="pl-10" />
             </div>
           </div>
@@ -417,7 +417,7 @@ export default function GestaoFerias() {
               <button
                 key={key}
                 onClick={() => setFiltroStatus(key)}
-                className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${filtroStatus === key ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
+                className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${filtroStatus === key ? 'bg-primary text-white' : 'bg-muted text-muted-foreground hover:bg-muted'}`}
               >
                 {label}
                 {key !== 'todos' && (
@@ -430,7 +430,7 @@ export default function GestaoFerias() {
           </div>
 
           {agentesFiltrados.length === 0 ? (
-            <div className="text-center py-16 text-slate-400">Nenhum colaborador encontrado</div>
+            <div className="text-center py-16 text-muted-foreground">Nenhum colaborador encontrado</div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {agentesFiltrados.map(colab => (
@@ -447,19 +447,19 @@ export default function GestaoFerias() {
 
         <TabsContent value="planejamento" className="space-y-6 mt-4">
           <div>
-            <h3 className="font-semibold text-slate-700 mb-3">Próximas Férias Agendadas</h3>
+            <h3 className="font-semibold text-foreground mb-3">Próximas Férias Agendadas</h3>
             {agendados.length === 0 ? (
-              <p className="text-slate-400 text-sm">Nenhuma férias agendada</p>
+              <p className="text-muted-foreground text-sm">Nenhuma férias agendada</p>
             ) : (
               <div className="space-y-2">
                 {agendados.slice(0, 20).map((f, i) => (
-                  <div key={i} className="flex items-center justify-between p-3 bg-white border border-slate-200 rounded-lg text-sm">
+                  <div key={i} className="flex items-center justify-between p-3 bg-card border border-border rounded-lg text-sm">
                     <div className="flex items-center gap-3">
-                      <div className="w-2 h-2 rounded-full bg-green-500" />
+                      <div className="w-2 h-2 rounded-full bg-success" />
                       <span className="font-medium">{f.ciclo.colaborador_nome}</span>
-                      <span className="text-slate-500">{fmtDate(f.data_inicio)} → {fmtDate(f.data_fim)}</span>
+                      <span className="text-muted-foreground">{fmtDate(f.data_inicio)} → {fmtDate(f.data_fim)}</span>
                     </div>
-                    <Badge className="bg-green-100 text-green-700">{f.dias} dias</Badge>
+                    <Badge className="bg-success-soft text-success">{f.dias} dias</Badge>
                   </div>
                 ))}
               </div>
@@ -467,20 +467,20 @@ export default function GestaoFerias() {
           </div>
 
           <div>
-            <h3 className="font-semibold text-slate-700 mb-3">De Férias Hoje</h3>
+            <h3 className="font-semibold text-foreground mb-3">De Férias Hoje</h3>
             {(() => {
               const hoje = new Date();
               const emFerias = ciclos
                 .flatMap(c => (c.fragmentos || []).map(f => ({ ...f, ciclo: c })))
                 .filter(f => f.data_inicio && f.data_fim && parseISO(f.data_inicio) <= hoje && parseISO(f.data_fim) >= hoje);
               return emFerias.length === 0 ? (
-                <p className="text-slate-400 text-sm">Nenhum colaborador de férias hoje</p>
+                <p className="text-muted-foreground text-sm">Nenhum colaborador de férias hoje</p>
               ) : (
                 <div className="space-y-2">
                   {emFerias.map((f, i) => (
-                    <div key={i} className="flex items-center justify-between p-3 bg-amber-50 border border-amber-100 rounded-lg text-sm">
+                    <div key={i} className="flex items-center justify-between p-3 bg-warning-soft border border-amber-100 rounded-lg text-sm">
                       <span className="font-medium">{f.ciclo.colaborador_nome}</span>
-                      <span className="text-slate-600">retorna em {fmtDate(f.data_fim)}</span>
+                      <span className="text-muted-foreground">retorna em {fmtDate(f.data_fim)}</span>
                     </div>
                   ))}
                 </div>
@@ -489,20 +489,20 @@ export default function GestaoFerias() {
           </div>
 
           <div>
-            <h3 className="font-semibold text-slate-700 mb-3">Férias Vencendo (próximos 90 dias)</h3>
+            <h3 className="font-semibold text-foreground mb-3">Férias Vencendo (próximos 90 dias)</h3>
             {alertasVencimento.length === 0 ? (
-              <p className="text-slate-400 text-sm">Nenhum alerta de vencimento</p>
+              <p className="text-muted-foreground text-sm">Nenhum alerta de vencimento</p>
             ) : (
               <div className="space-y-2">
                 {alertasVencimento.map(c => {
                   const dias = c.concessivo_fim ? differenceInDays(parseISO(c.concessivo_fim), new Date()) : null;
                   return (
-                    <div key={c.id} className={`flex items-center justify-between p-3 border rounded-lg text-sm ${dias < 0 ? 'bg-red-50 border-red-200' : 'bg-amber-50 border-amber-200'}`}>
+                    <div key={c.id} className={`flex items-center justify-between p-3 border rounded-lg text-sm ${dias < 0 ? 'bg-destructive/10 border-destructive/25' : 'bg-warning-soft border-warning/25'}`}>
                       <div>
                         <span className="font-medium">{c.colaborador_nome}</span>
-                        <span className="text-slate-500 ml-2">concessivo até {fmtDate(c.concessivo_fim)}</span>
+                        <span className="text-muted-foreground ml-2">concessivo até {fmtDate(c.concessivo_fim)}</span>
                       </div>
-                      <Badge className={dias < 0 ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'}>
+                      <Badge className={dias < 0 ? 'bg-destructive/10 text-destructive' : 'bg-warning-soft text-warning'}>
                         {dias < 0 ? 'VENCIDO' : `${dias}d`}
                       </Badge>
                     </div>

@@ -144,7 +144,7 @@ export default function AgenteN2Config() {
     setForm(f => ({ ...f, colaborador_id: colabId, colaborador_nome: colab?.nome_completo || '' }));
   };
 
-  if (isLoading) return <p className="text-sm text-slate-500">Carregando...</p>;
+  if (isLoading) return <p className="text-sm text-muted-foreground">Carregando...</p>;
 
   return (
     <div className="space-y-4">
@@ -153,19 +153,19 @@ export default function AgenteN2Config() {
           <div className="flex items-center justify-between">
             <div>
               <CardTitle className="text-base flex items-center gap-2">
-                <Headset className="w-5 h-5 text-violet-600" />
+                <Headset className="w-5 h-5 text-primary" />
                 Agentes N2 — Rodízio
               </CardTitle>
-              <p className="text-sm text-slate-500 mt-1">Gerencie os agentes do Time N2, posições e status. O cadastro não cria usuário no sistema.</p>
+              <p className="text-sm text-muted-foreground mt-1">Gerencie os agentes do Time N2, posições e status. O cadastro não cria usuário no sistema.</p>
             </div>
-            <Button className="bg-violet-600 hover:bg-violet-700" onClick={handleAdd}>
+            <Button className="bg-primary hover:bg-violet-700" onClick={handleAdd}>
               <Plus className="w-4 h-4 mr-1" /> Adicionar Agente N2
             </Button>
           </div>
         </CardHeader>
         <CardContent>
           {agentesOrdenados.length === 0 ? (
-            <div className="text-center py-8 text-slate-500">
+            <div className="text-center py-8 text-muted-foreground">
               <Headset className="w-10 h-10 mx-auto mb-2 opacity-40" />
               <p className="text-sm">Nenhum Agente N2 cadastrado.</p>
               <p className="text-xs mt-1">Clique em "Adicionar Agente N2" para começar.</p>
@@ -174,7 +174,7 @@ export default function AgenteN2Config() {
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-slate-200 text-xs text-slate-500 uppercase">
+                  <tr className="border-b border-border text-xs text-muted-foreground uppercase">
                     <th className="text-left py-2 px-3">Ordem</th>
                     <th className="text-left py-2 px-3">Agente N2</th>
                     <th className="text-left py-2 px-3">Status</th>
@@ -183,23 +183,23 @@ export default function AgenteN2Config() {
                 </thead>
                 <tbody>
                   {agentesOrdenados.map((agente, idx) => (
-                    <tr key={agente.id} className="border-b border-slate-100 hover:bg-slate-50">
+                    <tr key={agente.id} className="border-b border-border hover:bg-muted">
                       <td className="py-3 px-3">
                         <div className="flex items-center gap-1">
-                          <span className="w-7 h-7 rounded-full bg-violet-100 text-violet-700 flex items-center justify-center text-xs font-bold">{agente.ordem}</span>
+                          <span className="w-7 h-7 rounded-full bg-info-soft text-primary flex items-center justify-center text-xs font-bold">{agente.ordem}</span>
                           <div className="flex flex-col">
-                            <button onClick={() => reordenarMutation.mutate({ agente, direcao: 'up' })} disabled={idx === 0} className="text-slate-400 hover:text-violet-600 disabled:opacity-30">
+                            <button onClick={() => reordenarMutation.mutate({ agente, direcao: 'up' })} disabled={idx === 0} className="text-muted-foreground hover:text-primary disabled:opacity-30">
                               <ArrowUp className="w-3 h-3" />
                             </button>
-                            <button onClick={() => reordenarMutation.mutate({ agente, direcao: 'down' })} disabled={idx === agentesOrdenados.length - 1} className="text-slate-400 hover:text-violet-600 disabled:opacity-30">
+                            <button onClick={() => reordenarMutation.mutate({ agente, direcao: 'down' })} disabled={idx === agentesOrdenados.length - 1} className="text-muted-foreground hover:text-primary disabled:opacity-30">
                               <ArrowDown className="w-3 h-3" />
                             </button>
                           </div>
                         </div>
                       </td>
-                      <td className="py-3 px-3 font-medium text-slate-800">{agente.colaborador_nome}</td>
+                      <td className="py-3 px-3 font-medium text-foreground">{agente.colaborador_nome}</td>
                       <td className="py-3 px-3">
-                        <Badge className={STATUS_N2_LABELS[agente.status]?.color || 'bg-slate-100 text-slate-700'}>
+                        <Badge className={STATUS_N2_LABELS[agente.status]?.color || 'bg-muted text-foreground'}>
                           {STATUS_N2_LABELS[agente.status]?.label || agente.status}
                         </Badge>
                       </td>
@@ -207,7 +207,7 @@ export default function AgenteN2Config() {
                         <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleEditar(agente)}>
                           <Pencil className="w-4 h-4" />
                         </Button>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-red-500 hover:text-red-700" onClick={() => setExcluirTarget(agente)}>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive" onClick={() => setExcluirTarget(agente)}>
                           <Trash2 className="w-4 h-4" />
                         </Button>
                       </td>
@@ -220,10 +220,10 @@ export default function AgenteN2Config() {
 
           {agentesRemovidos.length > 0 && (
             <div className="mt-4 pt-4 border-t">
-              <p className="text-xs text-slate-400 mb-2">Removidos do rodízio (histórico preservado):</p>
+              <p className="text-xs text-muted-foreground mb-2">Removidos do rodízio (histórico preservado):</p>
               <div className="flex flex-wrap gap-2">
                 {agentesRemovidos.map(a => (
-                  <Badge key={a.id} variant="outline" className="text-slate-400">{a.colaborador_nome}</Badge>
+                  <Badge key={a.id} variant="outline" className="text-muted-foreground">{a.colaborador_nome}</Badge>
                 ))}
               </div>
             </div>
@@ -247,7 +247,7 @@ export default function AgenteN2Config() {
                   ))}
                 </SelectContent>
               </Select>
-              <p className="text-xs text-slate-400">O cadastro não cria usuário no sistema — é apenas referência para rodízio e acionamento.</p>
+              <p className="text-xs text-muted-foreground">O cadastro não cria usuário no sistema — é apenas referência para rodízio e acionamento.</p>
             </div>
             <div className="space-y-1.5">
               <Label className="text-xs">Nome do Agente N2</Label>
@@ -268,7 +268,7 @@ export default function AgenteN2Config() {
                 </Select>
               </div>
             </div>
-            <div className="p-3 bg-blue-50 rounded-lg border border-blue-100 text-xs text-blue-700 space-y-1">
+            <div className="p-3 bg-info-soft rounded-lg border border-blue-100 text-xs text-primary space-y-1">
               <p><strong>Permitido:</strong> participa do rodízio normalmente.</p>
               <p><strong>Férias:</strong> pulado temporariamente, sem perder a posição.</p>
               <p><strong>Bloqueado:</strong> não participa do rodízio, sem perder a posição.</p>
@@ -276,7 +276,7 @@ export default function AgenteN2Config() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancelar</Button>
-            <Button className="bg-violet-600 hover:bg-violet-700" disabled={!form.colaborador_nome.trim() || salvarMutation.isPending} onClick={() => salvarMutation.mutate({ editId, form })}>
+            <Button className="bg-primary hover:bg-violet-700" disabled={!form.colaborador_nome.trim() || salvarMutation.isPending} onClick={() => salvarMutation.mutate({ editId, form })}>
               <Save className="w-4 h-4 mr-1" /> {salvarMutation.isPending ? 'Salvando...' : 'Salvar'}
             </Button>
           </DialogFooter>
@@ -288,7 +288,7 @@ export default function AgenteN2Config() {
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <AlertTriangle className="w-5 h-5 text-red-500" />
+              <AlertTriangle className="w-5 h-5 text-destructive" />
               Excluir Agente N2
             </DialogTitle>
           </DialogHeader>
@@ -296,16 +296,16 @@ export default function AgenteN2Config() {
             const temHistorico = acionamentosHist.some(a => a.agente_n2_id === excluirTarget.id);
             return (
               <div className="space-y-4">
-                <p className="text-sm text-slate-600">
+                <p className="text-sm text-muted-foreground">
                   Você está prestes a excluir <strong>{excluirTarget.colaborador_nome}</strong> (Posição #{excluirTarget.ordem}).
                 </p>
                 {temHistorico ? (
-                  <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg text-sm text-amber-700">
+                  <div className="p-3 bg-warning-soft border border-warning/25 rounded-lg text-sm text-warning">
                     <p className="font-semibold mb-1">Este agente possui acionamentos vinculados.</p>
                     <p>O cadastro será inativado (removido do rodízio), mas o histórico de acionamentos será preservado para auditoria.</p>
                   </div>
                 ) : (
-                  <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
+                  <div className="p-3 bg-destructive/10 border border-destructive/25 rounded-lg text-sm text-destructive">
                     <p className="font-semibold mb-1">Exclusão permanente</p>
                     <p>Este agente não possui acionamentos vinculados. O cadastro será removido permanentemente do sistema.</p>
                   </div>

@@ -127,39 +127,39 @@ export default function ConfigElegibilidade() {
     <div className="space-y-6">
       {/* Ciclo Ativo Banner */}
       {cicloAtivo ? (
-        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-4 flex items-start gap-3">
-          <CheckCircle2 className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-info/25 rounded-xl p-4 flex items-start gap-3">
+          <CheckCircle2 className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
           <div>
-            <p className="font-semibold text-blue-800 text-sm">Ciclo Ativo: {cicloAtivo.nome}</p>
-            <p className="text-xs text-blue-700 mt-0.5">
+            <p className="font-semibold text-primary text-sm">Ciclo Ativo: {cicloAtivo.nome}</p>
+            <p className="text-xs text-primary mt-0.5">
               Período de avaliação: <strong>{fmtDate(cicloAtivo.data_inicio)}</strong> → <strong>{fmtDate(cicloAtivo.data_fim)}</strong>
               &nbsp;•&nbsp; Pagamento: <strong>{fmtMes(cicloAtivo.mes_pagamento)}</strong>
             </p>
-            <p className="text-xs text-blue-600 mt-1">Todos os critérios de elegibilidade aplicam-se a este período.</p>
+            <p className="text-xs text-primary mt-1">Todos os critérios de elegibilidade aplicam-se a este período.</p>
           </div>
         </div>
       ) : (
-        <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-start gap-3">
-          <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+        <div className="bg-warning-soft border border-warning/25 rounded-xl p-4 flex items-start gap-3">
+          <AlertTriangle className="w-5 h-5 text-warning flex-shrink-0 mt-0.5" />
           <div>
-            <p className="font-semibold text-amber-800 text-sm">Nenhum ciclo trimestral ativo</p>
-            <p className="text-xs text-amber-700 mt-0.5">Configure e ative um ciclo trimestral na aba "Ciclos Trimestrais" abaixo.</p>
+            <p className="font-semibold text-warning text-sm">Nenhum ciclo trimestral ativo</p>
+            <p className="text-xs text-warning mt-0.5">Configure e ative um ciclo trimestral na aba "Ciclos Trimestrais" abaixo.</p>
           </div>
         </div>
       )}
 
       {/* Nav interna */}
-      <div className="flex gap-2 border-b border-slate-200 pb-1">
+      <div className="flex gap-2 border-b border-border pb-1">
         <button
           onClick={() => setActiveSection('criterios')}
-          className={`px-4 py-2 text-sm font-medium rounded-t-lg transition-colors ${activeSection === 'criterios' ? 'bg-white border border-b-white border-slate-200 text-blue-700' : 'text-slate-500 hover:text-slate-700'}`}
+          className={`px-4 py-2 text-sm font-medium rounded-t-lg transition-colors ${activeSection === 'criterios' ? 'bg-card border border-b-white border-border text-primary' : 'text-muted-foreground hover:text-foreground'}`}
         >
           <Award className="w-4 h-4 inline mr-1.5" />
           Critérios de Elegibilidade
         </button>
         <button
           onClick={() => setActiveSection('ciclos')}
-          className={`px-4 py-2 text-sm font-medium rounded-t-lg transition-colors ${activeSection === 'ciclos' ? 'bg-white border border-b-white border-slate-200 text-blue-700' : 'text-slate-500 hover:text-slate-700'}`}
+          className={`px-4 py-2 text-sm font-medium rounded-t-lg transition-colors ${activeSection === 'ciclos' ? 'bg-card border border-b-white border-border text-primary' : 'text-muted-foreground hover:text-foreground'}`}
         >
           <CalendarDays className="w-4 h-4 inline mr-1.5" />
           Ciclos Trimestrais
@@ -176,7 +176,7 @@ export default function ConfigElegibilidade() {
                   <Award className="w-5 h-5" />
                   Exigências para Premiação Trimestral
                 </CardTitle>
-                <p className="text-sm text-slate-500 mt-1">
+                <p className="text-sm text-muted-foreground mt-1">
                   Defina os critérios que os agentes devem atender para participar
                 </p>
               </div>
@@ -188,30 +188,30 @@ export default function ConfigElegibilidade() {
           </CardHeader>
           <CardContent>
             {/* Info sobre regra de volume */}
-            <div className="mb-4 p-3 bg-slate-50 border border-slate-200 rounded-lg flex items-start gap-2 text-xs text-slate-600">
-              <Info className="w-4 h-4 text-slate-400 flex-shrink-0 mt-0.5" />
+            <div className="mb-4 p-3 bg-muted border border-border rounded-lg flex items-start gap-2 text-xs text-muted-foreground">
+              <Info className="w-4 h-4 text-muted-foreground flex-shrink-0 mt-0.5" />
               <span>
                 <strong>Regra de volume mínimo:</strong> Canais com menos de 4 registros no trimestre são automaticamente desconsiderados na validação, evitando distorções por baixo volume.
               </span>
             </div>
 
             {elegibilidades.length === 0 ? (
-              <p className="text-slate-500 text-center py-8">Nenhuma exigência configurada</p>
+              <p className="text-muted-foreground text-center py-8">Nenhuma exigência configurada</p>
             ) : (
               <div className="space-y-2">
                 {elegibilidades.map(elegib => {
                   const cats = elegib.categorias_tratativa || [];
                   return (
-                    <div key={elegib.id} className="flex items-start justify-between p-3 bg-slate-50 rounded-lg gap-3">
+                    <div key={elegib.id} className="flex items-start justify-between p-3 bg-muted rounded-lg gap-3">
                       <div className="flex-1">
                         <div className="flex items-center gap-2 flex-wrap">
                           <span className="text-base">{TIPO_ICONS[elegib.tipo_validacao] || ''}</span>
                           <p className="font-medium text-sm">{elegib.nome_exigencia}</p>
                           {elegib.obrigatoria && (
-                            <Badge className="bg-red-100 text-red-700 text-xs">Obrigatória</Badge>
+                            <Badge className="bg-destructive/10 text-destructive text-xs">Obrigatória</Badge>
                           )}
                         </div>
-                        <p className="text-xs text-slate-500 mt-1">
+                        <p className="text-xs text-muted-foreground mt-1">
                           {TIPOS_VALIDACAO[elegib.tipo_validacao]}
                           {elegib.tipo_validacao === 'execucao_tratativas_categoria' && cats.length > 0 && (
                             <span> — {cats.map(c => CATEGORIAS_TRATATIVA.find(x => x.value === c)?.label || c).join(', ')}</span>
@@ -223,12 +223,12 @@ export default function ConfigElegibilidade() {
                             <span> • Mínimo: {elegib.valor_minimo}</span>
                           )}
                         </p>
-                        {elegib.descricao && <p className="text-xs text-slate-400 mt-0.5 italic">{elegib.descricao}</p>}
+                        {elegib.descricao && <p className="text-xs text-muted-foreground mt-0.5 italic">{elegib.descricao}</p>}
                       </div>
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="text-red-400 hover:text-red-600 flex-shrink-0"
+                        className="text-red-400 hover:text-destructive flex-shrink-0"
                         onClick={() => deleteMutation.mutate(elegib.id)}
                       >
                         <Trash2 className="w-4 h-4" />
@@ -294,7 +294,7 @@ export default function ConfigElegibilidade() {
             {formData.tipo_validacao === 'execucao_tratativas_categoria' && (
               <div>
                 <Label>Categorias exigidas *</Label>
-                <p className="text-xs text-slate-500 mt-1 mb-2">
+                <p className="text-xs text-muted-foreground mt-1 mb-2">
                   O colaborador deve ter executado ao menos 1 tratativa em cada categoria selecionada durante o trimestre.
                 </p>
                 <div className="space-y-2">
@@ -324,7 +324,7 @@ export default function ConfigElegibilidade() {
                   className="mt-1"
                   placeholder="4"
                 />
-                <p className="text-xs text-slate-500 mt-1">
+                <p className="text-xs text-muted-foreground mt-1">
                   Canais com menos registros que este valor serão desconsiderados na validação da premiação.
                 </p>
               </div>

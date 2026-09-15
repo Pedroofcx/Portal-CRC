@@ -188,24 +188,24 @@ export default function ApoioN2Tool() {
       />
       <FilaVisualizacao titulo="Apoio N2" participantes={filaDataN2} statusLabels={STATUS_N2_LABELS} />
 
-      <div className="p-4 bg-blue-50 border border-blue-200 rounded-xl">
+      <div className="p-4 bg-info-soft border border-info/25 rounded-xl">
         <div className="flex items-start gap-3">
-          <Headset className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+          <Headset className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
           <div>
-            <p className="text-sm font-semibold text-blue-800">Apoio N2 — Time Especializado</p>
-            <p className="text-xs text-blue-600 mt-0.5">Acione o Time N2 para apoio especializado em tratativas de PROCON, Google Meu Negócio e Reclame Aqui.</p>
+            <p className="text-sm font-semibold text-primary">Apoio N2 — Time Especializado</p>
+            <p className="text-xs text-primary mt-0.5">Acione o Time N2 para apoio especializado em tratativas de PROCON, Google Meu Negócio e Reclame Aqui.</p>
           </div>
         </div>
       </div>
 
       {sucesso && (
-        <Card className="border-green-200 bg-green-50">
+        <Card className="border-success/25 bg-success-soft">
           <CardContent className="p-5">
             <div className="flex items-start gap-3">
-              <CheckCircle2 className="w-6 h-6 text-green-600 flex-shrink-0 mt-0.5" />
+              <CheckCircle2 className="w-6 h-6 text-success flex-shrink-0 mt-0.5" />
               <div className="flex-1">
-                <p className="font-semibold text-green-800">✓ Apoio N2 acionado com sucesso.</p>
-                <div className="mt-2 space-y-0.5 text-sm text-green-700">
+                <p className="font-semibold text-success">✓ Apoio N2 acionado com sucesso.</p>
+                <div className="mt-2 space-y-0.5 text-sm text-success">
                   <p><strong>Tratativa:</strong> #{sucesso.tratativa}</p>
                   <p><strong>Agente N2:</strong> {sucesso.agente}</p>
                   <p><strong>Tipo de acionamento:</strong> {TIPO_N2_LABELS[sucesso.tipo].label}</p>
@@ -222,8 +222,8 @@ export default function ApoioN2Tool() {
         <>
           <Card>
             <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-semibold text-slate-700 flex items-center gap-2">
-                <span className="w-6 h-6 rounded-full bg-violet-100 text-violet-700 flex items-center justify-center text-xs font-bold">1</span>
+              <CardTitle className="text-sm font-semibold text-foreground flex items-center gap-2">
+                <span className="w-6 h-6 rounded-full bg-info-soft text-primary flex items-center justify-center text-xs font-bold">1</span>
                 Selecionar Tratativa
               </CardTitle>
             </CardHeader>
@@ -240,36 +240,36 @@ export default function ApoioN2Tool() {
               </Select>
 
               {tratativaSelecionada && (
-                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
+                <div className="p-4 bg-muted rounded-xl border border-border space-y-2">
                   <div className="grid grid-cols-2 gap-3 text-sm">
                     <div>
-                      <p className="text-xs text-slate-500">Número</p>
-                      <p className="font-semibold text-slate-800">#{tratativaSelecionada.id_interno || tratativaSelecionada.id.slice(0, 8)}</p>
+                      <p className="text-xs text-muted-foreground">Número</p>
+                      <p className="font-semibold text-foreground">#{tratativaSelecionada.id_interno || tratativaSelecionada.id.slice(0, 8)}</p>
                     </div>
                     <div>
-                      <p className="text-xs text-slate-500">Cliente</p>
-                      <p className="font-semibold text-slate-800">{tratativaSelecionada.nome_cliente || '—'}</p>
+                      <p className="text-xs text-muted-foreground">Cliente</p>
+                      <p className="font-semibold text-foreground">{tratativaSelecionada.nome_cliente || '—'}</p>
                     </div>
                     <div>
-                      <p className="text-xs text-slate-500">Tipo / Canal</p>
-                      <Badge className="bg-blue-100 text-blue-700 border-blue-200">{TIPO_TRATATIVA_LABELS[tratativaSelecionada.tipo_tratativa] || tratativaSelecionada.tipo_tratativa || '—'}</Badge>
+                      <p className="text-xs text-muted-foreground">Tipo / Canal</p>
+                      <Badge className="bg-info-soft text-primary border-info/25">{TIPO_TRATATIVA_LABELS[tratativaSelecionada.tipo_tratativa] || tratativaSelecionada.tipo_tratativa || '—'}</Badge>
                     </div>
                     <div>
-                      <p className="text-xs text-slate-500">Status</p>
-                      <p className="font-semibold text-slate-800 capitalize">{tratativaSelecionada.status?.replace(/_/g, ' ') || '—'}</p>
+                      <p className="text-xs text-muted-foreground">Status</p>
+                      <p className="font-semibold text-foreground capitalize">{tratativaSelecionada.status?.replace(/_/g, ' ') || '—'}</p>
                     </div>
                     <div>
-                      <p className="text-xs text-slate-500">Agente responsável</p>
-                      <p className="font-semibold text-slate-800">{tratativaSelecionada.agente_responsavel_nome || '—'}</p>
+                      <p className="text-xs text-muted-foreground">Agente responsável</p>
+                      <p className="font-semibold text-foreground">{tratativaSelecionada.agente_responsavel_nome || '—'}</p>
                     </div>
                     <div>
-                      <p className="text-xs text-slate-500">Data</p>
-                      <p className="font-semibold text-slate-800">{tratativaSelecionada.data_registro ? formatDateSP(tratativaSelecionada.data_registro, 'DD/MM/YYYY') : '—'}</p>
+                      <p className="text-xs text-muted-foreground">Data</p>
+                      <p className="font-semibold text-foreground">{tratativaSelecionada.data_registro ? formatDateSP(tratativaSelecionada.data_registro, 'DD/MM/YYYY') : '—'}</p>
                     </div>
                   </div>
                   {tratativaSelecionada.n2_nome && (
-                    <div className="pt-2 mt-2 border-t border-slate-200">
-                      <p className="text-xs text-amber-600">Esta tratativa já possui N2 vinculado: <strong>{tratativaSelecionada.n2_nome}</strong> ({TIPO_N2_LABELS[tratativaSelecionada.tipo_acionamento_n2]?.label || '—'}). Um novo acionamento irá substituir.</p>
+                    <div className="pt-2 mt-2 border-t border-border">
+                      <p className="text-xs text-warning">Esta tratativa já possui N2 vinculado: <strong>{tratativaSelecionada.n2_nome}</strong> ({TIPO_N2_LABELS[tratativaSelecionada.tipo_acionamento_n2]?.label || '—'}). Um novo acionamento irá substituir.</p>
                     </div>
                   )}
                 </div>
@@ -280,8 +280,8 @@ export default function ApoioN2Tool() {
           {tratativaSelecionada && (
             <Card>
               <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-semibold text-slate-700 flex items-center gap-2">
-                  <span className="w-6 h-6 rounded-full bg-violet-100 text-violet-700 flex items-center justify-center text-xs font-bold">2</span>
+                <CardTitle className="text-sm font-semibold text-foreground flex items-center gap-2">
+                  <span className="w-6 h-6 rounded-full bg-info-soft text-primary flex items-center justify-center text-xs font-bold">2</span>
                   Como será realizado o acionamento?
                 </CardTitle>
               </CardHeader>
@@ -290,45 +290,45 @@ export default function ApoioN2Tool() {
                   <button
                     type="button"
                     onClick={() => setTipoAcionamento('rodizio')}
-                    className={`p-4 rounded-xl border-2 text-left transition-all ${tipoAcionamento === 'rodizio' ? 'border-violet-500 bg-violet-50' : 'border-slate-200 bg-white hover:border-slate-300'}`}
+                    className={`p-4 rounded-xl border-2 text-left transition-all ${tipoAcionamento === 'rodizio' ? 'border-violet-500 bg-info-soft' : 'border-border bg-card hover:border-border'}`}
                   >
                     <div className="flex items-center gap-2 mb-1">
-                      <div className={`w-4 h-4 rounded-full border-2 ${tipoAcionamento === 'rodizio' ? 'border-violet-500 bg-violet-500' : 'border-slate-300'}`} />
-                      <span className="font-semibold text-sm text-slate-800">Seguir rodízio</span>
+                      <div className={`w-4 h-4 rounded-full border-2 ${tipoAcionamento === 'rodizio' ? 'border-violet-500 bg-primary' : 'border-border'}`} />
+                      <span className="font-semibold text-sm text-foreground">Seguir rodízio</span>
                     </div>
-                    <p className="text-xs text-slate-500 ml-6">O sistema identifica automaticamente o próximo N2 elegível.</p>
+                    <p className="text-xs text-muted-foreground ml-6">O sistema identifica automaticamente o próximo N2 elegível.</p>
                   </button>
 
                   <button
                     type="button"
                     onClick={() => isGestor ? setTipoAcionamento('supervisor') : toast({ title: 'Sem permissão', description: 'Apenas supervisores/gestores podem usar esta opção.', variant: 'destructive' })}
-                    className={`p-4 rounded-xl border-2 text-left transition-all ${tipoAcionamento === 'supervisor' ? 'border-violet-500 bg-violet-50' : 'border-slate-200 bg-white hover:border-slate-300'} ${!isGestor ? 'opacity-60' : ''}`}
+                    className={`p-4 rounded-xl border-2 text-left transition-all ${tipoAcionamento === 'supervisor' ? 'border-violet-500 bg-info-soft' : 'border-border bg-card hover:border-border'} ${!isGestor ? 'opacity-60' : ''}`}
                   >
                     <div className="flex items-center gap-2 mb-1">
-                      <div className={`w-4 h-4 rounded-full border-2 ${tipoAcionamento === 'supervisor' ? 'border-violet-500 bg-violet-500' : 'border-slate-300'}`} />
-                      <span className="font-semibold text-sm text-slate-800">Supervisor realizou a escolha</span>
+                      <div className={`w-4 h-4 rounded-full border-2 ${tipoAcionamento === 'supervisor' ? 'border-violet-500 bg-primary' : 'border-border'}`} />
+                      <span className="font-semibold text-sm text-foreground">Supervisor realizou a escolha</span>
                     </div>
-                    <p className="text-xs text-slate-500 ml-6">Permite selecionar qualquer N2, inclusive bloqueado ou em férias.</p>
-                    {!isGestor && <p className="text-xs text-red-500 ml-6 mt-1">Exige perfil de supervisor/gestor.</p>}
+                    <p className="text-xs text-muted-foreground ml-6">Permite selecionar qualquer N2, inclusive bloqueado ou em férias.</p>
+                    {!isGestor && <p className="text-xs text-destructive ml-6 mt-1">Exige perfil de supervisor/gestor.</p>}
                   </button>
                 </div>
 
                 {tipoAcionamento === 'rodizio' && (
-                  <div className="p-4 bg-blue-50 border border-blue-200 rounded-xl">
+                  <div className="p-4 bg-info-soft border border-info/25 rounded-xl">
                     {proximoN2 ? (
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="text-xs text-blue-600 mb-1">Próximo Agente N2</p>
-                          <p className="text-lg font-bold text-slate-800">{proximoN2.agente.colaborador_nome}</p>
+                          <p className="text-xs text-primary mb-1">Próximo Agente N2</p>
+                          <p className="text-lg font-bold text-foreground">{proximoN2.agente.colaborador_nome}</p>
                           <div className="flex items-center gap-2 mt-1">
                             <Badge className={STATUS_N2_LABELS[proximoN2.agente.status].color}>Status: {STATUS_N2_LABELS[proximoN2.agente.status].label}</Badge>
-                            <span className="text-xs text-slate-500">Posição #{proximoN2.agente.ordem}</span>
+                            <span className="text-xs text-muted-foreground">Posição #{proximoN2.agente.ordem}</span>
                           </div>
                         </div>
-                        <Headset className="w-10 h-10 text-blue-400" />
+                        <Headset className="w-10 h-10 text-primary" />
                       </div>
                     ) : (
-                      <div className="flex items-center gap-2 text-amber-700">
+                      <div className="flex items-center gap-2 text-warning">
                         <AlertCircle className="w-5 h-5" />
                         <p className="text-sm">Nenhum Agente N2 com status "Permitido" disponível no rodízio. Solicite a um gestor que verifique os status.</p>
                       </div>
@@ -349,13 +349,13 @@ export default function ApoioN2Tool() {
                         ))}
                       </SelectContent>
                     </Select>
-                    <p className="text-xs text-purple-600">Esta ação será registrada como exceção de supervisor. O rodízio normal não será alterado.</p>
+                    <p className="text-xs text-primary">Esta ação será registrada como exceção de supervisor. O rodízio normal não será alterado.</p>
                   </div>
                 )}
 
                 {tipoAcionamento && (
                   <Button
-                    className="w-full bg-violet-600 hover:bg-violet-700"
+                    className="w-full bg-primary hover:bg-violet-700"
                     disabled={!canConfirm || acionarMutation.isPending}
                     onClick={handleConfirmar}
                   >
@@ -370,24 +370,24 @@ export default function ApoioN2Tool() {
           {acionamentos.length > 0 && (
             <Card>
               <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-semibold text-slate-700 flex items-center gap-2">
-                  <History className="w-4 h-4 text-slate-500" />
+                <CardTitle className="text-sm font-semibold text-foreground flex items-center gap-2">
+                  <History className="w-4 h-4 text-muted-foreground" />
                   Acionamentos N2 Recentes
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-2 max-h-72 overflow-y-auto">
                   {acionamentos.map(a => (
-                    <div key={a.id} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg text-sm">
+                    <div key={a.id} className="flex items-center justify-between p-3 bg-muted rounded-lg text-sm">
                       <div>
-                        <p className="font-medium text-slate-800">#{a.tratativa_id_interno || a.tratativa_id.slice(0, 8)} — {a.tratativa_nome_cliente || '—'}</p>
-                        <p className="text-xs text-slate-500">N2: {a.agente_n2_nome} • Posição #{a.agente_n2_ordem} • Por: {a.usuario_nome} {a.tratativa_tipo ? `• ${a.tratativa_tipo}` : ''}</p>
+                        <p className="font-medium text-foreground">#{a.tratativa_id_interno || a.tratativa_id.slice(0, 8)} — {a.tratativa_nome_cliente || '—'}</p>
+                        <p className="text-xs text-muted-foreground">N2: {a.agente_n2_nome} • Posição #{a.agente_n2_ordem} • Por: {a.usuario_nome} {a.tratativa_tipo ? `• ${a.tratativa_tipo}` : ''}</p>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Badge className={TIPO_N2_LABELS[a.tipo_acionamento]?.color || 'bg-slate-100 text-slate-700'}>
+                        <Badge className={TIPO_N2_LABELS[a.tipo_acionamento]?.color || 'bg-muted text-foreground'}>
                           {TIPO_N2_LABELS[a.tipo_acionamento]?.label || a.tipo_acionamento}
                         </Badge>
-                        <span className="text-xs text-slate-400">{a.data_acionamento ? formatDateSP(a.data_acionamento, 'DD/MM HH:mm') : '—'}</span>
+                        <span className="text-xs text-muted-foreground">{a.data_acionamento ? formatDateSP(a.data_acionamento, 'DD/MM HH:mm') : '—'}</span>
                       </div>
                     </div>
                   ))}

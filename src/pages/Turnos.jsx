@@ -159,7 +159,7 @@ export default function Turnos() {
                 Regerar Tudo
               </Button>
             ) : (
-              <Button size="sm" className="bg-blue-600 hover:bg-blue-700" onClick={() => setGerarDialogOpen(true)}>
+              <Button size="sm" className="bg-primary hover:bg-primary/90" onClick={() => setGerarDialogOpen(true)}>
                 <Calendar className="w-4 h-4 mr-1.5" />
                 Gerar Escala
               </Button>
@@ -195,24 +195,24 @@ export default function Turnos() {
         <TabsContent value="escala" className="pt-4">
           <div className="flex items-center gap-3 mb-5">
             <Button variant="outline" size="sm" onClick={() => setSemanaOffset(o => o - 1)}>←</Button>
-            <span className="text-sm font-medium text-slate-700 min-w-44 text-center">
+            <span className="text-sm font-medium text-foreground min-w-44 text-center">
               {semanaRef} · {new Date(dataInicioSemana + 'T12:00').toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })}
             </span>
             <Button variant="outline" size="sm" onClick={() => setSemanaOffset(o => o + 1)}>→</Button>
             {semanaOffset !== 0 && (
-              <Button variant="ghost" size="sm" onClick={() => setSemanaOffset(0)} className="text-blue-600">Hoje</Button>
+              <Button variant="ghost" size="sm" onClick={() => setSemanaOffset(0)} className="text-primary">Hoje</Button>
             )}
           </div>
 
           {loadingEscalas ? (
-            <div className="text-center py-12 text-slate-400 text-sm">Carregando...</div>
+            <div className="text-center py-12 text-muted-foreground text-sm">Carregando...</div>
           ) : !escalaAtual ? (
             <Card className="border-0 shadow-sm">
               <CardContent className="py-16 text-center">
-                <Calendar className="w-12 h-12 mx-auto mb-3 text-slate-300" />
-                <p className="text-slate-500 font-medium">Nenhuma escala para esta semana</p>
+                <Calendar className="w-12 h-12 mx-auto mb-3 text-muted-foreground" />
+                <p className="text-muted-foreground font-medium">Nenhuma escala para esta semana</p>
                 {isGestor && (
-                  <Button className="mt-4 bg-blue-600 hover:bg-blue-700" onClick={() => setGerarDialogOpen(true)}>
+                  <Button className="mt-4 bg-primary hover:bg-primary/90" onClick={() => setGerarDialogOpen(true)}>
                     <Calendar className="w-4 h-4 mr-2" />
                     Gerar Escala para Esta Semana
                   </Button>
@@ -224,25 +224,25 @@ export default function Turnos() {
               {escalaAtual.turnos?.map((turno, diaIndex) => (
                 <Card key={turno.dia} className={`border-0 shadow-sm overflow-hidden ${turno.cancelado ? 'ring-2 ring-red-200' : ''}`}>
                   {/* Header do card */}
-                  <div className={`px-4 pt-4 pb-2 ${turno.cancelado ? 'bg-red-50' : ''}`}>
+                  <div className={`px-4 pt-4 pb-2 ${turno.cancelado ? 'bg-destructive/10' : ''}`}>
                     <div className="flex items-start justify-between gap-2">
                       <div>
-                        <p className="text-sm font-semibold text-slate-800">{DIAS_PT[turno.dia]}</p>
-                        <p className="text-xs text-slate-400">
+                        <p className="text-sm font-semibold text-foreground">{DIAS_PT[turno.dia]}</p>
+                        <p className="text-xs text-muted-foreground">
                           {turno.data ? new Date(turno.data + 'T12:00').toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' }) : ''}
                         </p>
                       </div>
                       {turno.cancelado && (
-                        <div className="flex items-center gap-1 bg-red-600 text-white text-xs font-bold px-2 py-1 rounded-md">
+                        <div className="flex items-center gap-1 bg-destructive text-white text-xs font-bold px-2 py-1 rounded-md">
                           <BanIcon className="w-3 h-3" />
                           CANCELADO
                         </div>
                       )}
                     </div>
                     {turno.cancelado && turno.motivo_cancelamento && (
-                      <div className="mt-2 flex items-start gap-1.5 bg-red-100 border border-red-200 rounded-lg p-2">
-                        <AlertTriangle className="w-3 h-3 text-red-500 flex-shrink-0 mt-0.5" />
-                        <p className="text-xs text-red-700">{turno.motivo_cancelamento}</p>
+                      <div className="mt-2 flex items-start gap-1.5 bg-destructive/10 border border-destructive/25 rounded-lg p-2">
+                        <AlertTriangle className="w-3 h-3 text-destructive flex-shrink-0 mt-0.5" />
+                        <p className="text-xs text-destructive">{turno.motivo_cancelamento}</p>
                       </div>
                     )}
                   </div>
@@ -255,29 +255,29 @@ export default function Turnos() {
                       </div>
                     ) : (
                       <>
-                        <div className="bg-amber-50 border border-amber-200 rounded-lg p-2">
+                        <div className="bg-warning-soft border border-warning/25 rounded-lg p-2">
                           <div className="flex items-center gap-1.5 mb-1.5">
-                            <Sun className="w-3.5 h-3.5 text-amber-500" />
-                            <span className="text-xs font-semibold text-amber-700">Manhã</span>
-                            <span className="ml-auto text-xs text-amber-500">{turno.manha?.length || 0}</span>
+                            <Sun className="w-3.5 h-3.5 text-warning" />
+                            <span className="text-xs font-semibold text-warning">Manhã</span>
+                            <span className="ml-auto text-xs text-warning">{turno.manha?.length || 0}</span>
                           </div>
                           <div className="space-y-0.5">
                             {turno.manha?.map(c => (
-                              <p key={c.colaborador_id} className="text-xs text-amber-800 font-medium truncate">
+                              <p key={c.colaborador_id} className="text-xs text-warning font-medium truncate">
                                 {c.colaborador_nome?.split(' ').slice(0, 2).join(' ')}
                               </p>
                             ))}
                           </div>
                         </div>
-                        <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-2">
+                        <div className="bg-info-soft border border-indigo-200 rounded-lg p-2">
                           <div className="flex items-center gap-1.5 mb-1.5">
-                            <Moon className="w-3.5 h-3.5 text-indigo-500" />
-                            <span className="text-xs font-semibold text-indigo-700">Tarde</span>
-                            <span className="ml-auto text-xs text-indigo-500">{turno.tarde?.length || 0}</span>
+                            <Moon className="w-3.5 h-3.5 text-primary" />
+                            <span className="text-xs font-semibold text-primary">Tarde</span>
+                            <span className="ml-auto text-xs text-primary">{turno.tarde?.length || 0}</span>
                           </div>
                           <div className="space-y-0.5">
                             {turno.tarde?.map(c => (
-                              <p key={c.colaborador_id} className="text-xs text-indigo-800 font-medium truncate">
+                              <p key={c.colaborador_id} className="text-xs text-primary font-medium truncate">
                                 {c.colaborador_nome?.split(' ').slice(0, 2).join(' ')}
                               </p>
                             ))}
@@ -291,7 +291,7 @@ export default function Turnos() {
                         {!turno.cancelado && (
                           <Button
                             variant="outline" size="sm"
-                            className="flex-1 h-7 text-xs text-blue-600 border-blue-200 hover:bg-blue-50"
+                            className="flex-1 h-7 text-xs text-primary border-info/25 hover:bg-info-soft"
                             onClick={() => setMoverDiaIndex(diaIndex)}
                             disabled={atualizarEscala.isPending}
                           >
@@ -302,8 +302,8 @@ export default function Turnos() {
                         <Button
                           variant="outline" size="sm"
                           className={`flex-1 h-7 text-xs ${turno.cancelado
-                            ? 'text-green-600 border-green-200 hover:bg-green-50'
-                            : 'text-red-600 border-red-200 hover:bg-red-50'}`}
+                            ? 'text-success border-success/25 hover:bg-success-soft'
+                            : 'text-destructive border-destructive/25 hover:bg-destructive/10'}`}
                           onClick={() => setCancelarDiaIndex(diaIndex)}
                           disabled={atualizarEscala.isPending}
                         >
@@ -332,12 +332,12 @@ export default function Turnos() {
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <Users className="w-5 h-5 text-blue-600" />
+              <Users className="w-5 h-5 text-primary" />
               Selecionar Colaboradores
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <p className="text-sm text-slate-600">Semana <strong>{semanaRef}</strong> · Selecione os participantes.</p>
+            <p className="text-sm text-muted-foreground">Semana <strong>{semanaRef}</strong> · Selecione os participantes.</p>
             <div className="space-y-1.5 max-h-72 overflow-y-auto pr-1">
               {colaboradoresAtivos.map(c => {
                 const sel = selecionados.includes(c.id);
@@ -345,22 +345,22 @@ export default function Turnos() {
                   <button
                     key={c.id}
                     onClick={() => setSelecionados(prev => sel ? prev.filter(id => id !== c.id) : [...prev, c.id])}
-                    className={`w-full flex items-center gap-3 p-2.5 rounded-lg border text-left transition-all ${sel ? 'border-blue-400 bg-blue-50' : 'border-slate-200 hover:bg-slate-50'}`}
+                    className={`w-full flex items-center gap-3 p-2.5 rounded-lg border text-left transition-all ${sel ? 'border-primary/40 bg-info-soft' : 'border-border hover:bg-muted'}`}
                   >
-                    <div className={`w-5 h-5 rounded border-2 flex items-center justify-center flex-shrink-0 ${sel ? 'bg-blue-600 border-blue-600' : 'border-slate-300'}`}>
+                    <div className={`w-5 h-5 rounded border-2 flex items-center justify-center flex-shrink-0 ${sel ? 'bg-primary border-blue-600' : 'border-border'}`}>
                       {sel && <Check className="w-3 h-3 text-white" />}
                     </div>
-                    <span className="text-sm font-medium text-slate-800 flex-1">{c.nome_completo}</span>
-                    <Badge className="bg-slate-100 text-slate-600 border-0 text-xs">{c.cargo_atual}</Badge>
+                    <span className="text-sm font-medium text-foreground flex-1">{c.nome_completo}</span>
+                    <Badge className="bg-muted text-muted-foreground border-0 text-xs">{c.cargo_atual}</Badge>
                   </button>
                 );
               })}
             </div>
             <div className="flex items-center justify-between pt-1">
-              <span className="text-xs text-slate-500">{selecionados.length} selecionado(s)</span>
+              <span className="text-xs text-muted-foreground">{selecionados.length} selecionado(s)</span>
               <div className="flex gap-2">
                 <Button variant="outline" size="sm" onClick={() => setGerarDialogOpen(false)}>Cancelar</Button>
-                <Button size="sm" className="bg-blue-600 hover:bg-blue-700" onClick={handleGerarEscala} disabled={criarEscala.isPending || selecionados.length < 2}>
+                <Button size="sm" className="bg-primary hover:bg-primary/90" onClick={handleGerarEscala} disabled={criarEscala.isPending || selecionados.length < 2}>
                   <Shuffle className="w-4 h-4 mr-1.5" />
                   {criarEscala.isPending ? 'Gerando...' : 'Gerar Aleatoriamente'}
                 </Button>

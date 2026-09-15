@@ -8,8 +8,8 @@ import { TrendingDown } from 'lucide-react';
 // não geram nenhum trabalho obrigatório adicional para o agente.
 export default function MonetizacaoAtritoForm({ form, onChange }) {
   return (
-    <div className="p-4 bg-red-50 border border-red-200 rounded-lg space-y-3">
-      <h5 className="font-medium text-sm text-red-900 flex items-center gap-2">
+    <div className="p-4 bg-destructive/10 border border-destructive/25 rounded-lg space-y-3">
+      <h5 className="font-medium text-sm text-destructive flex items-center gap-2">
         <TrendingDown className="w-4 h-4" />
         Monetização de Atrito (opcional — apenas gestor)
       </h5>

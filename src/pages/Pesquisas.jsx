@@ -393,12 +393,12 @@ export default function Pesquisas() {
           return <span>{respostasDaPesquisa.length} respostas</span>;
         } else {
           return jaRespondeu(row.id) ? (
-            <Badge className="bg-green-100 text-green-700 border-green-200">
+            <Badge className="bg-success-soft text-success border-success/25">
               <CheckCircle className="w-3 h-3 mr-1" />
               Respondida
             </Badge>
           ) : (
-            <Badge variant="outline" className="text-amber-600">
+            <Badge variant="outline" className="text-warning">
               Pendente
             </Badge>
           );
@@ -414,7 +414,7 @@ export default function Pesquisas() {
               variant="default"
               size="sm"
               onClick={() => handleResponder(row)}
-              className="bg-blue-600 hover:bg-blue-700"
+              className="bg-primary hover:bg-primary/90"
             >
               Responder
             </Button>
@@ -427,7 +427,7 @@ export default function Pesquisas() {
                 onClick={() => handleOpenEdit(row)}
                 title="Editar pesquisa"
               >
-                <Star className="w-4 h-4 text-slate-600" />
+                <Star className="w-4 h-4 text-muted-foreground" />
               </Button>
               <Button 
                 variant="ghost" 
@@ -436,7 +436,7 @@ export default function Pesquisas() {
                 title="Clonar pesquisa"
                 disabled={clonarMutation.isPending}
               >
-                <Copy className="w-4 h-4 text-blue-600" />
+                <Copy className="w-4 h-4 text-primary" />
               </Button>
               <Button 
                 variant="ghost" 
@@ -447,7 +447,7 @@ export default function Pesquisas() {
                 }}
                 title="Reenviar para todos"
               >
-                <Send className="w-4 h-4 text-green-600" />
+                <Send className="w-4 h-4 text-success" />
               </Button>
               <Button 
                 variant="ghost" 
@@ -469,7 +469,7 @@ export default function Pesquisas() {
             <Button 
               variant="ghost" 
               size="icon"
-              className="text-red-600"
+              className="text-destructive"
               onClick={() => { setSelectedPesquisa(row); setDeleteDialogOpen(true); }}
             >
               <Trash2 className="w-4 h-4" />
@@ -492,7 +492,7 @@ export default function Pesquisas() {
         icon={Star}
         actions={
           isGestor && (
-            <Button onClick={() => setDialogOpen(true)} className="bg-blue-600 hover:bg-blue-700">
+            <Button onClick={() => setDialogOpen(true)} className="bg-primary hover:bg-primary/90">
               <Plus className="w-4 h-4 mr-2" />
               Nova Pesquisa
             </Button>
@@ -599,7 +599,7 @@ export default function Pesquisas() {
                       <Badge variant="outline">Pergunta {pIndex + 1}</Badge>
                       {formData.perguntas.length > 1 && (
                         <Button type="button" variant="ghost" size="icon" onClick={() => removePergunta(pIndex)}>
-                          <Trash2 className="w-4 h-4 text-red-500" />
+                          <Trash2 className="w-4 h-4 text-destructive" />
                         </Button>
                       )}
                     </div>
@@ -635,7 +635,7 @@ export default function Pesquisas() {
                     </div>
 
                     {pergunta.tipo_resposta === 'multipla_escolha' && (
-                      <div className="pl-4 border-l-2 border-slate-200">
+                      <div className="pl-4 border-l-2 border-border">
                         <div className="flex items-center justify-between mb-2">
                           <Label className="text-sm">Opções</Label>
                           <Button type="button" variant="ghost" size="sm" onClick={() => addOpcao(pIndex)}>
@@ -651,7 +651,7 @@ export default function Pesquisas() {
                               onChange={(e) => updateOpcao(pIndex, oIndex, e.target.value)}
                             />
                             <Button type="button" variant="ghost" size="icon" onClick={() => removeOpcao(pIndex, oIndex)}>
-                              <Trash2 className="w-3 h-3 text-red-500" />
+                              <Trash2 className="w-3 h-3 text-destructive" />
                             </Button>
                           </div>
                         ))}
@@ -670,10 +670,10 @@ export default function Pesquisas() {
 
             {/* Configurações Adicionais */}
             {formData.tipo === 'clima_organizacional' && (
-              <Card className="border-2 border-purple-200 bg-purple-50/30">
+              <Card className="border-2 border-info/25 bg-info-soft/30">
                 <CardContent className="p-4 space-y-3">
                   <div className="flex items-center gap-2">
-                    <Heart className="w-4 h-4 text-purple-600" />
+                    <Heart className="w-4 h-4 text-primary" />
                     <Label className="text-sm font-medium">Configurações de Clima Organizacional</Label>
                   </div>
                   <div className="pl-6 border-l-2 border-purple-300 space-y-2">
@@ -688,7 +688,7 @@ export default function Pesquisas() {
                         value={formData.peso_health_score}
                         onChange={(e) => setFormData({ ...formData, peso_health_score: parseFloat(e.target.value) })}
                       />
-                      <p className="text-xs text-purple-600 mt-1">
+                      <p className="text-xs text-primary mt-1">
                         Quanto maior o peso, maior o impacto no Health Score do colaborador
                       </p>
                     </div>
@@ -697,12 +697,12 @@ export default function Pesquisas() {
               </Card>
             )}
 
-            <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+            <div className="p-3 bg-info-soft border border-info/25 rounded-lg">
               <div className="flex items-center gap-2 mb-1">
-                <CheckCircle className="w-4 h-4 text-blue-600" />
-                <Label className="text-sm font-medium text-blue-900">Confirmação de Leitura Obrigatória</Label>
+                <CheckCircle className="w-4 h-4 text-primary" />
+                <Label className="text-sm font-medium text-primary">Confirmação de Leitura Obrigatória</Label>
               </div>
-              <p className="text-xs text-blue-700 pl-6">
+              <p className="text-xs text-primary pl-6">
                 Todas as pesquisas exigem confirmação de leitura e resposta obrigatória de todos os usuários (gestores e agentes).
               </p>
             </div>
@@ -711,7 +711,7 @@ export default function Pesquisas() {
               <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
                 Cancelar
               </Button>
-              <Button type="submit" className="bg-blue-600 hover:bg-blue-700" disabled={createMutation.isPending}>
+              <Button type="submit" className="bg-primary hover:bg-primary/90" disabled={createMutation.isPending}>
                 {createMutation.isPending ? 'Criando...' : 'Criar Pesquisa'}
               </Button>
             </div>
@@ -728,14 +728,14 @@ export default function Pesquisas() {
           {selectedPesquisa && (
             <div className="space-y-4 mt-4">
               {selectedPesquisa.descricao && (
-                <p className="text-sm text-slate-600">{selectedPesquisa.descricao}</p>
+                <p className="text-sm text-muted-foreground">{selectedPesquisa.descricao}</p>
               )}
               {selectedPesquisa.perguntas?.map((pergunta, index) => (
                 <Card key={pergunta.id}>
                   <CardContent className="p-4 space-y-2">
                     <Label className="flex items-center gap-2">
                       {pergunta.texto}
-                      {pergunta.obrigatoria && <span className="text-red-500">*</span>}
+                      {pergunta.obrigatoria && <span className="text-destructive">*</span>}
                     </Label>
 
                     {pergunta.tipo_resposta === 'texto' && (
@@ -754,7 +754,7 @@ export default function Pesquisas() {
                             key={num}
                             type="button"
                             variant={respostas[pergunta.id] === num.toString() ? 'default' : 'outline'}
-                            className={`flex-1 ${respostas[pergunta.id] === num.toString() ? 'bg-blue-600' : ''}`}
+                            className={`flex-1 ${respostas[pergunta.id] === num.toString() ? 'bg-primary' : ''}`}
                             onClick={() => setRespostas({ ...respostas, [pergunta.id]: num.toString() })}
                           >
                             {num}
@@ -771,7 +771,7 @@ export default function Pesquisas() {
                             type="button"
                             size="sm"
                             variant={respostas[pergunta.id] === num.toString() ? 'default' : 'outline'}
-                            className={`${respostas[pergunta.id] === num.toString() ? 'bg-blue-600' : ''}`}
+                            className={`${respostas[pergunta.id] === num.toString() ? 'bg-primary' : ''}`}
                             onClick={() => setRespostas({ ...respostas, [pergunta.id]: num.toString() })}
                           >
                             {num}
@@ -785,7 +785,7 @@ export default function Pesquisas() {
                         <Button
                           type="button"
                           variant={respostas[pergunta.id] === 'sim' ? 'default' : 'outline'}
-                          className={`flex-1 ${respostas[pergunta.id] === 'sim' ? 'bg-blue-600' : ''}`}
+                          className={`flex-1 ${respostas[pergunta.id] === 'sim' ? 'bg-primary' : ''}`}
                           onClick={() => setRespostas({ ...respostas, [pergunta.id]: 'sim' })}
                         >
                           Sim
@@ -793,7 +793,7 @@ export default function Pesquisas() {
                         <Button
                           type="button"
                           variant={respostas[pergunta.id] === 'nao' ? 'default' : 'outline'}
-                          className={`flex-1 ${respostas[pergunta.id] === 'nao' ? 'bg-blue-600' : ''}`}
+                          className={`flex-1 ${respostas[pergunta.id] === 'nao' ? 'bg-primary' : ''}`}
                           onClick={() => setRespostas({ ...respostas, [pergunta.id]: 'nao' })}
                         >
                           Não
@@ -820,7 +820,7 @@ export default function Pesquisas() {
                     {pergunta.tipo_resposta === 'multipla_escolha_multipla' && (
                       <div className="space-y-2">
                         {pergunta.opcoes?.map((opcao, i) => (
-                          <label key={i} className="flex items-center gap-2 p-2 hover:bg-slate-50 rounded cursor-pointer">
+                          <label key={i} className="flex items-center gap-2 p-2 hover:bg-muted rounded cursor-pointer">
                             <input
                               type="checkbox"
                               checked={(respostas[pergunta.id] || '').split(',').includes(opcao)}
@@ -846,7 +846,7 @@ export default function Pesquisas() {
                 <Button type="button" variant="outline" onClick={() => setResponderDialogOpen(false)}>
                   Cancelar
                 </Button>
-                <Button onClick={handleEnviarResposta} className="bg-blue-600 hover:bg-blue-700" disabled={responderMutation.isPending}>
+                <Button onClick={handleEnviarResposta} className="bg-primary hover:bg-primary/90" disabled={responderMutation.isPending}>
                   {responderMutation.isPending ? 'Enviando...' : 'Enviar Resposta'}
                 </Button>
               </div>
@@ -891,8 +891,8 @@ export default function Pesquisas() {
                 {selectedPesquisa.tipo !== 'csat' && selectedPesquisa.tipo !== 'nps' && (
                   <Card>
                     <CardContent className="p-6">
-                      <div className="text-center text-slate-600">
-                        <BarChart3 className="w-12 h-12 mx-auto mb-3 text-slate-300" />
+                      <div className="text-center text-muted-foreground">
+                        <BarChart3 className="w-12 h-12 mx-auto mb-3 text-muted-foreground" />
                         <p>Visualização de resultados disponível para CSAT e NPS</p>
                         <p className="text-sm mt-1">
                           Total de {respostasVisiveis.filter(r => r.pesquisa_id === selectedPesquisa.id).length} respostas recebidas
@@ -906,8 +906,8 @@ export default function Pesquisas() {
               <TabsContent value="perguntas" className="mt-4">
                 <div className="space-y-2">
                   {selectedPesquisa.descricao && (
-                    <Card className="bg-blue-50 border-blue-200">
-                      <CardContent className="p-3 text-sm text-slate-700">
+                    <Card className="bg-info-soft border-info/25">
+                      <CardContent className="p-3 text-sm text-foreground">
                         {selectedPesquisa.descricao}
                       </CardContent>
                     </Card>
@@ -918,11 +918,11 @@ export default function Pesquisas() {
                         <p className="font-medium">{i + 1}. {p.texto}</p>
                         <div className="flex gap-2 mt-2">
                           <Badge variant="outline" className="text-xs">{p.tipo_resposta}</Badge>
-                          {p.obrigatoria && <Badge className="text-xs bg-red-100 text-red-700">Obrigatória</Badge>}
+                          {p.obrigatoria && <Badge className="text-xs bg-destructive/10 text-destructive">Obrigatória</Badge>}
                         </div>
                         {p.opcoes && p.opcoes.length > 0 && (
-                          <div className="mt-2 pl-4 border-l-2 border-slate-200">
-                            <p className="text-xs text-slate-600 mb-1">Opções:</p>
+                          <div className="mt-2 pl-4 border-l-2 border-border">
+                            <p className="text-xs text-muted-foreground mb-1">Opções:</p>
                             <ul className="text-sm space-y-1">
                               {p.opcoes.map((op, idx) => (
                                 <li key={idx}>• {op}</li>
@@ -954,22 +954,22 @@ export default function Pesquisas() {
                               <div className="flex items-center gap-2">
                                 {resp.nota_calculada && (
                                   <Badge className={
-                                    resp.sentimento === 'positivo' ? 'bg-green-100 text-green-700' :
-                                    resp.sentimento === 'negativo' ? 'bg-red-100 text-red-700' :
-                                    'bg-yellow-100 text-yellow-700'
+                                    resp.sentimento === 'positivo' ? 'bg-success-soft text-success' :
+                                    resp.sentimento === 'negativo' ? 'bg-destructive/10 text-destructive' :
+                                    'bg-warning-soft text-warning'
                                   }>
                                     {resp.nota_calculada}
                                   </Badge>
                                 )}
-                                <span className="text-xs text-slate-500">
+                                <span className="text-xs text-muted-foreground">
                                   {formatDateSP(resp.data_resposta, 'DD/MM/YYYY HH:mm')}
                                 </span>
                               </div>
                             </div>
                             <div className="space-y-2">
                               {resp.respostas?.map((r, i) => (
-                                <div key={i} className="text-sm bg-slate-50 p-2 rounded">
-                                  <span className="text-slate-600 font-medium">{r.pergunta_texto}:</span>{' '}
+                                <div key={i} className="text-sm bg-muted p-2 rounded">
+                                  <span className="text-muted-foreground font-medium">{r.pergunta_texto}:</span>{' '}
                                   <span>{r.resposta || '-'}</span>
                                 </div>
                               ))}
@@ -1071,7 +1071,7 @@ export default function Pesquisas() {
                         <Badge variant="outline">Pergunta {pIndex + 1}</Badge>
                         {editingPesquisa.perguntas.length > 1 && (
                           <Button type="button" variant="ghost" size="icon" onClick={() => setEditingPesquisa(p => ({ ...p, perguntas: p.perguntas.filter((_, i) => i !== pIndex) }))}>
-                            <Trash2 className="w-4 h-4 text-red-500" />
+                            <Trash2 className="w-4 h-4 text-destructive" />
                           </Button>
                         )}
                       </div>
@@ -1097,7 +1097,7 @@ export default function Pesquisas() {
                         </div>
                       </div>
                       {(pergunta.tipo_resposta === 'multipla_escolha' || pergunta.tipo_resposta === 'multipla_escolha_multipla') && (
-                        <div className="pl-4 border-l-2 border-slate-200">
+                        <div className="pl-4 border-l-2 border-border">
                           <div className="flex items-center justify-between mb-2">
                             <Label className="text-sm">Opções</Label>
                             <Button type="button" variant="ghost" size="sm" onClick={() => { const ps = [...editingPesquisa.perguntas]; ps[pIndex].opcoes = [...(ps[pIndex].opcoes || []), '']; setEditingPesquisa(p => ({ ...p, perguntas: ps })); }}>
@@ -1109,7 +1109,7 @@ export default function Pesquisas() {
                               <Input size="sm" placeholder={`Opção ${oIndex + 1}`} value={opcao}
                                 onChange={e => { const ps = [...editingPesquisa.perguntas]; ps[pIndex].opcoes[oIndex] = e.target.value; setEditingPesquisa(p => ({ ...p, perguntas: ps })); }} />
                               <Button type="button" variant="ghost" size="icon" onClick={() => { const ps = [...editingPesquisa.perguntas]; ps[pIndex].opcoes = ps[pIndex].opcoes.filter((_, i) => i !== oIndex); setEditingPesquisa(p => ({ ...p, perguntas: ps })); }}>
-                                <Trash2 className="w-3 h-3 text-red-500" />
+                                <Trash2 className="w-3 h-3 text-destructive" />
                               </Button>
                             </div>
                           ))}
@@ -1122,7 +1122,7 @@ export default function Pesquisas() {
 
               <div className="flex justify-end gap-3 pt-4">
                 <Button type="button" variant="outline" onClick={() => setEditDialogOpen(false)}>Cancelar</Button>
-                <Button type="submit" className="bg-blue-600 hover:bg-blue-700" disabled={updateMutation.isPending}>
+                <Button type="submit" className="bg-primary hover:bg-primary/90" disabled={updateMutation.isPending}>
                   {updateMutation.isPending ? 'Salvando...' : 'Salvar Alterações'}
                 </Button>
               </div>

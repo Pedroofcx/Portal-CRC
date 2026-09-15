@@ -82,7 +82,7 @@ export default function ConfigSkills() {
                 {softSkills.map(skill => (
                   <Badge key={skill.id} variant="outline" className="px-3 py-1.5 flex items-center gap-2">
                     {skill.nome}
-                    <button onClick={() => deleteMutation.mutate(skill.id)} className="text-red-500 hover:text-red-700">
+                    <button onClick={() => deleteMutation.mutate(skill.id)} className="text-destructive hover:text-destructive">
                       <Trash2 className="w-3 h-3" />
                     </button>
                   </Badge>
@@ -114,7 +114,7 @@ export default function ConfigSkills() {
                 {hardSkills.map(skill => (
                   <Badge key={skill.id} variant="outline" className="px-3 py-1.5 flex items-center gap-2">
                     {skill.nome}
-                    <button onClick={() => deleteMutation.mutate(skill.id)} className="text-red-500 hover:text-red-700">
+                    <button onClick={() => deleteMutation.mutate(skill.id)} className="text-destructive hover:text-destructive">
                       <Trash2 className="w-3 h-3" />
                     </button>
                   </Badge>

@@ -78,7 +78,7 @@ export default function DialogNovaAtribuicao({ open, onClose, onSalvar, agentes,
         <div className="space-y-4 mt-2">
           {/* Tipo */}
           <div>
-            <Label className="text-xs">Tipo de Tratativa <span className="text-red-500">*</span></Label>
+            <Label className="text-xs">Tipo de Tratativa <span className="text-destructive">*</span></Label>
             <Select value={form.tipo_tratativa} onValueChange={v => { f('tipo_tratativa', v); setOverrideConfirmado(false); }}>
               <SelectTrigger className="mt-1"><SelectValue placeholder="Selecione o tipo" /></SelectTrigger>
               <SelectContent>
@@ -91,22 +91,22 @@ export default function DialogNovaAtribuicao({ open, onClose, onSalvar, agentes,
 
           {/* Sugestão do Rodízio */}
           {sugestao && (
-            <div className="p-3 bg-indigo-50 border border-indigo-200 rounded-lg">
-              <p className="text-xs font-semibold text-indigo-700 flex items-center gap-1 mb-1">
+            <div className="p-3 bg-info-soft border border-indigo-200 rounded-lg">
+              <p className="text-xs font-semibold text-primary flex items-center gap-1 mb-1">
                 <RotateCcw className="w-3 h-3" /> Sugestão do Rodízio Assistido
               </p>
-              <p className="text-sm font-bold text-indigo-900">{sugestao.sugerido?.nome_completo}</p>
+              <p className="text-sm font-bold text-primary">{sugestao.sugerido?.nome_completo}</p>
               {sugestao.ultimaAtribuicao ? (
-                <p className="text-xs text-indigo-600">Última: #{sugestao.ultimaAtribuicao.ticket_id} em {sugestao.ultimaAtribuicao.data_atribuicao}</p>
+                <p className="text-xs text-primary">Última: #{sugestao.ultimaAtribuicao.ticket_id} em {sugestao.ultimaAtribuicao.data_atribuicao}</p>
               ) : (
-                <p className="text-xs text-green-600">Nunca recebeu este tipo</p>
+                <p className="text-xs text-success">Nunca recebeu este tipo</p>
               )}
             </div>
           )}
 
           {/* Agente */}
           <div>
-            <Label className="text-xs">Agente Responsável <span className="text-red-500">*</span></Label>
+            <Label className="text-xs">Agente Responsável <span className="text-destructive">*</span></Label>
             <Select value={form.agente_id} onValueChange={v => { f('agente_id', v); setOverrideConfirmado(false); }}>
               <SelectTrigger className="mt-1"><SelectValue placeholder="Selecione o agente" /></SelectTrigger>
               <SelectContent>
@@ -122,9 +122,9 @@ export default function DialogNovaAtribuicao({ open, onClose, onSalvar, agentes,
 
           {/* Alerta de override */}
           {ehOverride && !overrideConfirmado && (
-            <Alert className="border-amber-300 bg-amber-50">
-              <AlertTriangle className="w-4 h-4 text-amber-600" />
-              <AlertDescription className="text-amber-800 text-xs space-y-2">
+            <Alert className="border-warning/30 bg-warning-soft">
+              <AlertTriangle className="w-4 h-4 text-warning" />
+              <AlertDescription className="text-warning text-xs space-y-2">
                 <p>
                   <strong>{agenteAtual?.nome_completo}</strong> não é o próximo no rodízio para <strong>{TIPOS_CONFIG[form.tipo_tratativa]?.label}</strong>.
                 </p>
@@ -133,7 +133,7 @@ export default function DialogNovaAtribuicao({ open, onClose, onSalvar, agentes,
                 )}
                 <p>Próximo sugerido: <strong>{sugestao.sugerido?.nome_completo}</strong></p>
                 <div>
-                  <Label className="text-xs text-amber-800">Justificativa do override (opcional)</Label>
+                  <Label className="text-xs text-warning">Justificativa do override (opcional)</Label>
                   <Textarea
                     rows={2}
                     className="mt-1 text-xs"
@@ -146,7 +146,7 @@ export default function DialogNovaAtribuicao({ open, onClose, onSalvar, agentes,
                   <Button size="sm" variant="outline" onClick={() => { f('agente_id', sugestao.sugerido?.id || ''); }}>
                     Usar sugerido
                   </Button>
-                  <Button size="sm" className="bg-amber-600 hover:bg-amber-700 text-white" onClick={() => setOverrideConfirmado(true)}>
+                  <Button size="sm" className="bg-warning hover:bg-amber-700 text-white" onClick={() => setOverrideConfirmado(true)}>
                     Atribuir mesmo assim
                   </Button>
                 </div>
@@ -155,14 +155,14 @@ export default function DialogNovaAtribuicao({ open, onClose, onSalvar, agentes,
           )}
 
           {ehOverride && overrideConfirmado && (
-            <div className="p-2 bg-amber-50 border border-amber-200 rounded text-xs text-amber-700">
+            <div className="p-2 bg-warning-soft border border-warning/25 rounded text-xs text-warning">
               Override confirmado — será registrado no histórico do rodízio.
             </div>
           )}
 
           {/* Ticket */}
           <div>
-            <Label className="text-xs">ID do Ticket <span className="text-red-500">*</span></Label>
+            <Label className="text-xs">ID do Ticket <span className="text-destructive">*</span></Label>
             <Input value={form.ticket_id} onChange={e => f('ticket_id', e.target.value)} placeholder="Ex: 975357" className="mt-1 font-mono" />
           </div>
 
@@ -213,7 +213,7 @@ export default function DialogNovaAtribuicao({ open, onClose, onSalvar, agentes,
             <Button
               onClick={handleSalvar}
               disabled={!form.agente_id || !form.ticket_id || !form.tipo_tratativa || !podeConfirmar || isPending}
-              className="bg-indigo-600 hover:bg-indigo-700"
+              className="bg-primary hover:bg-indigo-700"
             >
               {isPending ? 'Registrando...' : 'Registrar Atribuição'}
             </Button>

@@ -72,14 +72,14 @@ export default function ConfigTiposObservacao() {
             >
               {tipo.nome}
               <button onClick={() => deleteMutation.mutate(tipo.id)}>
-                <Trash2 className="w-3 h-3 text-red-500" />
+                <Trash2 className="w-3 h-3 text-destructive" />
               </button>
             </Badge>
           ))}
         </div>
 
         {tipos.length === 0 && (
-          <p className="text-slate-500 text-center py-4">
+          <p className="text-muted-foreground text-center py-4">
             Padrão: Feedback, One-on-One, Registro Diário
           </p>
         )}

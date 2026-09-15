@@ -24,7 +24,7 @@ export default function AgendamentoPesquisa({ agendamento = {}, onChange }) {
   };
 
   return (
-    <Card className="border-2 border-blue-200 bg-blue-50/30">
+    <Card className="border-2 border-info/25 bg-info-soft/30">
       <CardContent className="p-4 space-y-4">
         <div className="flex items-center gap-2">
           <Switch
@@ -32,13 +32,13 @@ export default function AgendamentoPesquisa({ agendamento = {}, onChange }) {
             onCheckedChange={(checked) => handleChange('ativo', checked)}
           />
           <div className="flex items-center gap-2">
-            <Clock className="w-4 h-4 text-blue-600" />
+            <Clock className="w-4 h-4 text-primary" />
             <Label className="text-sm font-medium">Agendar Envio Automático</Label>
           </div>
         </div>
 
         {agendamento.ativo && (
-          <div className="space-y-3 pl-6 border-l-2 border-blue-300">
+          <div className="space-y-3 pl-6 border-l-2 border-info/30">
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <Label className="text-xs">Tipo de Envio</Label>
@@ -113,13 +113,13 @@ export default function AgendamentoPesquisa({ agendamento = {}, onChange }) {
             </div>
 
             {agendamento.enviar_lembrete !== false && (
-              <div className="pl-4 border-l-2 border-amber-300 bg-amber-50 p-2 rounded">
+              <div className="pl-4 border-l-2 border-warning/30 bg-warning-soft p-2 rounded">
                 <div className="flex items-center gap-2 mb-2">
-                  <Bell className="w-3 h-3 text-amber-600" />
-                  <Label className="text-xs font-medium text-amber-900">Configuração do Lembrete</Label>
+                  <Bell className="w-3 h-3 text-warning" />
+                  <Label className="text-xs font-medium text-warning">Configuração do Lembrete</Label>
                 </div>
                 <div>
-                  <Label className="text-xs text-amber-700">Enviar lembrete X dias antes do prazo</Label>
+                  <Label className="text-xs text-warning">Enviar lembrete X dias antes do prazo</Label>
                   <Input
                     type="number"
                     min="1"
@@ -132,9 +132,9 @@ export default function AgendamentoPesquisa({ agendamento = {}, onChange }) {
             )}
 
             {agendamento.tipo !== 'unico' && (
-              <div className="p-2 bg-blue-100 rounded text-xs text-blue-900">
+              <div className="p-2 bg-info-soft rounded text-xs text-primary">
                 <p className="font-medium">Recorrência Ativa</p>
-                <p className="text-blue-700 mt-1">
+                <p className="text-primary mt-1">
                   Esta pesquisa será enviada automaticamente a cada{' '}
                   {agendamento.tipo === 'semanal' && '7 dias (semanalmente)'}
                   {agendamento.tipo === 'quinzenal' && '15 dias (quinzenalmente)'}

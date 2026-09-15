@@ -21,7 +21,7 @@ export default function ExternalImage({
   if (!src) {
     return (
       <div className={cn(
-        "flex items-center justify-center bg-slate-100 text-slate-400",
+        "flex items-center justify-center bg-muted text-muted-foreground",
         size === 'sm' && 'w-16 h-16',
         size === 'md' && 'w-24 h-24',
         size === 'lg' && 'w-32 h-32',
@@ -58,7 +58,7 @@ export default function ExternalImage({
   if (error) {
     return (
       <div className={cn(
-        "flex flex-col items-center justify-center bg-red-50 text-red-600 p-4 border-2 border-red-200",
+        "flex flex-col items-center justify-center bg-destructive/10 text-destructive p-4 border-2 border-destructive/25",
         size === 'sm' && 'w-16 h-16',
         size === 'md' && 'w-24 h-24',
         size === 'lg' && 'w-32 h-32',
@@ -83,7 +83,7 @@ export default function ExternalImage({
 
   return (
     <div className={cn(
-      "relative overflow-hidden bg-slate-100",
+      "relative overflow-hidden bg-muted",
       size === 'sm' && 'w-16 h-16',
       size === 'md' && 'w-24 h-24',
       size === 'lg' && 'w-32 h-32',
@@ -92,7 +92,7 @@ export default function ExternalImage({
       className
     )}>
       {loading && (
-        <div className="absolute inset-0 flex items-center justify-center bg-slate-100">
+        <div className="absolute inset-0 flex items-center justify-center bg-muted">
           <div className="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
         </div>
       )}

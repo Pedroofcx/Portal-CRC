@@ -38,10 +38,10 @@ export default function ConfigFinanceiraJornada({ configuracoes, onSalvar, isPen
     <Card className="border-0 shadow-sm">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-base">
-          <Settings className="w-5 h-5 text-slate-500" />
+          <Settings className="w-5 h-5 text-muted-foreground" />
           Parâmetros Financeiros da Jornada
         </CardTitle>
-        <p className="text-xs text-slate-500">
+        <p className="text-xs text-muted-foreground">
           Define o custo/hora usado no Impacto Financeiro Direto e o limite de tolerância de perda da empresa.
         </p>
       </CardHeader>
@@ -73,7 +73,7 @@ export default function ConfigFinanceiraJornada({ configuracoes, onSalvar, isPen
           </div>
         )}
         <div className="sm:col-span-2 lg:col-span-4 flex justify-end">
-          <Button onClick={handleSalvar} disabled={isPending} size="sm" className="bg-blue-600 hover:bg-blue-700">
+          <Button onClick={handleSalvar} disabled={isPending} size="sm" className="bg-primary hover:bg-primary/90">
             <Save className="w-4 h-4 mr-2" />
             Salvar Parâmetros
           </Button>

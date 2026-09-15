@@ -175,13 +175,13 @@ export default function LiderTecnicoTool() {
 
       {/* Sucesso */}
       {sucesso && (
-        <Card className="border-green-200 bg-green-50">
+        <Card className="border-success/25 bg-success-soft">
           <CardContent className="p-5">
             <div className="flex items-start gap-3">
-              <CheckCircle2 className="w-6 h-6 text-green-600 flex-shrink-0 mt-0.5" />
+              <CheckCircle2 className="w-6 h-6 text-success flex-shrink-0 mt-0.5" />
               <div className="flex-1">
-                <p className="font-semibold text-green-800">✓ Líder Técnico vinculado à tratativa com sucesso.</p>
-                <div className="mt-2 space-y-0.5 text-sm text-green-700">
+                <p className="font-semibold text-success">✓ Líder Técnico vinculado à tratativa com sucesso.</p>
+                <div className="mt-2 space-y-0.5 text-sm text-success">
                   <p><strong>Tratativa:</strong> #{sucesso.tratativa}</p>
                   <p><strong>Líder Técnico:</strong> {sucesso.lider}</p>
                   <p><strong>Tipo de acionamento:</strong> {TIPO_ACIONAMENTO_LABELS[sucesso.tipo].label}</p>
@@ -198,8 +198,8 @@ export default function LiderTecnicoTool() {
           {/* Passo 1: Selecionar Tratativa */}
           <Card>
             <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-semibold text-slate-700 flex items-center gap-2">
-                <span className="w-6 h-6 rounded-full bg-violet-100 text-violet-700 flex items-center justify-center text-xs font-bold">1</span>
+              <CardTitle className="text-sm font-semibold text-foreground flex items-center gap-2">
+                <span className="w-6 h-6 rounded-full bg-info-soft text-primary flex items-center justify-center text-xs font-bold">1</span>
                 Selecione a tratativa
               </CardTitle>
             </CardHeader>
@@ -216,36 +216,36 @@ export default function LiderTecnicoTool() {
               </Select>
 
               {tratativaSelecionada && (
-                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
+                <div className="p-4 bg-muted rounded-xl border border-border space-y-2">
                   <div className="grid grid-cols-2 gap-3 text-sm">
                     <div>
-                      <p className="text-xs text-slate-500">Número</p>
-                      <p className="font-semibold text-slate-800">#{tratativaSelecionada.id_interno || tratativaSelecionada.id.slice(0, 8)}</p>
+                      <p className="text-xs text-muted-foreground">Número</p>
+                      <p className="font-semibold text-foreground">#{tratativaSelecionada.id_interno || tratativaSelecionada.id.slice(0, 8)}</p>
                     </div>
                     <div>
-                      <p className="text-xs text-slate-500">Cliente</p>
-                      <p className="font-semibold text-slate-800">{tratativaSelecionada.nome_cliente || '—'}</p>
+                      <p className="text-xs text-muted-foreground">Cliente</p>
+                      <p className="font-semibold text-foreground">{tratativaSelecionada.nome_cliente || '—'}</p>
                     </div>
                     <div>
-                      <p className="text-xs text-slate-500">Assunto</p>
-                      <p className="font-semibold text-slate-800">{tratativaSelecionada.motivo_nome || '—'}</p>
+                      <p className="text-xs text-muted-foreground">Assunto</p>
+                      <p className="font-semibold text-foreground">{tratativaSelecionada.motivo_nome || '—'}</p>
                     </div>
                     <div>
-                      <p className="text-xs text-slate-500">Agente responsável</p>
-                      <p className="font-semibold text-slate-800">{tratativaSelecionada.agente_responsavel_nome || '—'}</p>
+                      <p className="text-xs text-muted-foreground">Agente responsável</p>
+                      <p className="font-semibold text-foreground">{tratativaSelecionada.agente_responsavel_nome || '—'}</p>
                     </div>
                     <div>
-                      <p className="text-xs text-slate-500">Data da tratativa</p>
-                      <p className="font-semibold text-slate-800">{tratativaSelecionada.data_registro ? formatDateSP(tratativaSelecionada.data_registro, 'DD/MM/YYYY') : '—'}</p>
+                      <p className="text-xs text-muted-foreground">Data da tratativa</p>
+                      <p className="font-semibold text-foreground">{tratativaSelecionada.data_registro ? formatDateSP(tratativaSelecionada.data_registro, 'DD/MM/YYYY') : '—'}</p>
                     </div>
                     <div>
-                      <p className="text-xs text-slate-500">Status</p>
-                      <p className="font-semibold text-slate-800 capitalize">{tratativaSelecionada.status?.replace(/_/g, ' ') || '—'}</p>
+                      <p className="text-xs text-muted-foreground">Status</p>
+                      <p className="font-semibold text-foreground capitalize">{tratativaSelecionada.status?.replace(/_/g, ' ') || '—'}</p>
                     </div>
                   </div>
                   {tratativaSelecionada.lider_tecnico_nome && (
-                    <div className="pt-2 mt-2 border-t border-slate-200">
-                      <p className="text-xs text-amber-600">Esta tratativa já possui Líder Técnico vinculado: <strong>{tratativaSelecionada.lider_tecnico_nome}</strong> ({TIPO_ACIONAMENTO_LABELS[tratativaSelecionada.tipo_acionamento_lider]?.label || '—'}). Um novo acionamento irá substituir.</p>
+                    <div className="pt-2 mt-2 border-t border-border">
+                      <p className="text-xs text-warning">Esta tratativa já possui Líder Técnico vinculado: <strong>{tratativaSelecionada.lider_tecnico_nome}</strong> ({TIPO_ACIONAMENTO_LABELS[tratativaSelecionada.tipo_acionamento_lider]?.label || '—'}). Um novo acionamento irá substituir.</p>
                     </div>
                   )}
                 </div>
@@ -257,8 +257,8 @@ export default function LiderTecnicoTool() {
           {tratativaSelecionada && (
             <Card>
               <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-semibold text-slate-700 flex items-center gap-2">
-                  <span className="w-6 h-6 rounded-full bg-violet-100 text-violet-700 flex items-center justify-center text-xs font-bold">2</span>
+                <CardTitle className="text-sm font-semibold text-foreground flex items-center gap-2">
+                  <span className="w-6 h-6 rounded-full bg-info-soft text-primary flex items-center justify-center text-xs font-bold">2</span>
                   Como será realizado o acionamento?
                 </CardTitle>
               </CardHeader>
@@ -267,46 +267,46 @@ export default function LiderTecnicoTool() {
                   <button
                     type="button"
                     onClick={() => setTipoAcionamento('rodizio')}
-                    className={`p-4 rounded-xl border-2 text-left transition-all ${tipoAcionamento === 'rodizio' ? 'border-violet-500 bg-violet-50' : 'border-slate-200 bg-white hover:border-slate-300'}`}
+                    className={`p-4 rounded-xl border-2 text-left transition-all ${tipoAcionamento === 'rodizio' ? 'border-violet-500 bg-info-soft' : 'border-border bg-card hover:border-border'}`}
                   >
                     <div className="flex items-center gap-2 mb-1">
-                      <div className={`w-4 h-4 rounded-full border-2 ${tipoAcionamento === 'rodizio' ? 'border-violet-500 bg-violet-500' : 'border-slate-300'}`} />
-                      <span className="font-semibold text-sm text-slate-800">Estou realizando o acionamento</span>
+                      <div className={`w-4 h-4 rounded-full border-2 ${tipoAcionamento === 'rodizio' ? 'border-violet-500 bg-primary' : 'border-border'}`} />
+                      <span className="font-semibold text-sm text-foreground">Estou realizando o acionamento</span>
                     </div>
-                    <p className="text-xs text-slate-500 ml-6">O sistema segue a ordem do rodízio automaticamente.</p>
+                    <p className="text-xs text-muted-foreground ml-6">O sistema segue a ordem do rodízio automaticamente.</p>
                   </button>
 
                   <button
                     type="button"
                     onClick={() => isGestor ? setTipoAcionamento('supervisor') : toast({ title: 'Sem permissão', description: 'Apenas supervisores/gestores podem usar esta opção.', variant: 'destructive' })}
-                    className={`p-4 rounded-xl border-2 text-left transition-all ${tipoAcionamento === 'supervisor' ? 'border-violet-500 bg-violet-50' : 'border-slate-200 bg-white hover:border-slate-300'} ${!isGestor ? 'opacity-60' : ''}`}
+                    className={`p-4 rounded-xl border-2 text-left transition-all ${tipoAcionamento === 'supervisor' ? 'border-violet-500 bg-info-soft' : 'border-border bg-card hover:border-border'} ${!isGestor ? 'opacity-60' : ''}`}
                   >
                     <div className="flex items-center gap-2 mb-1">
-                      <div className={`w-4 h-4 rounded-full border-2 ${tipoAcionamento === 'supervisor' ? 'border-violet-500 bg-violet-500' : 'border-slate-300'}`} />
-                      <span className="font-semibold text-sm text-slate-800">Supervisor realizou a escolha</span>
+                      <div className={`w-4 h-4 rounded-full border-2 ${tipoAcionamento === 'supervisor' ? 'border-violet-500 bg-primary' : 'border-border'}`} />
+                      <span className="font-semibold text-sm text-foreground">Supervisor realizou a escolha</span>
                     </div>
-                    <p className="text-xs text-slate-500 ml-6">Permite selecionar qualquer líder, inclusive bloqueado ou em férias.</p>
-                    {!isGestor && <p className="text-xs text-red-500 ml-6 mt-1">Exige perfil de supervisor/gestor.</p>}
+                    <p className="text-xs text-muted-foreground ml-6">Permite selecionar qualquer líder, inclusive bloqueado ou em férias.</p>
+                    {!isGestor && <p className="text-xs text-destructive ml-6 mt-1">Exige perfil de supervisor/gestor.</p>}
                   </button>
                 </div>
 
                 {/* Rodízio: mostrar próximo líder */}
                 {tipoAcionamento === 'rodizio' && (
-                  <div className="p-4 bg-blue-50 border border-blue-200 rounded-xl">
+                  <div className="p-4 bg-info-soft border border-info/25 rounded-xl">
                     {proximoLider ? (
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="text-xs text-blue-600 mb-1">Próximo Líder Técnico</p>
-                          <p className="text-lg font-bold text-slate-800">{proximoLider.lider.colaborador_nome}</p>
+                          <p className="text-xs text-primary mb-1">Próximo Líder Técnico</p>
+                          <p className="text-lg font-bold text-foreground">{proximoLider.lider.colaborador_nome}</p>
                           <div className="flex items-center gap-2 mt-1">
                             <Badge className={STATUS_LABELS[proximoLider.lider.status].color}>Status: {STATUS_LABELS[proximoLider.lider.status].label}</Badge>
-                            <span className="text-xs text-slate-500">Posição #{proximoLider.lider.ordem}</span>
+                            <span className="text-xs text-muted-foreground">Posição #{proximoLider.lider.ordem}</span>
                           </div>
                         </div>
-                        <UserCog className="w-10 h-10 text-blue-400" />
+                        <UserCog className="w-10 h-10 text-primary" />
                       </div>
                     ) : (
-                      <div className="flex items-center gap-2 text-amber-700">
+                      <div className="flex items-center gap-2 text-warning">
                         <AlertCircle className="w-5 h-5" />
                         <p className="text-sm">Nenhum Líder Técnico com status "Permitido" disponível no rodízio. Solicite a um gestor que verifique os status.</p>
                       </div>
@@ -328,13 +328,13 @@ export default function LiderTecnicoTool() {
                         ))}
                       </SelectContent>
                     </Select>
-                    <p className="text-xs text-purple-600">Esta ação será registrada como exceção de supervisor. O rodízio normal não será alterado.</p>
+                    <p className="text-xs text-primary">Esta ação será registrada como exceção de supervisor. O rodízio normal não será alterado.</p>
                   </div>
                 )}
 
                 {tipoAcionamento && (
                   <Button
-                    className="w-full bg-violet-600 hover:bg-violet-700"
+                    className="w-full bg-primary hover:bg-violet-700"
                     disabled={!canConfirm || acionarMutation.isPending}
                     onClick={handleConfirmar}
                   >
@@ -350,24 +350,24 @@ export default function LiderTecnicoTool() {
           {acionamentos.length > 0 && (
             <Card>
               <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-semibold text-slate-700 flex items-center gap-2">
-                  <History className="w-4 h-4 text-slate-500" />
+                <CardTitle className="text-sm font-semibold text-foreground flex items-center gap-2">
+                  <History className="w-4 h-4 text-muted-foreground" />
                   Acionamentos Recentes
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-2 max-h-72 overflow-y-auto">
                   {acionamentos.map(a => (
-                    <div key={a.id} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg text-sm">
+                    <div key={a.id} className="flex items-center justify-between p-3 bg-muted rounded-lg text-sm">
                       <div>
-                        <p className="font-medium text-slate-800">#{a.tratativa_id_interno || a.tratativa_id.slice(0, 8)} — {a.tratativa_nome_cliente || '—'}</p>
-                        <p className="text-xs text-slate-500">Líder: {a.lider_tecnico_nome} • Posição #{a.lider_tecnico_ordem} • Por: {a.usuario_nome}</p>
+                        <p className="font-medium text-foreground">#{a.tratativa_id_interno || a.tratativa_id.slice(0, 8)} — {a.tratativa_nome_cliente || '—'}</p>
+                        <p className="text-xs text-muted-foreground">Líder: {a.lider_tecnico_nome} • Posição #{a.lider_tecnico_ordem} • Por: {a.usuario_nome}</p>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Badge className={TIPO_ACIONAMENTO_LABELS[a.tipo_acionamento]?.color || 'bg-slate-100 text-slate-700'}>
+                        <Badge className={TIPO_ACIONAMENTO_LABELS[a.tipo_acionamento]?.color || 'bg-muted text-foreground'}>
                           {TIPO_ACIONAMENTO_LABELS[a.tipo_acionamento]?.label || a.tipo_acionamento}
                         </Badge>
-                        <span className="text-xs text-slate-400">{a.data_acionamento ? formatDateSP(a.data_acionamento, 'DD/MM HH:mm') : '—'}</span>
+                        <span className="text-xs text-muted-foreground">{a.data_acionamento ? formatDateSP(a.data_acionamento, 'DD/MM HH:mm') : '—'}</span>
                       </div>
                     </div>
                   ))}

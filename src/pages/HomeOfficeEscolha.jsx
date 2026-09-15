@@ -35,10 +35,10 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 
 const statusColors = {
-  pendente: 'bg-amber-100 text-amber-700 border-amber-200',
-  aprovada: 'bg-green-100 text-green-700 border-green-200',
-  recusada: 'bg-red-100 text-red-700 border-red-200',
-  cancelada: 'bg-slate-100 text-slate-700 border-slate-200'
+  pendente: 'bg-warning-soft text-warning border-warning/25',
+  aprovada: 'bg-success-soft text-success border-success/25',
+  recusada: 'bg-destructive/10 text-destructive border-destructive/25',
+  cancelada: 'bg-muted text-foreground border-border'
 };
 
 const statusIcons = {
@@ -210,7 +210,7 @@ export default function HomeOfficeEscolha() {
           <div className="flex items-start justify-between">
             <div>
               <CardTitle className="text-base">{colaboradorSol?.nome_completo || 'Colaborador'}</CardTitle>
-              <p className="text-sm text-slate-500 mt-1">
+              <p className="text-sm text-muted-foreground mt-1">
                 Semana: {formatDateSP(solicitacao.semana_inicio, 'DD/MM')} a {formatDateSP(solicitacao.semana_fim, 'DD/MM')}
               </p>
             </div>
@@ -222,7 +222,7 @@ export default function HomeOfficeEscolha() {
         </CardHeader>
         <CardContent className="space-y-3">
           <div>
-            <p className="text-xs text-slate-500 mb-1">Dias Home Office:</p>
+            <p className="text-xs text-muted-foreground mb-1">Dias Home Office:</p>
             <div className="flex flex-wrap gap-1">
               {solicitacao.dias_escolhidos?.map((dia, idx) => (
                 <Badge key={idx} variant="outline" className="text-xs">
@@ -243,7 +243,7 @@ export default function HomeOfficeEscolha() {
           )}
 
           {solicitacao.validacoes?.alertas && solicitacao.validacoes.alertas.length > 0 && (
-            <div className="text-xs text-amber-600 space-y-1">
+            <div className="text-xs text-warning space-y-1">
               {solicitacao.validacoes.alertas.map((alerta, idx) => (
                 <p key={idx}>{alerta}</p>
               ))}
@@ -265,7 +265,7 @@ export default function HomeOfficeEscolha() {
                 <Button
                   size="sm"
                   onClick={() => setAprovarDialog(solicitacao)}
-                  className="bg-green-600 hover:bg-green-700"
+                  className="bg-success hover:bg-success/90"
                 >
                   <ThumbsUp className="w-4 h-4" />
                 </Button>
@@ -273,7 +273,7 @@ export default function HomeOfficeEscolha() {
                   size="sm"
                   variant="outline"
                   onClick={() => setRecusarDialog(solicitacao)}
-                  className="text-red-600 hover:bg-red-50"
+                  className="text-destructive hover:bg-destructive/10"
                 >
                   <ThumbsDown className="w-4 h-4" />
                 </Button>
@@ -293,7 +293,7 @@ export default function HomeOfficeEscolha() {
         icon={Home}
         actions={
           !isGestor && configuracaoAtual?.ativo && (
-            <Button onClick={() => setDialogOpen(true)} className="bg-blue-600 hover:bg-blue-700">
+            <Button onClick={() => setDialogOpen(true)} className="bg-primary hover:bg-primary/90">
               <Plus className="w-4 h-4 mr-2" />
               Nova Solicitação
             </Button>
@@ -332,8 +332,8 @@ export default function HomeOfficeEscolha() {
             {solicitacoesPendentes.length === 0 ? (
               <Card>
                 <CardContent className="py-12 text-center">
-                  <Clock className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-                  <p className="text-slate-600">Nenhuma solicitação pendente</p>
+                  <Clock className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
+                  <p className="text-muted-foreground">Nenhuma solicitação pendente</p>
                 </CardContent>
               </Card>
             ) : (
@@ -361,7 +361,7 @@ export default function HomeOfficeEscolha() {
             </CardHeader>
             <CardContent>
               {minhasSolicitacoes.filter(s => s.mes_referencia === mesAtual).length === 0 ? (
-                <p className="text-sm text-slate-600 text-center py-4">
+                <p className="text-sm text-muted-foreground text-center py-4">
                   Nenhuma solicitação neste mês
                 </p>
               ) : (
@@ -412,11 +412,11 @@ export default function HomeOfficeEscolha() {
             <div className="space-y-4 mt-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <p className="text-sm text-slate-500">Colaborador</p>
+                  <p className="text-sm text-muted-foreground">Colaborador</p>
                   <p className="font-medium">{detalheDialog.colaborador_nome}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-slate-500">Status</p>
+                  <p className="text-sm text-muted-foreground">Status</p>
                   <Badge className={statusColors[detalheDialog.status]}>
                     {detalheDialog.status}
                   </Badge>
@@ -424,17 +424,17 @@ export default function HomeOfficeEscolha() {
               </div>
 
               <div>
-                <p className="text-sm text-slate-500 mb-1">Semana</p>
+                <p className="text-sm text-muted-foreground mb-1">Semana</p>
                 <p className="font-medium">
                   {formatDateSP(detalheDialog.semana_inicio, 'DD/MM/YYYY')} a {formatDateSP(detalheDialog.semana_fim, 'DD/MM/YYYY')}
                 </p>
               </div>
 
               <div>
-                <p className="text-sm text-slate-500 mb-2">Dias Home Office</p>
+                <p className="text-sm text-muted-foreground mb-2">Dias Home Office</p>
                 <div className="flex flex-wrap gap-2">
                   {detalheDialog.dias_escolhidos?.map((dia, idx) => (
-                    <Badge key={idx} className="bg-blue-100 text-blue-700">
+                    <Badge key={idx} className="bg-info-soft text-primary">
                       <Home className="w-3 h-3 mr-1" />
                       {formatDateSP(dia, 'DD/MM/YYYY')}
                     </Badge>
@@ -444,8 +444,8 @@ export default function HomeOfficeEscolha() {
 
               {detalheDialog.justificativa && (
                 <div>
-                  <p className="text-sm text-slate-500 mb-1">Justificativa</p>
-                  <p className="text-sm p-3 bg-slate-50 rounded-lg">{detalheDialog.justificativa}</p>
+                  <p className="text-sm text-muted-foreground mb-1">Justificativa</p>
+                  <p className="text-sm p-3 bg-muted rounded-lg">{detalheDialog.justificativa}</p>
                 </div>
               )}
 
@@ -484,8 +484,8 @@ export default function HomeOfficeEscolha() {
             <DialogTitle>Aprovar Solicitação</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 mt-4">
-            <Alert className="bg-green-50 border-green-200">
-              <CheckCircle2 className="w-4 h-4 text-green-600" />
+            <Alert className="bg-success-soft border-success/25">
+              <CheckCircle2 className="w-4 h-4 text-success" />
               <AlertDescription className="text-sm">
                 Ao aprovar, a escala do colaborador será atualizada automaticamente com os dias de home office escolhidos.
               </AlertDescription>
@@ -496,7 +496,7 @@ export default function HomeOfficeEscolha() {
               </Button>
               <Button 
                 onClick={handleAprovar}
-                className="bg-green-600 hover:bg-green-700"
+                className="bg-success hover:bg-success/90"
                 disabled={aprovarMutation.isPending}
               >
                 {aprovarMutation.isPending ? 'Aprovando...' : 'Confirmar Aprovação'}
@@ -526,7 +526,7 @@ export default function HomeOfficeEscolha() {
                 placeholder="A solicitação de Home Office por Escolha do Agente foi analisada, porém não pôde ser aprovada por impacto operacional ou descumprimento das regras vigentes. A escala padrão permanece válida."
                 rows={4}
               />
-              <p className="text-xs text-slate-500 mt-1">
+              <p className="text-xs text-muted-foreground mt-1">
                 {motivoRecusa ? '' : 'Deixe em branco para usar a mensagem padrão'}
               </p>
             </div>

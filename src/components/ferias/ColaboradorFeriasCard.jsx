@@ -17,12 +17,12 @@ function parseDataLocal(d) {
 }
 
 const STATUS_CONFIG = {
-  em_aquisicao: { label: 'Em Aquisição', cls: 'bg-slate-100 text-slate-500' },
-  disponivel: { label: 'Disponível', cls: 'bg-green-100 text-green-700' },
-  parcialmente_utilizado: { label: 'Parcialmente Utilizado', cls: 'bg-blue-100 text-blue-700' },
-  utilizado: { label: 'Utilizado', cls: 'bg-slate-200 text-slate-600' },
-  vencendo: { label: 'Vencendo', cls: 'bg-amber-100 text-amber-700' },
-  vencido: { label: 'Vencido', cls: 'bg-red-100 text-red-700' },
+  em_aquisicao: { label: 'Em Aquisição', cls: 'bg-muted text-muted-foreground' },
+  disponivel: { label: 'Disponível', cls: 'bg-success-soft text-success' },
+  parcialmente_utilizado: { label: 'Parcialmente Utilizado', cls: 'bg-info-soft text-primary' },
+  utilizado: { label: 'Utilizado', cls: 'bg-muted text-muted-foreground' },
+  vencendo: { label: 'Vencendo', cls: 'bg-warning-soft text-warning' },
+  vencido: { label: 'Vencido', cls: 'bg-destructive/10 text-destructive' },
 };
 
 export default function ColaboradorFeriasCard({ colaborador, cicloAtivo, onClick }) {
@@ -55,14 +55,14 @@ export default function ColaboradorFeriasCard({ colaborador, cicloAtivo, onClick
           </Avatar>
           <div className="flex-1 min-w-0">
             <div className="flex items-center justify-between">
-              <h3 className="font-semibold text-slate-900 truncate group-hover:text-blue-600 transition-colors text-sm">
+              <h3 className="font-semibold text-foreground truncate group-hover:text-primary transition-colors text-sm">
                 {colaborador.nome_completo}
               </h3>
-              <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-blue-500 flex-shrink-0 ml-1" />
+              <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-primary flex-shrink-0 ml-1" />
             </div>
-            <p className="text-xs text-slate-500 truncate">{colaborador.cargo_atual}</p>
+            <p className="text-xs text-muted-foreground truncate">{colaborador.cargo_atual}</p>
             {colaborador.equipe_nome && (
-              <p className="text-xs text-slate-400 truncate">{colaborador.equipe_nome}</p>
+              <p className="text-xs text-muted-foreground truncate">{colaborador.equipe_nome}</p>
             )}
           </div>
         </div>
@@ -72,41 +72,41 @@ export default function ColaboradorFeriasCard({ colaborador, cicloAtivo, onClick
             <Badge className={`${config.cls} text-xs mb-3`}>{config.label}</Badge>
 
             <div className="grid grid-cols-3 gap-2 mb-3 text-center">
-              <div className="bg-slate-50 rounded-lg p-2">
-                <p className="text-lg font-bold text-slate-700">{diasDireito}</p>
-                <p className="text-xs text-slate-500">direito</p>
+              <div className="bg-muted rounded-lg p-2">
+                <p className="text-lg font-bold text-foreground">{diasDireito}</p>
+                <p className="text-xs text-muted-foreground">direito</p>
               </div>
-              <div className="bg-blue-50 rounded-lg p-2">
-                <p className="text-lg font-bold text-blue-700">{utilizados}</p>
-                <p className="text-xs text-blue-500">gozados</p>
+              <div className="bg-info-soft rounded-lg p-2">
+                <p className="text-lg font-bold text-primary">{utilizados}</p>
+                <p className="text-xs text-primary">gozados</p>
               </div>
-              <div className={`rounded-lg p-2 ${restantes > 0 ? 'bg-green-50' : 'bg-slate-50'}`}>
-                <p className={`text-lg font-bold ${restantes > 0 ? 'text-green-700' : 'text-slate-400'}`}>{restantes}</p>
-                <p className="text-xs text-slate-500">disponível</p>
+              <div className={`rounded-lg p-2 ${restantes > 0 ? 'bg-success-soft' : 'bg-muted'}`}>
+                <p className={`text-lg font-bold ${restantes > 0 ? 'text-success' : 'text-muted-foreground'}`}>{restantes}</p>
+                <p className="text-xs text-muted-foreground">disponível</p>
               </div>
             </div>
             {abono > 0 && (
-              <div className="flex items-center gap-1.5 mb-2 px-2 py-1.5 bg-amber-50 border border-amber-200 rounded-lg">
-                <span className="text-amber-600 text-xs"></span>
-                <span className="text-xs text-amber-800 font-medium">{abono} dias vendidos (abono pecuniário)</span>
+              <div className="flex items-center gap-1.5 mb-2 px-2 py-1.5 bg-warning-soft border border-warning/25 rounded-lg">
+                <span className="text-warning text-xs"></span>
+                <span className="text-xs text-warning font-medium">{abono} dias vendidos (abono pecuniário)</span>
               </div>
             )}
 
             {/* Barra de progresso */}
-            <div className="w-full bg-slate-100 rounded-full h-1.5 mb-2">
+            <div className="w-full bg-muted rounded-full h-1.5 mb-2">
               <div
-                className={`h-1.5 rounded-full transition-all ${barPercent >= 100 ? 'bg-slate-400' : barPercent > 60 ? 'bg-amber-400' : 'bg-blue-500'}`}
+                className={`h-1.5 rounded-full transition-all ${barPercent >= 100 ? 'bg-slate-400' : barPercent > 60 ? 'bg-amber-400' : 'bg-primary'}`}
                 style={{ width: `${barPercent}%` }}
               />
             </div>
 
-            <div className="flex items-center justify-between text-xs text-slate-500">
+            <div className="flex items-center justify-between text-xs text-muted-foreground">
               <span className="flex items-center gap-1">
                 <Calendar className="w-3 h-3" />
                 {fmtDate(cicloAtivo.aquisitivo_inicio)} — {fmtDate(cicloAtivo.aquisitivo_fim)}
               </span>
               {diasConcessivo !== null && diasConcessivo <= 90 && status !== 'utilizado' && (
-                <span className="flex items-center gap-1 text-red-500">
+                <span className="flex items-center gap-1 text-destructive">
                   <AlertTriangle className="w-3 h-3" />
                   {diasConcessivo < 0 ? 'vencido' : `${diasConcessivo}d`}
                 </span>
@@ -115,9 +115,9 @@ export default function ColaboradorFeriasCard({ colaborador, cicloAtivo, onClick
           </>
         ) : (
           <div className="text-center py-3">
-            <p className="text-xs text-slate-400">Sem ciclo ativo cadastrado</p>
+            <p className="text-xs text-muted-foreground">Sem ciclo ativo cadastrado</p>
             {colaborador.data_admissao && (
-              <p className="text-xs text-slate-400 mt-1">Admissão: {fmtDate(colaborador.data_admissao)}</p>
+              <p className="text-xs text-muted-foreground mt-1">Admissão: {fmtDate(colaborador.data_admissao)}</p>
             )}
           </div>
         )}

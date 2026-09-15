@@ -71,7 +71,7 @@ export default function FerramentasLancamentoColetivo({ colaboradores, equipes, 
     <Card className="border-0 shadow-sm">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-base">
-          <Zap className="w-5 h-5 text-amber-500" />
+          <Zap className="w-5 h-5 text-warning" />
           Ferramentas de Lançamento Coletivo
         </CardTitle>
       </CardHeader>
@@ -140,7 +140,7 @@ export default function FerramentasLancamentoColetivo({ colaboradores, equipes, 
         </div>
 
         <div className="flex gap-3 pt-2">
-          <Button onClick={handleAplicar} disabled={isPending} className="bg-blue-600 hover:bg-blue-700">
+          <Button onClick={handleAplicar} disabled={isPending} className="bg-primary hover:bg-primary/90">
             Aplicar Escala em Massa
           </Button>
           <Button

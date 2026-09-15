@@ -70,11 +70,11 @@ export default function PDIPage() {
       {meusPDIs.length === 0 ? (
         <Card className="border-0 shadow-sm">
           <CardContent className="text-center py-16">
-            <Target className="w-16 h-16 text-slate-300 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-slate-900 mb-2">
+            <Target className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+            <h3 className="text-xl font-semibold text-foreground mb-2">
               Nenhum PDI registrado
             </h3>
-            <p className="text-slate-600">
+            <p className="text-muted-foreground">
               Seu gestor ainda não criou um PDI para você.
             </p>
           </CardContent>
@@ -88,60 +88,60 @@ export default function PDIPage() {
                 <div className="flex items-start justify-between">
                   <div>
                     <CardTitle className="text-xl flex items-center gap-2">
-                      <Target className="w-6 h-6 text-purple-600" />
+                      <Target className="w-6 h-6 text-primary" />
                       {pdiAtivo.titulo}
                     </CardTitle>
-                    <Badge className="mt-2 bg-green-100 text-green-700 border-green-200">
+                    <Badge className="mt-2 bg-success-soft text-success border-success/25">
                       Em Andamento
                     </Badge>
                   </div>
                 </div>
               </CardHeader>
               <CardContent className="space-y-6">
-                <div className="p-4 bg-white rounded-lg border border-purple-100">
-                  <p className="text-sm font-medium text-slate-700 mb-2">Objetivo Geral</p>
-                  <p className="text-slate-600">{pdiAtivo.objetivo_geral}</p>
+                <div className="p-4 bg-card rounded-lg border border-purple-100">
+                  <p className="text-sm font-medium text-foreground mb-2">Objetivo Geral</p>
+                  <p className="text-muted-foreground">{pdiAtivo.objetivo_geral}</p>
                 </div>
 
                 <div>
                   <div className="flex justify-between text-sm mb-2">
-                    <span className="font-medium text-slate-700">Progresso Geral</span>
-                    <span className="text-purple-600 font-bold">{pdiAtivo.percentual_conclusao || 0}%</span>
+                    <span className="font-medium text-foreground">Progresso Geral</span>
+                    <span className="text-primary font-bold">{pdiAtivo.percentual_conclusao || 0}%</span>
                   </div>
                   <Progress value={pdiAtivo.percentual_conclusao || 0} className="h-3" />
                 </div>
 
                 <div>
-                  <p className="font-medium text-slate-900 mb-3">Etapas ({pdiAtivo.etapas?.length || 0})</p>
+                  <p className="font-medium text-foreground mb-3">Etapas ({pdiAtivo.etapas?.length || 0})</p>
                   <div className="space-y-3">
                     {pdiAtivo.etapas?.map((etapa, idx) => (
                       <div 
                         key={idx} 
                         className={`p-4 rounded-lg border-2 ${
                           etapa.concluida 
-                            ? 'bg-green-50 border-green-200' 
-                            : 'bg-white border-slate-200'
+                            ? 'bg-success-soft border-success/25' 
+                            : 'bg-card border-border'
                         }`}
                       >
                         <div className="flex items-start gap-3">
                           <div className={`flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center ${
-                            etapa.concluida ? 'bg-green-500' : 'bg-slate-200'
+                            etapa.concluida ? 'bg-success' : 'bg-muted'
                           }`}>
                             {etapa.concluida ? (
                               <CheckCircle className="w-4 h-4 text-white" />
                             ) : (
-                              <Clock className="w-4 h-4 text-slate-500" />
+                              <Clock className="w-4 h-4 text-muted-foreground" />
                             )}
                           </div>
                           <div className="flex-1">
                             <p className={`font-medium mb-1 ${
-                              etapa.concluida ? 'text-green-900 line-through' : 'text-slate-900'
+                              etapa.concluida ? 'text-success line-through' : 'text-foreground'
                             }`}>
                               {etapa.titulo}
                             </p>
-                            <p className="text-sm text-slate-600 mb-2">{etapa.descricao}</p>
+                            <p className="text-sm text-muted-foreground mb-2">{etapa.descricao}</p>
                             {etapa.prazo && (
-                              <div className="flex items-center gap-1 text-xs text-slate-500">
+                              <div className="flex items-center gap-1 text-xs text-muted-foreground">
                                 <Calendar className="w-3 h-3" />
                                 Prazo: {formatDateSP(etapa.prazo, 'DD/MM/YYYY')}
                               </div>
@@ -167,11 +167,11 @@ export default function PDIPage() {
                   {meusPDIs
                     .filter(p => p.status !== 'em_andamento')
                     .map(pdi => (
-                      <div key={pdi.id} className="p-4 bg-slate-50 rounded-lg">
+                      <div key={pdi.id} className="p-4 bg-muted rounded-lg">
                         <div className="flex items-start justify-between">
                           <div>
-                            <p className="font-medium text-slate-900">{pdi.titulo}</p>
-                            <p className="text-sm text-slate-600 mt-1">
+                            <p className="font-medium text-foreground">{pdi.titulo}</p>
+                            <p className="text-sm text-muted-foreground mt-1">
                               {formatDateSP(pdi.data_criacao, 'DD/MM/YYYY')}
                             </p>
                           </div>

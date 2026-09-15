@@ -172,8 +172,8 @@ export default function FerramentasOperacionais() {
             <Wrench className="w-6 h-6" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-slate-900">Ferramentas Operacionais</h1>
-            <p className="text-slate-500 text-sm mt-0.5">Processos automatizados — sem planilhas, com rastreabilidade total</p>
+            <h1 className="text-2xl font-bold text-foreground">Ferramentas Operacionais</h1>
+            <p className="text-muted-foreground text-sm mt-0.5">Processos automatizados — sem planilhas, com rastreabilidade total</p>
           </div>
         </div>
       </div>
@@ -183,8 +183,8 @@ export default function FerramentasOperacionais() {
           onClick={() => setFerramentaAtiva('estorno')}
           className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold flex-shrink-0 transition-all ${
             ferramentaAtiva === 'estorno'
-              ? 'bg-violet-600 text-white shadow'
-              : 'bg-white border border-slate-200 text-slate-600 hover:border-violet-300'
+              ? 'bg-primary text-white shadow'
+              : 'bg-card border border-border text-muted-foreground hover:border-violet-300'
           }`}
         >
           <Calculator className="w-4 h-4" />
@@ -194,8 +194,8 @@ export default function FerramentasOperacionais() {
           onClick={() => setFerramentaAtiva('apoio')}
           className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold flex-shrink-0 transition-all ${
             ferramentaAtiva === 'apoio'
-              ? 'bg-violet-600 text-white shadow'
-              : 'bg-white border border-slate-200 text-slate-600 hover:border-violet-300'
+              ? 'bg-primary text-white shadow'
+              : 'bg-card border border-border text-muted-foreground hover:border-violet-300'
           }`}
         >
           <LifeBuoy className="w-4 h-4" />
@@ -205,8 +205,8 @@ export default function FerramentasOperacionais() {
           onClick={() => setFerramentaAtiva('lider')}
           className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold flex-shrink-0 transition-all ${
             ferramentaAtiva === 'lider'
-              ? 'bg-violet-600 text-white shadow'
-              : 'bg-white border border-slate-200 text-slate-600 hover:border-violet-300'
+              ? 'bg-primary text-white shadow'
+              : 'bg-card border border-border text-muted-foreground hover:border-violet-300'
           }`}
         >
           <UserCog className="w-4 h-4" />
@@ -216,8 +216,8 @@ export default function FerramentasOperacionais() {
           onClick={() => setFerramentaAtiva('n2')}
           className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold flex-shrink-0 transition-all ${
             ferramentaAtiva === 'n2'
-              ? 'bg-violet-600 text-white shadow'
-              : 'bg-white border border-slate-200 text-slate-600 hover:border-violet-300'
+              ? 'bg-primary text-white shadow'
+              : 'bg-card border border-border text-muted-foreground hover:border-violet-300'
           }`}
         >
           <Headset className="w-4 h-4" />
@@ -230,16 +230,16 @@ export default function FerramentasOperacionais() {
       {ferramentaAtiva === 'n2' && <ApoioN2Tool />}
       {ferramentaAtiva === 'estorno' && (
       <Tabs value={tab} onValueChange={setTab}>
-        <TabsList className="bg-slate-100">
-          <TabsTrigger value="calculadora" className="gap-2 data-[state=active]:bg-white">
+        <TabsList className="bg-muted">
+          <TabsTrigger value="calculadora" className="gap-2 data-[state=active]:bg-card">
             <Calculator className="w-4 h-4" /> Calculadora
           </TabsTrigger>
-          <TabsTrigger value="historico" className="gap-2 data-[state=active]:bg-white">
+          <TabsTrigger value="historico" className="gap-2 data-[state=active]:bg-card">
             <History className="w-4 h-4" /> Histórico
             {historico.length > 0 && <Badge className="ml-1 text-xs h-5">{historico.length}</Badge>}
           </TabsTrigger>
           {isAdmin && (
-            <TabsTrigger value="admin" className="gap-2 data-[state=active]:bg-white">
+            <TabsTrigger value="admin" className="gap-2 data-[state=active]:bg-card">
               <Settings className="w-4 h-4" /> Configurações Admin
             </TabsTrigger>
           )}
@@ -250,8 +250,8 @@ export default function FerramentasOperacionais() {
             <div className="lg:col-span-3 space-y-5">
               <Card>
                 <CardHeader className="pb-3">
-                  <CardTitle className="text-sm font-semibold text-slate-700 flex items-center gap-2">
-                    <FileText className="w-4 h-4 text-blue-500" />
+                  <CardTitle className="text-sm font-semibold text-foreground flex items-center gap-2">
+                    <FileText className="w-4 h-4 text-primary" />
                     Bloco 1 — Identificação da Solicitação
                   </CardTitle>
                 </CardHeader>
@@ -262,7 +262,7 @@ export default function FerramentasOperacionais() {
                       <Input placeholder="#123456" value={form.ticket_zendesk} onChange={e => onChange('ticket_zendesk', e.target.value)} />
                     </div>
                     <div className="space-y-1.5">
-                      <Label className="text-xs">Tipo de Estorno <span className="text-red-500">*</span></Label>
+                      <Label className="text-xs">Tipo de Estorno <span className="text-destructive">*</span></Label>
                       <Select value={form.tipo_estorno} onValueChange={v => onChange('tipo_estorno', v)}>
                         <SelectTrigger><SelectValue placeholder="Selecione..." /></SelectTrigger>
                         <SelectContent>
@@ -271,7 +271,7 @@ export default function FerramentasOperacionais() {
                       </Select>
                     </div>
                     <div className="space-y-1.5">
-                      <Label className="text-xs">Nome do Cliente <span className="text-red-500">*</span></Label>
+                      <Label className="text-xs">Nome do Cliente <span className="text-destructive">*</span></Label>
                       <Input placeholder="Nome completo" value={form.nome_cliente} onChange={e => onChange('nome_cliente', e.target.value)} />
                     </div>
                     <div className="space-y-1.5">
@@ -305,7 +305,7 @@ export default function FerramentasOperacionais() {
                       </SelectContent>
                     </Select>
                     {form.tratativa_id_interno && (
-                      <p className="text-xs text-blue-600">✓ Vinculado: {form.tratativa_id_interno}</p>
+                      <p className="text-xs text-primary">✓ Vinculado: {form.tratativa_id_interno}</p>
                     )}
                   </div>
                 </CardContent>
@@ -313,17 +313,17 @@ export default function FerramentasOperacionais() {
 
               <Card>
                 <CardHeader className="pb-3">
-                  <CardTitle className="text-sm font-semibold text-slate-700 flex items-center gap-2">
-                    <DollarSign className="w-4 h-4 text-emerald-500" />
+                  <CardTitle className="text-sm font-semibold text-foreground flex items-center gap-2">
+                    <DollarSign className="w-4 h-4 text-success" />
                     Bloco 2 — Dados Financeiros
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {/* Valor da NF com máscara BRL */}
                   <div className="space-y-1.5">
-                    <Label className="text-xs">Valor Total da Nota Fiscal <span className="text-red-500">*</span></Label>
+                    <Label className="text-xs">Valor Total da Nota Fiscal <span className="text-destructive">*</span></Label>
                     <div className="relative">
-                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm font-semibold pointer-events-none">R$</span>
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm font-semibold pointer-events-none">R$</span>
                       <Input
                         type="text"
                         inputMode="numeric"
@@ -337,7 +337,7 @@ export default function FerramentasOperacionais() {
                       />
                     </div>
                     {form.valor_nota_fiscal && (
-                      <p className="text-xs text-emerald-600 font-medium">
+                      <p className="text-xs text-success font-medium">
                         {fmtBRL(parseBRL(form.valor_nota_fiscal))}
                       </p>
                     )}
@@ -365,8 +365,8 @@ export default function FerramentasOperacionais() {
                           onClick={() => onChange('tipo_plano', p.value)}
                           className={`py-2 px-1 rounded-lg text-xs font-semibold border-2 transition-all ${
                             form.tipo_plano === p.value
-                              ? 'border-violet-500 bg-violet-50 text-violet-700'
-                              : 'border-slate-200 bg-white text-slate-500 hover:border-slate-300'
+                              ? 'border-violet-500 bg-info-soft text-primary'
+                              : 'border-border bg-card text-muted-foreground hover:border-border'
                           }`}
                         >
                           <div>{p.label}</div>
@@ -389,7 +389,7 @@ export default function FerramentasOperacionais() {
                             onChange={e => onChange('meses_usados', e.target.value)}
                             className="font-mono"
                           />
-                          <span className="text-xs text-slate-500 whitespace-nowrap">meses</span>
+                          <span className="text-xs text-muted-foreground whitespace-nowrap">meses</span>
                         </div>
                       </div>
                       <div>
@@ -401,12 +401,12 @@ export default function FerramentasOperacionais() {
                             onChange={e => onChange('dias_adicionais', e.target.value)}
                             className="font-mono"
                           />
-                          <span className="text-xs text-slate-500 whitespace-nowrap">dias</span>
+                          <span className="text-xs text-muted-foreground whitespace-nowrap">dias</span>
                         </div>
                       </div>
                     </div>
                     {(mesesUsados > 0 || diasAdicionais > 0) && (
-                      <p className={`text-xs mt-1 ${tempoExcedido ? 'text-red-600 font-semibold' : 'text-blue-600'}`}>
+                      <p className={`text-xs mt-1 ${tempoExcedido ? 'text-destructive font-semibold' : 'text-primary'}`}>
                         {tempoExcedido
                           ? `${diasTotaisUsados} dias excedem o contrato (${diasContrato} dias)`
                           : `≡ ${diasTotaisUsados} dias totais de uso (contrato: ${diasContrato} dias)`}
@@ -416,23 +416,23 @@ export default function FerramentasOperacionais() {
 
                   {/* Preview proporcional — base única em dias */}
                   {resultado?.uso_proporcional_detalhe?.valor > 0 && (
-                    <div className="p-3 bg-purple-50 border border-purple-200 rounded-lg space-y-1">
-                      <p className="text-xs font-semibold text-purple-700">Cálculo Proporcional — Plano {planoAtual?.label} ({resultado.uso_proporcional_detalhe.mesesContrato} meses)</p>
-                      <p className="text-xs text-purple-600">
+                    <div className="p-3 bg-info-soft border border-info/25 rounded-lg space-y-1">
+                      <p className="text-xs font-semibold text-primary">Cálculo Proporcional — Plano {planoAtual?.label} ({resultado.uso_proporcional_detalhe.mesesContrato} meses)</p>
+                      <p className="text-xs text-primary">
                         Valor mensal: {fmtBRL(resultado.uso_proporcional_detalhe.valorMensal)}/mês
                         {' '}= {fmtBRL(parseBRL(form.valor_nota_fiscal))} ÷ {resultado.uso_proporcional_detalhe.mesesContrato}
                       </p>
                       {mesesUsados > 0 && (
-                        <p className="text-xs text-purple-600">
+                        <p className="text-xs text-primary">
                           {mesesUsados} meses × {fmtBRL(resultado.uso_proporcional_detalhe.valorMensal)} = {fmtBRL(resultado.uso_proporcional_detalhe.valorMeses)}
                         </p>
                       )}
                       {diasAdicionais > 0 && (
-                        <p className="text-xs text-purple-600">
+                        <p className="text-xs text-primary">
                           {diasAdicionais} dias × {fmtBRL(resultado.uso_proporcional_detalhe.valorDiario)}/dia = {fmtBRL(resultado.uso_proporcional_detalhe.valorDias)}
                         </p>
                       )}
-                      <p className="text-sm font-bold text-purple-800">
+                      <p className="text-sm font-bold text-primary">
                         Total uso do sistema: {fmtBRL(resultado.uso_proporcional_detalhe.valor)}
                       </p>
                     </div>
@@ -442,8 +442,8 @@ export default function FerramentasOperacionais() {
 
               <Card>
                 <CardHeader className="pb-3">
-                  <CardTitle className="text-sm font-semibold text-slate-700 flex items-center gap-2">
-                    <Settings className="w-4 h-4 text-slate-500" />
+                  <CardTitle className="text-sm font-semibold text-foreground flex items-center gap-2">
+                    <Settings className="w-4 h-4 text-muted-foreground" />
                     Bloco 3 — Impostos e Descontos
                   </CardTitle>
                 </CardHeader>
@@ -454,7 +454,7 @@ export default function FerramentasOperacionais() {
 
               <Card>
                 <CardContent className="pt-5 space-y-1.5">
-                  <Label className="text-xs font-semibold text-slate-700 flex items-center gap-1">
+                  <Label className="text-xs font-semibold text-foreground flex items-center gap-1">
                     <FileText className="w-3.5 h-3.5" /> Observação Operacional
                   </Label>
                   <Textarea
@@ -464,7 +464,7 @@ export default function FerramentasOperacionais() {
                     onChange={e => onChange('observacao_operacional', e.target.value)}
                     className="resize-none text-sm"
                   />
-                  <p className="text-xs text-slate-400">Aparecerá no PDF exportado.</p>
+                  <p className="text-xs text-muted-foreground">Aparecerá no PDF exportado.</p>
                 </CardContent>
               </Card>
             </div>
@@ -474,7 +474,7 @@ export default function FerramentasOperacionais() {
                 <Card className="border-2 border-violet-100">
                   <CardHeader className="pb-3">
                     <CardTitle className="text-sm flex items-center gap-2">
-                      <Calculator className="w-4 h-4 text-violet-500" />
+                      <Calculator className="w-4 h-4 text-primary" />
                       Resultado em Tempo Real
                     </CardTitle>
                   </CardHeader>
@@ -487,7 +487,7 @@ export default function FerramentasOperacionais() {
                           aplicarMulta={aplicarMulta}
                           onToggleMulta={setAplicarMulta}
                         />
-                        <div className="pt-3 border-t border-slate-100 space-y-3">
+                        <div className="pt-3 border-t border-border space-y-3">
                           <ExportacaoEstorno
                             form={form}
                             config={configAtiva}
@@ -495,7 +495,7 @@ export default function FerramentasOperacionais() {
                             aplicarMulta={aplicarMulta}
                           />
                           <Button
-                            className="w-full gap-2 bg-violet-600 hover:bg-violet-700 text-white"
+                            className="w-full gap-2 bg-primary hover:bg-violet-700 text-white"
                             onClick={handleSalvar}
                             disabled={salvarMutation.isPending}
                           >
@@ -508,10 +508,10 @@ export default function FerramentasOperacionais() {
                         </div>
                       </>
                     ) : (
-                      <div className="flex flex-col items-center justify-center py-14 text-slate-300">
+                      <div className="flex flex-col items-center justify-center py-14 text-muted-foreground">
                         <Calculator className="w-14 h-14 mb-3 opacity-20" />
-                        <p className="text-sm text-slate-400">Digite o valor da nota fiscal</p>
-                        <p className="text-xs text-slate-300">O resultado aparece automaticamente</p>
+                        <p className="text-sm text-muted-foreground">Digite o valor da nota fiscal</p>
+                        <p className="text-xs text-muted-foreground">O resultado aparece automaticamente</p>
                       </div>
                     )}
                   </CardContent>
@@ -535,7 +535,7 @@ export default function FerramentasOperacionais() {
           <Card>
             <CardHeader>
               <CardTitle className="text-base flex items-center gap-2">
-                <History className="w-4 h-4 text-violet-500" />
+                <History className="w-4 h-4 text-primary" />
                 Histórico de Cálculos
                 <Badge variant="outline">{historico.length} registros</Badge>
               </CardTitle>
@@ -561,15 +561,15 @@ export default function FerramentasOperacionais() {
               <Card>
                 <CardHeader>
                   <CardTitle className="text-base flex items-center gap-2">
-                    <Settings className="w-4 h-4 text-violet-500" />
+                    <Settings className="w-4 h-4 text-primary" />
                     Configurar Percentuais
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-5">
                   <ImpostosPanel config={configEditada} onChange={(k, v) => setConfigEditada(c => ({ ...c, [k]: v }))} isAdmin />
-                  <div className="flex gap-2 pt-2 border-t border-slate-100">
+                  <div className="flex gap-2 pt-2 border-t border-border">
                     <Button
-                      className="gap-2 bg-violet-600 hover:bg-violet-700 text-white"
+                      className="gap-2 bg-primary hover:bg-violet-700 text-white"
                       onClick={() => salvarConfigMutation.mutate(configEditada)}
                       disabled={salvarConfigMutation.isPending}
                     >
@@ -578,7 +578,7 @@ export default function FerramentasOperacionais() {
                     </Button>
                     <Button variant="outline" onClick={() => setConfigEditada({ ...configAtiva })}>Cancelar</Button>
                   </div>
-                  <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg flex gap-2 text-sm text-amber-700">
+                  <div className="p-3 bg-warning-soft border border-warning/25 rounded-lg flex gap-2 text-sm text-warning">
                     <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
                     <p>Alterações afetam apenas cálculos <strong>futuros</strong>. Registros anteriores preservam os percentuais originais.</p>
                   </div>
@@ -588,27 +588,27 @@ export default function FerramentasOperacionais() {
               <Card>
                 <CardHeader>
                   <CardTitle className="text-base flex items-center gap-2">
-                    <History className="w-4 h-4 text-slate-500" />
+                    <History className="w-4 h-4 text-muted-foreground" />
                     Log de Alterações
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   {(() => {
                     const logs = configs.flatMap(c => c.log_alteracoes || []).sort((a, b) => new Date(b.data) - new Date(a.data));
-                    if (!logs.length) return <p className="text-sm text-slate-400 text-center py-8">Nenhuma alteração registrada ainda.</p>;
+                    if (!logs.length) return <p className="text-sm text-muted-foreground text-center py-8">Nenhuma alteração registrada ainda.</p>;
                     return (
                       <div className="space-y-2 max-h-80 overflow-y-auto">
                         {logs.map((l, i) => (
-                          <div key={i} className="flex items-start gap-3 text-xs p-2.5 rounded-lg bg-slate-50 border border-slate-100">
+                          <div key={i} className="flex items-start gap-3 text-xs p-2.5 rounded-lg bg-muted border border-border">
                             <div className="flex-1">
-                              <span className="font-semibold text-slate-700">{l.campo?.toUpperCase()}</span>
-                              <span className="text-slate-400"> de </span>
-                              <span className="text-red-600 font-medium">{l.valor_anterior}%</span>
-                              <span className="text-slate-400"> → </span>
-                              <span className="text-green-600 font-medium">{l.valor_novo}%</span>
+                              <span className="font-semibold text-foreground">{l.campo?.toUpperCase()}</span>
+                              <span className="text-muted-foreground"> de </span>
+                              <span className="text-destructive font-medium">{l.valor_anterior}%</span>
+                              <span className="text-muted-foreground"> → </span>
+                              <span className="text-success font-medium">{l.valor_novo}%</span>
                             </div>
-                            <div className="text-right text-slate-400 shrink-0">
-                              <p className="font-medium text-slate-600">{l.usuario}</p>
+                            <div className="text-right text-muted-foreground shrink-0">
+                              <p className="font-medium text-muted-foreground">{l.usuario}</p>
                               <p>{l.data ? new Date(l.data).toLocaleDateString('pt-BR') : '—'}</p>
                             </div>
                           </div>

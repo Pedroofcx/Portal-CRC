@@ -10,9 +10,9 @@ export default function CustoOperacionalCard({ tratativa }) {
   if (!temDados) return null;
 
   return (
-    <Card className="border-0 shadow-sm bg-slate-900 text-white">
+    <Card className="border-0 shadow-sm bg-slate-900 superficie-escura text-white">
       <CardHeader className="pb-2">
-        <CardTitle className="text-sm font-medium text-slate-300 flex items-center gap-2">
+        <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
           <DollarSign className="w-4 h-4" />
           Impacto Financeiro (restrito)
         </CardTitle>
@@ -20,7 +20,7 @@ export default function CustoOperacionalCard({ tratativa }) {
       <CardContent className="space-y-2 text-sm">
         {tratativa.custo_operacional_reais > 0 && (
           <div className="flex justify-between">
-            <span className="text-slate-400">Custo operacional</span>
+            <span className="text-muted-foreground">Custo operacional</span>
             <span className="font-semibold">
               {formatBRL(tratativa.custo_operacional_reais)}
             </span>
@@ -28,14 +28,14 @@ export default function CustoOperacionalCard({ tratativa }) {
         )}
         {tratativa.valor_perda_receita > 0 && (
           <div className="flex justify-between">
-            <span className="text-slate-400">Perda de receita estimada</span>
+            <span className="text-muted-foreground">Perda de receita estimada</span>
             <span className="font-semibold">
               {formatBRL(tratativa.valor_perda_receita)}
             </span>
           </div>
         )}
         {tratativa.teve_churn && (
-          <Badge className="bg-red-500/20 text-red-300 border-red-500/40 flex items-center gap-1 w-fit">
+          <Badge className="bg-destructive/20 text-red-300 border-red-500/40 flex items-center gap-1 w-fit">
             <TrendingDown className="w-3 h-3" />
             Churn registrado
           </Badge>

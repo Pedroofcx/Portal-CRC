@@ -32,9 +32,9 @@ export function SafeRoute({ children, fallback, loadingText = "Carregando..." })
   if (hasError) {
     return fallback || (
       <div className="text-center py-16">
-        <AlertCircle className="w-12 h-12 text-amber-500 mx-auto mb-4" />
+        <AlertCircle className="w-12 h-12 text-warning mx-auto mb-4" />
         <h2 className="text-xl font-semibold mb-2">Erro ao Carregar Página</h2>
-        <p className="text-slate-600">Tente navegar para outra seção.</p>
+        <p className="text-muted-foreground">Tente navegar para outra seção.</p>
       </div>
     );
   }

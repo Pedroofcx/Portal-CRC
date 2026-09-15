@@ -8,13 +8,13 @@ import { formatDateSP } from '@/components/utils/helpers';
 import { cn } from '@/lib/utils';
 
 const corPorTipo = {
-  home_office: 'bg-green-500',
-  presencial: 'bg-blue-500',
-  hibrido: 'bg-purple-500',
+  home_office: 'bg-success',
+  presencial: 'bg-primary',
+  hibrido: 'bg-primary',
   ferias: 'bg-cyan-500',
-  day_off: 'bg-amber-500',
-  falta: 'bg-red-500',
-  treinamento: 'bg-indigo-500',
+  day_off: 'bg-warning',
+  falta: 'bg-destructive',
+  treinamento: 'bg-primary',
   evento_especial: 'bg-pink-500'
 };
 
@@ -45,8 +45,8 @@ export default function EquipeDetalhes({
           <ArrowLeft className="w-5 h-5" />
         </Button>
         <div>
-          <h2 className="text-2xl font-bold text-slate-900">{equipe.nome}</h2>
-          <p className="text-slate-600">{colaboradoresDaEquipe.length} colaboradores</p>
+          <h2 className="text-2xl font-bold text-foreground">{equipe.nome}</h2>
+          <p className="text-muted-foreground">{colaboradoresDaEquipe.length} colaboradores</p>
         </div>
       </div>
 
@@ -71,15 +71,15 @@ export default function EquipeDetalhes({
                 <div className="flex items-start gap-3 mb-3">
                   <Avatar className="h-12 w-12 ring-2 ring-white">
                     <AvatarImage src={colab.foto_url} />
-                    <AvatarFallback className="bg-slate-200 text-slate-700">
+                    <AvatarFallback className="bg-muted text-foreground">
                       {colab.nome_completo?.charAt(0)}
                     </AvatarFallback>
                   </Avatar>
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-slate-900 truncate">
+                    <h3 className="font-semibold text-foreground truncate">
                       {colab.nome_completo}
                     </h3>
-                    <p className="text-xs text-slate-500">{colab.cargo_atual}</p>
+                    <p className="text-xs text-muted-foreground">{colab.cargo_atual}</p>
                   </div>
                 </div>
 
@@ -90,7 +90,7 @@ export default function EquipeDetalhes({
                     </Badge>
                     
                     {escala && (
-                      <div className="text-xs text-slate-600">
+                      <div className="text-xs text-muted-foreground">
                         <div className="flex items-center gap-1">
                           <Calendar className="w-3 h-3" />
                           {escala.nome}
@@ -98,13 +98,13 @@ export default function EquipeDetalhes({
                       </div>
                     )}
 
-                    <div className="text-xs text-slate-500">
+                    <div className="text-xs text-muted-foreground">
                       {formatDateSP(atribAtual.data_inicio, 'DD/MM')}
                       {atribAtual.data_fim && ` - ${formatDateSP(atribAtual.data_fim, 'DD/MM')}`}
                     </div>
                   </div>
                 ) : (
-                  <p className="text-xs text-slate-400">Sem escala ativa</p>
+                  <p className="text-xs text-muted-foreground">Sem escala ativa</p>
                 )}
               </CardContent>
             </Card>

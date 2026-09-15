@@ -67,7 +67,7 @@ export default function UploadFoto({ colaborador, onSuccess, onCancel }) {
         <div className="text-center space-y-4">
           <Avatar className="h-32 w-32 mx-auto">
             <AvatarImage src={previewUrl || colaborador?.foto_url} />
-            <AvatarFallback className="bg-blue-100 text-blue-600 text-3xl">
+            <AvatarFallback className="bg-info-soft text-primary text-3xl">
               {colaborador?.nome_completo?.charAt(0) || 'U'}
             </AvatarFallback>
           </Avatar>
@@ -84,7 +84,7 @@ export default function UploadFoto({ colaborador, onSuccess, onCancel }) {
             <label htmlFor="foto-upload">
               <Button
                 type="button"
-                className="cursor-pointer bg-blue-600 hover:bg-blue-700"
+                className="cursor-pointer bg-primary hover:bg-primary/90"
                 disabled={uploading}
                 asChild
               >
@@ -105,7 +105,7 @@ export default function UploadFoto({ colaborador, onSuccess, onCancel }) {
             </label>
           </div>
 
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-muted-foreground">
             Formatos aceitos: JPG, PNG, GIF (máx. 5MB)
           </p>
 

@@ -12,7 +12,7 @@ import { toast } from 'sonner';
 
 const EtapaItem = React.memo(({ etapa, index, isChecked, onToggle }) => {
   return (
-    <Card className={`transition-all ${isChecked ? 'bg-green-50 border-green-200' : ''}`}>
+    <Card className={`transition-all ${isChecked ? 'bg-success-soft border-success/25' : ''}`}>
       <CardContent className="p-4">
         <div 
           className="flex items-start gap-3 cursor-pointer"
@@ -22,23 +22,23 @@ const EtapaItem = React.memo(({ etapa, index, isChecked, onToggle }) => {
             type="checkbox"
             checked={isChecked}
             onChange={() => {}}
-            className="w-4 h-4 mt-1 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+            className="w-4 h-4 mt-1 rounded border-border text-primary focus:ring-blue-500 cursor-pointer"
           />
           <div className="flex-1">
             <div className="flex items-center gap-2">
-              <p className={`font-medium ${isChecked ? 'line-through text-slate-500' : ''}`}>
+              <p className={`font-medium ${isChecked ? 'line-through text-muted-foreground' : ''}`}>
                 {etapa.titulo}
               </p>
-              {isChecked && <Badge className="bg-green-600 text-xs">Concluída</Badge>}
+              {isChecked && <Badge className="bg-success text-xs">Concluída</Badge>}
             </div>
-            {etapa.descricao && <p className="text-sm text-slate-600 mt-2">{etapa.descricao}</p>}
+            {etapa.descricao && <p className="text-sm text-muted-foreground mt-2">{etapa.descricao}</p>}
             {etapa.conteudo_profissional && (
-              <p className="text-sm text-slate-500 mt-2 p-2 bg-slate-50 rounded">
+              <p className="text-sm text-muted-foreground mt-2 p-2 bg-muted rounded">
                 <strong>Conteúdo:</strong> {etapa.conteudo_profissional}
               </p>
             )}
             {etapa.prazo && (
-              <div className="flex items-center gap-1 mt-2 text-xs text-slate-500">
+              <div className="flex items-center gap-1 mt-2 text-xs text-muted-foreground">
                 <Clock className="w-3 h-3" />
                 Prazo: {formatDateSP(etapa.prazo, 'DD/MM/YYYY')}
               </div>
@@ -102,7 +102,7 @@ export default function PDIModal({ pdi, open, onClose }) {
         </DialogHeader>
         <div className="space-y-4 mt-4">
           <div>
-            <p className="text-sm text-slate-500">Objetivo</p>
+            <p className="text-sm text-muted-foreground">Objetivo</p>
             <p className="whitespace-pre-wrap mt-1">{pdi.objetivo_geral || 'Sem objetivo definido'}</p>
           </div>
           <div>
@@ -113,10 +113,10 @@ export default function PDIModal({ pdi, open, onClose }) {
             <Progress value={pdi.percentual_conclusao || 0} className="h-3" />
           </div>
           <div>
-            <p className="text-sm text-slate-500 mb-3">Etapas</p>
+            <p className="text-sm text-muted-foreground mb-3">Etapas</p>
             <div className="space-y-3">
               {(!pdi.etapas || pdi.etapas.length === 0) ? (
-                <p className="text-center text-slate-500 py-8">Nenhuma etapa definida neste PDI</p>
+                <p className="text-center text-muted-foreground py-8">Nenhuma etapa definida neste PDI</p>
               ) : (
                 pdi.etapas.map((etapa, index) => (
                   <EtapaItem

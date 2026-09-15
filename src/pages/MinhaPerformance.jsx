@@ -128,9 +128,9 @@ export default function MinhaPerformance() {
   if (user && colaboradores.length > 0 && !colaborador) {
     return (
       <div className="text-center py-16">
-        <Award className="w-12 h-12 text-slate-300 mx-auto mb-4" />
+        <Award className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
         <h2 className="text-xl font-semibold mb-2">Cadastro Pendente</h2>
-        <p className="text-slate-600">Seu usuário ainda não foi registrado como colaborador.</p>
+        <p className="text-muted-foreground">Seu usuário ainda não foi registrado como colaborador.</p>
       </div>
     );
   }
@@ -200,12 +200,12 @@ export default function MinhaPerformance() {
           <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle className="flex items-center gap-2">
-                <Star className="w-5 h-5 text-amber-500" />
+                <Star className="w-5 h-5 text-warning" />
                 Detalhamento de Pontos - {trimestre}
               </CardTitle>
               <button 
                 onClick={() => setDetalhamentoExpanded(!detalhamentoExpanded)}
-                className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
+                className="p-2 hover:bg-muted rounded-lg transition-colors"
               >
                 {detalhamentoExpanded ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
               </button>
@@ -213,12 +213,12 @@ export default function MinhaPerformance() {
           </CardHeader>
           <CardContent>
             {!detalhamentoExpanded ? (
-              <div className="text-center py-4 text-slate-500">
+              <div className="text-center py-4 text-muted-foreground">
                 <p className="text-sm">Clique para expandir o detalhamento</p>
-                <p className="text-2xl font-bold text-amber-600 mt-2">{pontosCalculados.toFixed(1)} pts</p>
+                <p className="text-2xl font-bold text-warning mt-2">{pontosCalculados.toFixed(1)} pts</p>
               </div>
             ) : detalhamentoPontos.length === 0 ? (
-              <div className="text-center py-8 text-slate-500">
+              <div className="text-center py-8 text-muted-foreground">
                 <Award className="w-10 h-10 mx-auto mb-2 opacity-50" />
                 <p>Nenhuma pontuação registrada neste trimestre</p>
                 <p className="text-sm mt-1">Encerre tratativas para acumular pontos</p>
@@ -226,26 +226,26 @@ export default function MinhaPerformance() {
             ) : (
               <div className="space-y-3 max-h-96 overflow-y-auto">
                 {detalhamentoPontos.map((item, index) => (
-                  <div key={index} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors">
+                  <div key={index} className="flex items-center justify-between p-3 bg-muted rounded-lg hover:bg-muted transition-colors">
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 bg-amber-100 rounded-full flex items-center justify-center flex-shrink-0">
-                        <Star className="w-4 h-4 text-amber-600" />
+                      <div className="w-8 h-8 bg-warning-soft rounded-full flex items-center justify-center flex-shrink-0">
+                        <Star className="w-4 h-4 text-warning" />
                       </div>
                       <div>
-                        <p className="font-medium text-slate-900 text-sm">{item.tipo}</p>
-                        <p className="text-xs text-slate-500">
+                        <p className="font-medium text-foreground text-sm">{item.tipo}</p>
+                        <p className="text-xs text-muted-foreground">
                           Tratativa #{item.tratativa_id?.substring(0, 8)}
                         </p>
                       </div>
                     </div>
-                    <Badge className="bg-amber-100 text-amber-700 border-amber-200">
+                    <Badge className="bg-warning-soft text-warning border-warning/25">
                       +{item.pontos} pts
                     </Badge>
                   </div>
                 ))}
-                <div className="flex justify-between items-center pt-4 border-t mt-4 sticky bottom-0 bg-white">
-                  <span className="font-semibold text-slate-900">Total de Pontos</span>
-                  <span className="text-2xl font-bold text-amber-600">{pontosCalculados.toFixed(1)}</span>
+                <div className="flex justify-between items-center pt-4 border-t mt-4 sticky bottom-0 bg-card">
+                  <span className="font-semibold text-foreground">Total de Pontos</span>
+                  <span className="text-2xl font-bold text-warning">{pontosCalculados.toFixed(1)}</span>
                 </div>
               </div>
             )}
@@ -268,7 +268,7 @@ export default function MinhaPerformance() {
                   Visualize seus resultados consolidados, histórico de desempenho e gráficos de evolução
                 </p>
                 {meusHansei.length > 0 && (
-                  <div className="p-3 bg-white/20 rounded-lg backdrop-blur-sm">
+                  <div className="p-3 bg-card/20 rounded-lg backdrop-blur-sm">
                     <p className="text-xs text-blue-100 mb-1">Últimos resultados:</p>
                     <p className="text-sm font-medium text-white">
                       {meusHansei.filter(h => !h.visualizado).length} novo(s) • {meusHansei.length} total
@@ -347,7 +347,7 @@ export default function MinhaPerformance() {
                   )}
                 </>
               ) : (
-                <p className="text-sm text-slate-500 text-center py-4">Sem apurações recentes</p>
+                <p className="text-sm text-muted-foreground text-center py-4">Sem apurações recentes</p>
               )}
             </CardContent>
           </Card>
@@ -355,36 +355,36 @@ export default function MinhaPerformance() {
           {/* PDI Ativo */}
           {pdiAtivo ? (
             <Card 
-              className="border-0 shadow-sm bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200 cursor-pointer hover:shadow-md transition-shadow"
+              className="border-0 shadow-sm bg-gradient-to-br from-blue-50 to-blue-100 border-info/25 cursor-pointer hover:shadow-md transition-shadow"
               onClick={() => setSelectedPDI(pdiAtivo)}
             >
               <CardHeader className="pb-2">
-                <CardTitle className="text-base flex items-center gap-2 text-blue-900">
+                <CardTitle className="text-base flex items-center gap-2 text-primary">
                   <Target className="w-4 h-4" />
                   PDI em Andamento
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="font-medium text-blue-900">{pdiAtivo.titulo}</p>
-                <p className="text-sm text-blue-700 mt-1 line-clamp-2">{pdiAtivo.objetivo_geral}</p>
+                <p className="font-medium text-primary">{pdiAtivo.titulo}</p>
+                <p className="text-sm text-primary mt-1 line-clamp-2">{pdiAtivo.objetivo_geral}</p>
                 <div className="mt-3">
-                  <div className="flex justify-between text-sm mb-1 text-blue-800">
+                  <div className="flex justify-between text-sm mb-1 text-primary">
                     <span>Progresso</span>
                     <span>{pdiAtivo.percentual_conclusao || 0}%</span>
                   </div>
                   <Progress value={pdiAtivo.percentual_conclusao || 0} className="h-2 bg-blue-200" />
                 </div>
-                <p className="text-xs text-blue-600 mt-2">
+                <p className="text-xs text-primary mt-2">
                   {pdiAtivo.etapas?.filter(e => e.concluida).length || 0} de {pdiAtivo.etapas?.length || 0} etapas concluídas
                 </p>
-                <p className="text-xs text-blue-500 mt-2 text-center">Clique para ver detalhes</p>
+                <p className="text-xs text-primary mt-2 text-center">Clique para ver detalhes</p>
               </CardContent>
             </Card>
           ) : (
             <Card className="border-0 shadow-sm">
               <CardContent className="py-8 text-center">
-                <Target className="w-10 h-10 mx-auto mb-2 text-slate-300" />
-                <p className="text-slate-500">Nenhum PDI ativo</p>
+                <Target className="w-10 h-10 mx-auto mb-2 text-muted-foreground" />
+                <p className="text-muted-foreground">Nenhum PDI ativo</p>
               </CardContent>
             </Card>
           )}
@@ -399,7 +399,7 @@ export default function MinhaPerformance() {
             </CardHeader>
             <CardContent>
               {minhasObservacoes.length === 0 ? (
-                <p className="text-slate-500 text-sm text-center py-4">Nenhuma observação compartilhada</p>
+                <p className="text-muted-foreground text-sm text-center py-4">Nenhuma observação compartilhada</p>
               ) : (
                 <div className="space-y-3 max-h-96 overflow-y-auto">
                   {minhasObservacoes.map(obs => {
@@ -415,20 +415,20 @@ export default function MinhaPerformance() {
                                     categoria.toLowerCase().includes('advertência') ||
                                     categoria.toLowerCase().includes('atenção');
                     
-                    const bgColor = isPositivo ? 'bg-green-50 border-green-200' :
-                                   isDesenvolvimento ? 'bg-blue-50 border-blue-200' :
-                                   isAlerta ? 'bg-amber-50 border-amber-200' :
-                                   'bg-slate-50 border-slate-200';
+                    const bgColor = isPositivo ? 'bg-success-soft border-success/25' :
+                                   isDesenvolvimento ? 'bg-info-soft border-info/25' :
+                                   isAlerta ? 'bg-warning-soft border-warning/25' :
+                                   'bg-muted border-border';
                     
-                    const badgeColor = isPositivo ? 'bg-green-100 text-green-700' :
-                                      isDesenvolvimento ? 'bg-blue-100 text-blue-700' :
-                                      isAlerta ? 'bg-amber-100 text-amber-700' :
-                                      'bg-slate-100 text-slate-700';
+                    const badgeColor = isPositivo ? 'bg-success-soft text-success' :
+                                      isDesenvolvimento ? 'bg-info-soft text-primary' :
+                                      isAlerta ? 'bg-warning-soft text-warning' :
+                                      'bg-muted text-foreground';
                     
-                    const textColor = isPositivo ? 'text-green-900' :
-                                     isDesenvolvimento ? 'text-blue-900' :
-                                     isAlerta ? 'text-amber-900' :
-                                     'text-slate-900';
+                    const textColor = isPositivo ? 'text-success' :
+                                     isDesenvolvimento ? 'text-primary' :
+                                     isAlerta ? 'text-warning' :
+                                     'text-foreground';
                     
                     return (
                       <div 
@@ -440,17 +440,17 @@ export default function MinhaPerformance() {
                           <Badge className={`${badgeColor} text-xs`}>
                             {categoria}
                           </Badge>
-                          <span className="text-xs text-slate-500">
+                          <span className="text-xs text-muted-foreground">
                             {formatDateSP(obs.data_registro, 'DD/MM/YYYY')}
                           </span>
                         </div>
                         <p className={`font-medium text-sm ${textColor} line-clamp-2`}>
                           {obs.titulo || obs.conteudo?.substring(0, 60)}
                         </p>
-                        <p className="text-xs text-slate-600 mt-1">
+                        <p className="text-xs text-muted-foreground mt-1">
                           Por: {obs.autor_nome}
                         </p>
-                        <p className="text-xs text-blue-600 mt-2 font-medium">
+                        <p className="text-xs text-primary mt-2 font-medium">
                           Toque para ler completo →
                         </p>
                       </div>

@@ -59,21 +59,21 @@ export default function ResumoIAEtapa({ etapa, tratativas }) {
       <CardContent className="space-y-3">
         {!resultado && (
           <Button onClick={gerarResumo} disabled={loading} size="sm" variant="outline">
-            {loading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Sparkles className="w-4 h-4 mr-2 text-amber-500" />}
+            {loading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Sparkles className="w-4 h-4 mr-2 text-warning" />}
             Gerar Resumo & Plano de Ação (IA)
           </Button>
         )}
         {resultado && (
           <div className="space-y-3">
             <div>
-              <p className="text-xs font-semibold text-slate-500 uppercase mb-1">O que aconteceu</p>
-              <p className="text-sm text-slate-700 leading-relaxed">{resultado.resumo}</p>
+              <p className="text-xs font-semibold text-muted-foreground uppercase mb-1">O que aconteceu</p>
+              <p className="text-sm text-foreground leading-relaxed">{resultado.resumo}</p>
             </div>
             <div>
-              <p className="text-xs font-semibold text-slate-500 uppercase mb-1">Plano de Ação Sugerido</p>
+              <p className="text-xs font-semibold text-muted-foreground uppercase mb-1">Plano de Ação Sugerido</p>
               <ul className="list-disc pl-5 space-y-1">
                 {resultado.plano_de_acao?.map((item, i) => (
-                  <li key={i} className="text-sm text-slate-700">{item}</li>
+                  <li key={i} className="text-sm text-foreground">{item}</li>
                 ))}
               </ul>
             </div>

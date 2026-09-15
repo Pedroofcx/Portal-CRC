@@ -109,7 +109,7 @@ export default function ConfigTiposTratativa() {
     { 
       key: 'chave', 
       label: 'Chave',
-      render: (tipo) => <code className="text-xs bg-slate-100 px-2 py-1 rounded">{tipo.chave}</code>
+      render: (tipo) => <code className="text-xs bg-muted px-2 py-1 rounded">{tipo.chave}</code>
     },
     { 
       key: 'sla_horas', 
@@ -120,7 +120,7 @@ export default function ConfigTiposTratativa() {
       key: 'permite_reabertura', 
       label: 'Reabertura',
       render: (tipo) => tipo.permite_reabertura ? (
-        <Badge className="bg-green-100 text-green-700">Sim</Badge>
+        <Badge className="bg-success-soft text-success">Sim</Badge>
       ) : (
         <Badge variant="outline">Não</Badge>
       )
@@ -129,9 +129,9 @@ export default function ConfigTiposTratativa() {
       key: 'ativa',
       label: 'Status',
       render: (tipo) => tipo.ativa ? (
-        <Badge className="bg-green-100 text-green-700">Ativa</Badge>
+        <Badge className="bg-success-soft text-success">Ativa</Badge>
       ) : (
-        <Badge variant="outline" className="text-slate-500">Inativa</Badge>
+        <Badge variant="outline" className="text-muted-foreground">Inativa</Badge>
       )
     },
     {
@@ -146,7 +146,7 @@ export default function ConfigTiposTratativa() {
             variant="ghost" 
             size="sm" 
             onClick={() => setConfirmDialog({ open: true, id: tipo.id })}
-            className="text-red-600 hover:text-red-700 hover:bg-red-50"
+            className="text-destructive hover:text-destructive hover:bg-destructive/10"
           >
             <Trash2 className="w-4 h-4" />
           </Button>
@@ -165,11 +165,11 @@ export default function ConfigTiposTratativa() {
                 <FileText className="w-5 h-5" />
                 Tipos de Tratativas
               </CardTitle>
-              <p className="text-sm text-slate-500 mt-1">
+              <p className="text-sm text-muted-foreground mt-1">
                 Configure os tipos de tratativas e suas características específicas
               </p>
             </div>
-            <Button onClick={() => setShowForm(!showForm)} className="bg-blue-600 hover:bg-blue-700">
+            <Button onClick={() => setShowForm(!showForm)} className="bg-primary hover:bg-primary/90">
               <Plus className="w-4 h-4 mr-2" />
               {showForm ? 'Cancelar' : 'Novo Tipo'}
             </Button>
@@ -197,7 +197,7 @@ export default function ConfigTiposTratativa() {
                     placeholder="Ex: reclamacao_interna"
                     required
                   />
-                  <p className="text-xs text-slate-500 mt-1">Sem espaços, apenas letras minúsculas e _</p>
+                  <p className="text-xs text-muted-foreground mt-1">Sem espaços, apenas letras minúsculas e _</p>
                 </div>
               </div>
 
@@ -231,21 +231,21 @@ export default function ConfigTiposTratativa() {
                 </div>
               </div>
 
-              <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg">
+              <div className="flex items-center gap-3 p-3 bg-info-soft rounded-lg">
                 <Switch
                   checked={formData.permite_reabertura}
                   onCheckedChange={(checked) => setFormData({ ...formData, permite_reabertura: checked })}
                 />
                 <div>
                   <Label className="text-sm">Permite Controle de Reabertura</Label>
-                  <p className="text-xs text-slate-600">
+                  <p className="text-xs text-muted-foreground">
                     Ativa o contador de 7 dias para confirmar se houve reabertura
                   </p>
                 </div>
               </div>
 
               <div className="flex gap-2">
-                <Button type="submit" className="bg-green-600 hover:bg-green-700">
+                <Button type="submit" className="bg-success hover:bg-success/90">
                   <CheckCircle className="w-4 h-4 mr-2" />
                   {editingTipo ? 'Atualizar' : 'Criar'} Tipo
                 </Button>

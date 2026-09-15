@@ -14,10 +14,10 @@ const origemLabel = {
 };
 
 const origemColor = {
-  reclamacao_interna: 'bg-blue-100 text-blue-700',
-  reclame_aqui: 'bg-amber-100 text-amber-700',
-  google_meu_negocio: 'bg-green-100 text-green-700',
-  contestacao: 'bg-red-100 text-red-700',
+  reclamacao_interna: 'bg-info-soft text-primary',
+  reclame_aqui: 'bg-warning-soft text-warning',
+  google_meu_negocio: 'bg-success-soft text-success',
+  contestacao: 'bg-destructive/10 text-destructive',
 };
 
 export default function RelatorioFinanceiroConsolidado({ tratativasFiltradas }) {
@@ -134,26 +134,26 @@ export default function RelatorioFinanceiroConsolidado({ tratativasFiltradas }) 
         </CardHeader>
         <CardContent>
           {porOrigem.length === 0 ? (
-            <p className="text-slate-500 text-center py-6">Nenhuma devolução registrada no período</p>
+            <p className="text-muted-foreground text-center py-6">Nenhuma devolução registrada no período</p>
           ) : (
             <div className="space-y-3">
               {porOrigem.map(item => (
-                <div key={item.origem} className="p-4 bg-slate-50 rounded-lg">
+                <div key={item.origem} className="p-4 bg-muted rounded-lg">
                   <div className="flex items-center justify-between mb-1">
-                    <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${origemColor[item.origem] || 'bg-slate-200 text-slate-700'}`}>
+                    <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${origemColor[item.origem] || 'bg-muted text-foreground'}`}>
                       {origemLabel[item.origem] || item.origem}
                     </span>
                     <Badge variant="outline">{item.qtd} caso{item.qtd !== 1 ? 's' : ''}</Badge>
                   </div>
-                  <p className="text-xl font-bold text-red-600 mt-1">
+                  <p className="text-xl font-bold text-destructive mt-1">
                     R$ {item.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                   </p>
                   {totalGeral > 0 && (
                     <div className="mt-2">
-                      <div className="w-full bg-slate-200 rounded-full h-1.5">
-                        <div className="bg-red-500 h-1.5 rounded-full" style={{ width: `${(item.valor / totalGeral) * 100}%` }} />
+                      <div className="w-full bg-muted rounded-full h-1.5">
+                        <div className="bg-destructive h-1.5 rounded-full" style={{ width: `${(item.valor / totalGeral) * 100}%` }} />
                       </div>
-                      <p className="text-xs text-slate-500 mt-0.5">{Math.round((item.valor / totalGeral) * 100)}% do total</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">{Math.round((item.valor / totalGeral) * 100)}% do total</p>
                     </div>
                   )}
                 </div>
@@ -176,47 +176,47 @@ export default function RelatorioFinanceiroConsolidado({ tratativasFiltradas }) 
         </CardHeader>
         <CardContent className="p-0">
           {registros.length === 0 ? (
-            <p className="text-slate-500 text-center py-8">Nenhuma devolução encontrada no período selecionado</p>
+            <p className="text-muted-foreground text-center py-8">Nenhuma devolução encontrada no período selecionado</p>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b bg-slate-50">
-                    <th className="text-left px-4 py-3 font-medium text-slate-600 whitespace-nowrap">Data</th>
-                    <th className="text-left px-4 py-3 font-medium text-slate-600 whitespace-nowrap">ID</th>
-                    <th className="text-left px-4 py-3 font-medium text-slate-600 whitespace-nowrap">Cliente</th>
-                    <th className="text-left px-4 py-3 font-medium text-slate-600 whitespace-nowrap">Origem</th>
-                    <th className="text-right px-4 py-3 font-medium text-slate-600 whitespace-nowrap">Valor (R$)</th>
-                    <th className="text-left px-4 py-3 font-medium text-slate-600 whitespace-nowrap">Agente</th>
-                    <th className="text-left px-4 py-3 font-medium text-slate-600 whitespace-nowrap">Motivo</th>
+                  <tr className="border-b bg-muted">
+                    <th className="text-left px-4 py-3 font-medium text-muted-foreground whitespace-nowrap">Data</th>
+                    <th className="text-left px-4 py-3 font-medium text-muted-foreground whitespace-nowrap">ID</th>
+                    <th className="text-left px-4 py-3 font-medium text-muted-foreground whitespace-nowrap">Cliente</th>
+                    <th className="text-left px-4 py-3 font-medium text-muted-foreground whitespace-nowrap">Origem</th>
+                    <th className="text-right px-4 py-3 font-medium text-muted-foreground whitespace-nowrap">Valor (R$)</th>
+                    <th className="text-left px-4 py-3 font-medium text-muted-foreground whitespace-nowrap">Agente</th>
+                    <th className="text-left px-4 py-3 font-medium text-muted-foreground whitespace-nowrap">Motivo</th>
                   </tr>
                 </thead>
                 <tbody>
                   {registros.map(r => (
-                    <tr key={r.id} className="border-b hover:bg-slate-50 transition-colors">
-                      <td className="px-4 py-3 text-slate-600 whitespace-nowrap">{formatDateSP(r.data, 'DD/MM/YYYY')}</td>
-                      <td className="px-4 py-3 font-mono text-xs text-slate-500">{r.id_interno || r.id?.substring(0, 8)}</td>
+                    <tr key={r.id} className="border-b hover:bg-muted transition-colors">
+                      <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">{formatDateSP(r.data, 'DD/MM/YYYY')}</td>
+                      <td className="px-4 py-3 font-mono text-xs text-muted-foreground">{r.id_interno || r.id?.substring(0, 8)}</td>
                       <td className="px-4 py-3">
-                        <p className="font-medium text-slate-800">{r.nome_cliente || '-'}</p>
-                        <p className="text-xs text-slate-400">{r.id_base_cliente || ''}</p>
+                        <p className="font-medium text-foreground">{r.nome_cliente || '-'}</p>
+                        <p className="text-xs text-muted-foreground">{r.id_base_cliente || ''}</p>
                       </td>
                       <td className="px-4 py-3">
-                        <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${origemColor[r.origem] || 'bg-slate-100 text-slate-600'}`}>
+                        <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${origemColor[r.origem] || 'bg-muted text-muted-foreground'}`}>
                           {origemLabel[r.origem] || r.origem}
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-right font-bold text-red-600 whitespace-nowrap">
+                      <td className="px-4 py-3 text-right font-bold text-destructive whitespace-nowrap">
                         {r.valor > 0 ? `R$ ${r.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}` : '-'}
                       </td>
-                      <td className="px-4 py-3 text-slate-600">{r.agente}</td>
-                      <td className="px-4 py-3 text-slate-500 max-w-[200px] truncate">{r.motivo}</td>
+                      <td className="px-4 py-3 text-muted-foreground">{r.agente}</td>
+                      <td className="px-4 py-3 text-muted-foreground max-w-[200px] truncate">{r.motivo}</td>
                     </tr>
                   ))}
                 </tbody>
                 <tfoot>
-                  <tr className="bg-red-50 border-t-2 border-red-200">
-                    <td colSpan={4} className="px-4 py-3 font-bold text-slate-700">Total Geral ({registros.length} registros)</td>
-                    <td className="px-4 py-3 text-right font-bold text-red-700 text-base">
+                  <tr className="bg-destructive/10 border-t-2 border-destructive/25">
+                    <td colSpan={4} className="px-4 py-3 font-bold text-foreground">Total Geral ({registros.length} registros)</td>
+                    <td className="px-4 py-3 text-right font-bold text-destructive text-base">
                       R$ {totalGeral.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                     </td>
                     <td colSpan={2} />

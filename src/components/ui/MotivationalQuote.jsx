@@ -40,13 +40,13 @@ export default function MotivationalQuote() {
             transition={{ duration: 0.5 }}
             className="flex gap-4"
           >
-            <Quote className="w-8 h-8 text-blue-400 flex-shrink-0" />
+            <Quote className="w-8 h-8 text-primary flex-shrink-0" />
             <div>
-              <p className="text-slate-700 italic text-sm md:text-base leading-relaxed">
+              <p className="text-foreground italic text-sm md:text-base leading-relaxed">
                 "{fraseAtual.texto}"
               </p>
               {fraseAtual.autor && (
-                <p className="text-slate-500 text-xs mt-2">— {fraseAtual.autor}</p>
+                <p className="text-muted-foreground text-xs mt-2">— {fraseAtual.autor}</p>
               )}
             </div>
           </motion.div>

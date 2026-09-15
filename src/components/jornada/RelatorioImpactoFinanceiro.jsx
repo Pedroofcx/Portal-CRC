@@ -51,7 +51,7 @@ export default function RelatorioImpactoFinanceiro({ tratativas, colaboradores =
   if (porEtapa.length === 0) {
     return (
       <Card className="border-0 shadow-sm">
-        <CardContent className="py-10 text-center text-slate-500">
+        <CardContent className="py-10 text-center text-muted-foreground">
           Nenhum dado financeiro disponível ainda para as etapas da jornada.
         </CardContent>
       </Card>
@@ -62,22 +62,22 @@ export default function RelatorioImpactoFinanceiro({ tratativas, colaboradores =
     <Card className="border-0 shadow-sm">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <DollarSign className="w-5 h-5 text-red-600" />
+          <DollarSign className="w-5 h-5 text-destructive" />
           Impacto Financeiro por Etapa da Jornada
         </CardTitle>
-        <p className="text-sm text-slate-500 mt-1">
+        <p className="text-sm text-muted-foreground mt-1">
           Soma de custo operacional + devolução ao cliente + perda de receita por churn.
         </p>
       </CardHeader>
       <CardContent>
         {isGestor && (
           <Accordion type="single" collapsible className="mb-5">
-            <AccordionItem value="parametros" className="border border-slate-200 rounded-lg px-4 bg-slate-50">
-              <AccordionTrigger className="text-sm font-semibold text-slate-700 hover:no-underline">
+            <AccordionItem value="parametros" className="border border-border rounded-lg px-4 bg-muted">
+              <AccordionTrigger className="text-sm font-semibold text-foreground hover:no-underline">
                 <span className="flex items-center gap-2"><Settings className="w-4 h-4" /> Ajustar Parâmetros e Variáveis do Cálculo</span>
               </AccordionTrigger>
               <AccordionContent>
-                <p className="text-xs text-slate-500 mb-3">
+                <p className="text-xs text-muted-foreground mb-3">
                   Simulação client-side: altere os valores para ver o impacto no custo operacional em tempo real. Nada aqui é salvo no banco de dados.
                 </p>
                 <div className="grid sm:grid-cols-2 gap-4">
@@ -108,26 +108,26 @@ export default function RelatorioImpactoFinanceiro({ tratativas, colaboradores =
           {porEtapa.map((item, i) => (
             <div
               key={item.etapa}
-              className={`p-5 rounded-xl border ${i === 0 ? 'bg-red-50 border-red-300' : 'bg-slate-50 border-slate-200'}`}
+              className={`p-5 rounded-xl border ${i === 0 ? 'bg-destructive/10 border-destructive/30' : 'bg-muted border-border'}`}
             >
               <div className="flex items-center justify-between mb-3">
-                <span className="font-bold text-slate-900 text-lg">{item.etapa}</span>
+                <span className="font-bold text-foreground text-lg">{item.etapa}</span>
                 {i === 0 && (
-                  <Badge className="bg-red-100 text-red-700 flex items-center gap-1">
+                  <Badge className="bg-destructive/10 text-destructive flex items-center gap-1">
                     <AlertTriangle className="w-3 h-3" />
                     Mais custosa
                   </Badge>
                 )}
               </div>
-              <p className="text-xs text-slate-500 mb-4">{item.casos} caso(s) fecharam nesta etapa</p>
+              <p className="text-xs text-muted-foreground mb-4">{item.casos} caso(s) fecharam nesta etapa</p>
 
               {/* Card de Custo Operacional */}
-              <div className="bg-white border border-slate-200 rounded-lg p-4 mb-3">
-                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">
+              <div className="bg-card border border-border rounded-lg p-4 mb-3">
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
                   Prejuízo em Horas Trabalhadas (Custo Operacional)
                 </p>
-                <p className="text-2xl font-bold text-slate-900 mt-1">{formatBRL(item.custoOperacional)}</p>
-                <p className="text-xs text-slate-600 mt-2 leading-relaxed">
+                <p className="text-2xl font-bold text-foreground mt-1">{formatBRL(item.custoOperacional)}</p>
+                <p className="text-xs text-muted-foreground mt-2 leading-relaxed">
                   <strong>Como chegamos a esse número?</strong> Pegamos o salário base do agente responsável + 60% de encargos trabalhistas de mercado.
                   Dividimos isso por 220 horas mensais para descobrir o custo por minuto de atendimento do funcionário.
                   Depois, multiplicamos esse valor pelos minutos reais que o sistema cronometrou enquanto o ticket estava em andamento.
@@ -135,15 +135,15 @@ export default function RelatorioImpactoFinanceiro({ tratativas, colaboradores =
               </div>
 
               {/* Card de FTE */}
-              <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
-                <p className="text-xs font-semibold text-purple-700 uppercase tracking-wide flex items-center gap-1.5">
+              <div className="bg-info-soft border border-info/25 rounded-lg p-4">
+                <p className="text-xs font-semibold text-primary uppercase tracking-wide flex items-center gap-1.5">
                   <Users className="w-3.5 h-3.5" />
                   Desperdício de Mão de Obra (Força de Trabalho Ativa)
                 </p>
-                <p className="text-2xl font-bold text-purple-900 mt-1">
+                <p className="text-2xl font-bold text-primary mt-1">
                   {item.ftePerdido.toFixed(2)} Funcionários perdidos apagando incêndio
                 </p>
-                <p className="text-xs text-purple-800 mt-2 leading-relaxed">
+                <p className="text-xs text-primary mt-2 leading-relaxed">
                   <strong>Como chegamos a esse número?</strong> Nossa equipe gastou um total de {Math.round(item.minutosEfetivos).toLocaleString('pt-BR')} minutos
                   reais tratando esse problema neste mês. Como um colaborador trabalha 13.200 minutos por mês (220 horas), significa que o volume de erros
                   dessa etapa da jornada equivale a ter {item.ftePerdido.toFixed(2)} pessoas contratadas exclusivamente para resolver falhas, em vez de estarem
@@ -151,12 +151,12 @@ export default function RelatorioImpactoFinanceiro({ tratativas, colaboradores =
                 </p>
               </div>
 
-              <div className="space-y-1 text-xs text-slate-600 mt-3 pt-3 border-t border-slate-200">
+              <div className="space-y-1 text-xs text-muted-foreground mt-3 pt-3 border-t border-border">
                 <div className="flex justify-between"><span>Devolução ao cliente</span><span>{formatBRL(item.devolucaoCliente)}</span></div>
                 <div className="flex justify-between"><span>Perda de receita (churn)</span><span>{formatBRL(item.perdaReceita)}</span></div>
-                <div className="flex justify-between font-semibold text-slate-900"><span>Prejuízo total</span><span>{formatBRL(item.totalDor)}</span></div>
+                <div className="flex justify-between font-semibold text-foreground"><span>Prejuízo total</span><span>{formatBRL(item.totalDor)}</span></div>
               </div>
-              <p className="text-[11px] text-slate-500 italic mt-2">
+              <p className="text-[11px] text-muted-foreground italic mt-2">
                 Média de tempo nesta etapa: {item.casos > 0 ? Math.round(item.minutosEfetivos / item.casos) : 0} minutos por caso.
                 Baseado no custo-hora real do agente focado em cada ticket.
               </p>

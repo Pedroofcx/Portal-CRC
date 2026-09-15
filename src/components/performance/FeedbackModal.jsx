@@ -14,20 +14,20 @@ export default function FeedbackModal({ feedback, open, onClose }) {
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <MessageSquare className="w-5 h-5 text-blue-600" />
+            <MessageSquare className="w-5 h-5 text-primary" />
             {feedback.titulo || feedback.tipo}
           </DialogTitle>
         </DialogHeader>
         <div className="space-y-4 mt-4">
           <div>
-            <p className="text-sm text-slate-500">De: {feedback.autor_nome || 'Desconhecido'}</p>
+            <p className="text-sm text-muted-foreground">De: {feedback.autor_nome || 'Desconhecido'}</p>
             {feedback.data_registro && (
-              <p className="text-xs text-slate-400">Em: {formatDateSP(feedback.data_registro, 'DD/MM/YYYY HH:mm')}</p>
+              <p className="text-xs text-muted-foreground">Em: {formatDateSP(feedback.data_registro, 'DD/MM/YYYY HH:mm')}</p>
             )}
           </div>
 
           <div>
-            <p className="text-sm text-slate-500 mb-1">Conteúdo</p>
+            <p className="text-sm text-muted-foreground mb-1">Conteúdo</p>
             <div className="max-h-80 overflow-y-auto">
               <RichTextViewer 
                 content={feedback.conteudo || 'Sem conteúdo disponível'} 
@@ -38,39 +38,39 @@ export default function FeedbackModal({ feedback, open, onClose }) {
 
           {/* SWOT */}
           {feedback.analise_swot && (
-            <Card className="bg-blue-50 border-blue-200">
+            <Card className="bg-info-soft border-info/25">
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm">Análise SWOT</CardTitle>
               </CardHeader>
               <CardContent className="grid grid-cols-2 gap-3 text-sm max-h-60 overflow-y-auto">
                 {feedback.analise_swot.forcas?.length > 0 && (
                   <div>
-                    <p className="text-xs font-medium text-green-700 mb-1">Forças</p>
-                    <ul className="text-xs text-slate-600 list-disc list-inside">
+                    <p className="text-xs font-medium text-success mb-1">Forças</p>
+                    <ul className="text-xs text-muted-foreground list-disc list-inside">
                       {feedback.analise_swot.forcas.map((f, i) => <li key={i}>{f}</li>)}
                     </ul>
                   </div>
                 )}
                 {feedback.analise_swot.fraquezas?.length > 0 && (
                   <div>
-                    <p className="text-xs font-medium text-red-700 mb-1">Fraquezas</p>
-                    <ul className="text-xs text-slate-600 list-disc list-inside">
+                    <p className="text-xs font-medium text-destructive mb-1">Fraquezas</p>
+                    <ul className="text-xs text-muted-foreground list-disc list-inside">
                       {feedback.analise_swot.fraquezas.map((f, i) => <li key={i}>{f}</li>)}
                     </ul>
                   </div>
                 )}
                 {feedback.analise_swot.oportunidades?.length > 0 && (
                   <div>
-                    <p className="text-xs font-medium text-blue-700 mb-1">Oportunidades</p>
-                    <ul className="text-xs text-slate-600 list-disc list-inside">
+                    <p className="text-xs font-medium text-primary mb-1">Oportunidades</p>
+                    <ul className="text-xs text-muted-foreground list-disc list-inside">
                       {feedback.analise_swot.oportunidades.map((f, i) => <li key={i}>{f}</li>)}
                     </ul>
                   </div>
                 )}
                 {feedback.analise_swot.ameacas?.length > 0 && (
                   <div>
-                    <p className="text-xs font-medium text-amber-700 mb-1">Ameaças</p>
-                    <ul className="text-xs text-slate-600 list-disc list-inside">
+                    <p className="text-xs font-medium text-warning mb-1">Ameaças</p>
+                    <ul className="text-xs text-muted-foreground list-disc list-inside">
                       {feedback.analise_swot.ameacas.map((f, i) => <li key={i}>{f}</li>)}
                     </ul>
                   </div>
@@ -81,7 +81,7 @@ export default function FeedbackModal({ feedback, open, onClose }) {
 
           {/* Skills Avaliadas */}
           {(feedback.soft_skills_avaliadas || feedback.hard_skills_avaliadas) && (
-            <Card className="bg-indigo-50 border-indigo-200">
+            <Card className="bg-info-soft border-indigo-200">
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm">Avaliação de Skills</CardTitle>
               </CardHeader>
@@ -91,7 +91,7 @@ export default function FeedbackModal({ feedback, open, onClose }) {
                     <p className="text-xs font-medium mb-2">Soft Skills</p>
                     {Object.entries(feedback.soft_skills_avaliadas).map(([skill, value]) => (
                       <div key={skill} className="flex justify-between py-1">
-                        <span className="text-slate-600">{skill}</span>
+                        <span className="text-muted-foreground">{skill}</span>
                         <Badge variant="outline">{value}/10</Badge>
                       </div>
                     ))}
@@ -102,7 +102,7 @@ export default function FeedbackModal({ feedback, open, onClose }) {
                     <p className="text-xs font-medium mb-2">Hard Skills</p>
                     {Object.entries(feedback.hard_skills_avaliadas).map(([skill, value]) => (
                       <div key={skill} className="flex justify-between py-1">
-                        <span className="text-slate-600">{skill}</span>
+                        <span className="text-muted-foreground">{skill}</span>
                         <Badge variant="outline">{value}/10</Badge>
                       </div>
                     ))}
@@ -114,10 +114,10 @@ export default function FeedbackModal({ feedback, open, onClose }) {
 
           {/* Sugestão IA */}
           {(feedback.sugestao_ia_soft_skills || feedback.sugestao_ia_hard_skills) && (
-            <Card className="bg-purple-50 border-purple-200">
+            <Card className="bg-info-soft border-info/25">
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm flex items-center gap-2">
-                  <Sparkles className="w-4 h-4 text-purple-600" />
+                  <Sparkles className="w-4 h-4 text-primary" />
                   Sugestão da IA
                 </CardTitle>
               </CardHeader>
@@ -127,7 +127,7 @@ export default function FeedbackModal({ feedback, open, onClose }) {
                     <p className="text-xs font-medium mb-2">Soft Skills</p>
                     {Object.entries(feedback.sugestao_ia_soft_skills).map(([skill, value]) => (
                       <div key={skill} className="flex justify-between py-1">
-                        <span className="capitalize text-slate-600">{skill.replace('_', ' ')}</span>
+                        <span className="capitalize text-muted-foreground">{skill.replace('_', ' ')}</span>
                         <span>{value}/10</span>
                       </div>
                     ))}
@@ -138,7 +138,7 @@ export default function FeedbackModal({ feedback, open, onClose }) {
                     <p className="text-xs font-medium mb-2">Hard Skills</p>
                     {Object.entries(feedback.sugestao_ia_hard_skills).map(([skill, value]) => (
                       <div key={skill} className="flex justify-between py-1">
-                        <span className="capitalize text-slate-600">{skill.replace('_', ' ')}</span>
+                        <span className="capitalize text-muted-foreground">{skill.replace('_', ' ')}</span>
                         <span>{value}/10</span>
                       </div>
                     ))}

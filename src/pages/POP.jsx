@@ -91,7 +91,7 @@ export default function POP() {
           isGestor && (
             <Button
               onClick={() => setDialogOpen(true)}
-              className="bg-slate-800 hover:bg-slate-900 gap-2"
+              className="bg-slate-800 superficie-escura hover:bg-slate-900 gap-2"
             >
               <Plus className="w-4 h-4" />
               Novo POP
@@ -104,7 +104,7 @@ export default function POP() {
       <Card className="border-0 shadow-sm">
         <CardContent className="p-4">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
               placeholder="Buscar por código, título ou categoria..."
               value={searchTerm}
@@ -119,7 +119,7 @@ export default function POP() {
       {isLoading ? (
         <LoadingSpinner text="Carregando procedimentos..." />
       ) : popsFiltrados.length === 0 ? (
-        <div className="text-center py-16 text-slate-400">
+        <div className="text-center py-16 text-muted-foreground">
           <FileText className="w-10 h-10 mx-auto mb-3 opacity-30" />
           <p className="font-medium">Nenhum POP encontrado</p>
           {isGestor && (
@@ -142,8 +142,8 @@ export default function POP() {
             >
               <CardContent className="p-4 flex items-center justify-between gap-4">
                 <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-9 h-9 rounded-lg bg-slate-100 flex items-center justify-center flex-shrink-0">
-                    <FileText className="w-4 h-4 text-slate-500" />
+                  <div className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center flex-shrink-0">
+                    <FileText className="w-4 h-4 text-muted-foreground" />
                   </div>
                   <div className="min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
@@ -152,15 +152,15 @@ export default function POP() {
                         <Badge variant="secondary" className="text-xs">{pop.categoria}</Badge>
                       )}
                     </div>
-                    <p className="text-sm font-semibold text-slate-800 mt-0.5 truncate">{pop.titulo}</p>
+                    <p className="text-sm font-semibold text-foreground mt-0.5 truncate">{pop.titulo}</p>
                     {pop.objetivo && (
-                      <p className="text-xs text-slate-400 mt-0.5 truncate max-w-xl">{pop.objetivo}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5 truncate max-w-xl">{pop.objetivo}</p>
                     )}
                   </div>
                 </div>
 
                 <div className="flex items-center gap-2 flex-shrink-0">
-                  <span className="text-xs text-slate-400 hidden sm:block">
+                  <span className="text-xs text-muted-foreground hidden sm:block">
                     {formatDateSP(pop.data_criacao, 'DD/MM/YYYY')}
                   </span>
                   <Button
@@ -174,7 +174,7 @@ export default function POP() {
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="text-red-400 hover:text-red-600"
+                      className="text-red-400 hover:text-destructive"
                       onClick={(e) => { e.stopPropagation(); setSelectedPOP(pop); setDeleteDialogOpen(true); }}
                     >
                       <Trash2 className="w-4 h-4" />

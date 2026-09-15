@@ -319,7 +319,7 @@ export default function Escalas() {
         const atribuicoesDaEscala = atribuicoes.filter(a => a.escala_id === row.id && a.ativa);
         return (
           <div className="flex items-center gap-2">
-            <Users className="w-4 h-4 text-slate-500" />
+            <Users className="w-4 h-4 text-muted-foreground" />
             <span>{atribuicoesDaEscala.length}</span>
           </div>
         );
@@ -349,7 +349,7 @@ export default function Escalas() {
             <Button 
               variant="ghost" 
               size="icon"
-              className="text-red-600"
+              className="text-destructive"
               onClick={() => { setSelectedEscala(row); setDeleteDialogOpen(true); }}
             >
               <Trash2 className="w-4 h-4" />
@@ -372,7 +372,7 @@ export default function Escalas() {
         icon={CalendarIcon}
         actions={
           <div className="flex gap-2">
-            <div className="flex gap-1 border rounded-lg p-1 bg-white">
+            <div className="flex gap-1 border rounded-lg p-1 bg-card">
               <Button 
                 variant={visao === 'equipes' ? 'default' : 'ghost'} 
                 size="sm"
@@ -398,7 +398,7 @@ export default function Escalas() {
               </Button>
             </div>
             {isGestor && (
-              <Button onClick={() => setDialogOpen(true)} className="bg-blue-600 hover:bg-blue-700">
+              <Button onClick={() => setDialogOpen(true)} className="bg-primary hover:bg-primary/90">
                 <Plus className="w-4 h-4 mr-2" />
                 Nova Chave
               </Button>
@@ -439,9 +439,9 @@ export default function Escalas() {
             ))}
             {equipes.length === 0 && (
               <div className="col-span-full text-center py-12">
-                <Users className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-                <p className="text-slate-600 font-medium">Nenhuma equipe cadastrada</p>
-                <p className="text-slate-400 text-sm">Crie equipes para organizar melhor as escalas</p>
+                <Users className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
+                <p className="text-muted-foreground font-medium">Nenhuma equipe cadastrada</p>
+                <p className="text-muted-foreground text-sm">Crie equipes para organizar melhor as escalas</p>
               </div>
             )}
           </div>
@@ -472,7 +472,7 @@ export default function Escalas() {
               <Button 
                 onClick={() => setAtribuirDialogOpen(true)} 
                 size="lg"
-                className="bg-blue-600 hover:bg-blue-700"
+                className="bg-primary hover:bg-primary/90"
               >
                 <Plus className="w-5 h-5 mr-2" />
                 Atribuir Nova Escala
@@ -489,9 +489,9 @@ export default function Escalas() {
               </CardHeader>
               <CardContent className="space-y-2">
                 {minhasAtribuicoes.map(atrib => (
-                  <div key={atrib.id} className="p-3 bg-white rounded-lg">
+                  <div key={atrib.id} className="p-3 bg-card rounded-lg">
                     <p className="font-medium">{atrib.escala_nome}</p>
-                    <p className="text-sm text-slate-500">
+                    <p className="text-sm text-muted-foreground">
                       {formatDateSP(atrib.data_inicio, 'DD/MM/YYYY')} 
                       {atrib.data_fim ? ` - ${formatDateSP(atrib.data_fim, 'DD/MM/YYYY')}` : ' - Sem fim definido'}
                     </p>
@@ -554,7 +554,7 @@ export default function Escalas() {
                       <Badge variant="outline">Turno {tIndex + 1}</Badge>
                       {formData.turnos.length > 1 && (
                         <Button type="button" variant="ghost" size="icon" onClick={() => removeTurno(tIndex)}>
-                          <Trash2 className="w-4 h-4 text-red-500" />
+                          <Trash2 className="w-4 h-4 text-destructive" />
                         </Button>
                       )}
                     </div>
@@ -590,7 +590,7 @@ export default function Escalas() {
                             type="button"
                             variant={turno.dias_semana?.includes(diaIndex) ? 'default' : 'outline'}
                             size="sm"
-                            className={turno.dias_semana?.includes(diaIndex) ? 'bg-blue-600' : ''}
+                            className={turno.dias_semana?.includes(diaIndex) ? 'bg-primary' : ''}
                             onClick={() => toggleDiaSemana(tIndex, diaIndex)}
                           >
                             {dia}
@@ -607,7 +607,7 @@ export default function Escalas() {
               <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
                 Cancelar
               </Button>
-              <Button type="submit" className="bg-blue-600 hover:bg-blue-700" disabled={createMutation.isPending}>
+              <Button type="submit" className="bg-primary hover:bg-primary/90" disabled={createMutation.isPending}>
                 {createMutation.isPending ? (
                   <>
                     <div className="w-4 h-4 mr-2 border-2 border-white border-t-transparent rounded-full animate-spin" />

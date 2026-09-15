@@ -167,9 +167,9 @@ export default function PainelWFM({ colaboradores, isGestor }) {
     return (
       <Card className="border-0 shadow-sm">
         <CardContent className="p-8 text-center">
-          <Users className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-          <p className="text-slate-600 font-medium">Agentes insuficientes</p>
-          <p className="text-slate-400 text-sm mt-1">
+          <Users className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
+          <p className="text-muted-foreground font-medium">Agentes insuficientes</p>
+          <p className="text-muted-foreground text-sm mt-1">
             São necessários pelo menos 4 agentes ativos para gerar a escala WFM.
           </p>
         </CardContent>
@@ -192,8 +192,8 @@ export default function PainelWFM({ colaboradores, isGestor }) {
                 <ChevronLeft className="w-4 h-4" />
               </Button>
               <div className="text-center min-w-[160px]">
-                <p className="font-bold text-slate-800">{semanaRef}</p>
-                <p className="text-xs text-slate-500">{labelSemana}</p>
+                <p className="font-bold text-foreground">{semanaRef}</p>
+                <p className="text-xs text-muted-foreground">{labelSemana}</p>
               </div>
               <Button
                 variant="outline" size="icon"
@@ -204,7 +204,7 @@ export default function PainelWFM({ colaboradores, isGestor }) {
               <Button
                 variant="ghost" size="sm"
                 onClick={() => setSegundaFeira(getSegundaFeira(new Date()))}
-                className="text-slate-500 text-xs"
+                className="text-muted-foreground text-xs"
               >
                 Hoje
               </Button>
@@ -213,12 +213,12 @@ export default function PainelWFM({ colaboradores, isGestor }) {
             {/* Status + Ações */}
             <div className="flex items-center gap-2">
               {isPublicada && (
-                <Badge className="bg-green-100 text-green-700 border border-green-300">
+                <Badge className="bg-success-soft text-success border border-success/30">
                   <CheckCircle2 className="w-3 h-3 mr-1" /> Publicada
                 </Badge>
               )}
               {isDraft && (
-                <Badge className="bg-amber-100 text-amber-700 border border-amber-300">
+                <Badge className="bg-warning-soft text-warning border border-warning/30">
                   Rascunho
                 </Badge>
               )}
@@ -232,7 +232,7 @@ export default function PainelWFM({ colaboradores, isGestor }) {
                 <>
                   <Button
                     onClick={handleGerar}
-                    className="bg-blue-600 hover:bg-blue-700"
+                    className="bg-primary hover:bg-primary/90"
                     size="sm"
                   >
                     <Zap className="w-4 h-4 mr-1.5" />
@@ -257,7 +257,7 @@ export default function PainelWFM({ colaboradores, isGestor }) {
                   {escala && !isPublicada && (
                     <Button
                       size="sm"
-                      className="bg-green-600 hover:bg-green-700"
+                      className="bg-success hover:bg-success/90"
                       onClick={handlePublicar}
                       disabled={publicarMutation.isPending || erros.length > 0}
                     >
@@ -277,14 +277,14 @@ export default function PainelWFM({ colaboradores, isGestor }) {
         <Card className="border-0 shadow-sm">
           <CardContent className="p-8 text-center">
             <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
-            <p className="text-slate-500 text-sm">Carregando escala...</p>
+            <p className="text-muted-foreground text-sm">Carregando escala...</p>
           </CardContent>
         </Card>
       ) : escala ? (
         <Card className="border-0 shadow-lg">
           <CardHeader className="pb-2">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-base text-slate-800">Grade Semanal WFM</CardTitle>
+              <CardTitle className="text-base text-foreground">Grade Semanal WFM</CardTitle>
               <LegendaWFM />
             </div>
           </CardHeader>
@@ -300,16 +300,16 @@ export default function PainelWFM({ colaboradores, isGestor }) {
         </Card>
       ) : (
         /* Estado vazio — escala não gerada ainda */
-        <Card className="border-0 shadow-sm border-2 border-dashed border-slate-200">
+        <Card className="border-0 shadow-sm border-2 border-dashed border-border">
           <CardContent className="p-12 text-center">
-            <Zap className="w-14 h-14 text-slate-300 mx-auto mb-4" />
-            <p className="text-slate-600 font-semibold text-lg">Semana sem escala gerada</p>
-            <p className="text-slate-400 text-sm mt-1 mb-6">
+            <Zap className="w-14 h-14 text-muted-foreground mx-auto mb-4" />
+            <p className="text-muted-foreground font-semibold text-lg">Semana sem escala gerada</p>
+            <p className="text-muted-foreground text-sm mt-1 mb-6">
               Clique em "Gerar Automático" para distribuir os 4 slots diários automaticamente,
               respeitando equilíbrio, anti-dobra e rotação.
             </p>
             {isGestor && (
-              <Button onClick={handleGerar} className="bg-blue-600 hover:bg-blue-700" size="lg">
+              <Button onClick={handleGerar} className="bg-primary hover:bg-primary/90" size="lg">
                 <Zap className="w-5 h-5 mr-2" />
                 Gerar Escala Automaticamente
               </Button>
@@ -318,10 +318,10 @@ export default function PainelWFM({ colaboradores, isGestor }) {
             <div className="mt-8 grid grid-cols-5 gap-2 max-w-2xl mx-auto opacity-40">
               {['Seg', 'Ter', 'Qua', 'Qui', 'Sex'].map(d => (
                 <div key={d} className="space-y-1.5">
-                  <p className="text-xs font-bold text-slate-500 text-center">{d}</p>
+                  <p className="text-xs font-bold text-muted-foreground text-center">{d}</p>
                   {['M-ATEND', 'M-ANÁL', 'T-ATEND', 'T-ANÁL'].map(s => (
-                    <div key={s} className="border-2 border-dashed border-slate-200 rounded-lg p-1.5 text-center">
-                      <span className="text-[10px] text-slate-400 font-medium">{s}</span>
+                    <div key={s} className="border-2 border-dashed border-border rounded-lg p-1.5 text-center">
+                      <span className="text-[10px] text-muted-foreground font-medium">{s}</span>
                     </div>
                   ))}
                 </div>
@@ -352,17 +352,17 @@ export default function PainelWFM({ colaboradores, isGestor }) {
         <DialogContent className="max-w-sm">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <AlertTriangle className="w-5 h-5 text-amber-500" />
+              <AlertTriangle className="w-5 h-5 text-warning" />
               {slotsFixos.length} slot(s) travado(s)
             </DialogTitle>
           </DialogHeader>
-          <p className="text-slate-600 text-sm">
+          <p className="text-muted-foreground text-sm">
             O algoritmo irá respeitar os slots travados e preencher apenas os restantes.
             Deseja continuar?
           </p>
           <div className="flex justify-end gap-2 mt-4">
             <Button variant="outline" onClick={() => setConfirmGerarOpen(false)}>Cancelar</Button>
-            <Button className="bg-blue-600 hover:bg-blue-700" onClick={executarGeracao}>
+            <Button className="bg-primary hover:bg-primary/90" onClick={executarGeracao}>
               Continuar
             </Button>
           </div>

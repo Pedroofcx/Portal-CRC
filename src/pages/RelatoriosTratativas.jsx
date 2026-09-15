@@ -412,29 +412,29 @@ export default function RelatoriosTratativas() {
                 <CardTitle className="text-base">Métricas de Qualidade</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
-                  <span className="text-sm text-slate-700">Tempo Médio de Resolução</span>
-                  <span className="font-bold text-lg text-blue-600">
+                <div className="flex justify-between items-center p-3 bg-muted rounded-lg">
+                  <span className="text-sm text-foreground">Tempo Médio de Resolução</span>
+                  <span className="font-bold text-lg text-primary">
                     {Math.round(ri.tempoMedio / 60)}h {Math.round(ri.tempoMedio % 60)}min
                   </span>
                 </div>
-                <div className="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
-                  <span className="text-sm text-slate-700">Taxa de SLA</span>
-                  <span className="font-bold text-lg text-green-600">
+                <div className="flex justify-between items-center p-3 bg-muted rounded-lg">
+                  <span className="text-sm text-foreground">Taxa de SLA</span>
+                  <span className="font-bold text-lg text-success">
                     {ri.encerradas > 0 ? Math.round((ri.dentraSLA / ri.encerradas) * 100) : 0}%
                   </span>
                 </div>
-                <div className="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
-                  <span className="text-sm text-slate-700">Soluções Replicáveis</span>
-                  <span className="font-bold text-lg text-purple-600">{ri.solucoesReplicaveis}</span>
+                <div className="flex justify-between items-center p-3 bg-muted rounded-lg">
+                  <span className="text-sm text-foreground">Soluções Replicáveis</span>
+                  <span className="font-bold text-lg text-primary">{ri.solucoesReplicaveis}</span>
                 </div>
-                <div className="flex justify-between items-center p-3 bg-orange-50 border border-orange-200 rounded-lg">
-                  <span className="text-sm text-slate-700">Casos com Devolução</span>
-                  <span className="font-bold text-lg text-orange-600">{ri.totalDevolucoes || 0}</span>
+                <div className="flex justify-between items-center p-3 bg-critical-soft border border-critical/25 rounded-lg">
+                  <span className="text-sm text-foreground">Casos com Devolução</span>
+                  <span className="font-bold text-lg text-critical">{ri.totalDevolucoes || 0}</span>
                 </div>
-                <div className="flex justify-between items-center p-3 bg-red-50 border border-red-100 rounded-lg">
-                  <span className="text-sm text-slate-700">Valor Total Devolvido</span>
-                  <span className="font-bold text-lg text-red-600">
+                <div className="flex justify-between items-center p-3 bg-destructive/10 border border-red-100 rounded-lg">
+                  <span className="text-sm text-foreground">Valor Total Devolvido</span>
+                  <span className="font-bold text-lg text-destructive">
                     R$ {(ri.valorTotalDevolvido || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                   </span>
                 </div>
@@ -453,7 +453,7 @@ export default function RelatoriosTratativas() {
               </CardHeader>
               <CardContent>
                 {Object.keys(ri.categorias).length === 0 ? (
-                  <p className="text-slate-500 text-center py-8">Sem dados</p>
+                  <p className="text-muted-foreground text-center py-8">Sem dados</p>
                 ) : (
                   <div className="space-y-3">
                     {Object.entries(ri.categorias)
@@ -482,21 +482,21 @@ export default function RelatoriosTratativas() {
           </div>
 
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="p-4 bg-slate-50 border border-slate-200 rounded-lg text-center">
-              <p className="text-2xl font-bold text-blue-600">{ra.encerradas > 0 ? Math.round((ra.dentraSLA / ra.encerradas) * 100) : 0}%</p>
-              <p className="text-xs text-slate-600 mt-1">SLA Cumprido</p>
+            <div className="p-4 bg-muted border border-border rounded-lg text-center">
+              <p className="text-2xl font-bold text-primary">{ra.encerradas > 0 ? Math.round((ra.dentraSLA / ra.encerradas) * 100) : 0}%</p>
+              <p className="text-xs text-muted-foreground mt-1">SLA Cumprido</p>
             </div>
-            <div className="p-4 bg-slate-50 border border-slate-200 rounded-lg text-center">
-              <p className="text-2xl font-bold text-slate-700">{ra.tempoMedio > 0 ? `${Math.round(ra.tempoMedio / 60)}h ${Math.round(ra.tempoMedio % 60)}m` : '-'}</p>
-              <p className="text-xs text-slate-600 mt-1">Tempo Médio</p>
+            <div className="p-4 bg-muted border border-border rounded-lg text-center">
+              <p className="text-2xl font-bold text-foreground">{ra.tempoMedio > 0 ? `${Math.round(ra.tempoMedio / 60)}h ${Math.round(ra.tempoMedio % 60)}m` : '-'}</p>
+              <p className="text-xs text-muted-foreground mt-1">Tempo Médio</p>
             </div>
-            <div className="p-4 bg-orange-50 border border-orange-200 rounded-lg text-center">
-              <p className="text-2xl font-bold text-orange-600">{ra.totalDevolucoes || 0}</p>
-              <p className="text-xs text-slate-600 mt-1">Casos com Devolução</p>
+            <div className="p-4 bg-critical-soft border border-critical/25 rounded-lg text-center">
+              <p className="text-2xl font-bold text-critical">{ra.totalDevolucoes || 0}</p>
+              <p className="text-xs text-muted-foreground mt-1">Casos com Devolução</p>
             </div>
-            <div className="p-4 bg-red-50 border border-red-100 rounded-lg text-center">
-              <p className="text-xl font-bold text-red-600">R$ {(ra.valorTotalDevolvido || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
-              <p className="text-xs text-slate-600 mt-1">Valor Devolvido</p>
+            <div className="p-4 bg-destructive/10 border border-red-100 rounded-lg text-center">
+              <p className="text-xl font-bold text-destructive">R$ {(ra.valorTotalDevolvido || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+              <p className="text-xs text-muted-foreground mt-1">Valor Devolvido</p>
             </div>
           </div>
 
@@ -505,7 +505,7 @@ export default function RelatoriosTratativas() {
               <CardHeader><CardTitle className="text-base">Distribuição de Notas</CardTitle></CardHeader>
               <CardContent>
                 {ra.notas.length === 0 ? (
-                  <p className="text-slate-500 text-center py-8">Sem notas registradas</p>
+                  <p className="text-muted-foreground text-center py-8">Sem notas registradas</p>
                 ) : (
                   <ResponsiveContainer width="100%" height={220}>
                     <PieChart>
@@ -523,12 +523,12 @@ export default function RelatoriosTratativas() {
               <CardHeader><CardTitle className="text-base">Categorias de Reclamação</CardTitle></CardHeader>
               <CardContent>
                 {Object.keys(ra.categorias).length === 0 ? (
-                  <p className="text-slate-500 text-center py-8">Sem categorias registradas</p>
+                  <p className="text-muted-foreground text-center py-8">Sem categorias registradas</p>
                 ) : (
                   <div className="space-y-2">
                     {Object.entries(ra.categorias).sort(([, a], [, b]) => b - a).slice(0, 6).map(([cat, count]) => (
-                      <div key={cat} className="flex items-center justify-between p-2 bg-slate-50 rounded">
-                        <span className="text-sm text-slate-700 truncate">{cat}</span>
+                      <div key={cat} className="flex items-center justify-between p-2 bg-muted rounded">
+                        <span className="text-sm text-foreground truncate">{cat}</span>
                         <Badge variant="outline">{count}</Badge>
                       </div>
                     ))}
@@ -545,13 +545,13 @@ export default function RelatoriosTratativas() {
                 </div>
               </CardHeader>
               <CardContent className="space-y-3">
-                <div className="p-3 bg-blue-50 rounded-lg">
-                  <p className="text-xs font-medium text-blue-900 mb-1">Recomendação</p>
-                  <p className="text-xs text-blue-700">{ra.notaMedia >= 9 ? 'Excelente! Continue o padrão.' : ra.notaMedia >= 8 ? 'Bom. Busque nota 9+.' : 'Plano de ação necessário.'}</p>
+                <div className="p-3 bg-info-soft rounded-lg">
+                  <p className="text-xs font-medium text-primary mb-1">Recomendação</p>
+                  <p className="text-xs text-primary">{ra.notaMedia >= 9 ? 'Excelente! Continue o padrão.' : ra.notaMedia >= 8 ? 'Bom. Busque nota 9+.' : 'Plano de ação necessário.'}</p>
                 </div>
-                <div className="p-3 bg-slate-50 rounded-lg space-y-1 text-xs">
+                <div className="p-3 bg-muted rounded-lg space-y-1 text-xs">
                   <div className="flex justify-between"><span>Notas 10</span><strong>{ra.notas.filter(n => n === 10).length}</strong></div>
-                  <div className="flex justify-between"><span>SLA Estourado</span><strong className="text-red-600">{ra.encerradas - ra.dentraSLA}</strong></div>
+                  <div className="flex justify-between"><span>SLA Estourado</span><strong className="text-destructive">{ra.encerradas - ra.dentraSLA}</strong></div>
                   <div className="flex justify-between"><span>Em Aberto</span><strong>{ra.total - ra.encerradas}</strong></div>
                 </div>
               </CardContent>
@@ -569,21 +569,21 @@ export default function RelatoriosTratativas() {
           </div>
 
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="p-4 bg-slate-50 rounded-lg text-center">
-              <p className="text-2xl font-bold text-blue-600">{gmn.encerradas > 0 ? Math.round((gmn.dentraSLA / gmn.encerradas) * 100) : 0}%</p>
-              <p className="text-xs text-slate-600 mt-1">SLA Cumprido</p>
+            <div className="p-4 bg-muted rounded-lg text-center">
+              <p className="text-2xl font-bold text-primary">{gmn.encerradas > 0 ? Math.round((gmn.dentraSLA / gmn.encerradas) * 100) : 0}%</p>
+              <p className="text-xs text-muted-foreground mt-1">SLA Cumprido</p>
             </div>
-            <div className="p-4 bg-slate-50 rounded-lg text-center">
-              <p className="text-2xl font-bold text-slate-700">{gmn.tempoMedio > 0 ? `${Math.round(gmn.tempoMedio / 60)}h ${Math.round(gmn.tempoMedio % 60)}m` : '-'}</p>
-              <p className="text-xs text-slate-600 mt-1">Tempo Médio</p>
+            <div className="p-4 bg-muted rounded-lg text-center">
+              <p className="text-2xl font-bold text-foreground">{gmn.tempoMedio > 0 ? `${Math.round(gmn.tempoMedio / 60)}h ${Math.round(gmn.tempoMedio % 60)}m` : '-'}</p>
+              <p className="text-xs text-muted-foreground mt-1">Tempo Médio</p>
             </div>
-            <div className="p-4 bg-orange-50 border border-orange-200 rounded-lg text-center">
-              <p className="text-2xl font-bold text-orange-600">{gmn.totalDevolucoes || 0}</p>
-              <p className="text-xs text-slate-600 mt-1">Casos com Devolução</p>
+            <div className="p-4 bg-critical-soft border border-critical/25 rounded-lg text-center">
+              <p className="text-2xl font-bold text-critical">{gmn.totalDevolucoes || 0}</p>
+              <p className="text-xs text-muted-foreground mt-1">Casos com Devolução</p>
             </div>
-            <div className="p-4 bg-red-50 rounded-lg text-center">
-              <p className="text-xl font-bold text-red-600">R$ {(gmn.valorTotalDevolvido || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
-              <p className="text-xs text-slate-600 mt-1">Valor Devolvido</p>
+            <div className="p-4 bg-destructive/10 rounded-lg text-center">
+              <p className="text-xl font-bold text-destructive">R$ {(gmn.valorTotalDevolvido || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+              <p className="text-xs text-muted-foreground mt-1">Valor Devolvido</p>
             </div>
           </div>
 
@@ -592,17 +592,17 @@ export default function RelatoriosTratativas() {
               <CardHeader><CardTitle className="text-base">Situação dos Comentários</CardTitle></CardHeader>
               <CardContent>
                 <div className="grid grid-cols-3 gap-3 mb-4">
-                  <div className="text-center p-4 bg-slate-50 rounded-lg">
-                    <p className="text-2xl font-bold text-slate-700">{gmn.comentariosMantidos}</p>
-                    <p className="text-xs text-slate-500 mt-1">Mantidos</p>
+                  <div className="text-center p-4 bg-muted rounded-lg">
+                    <p className="text-2xl font-bold text-foreground">{gmn.comentariosMantidos}</p>
+                    <p className="text-xs text-muted-foreground mt-1">Mantidos</p>
                   </div>
-                  <div className="text-center p-4 bg-amber-50 rounded-lg">
-                    <p className="text-2xl font-bold text-amber-600">{gmn.comentariosEditados}</p>
-                    <p className="text-xs text-slate-500 mt-1">Editados</p>
+                  <div className="text-center p-4 bg-warning-soft rounded-lg">
+                    <p className="text-2xl font-bold text-warning">{gmn.comentariosEditados}</p>
+                    <p className="text-xs text-muted-foreground mt-1">Editados</p>
                   </div>
-                  <div className="text-center p-4 bg-green-50 rounded-lg">
-                    <p className="text-2xl font-bold text-green-600">{gmn.comentariosExcluidos}</p>
-                    <p className="text-xs text-slate-500 mt-1">Excluídos</p>
+                  <div className="text-center p-4 bg-success-soft rounded-lg">
+                    <p className="text-2xl font-bold text-success">{gmn.comentariosExcluidos}</p>
+                    <p className="text-xs text-muted-foreground mt-1">Excluídos</p>
                   </div>
                 </div>
               </CardContent>
@@ -617,17 +617,17 @@ export default function RelatoriosTratativas() {
               </CardHeader>
               <CardContent>
                 <div className="grid sm:grid-cols-2 gap-4">
-                  <div className="text-center p-5 bg-green-50 rounded-lg">
-                    <p className="text-3xl font-bold text-green-600">{gmn.encerradas > 0 ? Math.round((gmn.reavaliacoesPositivas / gmn.encerradas) * 100) : 0}%</p>
-                    <p className="text-xs text-slate-600 mt-1">Reavaliação Positiva</p>
+                  <div className="text-center p-5 bg-success-soft rounded-lg">
+                    <p className="text-3xl font-bold text-success">{gmn.encerradas > 0 ? Math.round((gmn.reavaliacoesPositivas / gmn.encerradas) * 100) : 0}%</p>
+                    <p className="text-xs text-muted-foreground mt-1">Reavaliação Positiva</p>
                   </div>
-                  <div className="text-center p-5 bg-blue-50 rounded-lg">
-                    <p className="text-3xl font-bold text-blue-600">{gmn.encerradas > 0 ? Math.round((gmn.exclusoesAvaliacao / gmn.encerradas) * 100) : 0}%</p>
-                    <p className="text-xs text-slate-600 mt-1">Taxa de Exclusão</p>
+                  <div className="text-center p-5 bg-info-soft rounded-lg">
+                    <p className="text-3xl font-bold text-primary">{gmn.encerradas > 0 ? Math.round((gmn.exclusoesAvaliacao / gmn.encerradas) * 100) : 0}%</p>
+                    <p className="text-xs text-muted-foreground mt-1">Taxa de Exclusão</p>
                   </div>
                 </div>
-                <div className="mt-3 p-3 bg-slate-50 rounded-lg text-xs space-y-1">
-                  <div className="flex justify-between"><span>SLA Estourado</span><strong className="text-red-600">{gmn.encerradas - gmn.dentraSLA}</strong></div>
+                <div className="mt-3 p-3 bg-muted rounded-lg text-xs space-y-1">
+                  <div className="flex justify-between"><span>SLA Estourado</span><strong className="text-destructive">{gmn.encerradas - gmn.dentraSLA}</strong></div>
                   <div className="flex justify-between"><span>Em Aberto</span><strong>{gmn.total - gmn.encerradas}</strong></div>
                 </div>
               </CardContent>
@@ -645,21 +645,21 @@ export default function RelatoriosTratativas() {
           </div>
 
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="p-4 bg-slate-50 rounded-lg text-center">
-              <p className="text-2xl font-bold text-blue-600">{cont.encerradas > 0 ? Math.round((cont.dentraSLA / cont.encerradas) * 100) : 0}%</p>
-              <p className="text-xs text-slate-600 mt-1">SLA Cumprido</p>
+            <div className="p-4 bg-muted rounded-lg text-center">
+              <p className="text-2xl font-bold text-primary">{cont.encerradas > 0 ? Math.round((cont.dentraSLA / cont.encerradas) * 100) : 0}%</p>
+              <p className="text-xs text-muted-foreground mt-1">SLA Cumprido</p>
             </div>
-            <div className="p-4 bg-slate-50 rounded-lg text-center">
-              <p className="text-2xl font-bold text-slate-700">{cont.tempoMedio > 0 ? `${Math.round(cont.tempoMedio / 60)}h ${Math.round(cont.tempoMedio % 60)}m` : '-'}</p>
-              <p className="text-xs text-slate-600 mt-1">Tempo Médio</p>
+            <div className="p-4 bg-muted rounded-lg text-center">
+              <p className="text-2xl font-bold text-foreground">{cont.tempoMedio > 0 ? `${Math.round(cont.tempoMedio / 60)}h ${Math.round(cont.tempoMedio % 60)}m` : '-'}</p>
+              <p className="text-xs text-muted-foreground mt-1">Tempo Médio</p>
             </div>
-            <div className="p-4 bg-red-50 rounded-lg text-center">
-              <p className="text-2xl font-bold text-red-600">{cont.encerradas - cont.dentraSLA}</p>
-              <p className="text-xs text-slate-600 mt-1">SLA Estourado</p>
+            <div className="p-4 bg-destructive/10 rounded-lg text-center">
+              <p className="text-2xl font-bold text-destructive">{cont.encerradas - cont.dentraSLA}</p>
+              <p className="text-xs text-muted-foreground mt-1">SLA Estourado</p>
             </div>
-            <div className="p-4 bg-amber-50 rounded-lg text-center">
-              <p className="text-2xl font-bold text-amber-600">{cont.total - cont.encerradas}</p>
-              <p className="text-xs text-slate-600 mt-1">Em Aberto</p>
+            <div className="p-4 bg-warning-soft rounded-lg text-center">
+              <p className="text-2xl font-bold text-warning">{cont.total - cont.encerradas}</p>
+              <p className="text-xs text-muted-foreground mt-1">Em Aberto</p>
             </div>
           </div>
 
@@ -667,28 +667,28 @@ export default function RelatoriosTratativas() {
             <Card className="border-0 shadow-sm">
               <CardHeader><CardTitle className="text-base">Impacto Financeiro</CardTitle></CardHeader>
               <CardContent className="space-y-3">
-                <div className="p-3 bg-red-50 rounded-lg">
-                  <p className="text-xs text-slate-500">Valor Contestado</p>
-                  <p className="text-xl font-bold text-red-600">R$ {cont.valorTotalContestado.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+                <div className="p-3 bg-destructive/10 rounded-lg">
+                  <p className="text-xs text-muted-foreground">Valor Contestado</p>
+                  <p className="text-xl font-bold text-destructive">R$ {cont.valorTotalContestado.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
                 </div>
-                <div className="p-3 bg-blue-50 rounded-lg">
-                  <p className="text-xs text-slate-500">Valor Pago (cliente pagou)</p>
-                  <p className="text-xl font-bold text-blue-600">R$ {cont.valorTotalPago.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
-                  <p className="text-xs text-blue-500">{cont.pagamentosIntegrais} caso{cont.pagamentosIntegrais !== 1 ? 's' : ''}</p>
+                <div className="p-3 bg-info-soft rounded-lg">
+                  <p className="text-xs text-muted-foreground">Valor Pago (cliente pagou)</p>
+                  <p className="text-xl font-bold text-primary">R$ {cont.valorTotalPago.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+                  <p className="text-xs text-primary">{cont.pagamentosIntegrais} caso{cont.pagamentosIntegrais !== 1 ? 's' : ''}</p>
                 </div>
-                <div className="p-3 bg-green-50 rounded-lg">
-                  <p className="text-xs text-slate-500">Valor Recuperado (total)</p>
-                  <p className="text-xl font-bold text-green-600">R$ {cont.valorTotalRecuperado.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+                <div className="p-3 bg-success-soft rounded-lg">
+                  <p className="text-xs text-muted-foreground">Valor Recuperado (total)</p>
+                  <p className="text-xl font-bold text-success">R$ {cont.valorTotalRecuperado.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
                 </div>
-                <div className="p-3 bg-slate-50 rounded-lg">
-                  <p className="text-xs text-slate-500">Valor Perdido / Não Recuperado</p>
-                  <p className="text-xl font-bold text-slate-600">
+                <div className="p-3 bg-muted rounded-lg">
+                  <p className="text-xs text-muted-foreground">Valor Perdido / Não Recuperado</p>
+                  <p className="text-xl font-bold text-muted-foreground">
                     R$ {Math.max(0, cont.valorTotalContestado - cont.valorTotalRecuperado).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                   </p>
                 </div>
-                <div className="p-3 bg-amber-50 rounded-lg">
-                  <p className="text-xs text-slate-500">Taxa de Recuperação</p>
-                  <p className="text-2xl font-bold text-amber-600">{cont.valorTotalContestado > 0 ? Math.round((cont.valorTotalRecuperado / cont.valorTotalContestado) * 100) : 0}%</p>
+                <div className="p-3 bg-warning-soft rounded-lg">
+                  <p className="text-xs text-muted-foreground">Taxa de Recuperação</p>
+                  <p className="text-2xl font-bold text-warning">{cont.valorTotalContestado > 0 ? Math.round((cont.valorTotalRecuperado / cont.valorTotalContestado) * 100) : 0}%</p>
                 </div>
               </CardContent>
             </Card>
@@ -697,13 +697,13 @@ export default function RelatoriosTratativas() {
               <CardHeader><CardTitle className="text-base">Categorias de Motivo</CardTitle></CardHeader>
               <CardContent>
                 {Object.keys(cont.categorias).length === 0 ? (
-                  <p className="text-slate-500 text-center py-8">Sem categorias registradas</p>
+                  <p className="text-muted-foreground text-center py-8">Sem categorias registradas</p>
                 ) : (
                   <div className="space-y-2">
                     {Object.entries(cont.categorias).sort(([, a], [, b]) => b - a).map(([cat, count]) => {
                       const labels = { erro_cobranca: 'Erro de Cobrança', fraude: 'Fraude', cancelamento_compra: 'Cancelamento', erro_operacional: 'Erro Operacional', outros: 'Outros' };
                       return (
-                        <div key={cat} className="flex items-center justify-between p-2 bg-slate-50 rounded">
+                        <div key={cat} className="flex items-center justify-between p-2 bg-muted rounded">
                           <span className="text-sm">{labels[cat] || cat}</span>
                           <Badge variant="outline">{count}</Badge>
                         </div>
@@ -724,14 +724,14 @@ export default function RelatoriosTratativas() {
               <CardContent>
                 <div className="space-y-2 mt-2">
                   {[
-                    { label: 'Pagou (integral)', value: cont.pagamentosIntegrais, color: 'bg-blue-100 text-blue-700' },
-                    { label: 'Cancelamento', value: cont.cancelamentos, color: 'bg-green-100 text-green-700' },
-                    { label: 'Acordo', value: cont.acordos, color: 'bg-amber-100 text-amber-700' },
-                    { label: 'Sem Acordo', value: cont.semAcordo, color: 'bg-red-100 text-red-700' },
-                    { label: 'Sem Contato', value: cont.semContato, color: 'bg-slate-100 text-slate-700' },
+                    { label: 'Pagou (integral)', value: cont.pagamentosIntegrais, color: 'bg-info-soft text-primary' },
+                    { label: 'Cancelamento', value: cont.cancelamentos, color: 'bg-success-soft text-success' },
+                    { label: 'Acordo', value: cont.acordos, color: 'bg-warning-soft text-warning' },
+                    { label: 'Sem Acordo', value: cont.semAcordo, color: 'bg-destructive/10 text-destructive' },
+                    { label: 'Sem Contato', value: cont.semContato, color: 'bg-muted text-foreground' },
                   ].map(item => (
                     <div key={item.label} className="flex items-center justify-between">
-                      <span className="text-sm text-slate-700">{item.label}</span>
+                      <span className="text-sm text-foreground">{item.label}</span>
                       <Badge className={item.color}>{item.value}</Badge>
                     </div>
                   ))}

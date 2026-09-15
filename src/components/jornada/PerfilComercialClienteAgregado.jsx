@@ -52,12 +52,12 @@ export default function PerfilComercialClienteAgregado({ tratativas }) {
       <Card className="border-0 shadow-sm">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base">
-            <Building2 className="w-5 h-5 text-slate-400" />
+            <Building2 className="w-5 h-5 text-muted-foreground" />
             Perfil Comercial do Cliente
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-sm text-slate-400 text-center py-4">
+          <p className="text-sm text-muted-foreground text-center py-4">
             Nenhum dado comercial registrado nas tratativas. Preencha os dados comerciais ao registrar novas tratativas ou importe via CSV.
           </p>
         </CardContent>
@@ -69,9 +69,9 @@ export default function PerfilComercialClienteAgregado({ tratativas }) {
     <Card className="border-0 shadow-sm bg-gradient-to-br from-emerald-50 to-teal-50">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-base">
-          <Building2 className="w-5 h-5 text-emerald-600" />
+          <Building2 className="w-5 h-5 text-success" />
           Perfil Comercial do Cliente
-          <span className="text-sm font-normal text-slate-500 ml-2">
+          <span className="text-sm font-normal text-muted-foreground ml-2">
             {dados.totalComercial} cliente(s) com dados comerciais
           </span>
         </CardTitle>
@@ -81,27 +81,27 @@ export default function PerfilComercialClienteAgregado({ tratativas }) {
           {/* Receita envolvida — valores equivalentes calculados dinamicamente */}
           <div className="space-y-3">
             <div className="flex items-start gap-2">
-              <DollarSign className="w-4 h-4 text-emerald-600 mt-0.5 flex-shrink-0" />
+              <DollarSign className="w-4 h-4 text-success mt-0.5 flex-shrink-0" />
               <div>
-                <p className="text-xs text-slate-500">Receita Mensal Equivalente</p>
-                <p className="font-bold text-slate-900 text-lg">{formatBRL(dados.receitaMensalTotal)}</p>
-                <p className="text-[10px] text-emerald-600 italic">calculado por modalidade</p>
+                <p className="text-xs text-muted-foreground">Receita Mensal Equivalente</p>
+                <p className="font-bold text-foreground text-lg">{formatBRL(dados.receitaMensalTotal)}</p>
+                <p className="text-[10px] text-success italic">calculado por modalidade</p>
               </div>
             </div>
             <div className="flex items-start gap-2">
-              <DollarSign className="w-4 h-4 text-emerald-600 mt-0.5 flex-shrink-0" />
+              <DollarSign className="w-4 h-4 text-success mt-0.5 flex-shrink-0" />
               <div>
-                <p className="text-xs text-slate-500">Receita Anual Equivalente</p>
-                <p className="font-bold text-slate-900 text-lg">{formatBRL(dados.receitaAnualTotal)}</p>
-                <p className="text-[10px] text-emerald-600 italic">calculado por modalidade</p>
+                <p className="text-xs text-muted-foreground">Receita Anual Equivalente</p>
+                <p className="font-bold text-foreground text-lg">{formatBRL(dados.receitaAnualTotal)}</p>
+                <p className="text-[10px] text-success italic">calculado por modalidade</p>
               </div>
             </div>
             {dados.tempoMedio !== null && (
               <div className="flex items-start gap-2">
-                <TrendingUp className="w-4 h-4 text-emerald-600 mt-0.5 flex-shrink-0" />
+                <TrendingUp className="w-4 h-4 text-success mt-0.5 flex-shrink-0" />
                 <div>
-                  <p className="text-xs text-slate-500">Tempo Médio de Relacionamento</p>
-                  <p className="font-semibold text-slate-900">{formatarTempoContrato(dados.tempoMedio)}</p>
+                  <p className="text-xs text-muted-foreground">Tempo Médio de Relacionamento</p>
+                  <p className="font-semibold text-foreground">{formatarTempoContrato(dados.tempoMedio)}</p>
                 </div>
               </div>
             )}
@@ -109,14 +109,14 @@ export default function PerfilComercialClienteAgregado({ tratativas }) {
 
           {/* Distribuição por Plano */}
           <div className="lg:col-span-1">
-            <p className="text-xs font-semibold text-slate-500 uppercase mb-2 flex items-center gap-1.5">
+            <p className="text-xs font-semibold text-muted-foreground uppercase mb-2 flex items-center gap-1.5">
               <Tag className="w-3.5 h-3.5" /> Por Plano
             </p>
             <div className="space-y-1.5">
               {dados.porPlano.slice(0, 5).map(([plano, count]) => (
                 <div key={plano} className="flex items-center justify-between text-sm">
-                  <span className="text-slate-700 truncate">{plano}</span>
-                  <Badge className="bg-emerald-100 text-emerald-700 text-xs">{count}</Badge>
+                  <span className="text-foreground truncate">{plano}</span>
+                  <Badge className="bg-success-soft text-success text-xs">{count}</Badge>
                 </div>
               ))}
             </div>
@@ -124,13 +124,13 @@ export default function PerfilComercialClienteAgregado({ tratativas }) {
 
           {/* Distribuição por Segmento */}
           <div className="lg:col-span-2">
-            <p className="text-xs font-semibold text-slate-500 uppercase mb-2 flex items-center gap-1.5">
+            <p className="text-xs font-semibold text-muted-foreground uppercase mb-2 flex items-center gap-1.5">
               <Building2 className="w-3.5 h-3.5" /> Por Segmento
             </p>
             <div className="grid grid-cols-2 gap-1.5">
               {dados.porSegmento.map(([segmento, count]) => (
-                <div key={segmento} className="flex items-center justify-between text-sm bg-white/60 rounded px-2 py-1">
-                  <span className="text-slate-700 truncate">{segmento}</span>
+                <div key={segmento} className="flex items-center justify-between text-sm bg-card/60 rounded px-2 py-1">
+                  <span className="text-foreground truncate">{segmento}</span>
                   <Badge variant="outline" className="text-xs">{count}</Badge>
                 </div>
               ))}

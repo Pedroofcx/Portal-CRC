@@ -39,7 +39,7 @@ export default function RichTextEditor({
   ];
 
   return (
-    <div className={cn("bg-white rounded-lg border border-slate-200", className)}>
+    <div className={cn("bg-card rounded-lg border border-border", className)}>
       <ReactQuill
         theme="snow"
         value={value}

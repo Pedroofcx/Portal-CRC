@@ -45,15 +45,15 @@ export default function MatrizEsforcoImpacto({ tratativas, motivos }) {
   const formatarReais = (valor) => `R$ ${valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
 
   const esforcoBadgeClass = {
-    Baixo: 'bg-green-100 text-green-700 border-green-300',
-    Medio: 'bg-amber-100 text-amber-700 border-amber-300',
-    Alto: 'bg-red-100 text-red-700 border-red-300',
+    Baixo: 'bg-success-soft text-success border-success/30',
+    Medio: 'bg-warning-soft text-warning border-warning/30',
+    Alto: 'bg-destructive/10 text-destructive border-destructive/30',
   };
 
   if (linhas.length === 0) {
     return (
       <Card className="border-0 shadow-sm">
-        <CardContent className="py-10 text-center text-slate-500">
+        <CardContent className="py-10 text-center text-muted-foreground">
           Nenhum motivo com custo financeiro apurado ainda. Configure o "Esforço de Correção (TI)" em cada motivo para habilitar a matriz.
         </CardContent>
       </Card>
@@ -64,12 +64,12 @@ export default function MatrizEsforcoImpacto({ tratativas, motivos }) {
     <Card className="border-0 shadow-sm">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Target className="w-5 h-5 text-purple-600" />
+          <Target className="w-5 h-5 text-primary" />
           Matriz de Esforço x Impacto
         </CardTitle>
-        <p className="text-sm text-slate-500 mt-1">
+        <p className="text-sm text-muted-foreground mt-1">
           Cruza o esforço de correção (TI/Produto) de cada motivo com o custo financeiro total que ele gera.
-          <Badge className="ml-2 bg-green-100 text-green-700 align-middle">
+          <Badge className="ml-2 bg-success-soft text-success align-middle">
             <Sparkles className="w-3 h-3 mr-1" />
             Quick Win = alto custo + baixo esforço
           </Badge>
@@ -81,16 +81,16 @@ export default function MatrizEsforcoImpacto({ tratativas, motivos }) {
             <div
               key={linha.motivoId}
               className={`flex items-center justify-between p-3 rounded-lg border ${
-                linha.quickWin ? 'bg-green-50 border-green-300' : 'bg-slate-50 border-slate-200'
+                linha.quickWin ? 'bg-success-soft border-success/30' : 'bg-muted border-border'
               }`}
             >
               <div className="flex items-center gap-3 min-w-0">
                 <div className="min-w-0">
-                  <p className="font-medium text-slate-900 truncate">{linha.nome}</p>
-                  <p className="text-xs text-slate-500">{linha.casos} caso(s)</p>
+                  <p className="font-medium text-foreground truncate">{linha.nome}</p>
+                  <p className="text-xs text-muted-foreground">{linha.casos} caso(s)</p>
                 </div>
                 {linha.quickWin && (
-                  <Badge className="bg-green-600 text-white flex items-center gap-1 flex-shrink-0">
+                  <Badge className="bg-success text-white flex items-center gap-1 flex-shrink-0">
                     <Sparkles className="w-3 h-3" />
                     Quick Win
                   </Badge>
@@ -100,7 +100,7 @@ export default function MatrizEsforcoImpacto({ tratativas, motivos }) {
                 <Badge variant="outline" className={esforcoBadgeClass[linha.esforco] || ''}>
                   Esforço: {linha.esforco}
                 </Badge>
-                <span className="font-semibold text-slate-900 w-28 text-right">
+                <span className="font-semibold text-foreground w-28 text-right">
                   {formatarReais(linha.custoTotal)}
                 </span>
               </div>

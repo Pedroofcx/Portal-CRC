@@ -133,26 +133,26 @@ export class ErrorBoundary extends React.Component {
   render() {
     if (this.state.hasError) {
       return (
-        <div className="min-h-screen flex items-center justify-center p-6 bg-slate-50">
+        <div className="min-h-screen flex items-center justify-center p-6 bg-muted">
           <Card className="max-w-lg w-full border-0 shadow-lg">
             <CardContent className="p-8 text-center">
-              <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <AlertTriangle className="w-8 h-8 text-red-600" />
+              <div className="w-16 h-16 bg-destructive/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                <AlertTriangle className="w-8 h-8 text-destructive" />
               </div>
-              <h1 className="text-2xl font-bold text-slate-900 mb-2">
+              <h1 className="text-2xl font-bold text-foreground mb-2">
                 Ops! Algo deu errado
               </h1>
-              <p className="text-slate-600 mb-6">
+              <p className="text-muted-foreground mb-6">
                 Ocorreu um erro inesperado. Não se preocupe, seus dados estão seguros.
               </p>
               
               {this.state.error && (
                 <details className="mb-6 text-left">
-                  <summary className="cursor-pointer text-sm font-medium text-slate-700 mb-2 p-3 bg-slate-100 rounded-lg hover:bg-slate-200 transition-colors">
+                  <summary className="cursor-pointer text-sm font-medium text-foreground mb-2 p-3 bg-muted rounded-lg hover:bg-muted transition-colors">
                     Ver detalhes técnicos
                   </summary>
-                  <div className="mt-2 p-4 bg-red-50 rounded-lg border border-red-200">
-                    <p className="text-xs font-mono text-red-700 break-all whitespace-pre-wrap">
+                  <div className="mt-2 p-4 bg-destructive/10 rounded-lg border border-destructive/25">
+                    <p className="text-xs font-mono text-destructive break-all whitespace-pre-wrap">
                       {this.state.error.toString()}
                     </p>
                   </div>
@@ -162,7 +162,7 @@ export class ErrorBoundary extends React.Component {
               <div className="flex gap-3 justify-center flex-col sm:flex-row">
                 <Button 
                   onClick={this.handleReset}
-                  className="bg-blue-600 hover:bg-blue-700 gap-2"
+                  className="bg-primary hover:bg-primary/90 gap-2"
                 >
                   <Home className="w-4 h-4" />
                   Voltar ao Dashboard
@@ -187,13 +187,13 @@ export class ErrorBoundary extends React.Component {
                     <Shield className="w-4 h-4" />
                     Modo Seguro (Reset Completo)
                   </Button>
-                  <p className="text-xs text-amber-600 mt-2">
+                  <p className="text-xs text-warning mt-2">
                     Erros consecutivos detectados. Use o Modo Seguro se o problema persistir.
                   </p>
                 </div>
               )}
 
-              <p className="text-xs text-slate-500 mt-6">
+              <p className="text-xs text-muted-foreground mt-6">
                 Se o erro persistir, entre em contato com o suporte técnico.
               </p>
             </CardContent>

@@ -32,10 +32,10 @@ import {
 } from 'lucide-react';
 
 const tipoConfig = {
-  informativo: { icon: Info, color: 'bg-blue-100 text-blue-700 border-blue-200' },
-  urgente: { icon: AlertTriangle, color: 'bg-red-100 text-red-700 border-red-200' },
-  alerta: { icon: AlertCircle, color: 'bg-amber-100 text-amber-700 border-amber-200' },
-  comunicado: { icon: Megaphone, color: 'bg-purple-100 text-purple-700 border-purple-200' }
+  informativo: { icon: Info, color: 'bg-info-soft text-primary border-info/25' },
+  urgente: { icon: AlertTriangle, color: 'bg-destructive/10 text-destructive border-destructive/25' },
+  alerta: { icon: AlertCircle, color: 'bg-warning-soft text-warning border-warning/25' },
+  comunicado: { icon: Megaphone, color: 'bg-info-soft text-primary border-info/25' }
 };
 
 export default function Avisos() {
@@ -184,7 +184,7 @@ export default function Avisos() {
         icon={Bell}
         actions={
           isGestor && (
-            <Button onClick={() => setDialogOpen(true)} className="bg-blue-600 hover:bg-blue-700">
+            <Button onClick={() => setDialogOpen(true)} className="bg-primary hover:bg-primary/90">
               <Plus className="w-4 h-4 mr-2" />
               Novo Aviso
             </Button>
@@ -195,9 +195,9 @@ export default function Avisos() {
       {avisosVisiveis.length === 0 ? (
         <Card className="border-0 shadow-sm">
           <CardContent className="py-16 text-center">
-            <Bell className="w-12 h-12 mx-auto mb-4 text-slate-300" />
+            <Bell className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
             <h3 className="text-lg font-semibold mb-2">Nenhum aviso</h3>
-            <p className="text-slate-500">Não há avisos no momento</p>
+            <p className="text-muted-foreground">Não há avisos no momento</p>
           </CardContent>
         </Card>
       ) : (
@@ -222,23 +222,23 @@ export default function Avisos() {
                       <div className="flex items-start justify-between gap-4">
                         <div>
                           <div className="flex items-center gap-2 mb-1">
-                            <h3 className={`font-semibold ${!lido ? 'text-slate-900' : 'text-slate-600'}`}>
+                            <h3 className={`font-semibold ${!lido ? 'text-foreground' : 'text-muted-foreground'}`}>
                               {aviso.titulo}
                             </h3>
                             <Badge variant="outline" className={config.color}>
                               {aviso.tipo}
                             </Badge>
                             {!lido && (
-                              <Badge className="bg-blue-500 text-white">Novo</Badge>
+                              <Badge className="bg-primary text-white">Novo</Badge>
                             )}
                           </div>
-                          <p className="text-sm text-slate-600 line-clamp-2">{aviso.conteudo}</p>
+                          <p className="text-sm text-muted-foreground line-clamp-2">{aviso.conteudo}</p>
                         </div>
                         {isGestor && (
                           <Button 
                             variant="ghost" 
                             size="icon"
-                            className="text-red-500"
+                            className="text-destructive"
                             onClick={(e) => { 
                               e.stopPropagation(); 
                               setSelectedAviso(aviso);
@@ -249,7 +249,7 @@ export default function Avisos() {
                           </Button>
                         )}
                       </div>
-                      <div className="flex items-center gap-4 mt-3 text-xs text-slate-500">
+                      <div className="flex items-center gap-4 mt-3 text-xs text-muted-foreground">
                         <span>Por: {aviso.autor_nome}</span>
                         <span>{formatDateSP(aviso.data_publicacao, 'DD/MM/YYYY HH:mm')}</span>
                         {aviso.destinatarios !== 'todos' && (
@@ -356,7 +356,7 @@ export default function Avisos() {
               <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
                 Cancelar
               </Button>
-              <Button type="submit" className="bg-blue-600 hover:bg-blue-700" disabled={createMutation.isPending}>
+              <Button type="submit" className="bg-primary hover:bg-primary/90" disabled={createMutation.isPending}>
                 {createMutation.isPending ? 'Publicando...' : 'Publicar'}
               </Button>
             </div>
@@ -377,8 +377,8 @@ export default function Avisos() {
           </DialogHeader>
           {selectedAviso && (
             <div className="space-y-4 mt-4">
-              <p className="text-slate-700 whitespace-pre-wrap">{selectedAviso.conteudo}</p>
-              <div className="flex items-center gap-4 text-sm text-slate-500 pt-4 border-t">
+              <p className="text-foreground whitespace-pre-wrap">{selectedAviso.conteudo}</p>
+              <div className="flex items-center gap-4 text-sm text-muted-foreground pt-4 border-t">
                 <span>Por: {selectedAviso.autor_nome}</span>
                 <span>{formatDateSP(selectedAviso.data_publicacao)}</span>
               </div>
@@ -396,16 +396,16 @@ export default function Avisos() {
                       .map(leitura => {
                         const colab = colaboradores.find(c => c.id === leitura.colaborador_id);
                         return (
-                          <Badge key={leitura.id} variant="outline" className="bg-green-50 border-green-200 text-green-700">
+                          <Badge key={leitura.id} variant="outline" className="bg-success-soft border-success/25 text-success">
                             {colab?.nome_completo || 'Colaborador'}
-                            <span className="ml-1 text-xs text-green-600">
+                            <span className="ml-1 text-xs text-success">
                               • {formatDateSP(leitura.data_leitura, 'DD/MM HH:mm')}
                             </span>
                           </Badge>
                         );
                       })}
                     {leituras.filter(l => l.aviso_id === selectedAviso.id && l.confirmou).length === 0 && (
-                      <p className="text-sm text-slate-500">Nenhuma confirmação ainda</p>
+                      <p className="text-sm text-muted-foreground">Nenhuma confirmação ainda</p>
                     )}
                   </div>
                 </div>

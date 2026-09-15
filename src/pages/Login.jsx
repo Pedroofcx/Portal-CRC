@@ -46,15 +46,15 @@ export default function Login() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-900 p-4">
+    <div className="flex min-h-screen items-center justify-center bg-slate-900 superficie-escura p-4">
       <div className="w-full max-w-sm space-y-6">
 
         <div className="space-y-1 text-center">
-          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-lg bg-blue-600 text-xl font-bold text-white">
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-lg bg-primary text-xl font-bold text-white">
             C
           </div>
           <h1 className="pt-3 text-xl font-semibold text-white">Portal CRC</h1>
-          <p className="text-sm text-slate-400">Central de Relacionamento</p>
+          <p className="text-sm text-muted-foreground">Central de Relacionamento</p>
         </div>
 
         <Card>
@@ -90,7 +90,7 @@ export default function Login() {
               {erro && (
                 <div
                   role="alert"
-                  className="flex items-start gap-2 rounded-md bg-red-50 p-3 text-sm text-red-700"
+                  className="flex items-start gap-2 rounded-md bg-destructive/10 p-3 text-sm text-destructive"
                 >
                   <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
                   <span>{erro}</span>
@@ -106,7 +106,7 @@ export default function Login() {
           </CardContent>
         </Card>
 
-        <p className="text-center text-xs text-slate-500">
+        <p className="text-center text-xs text-muted-foreground">
           Esqueceu a senha? Fale com o administrador do Portal.
         </p>
 

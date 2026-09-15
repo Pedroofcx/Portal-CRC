@@ -30,47 +30,47 @@ const tipoLabels = {
 };
 
 const tipoCores = {
-  feedback_positivo: 'bg-green-100 text-green-700 border-green-200',
-  feedback_negativo: 'bg-red-100 text-red-700 border-red-200',
-  feedback_regular: 'bg-amber-100 text-amber-700 border-amber-200',
-  one_on_one: 'bg-blue-100 text-blue-700 border-blue-200',
+  feedback_positivo: 'bg-success-soft text-success border-success/25',
+  feedback_negativo: 'bg-destructive/10 text-destructive border-destructive/25',
+  feedback_regular: 'bg-warning-soft text-warning border-warning/25',
+  one_on_one: 'bg-info-soft text-primary border-info/25',
   kaizen: 'bg-teal-100 text-teal-700 border-teal-200',
-  hansei: 'bg-purple-100 text-purple-700 border-purple-200',
-  keidoh: 'bg-indigo-100 text-indigo-700 border-indigo-200',
-  registro_livre: 'bg-slate-100 text-slate-700 border-slate-200',
+  hansei: 'bg-info-soft text-primary border-info/25',
+  keidoh: 'bg-info-soft text-primary border-indigo-200',
+  registro_livre: 'bg-muted text-foreground border-border',
   observacao_diaria: 'bg-cyan-100 text-cyan-700 border-cyan-200',
 };
 
 function ObservacaoCard({ obs, onView, onDelete, podeExcluir }) {
   const tipoLabel = tipoLabels[obs.tipo] || obs.tipo;
-  const coresTipo = tipoCores[obs.tipo] || 'bg-slate-100 text-slate-700 border-slate-200';
+  const coresTipo = tipoCores[obs.tipo] || 'bg-muted text-foreground border-border';
 
   return (
-    <div className="bg-white border border-slate-200 rounded-xl p-4 hover:shadow-sm transition-shadow">
+    <div className="bg-card border border-border rounded-xl p-4 hover:shadow-sm transition-shadow">
       <div className="flex items-start justify-between gap-3">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap mb-2">
             <Badge className={`text-xs border ${coresTipo}`}>{tipoLabel}</Badge>
             {obs.visibilidade === 'gestor' ? (
-              <span className="flex items-center gap-1 text-xs text-slate-400">
+              <span className="flex items-center gap-1 text-xs text-muted-foreground">
                 <EyeOff className="w-3 h-3" /> Privado
               </span>
             ) : (
-              <span className="flex items-center gap-1 text-xs text-green-600">
+              <span className="flex items-center gap-1 text-xs text-success">
                 <Eye className="w-3 h-3" /> Visível ao agente
               </span>
             )}
           </div>
 
           {obs.titulo && (
-            <h4 className="font-medium text-slate-800 text-sm mb-1">{obs.titulo}</h4>
+            <h4 className="font-medium text-foreground text-sm mb-1">{obs.titulo}</h4>
           )}
 
-          <div className="text-xs text-slate-500 line-clamp-2 mb-3">
+          <div className="text-xs text-muted-foreground line-clamp-2 mb-3">
             <RichTextViewer content={obs.conteudo} maxHeight="60px" />
           </div>
 
-          <div className="flex items-center gap-4 text-xs text-slate-400">
+          <div className="flex items-center gap-4 text-xs text-muted-foreground">
             <span className="flex items-center gap-1">
               <User className="w-3 h-3" />
               {obs.autor_nome}
@@ -80,7 +80,7 @@ function ObservacaoCard({ obs, onView, onDelete, podeExcluir }) {
               {formatDateSP(obs.data_registro || obs.created_date, 'DD/MM/YYYY')}
             </span>
             {(obs.soft_skills_avaliadas && Object.keys(obs.soft_skills_avaliadas).length > 0) && (
-              <span className="text-purple-500">Skills avaliadas</span>
+              <span className="text-primary">Skills avaliadas</span>
             )}
           </div>
         </div>
@@ -90,7 +90,7 @@ function ObservacaoCard({ obs, onView, onDelete, podeExcluir }) {
             <Eye className="w-3.5 h-3.5" />
           </Button>
           {podeExcluir && (
-            <Button variant="ghost" size="icon" className="h-8 w-8 text-red-500 hover:text-red-600" onClick={() => onDelete(obs)}>
+            <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive" onClick={() => onDelete(obs)}>
               <Trash2 className="w-3.5 h-3.5" />
             </Button>
           )}
@@ -139,14 +139,14 @@ export default function HistoricoColaborador({
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center gap-4">
-        <Button variant="ghost" size="sm" onClick={onBack} className="text-slate-500 hover:text-slate-700">
+        <Button variant="ghost" size="sm" onClick={onBack} className="text-muted-foreground hover:text-foreground">
           <ArrowLeft className="w-4 h-4 mr-1" />
           Voltar
         </Button>
       </div>
 
       {/* Perfil do Colaborador */}
-      <div className="bg-white border border-slate-200 rounded-2xl p-6">
+      <div className="bg-card border border-border rounded-2xl p-6">
         <div className="flex flex-col sm:flex-row sm:items-center gap-4">
           <Avatar className="h-16 w-16">
             <AvatarImage src={colaborador.foto_url} />
@@ -155,25 +155,25 @@ export default function HistoricoColaborador({
             </AvatarFallback>
           </Avatar>
           <div className="flex-1">
-            <h2 className="text-xl font-bold text-slate-900">{colaborador.nome_completo}</h2>
-            <p className="text-slate-500 text-sm">{colaborador.cargo_atual}</p>
+            <h2 className="text-xl font-bold text-foreground">{colaborador.nome_completo}</h2>
+            <p className="text-muted-foreground text-sm">{colaborador.cargo_atual}</p>
             <div className="flex flex-wrap gap-3 mt-3">
-              <span className="text-xs bg-slate-100 text-slate-600 px-3 py-1 rounded-full">
+              <span className="text-xs bg-muted text-muted-foreground px-3 py-1 rounded-full">
                 {obsDoColab.length} registro{obsDoColab.length !== 1 ? 's' : ''}
               </span>
-              <span className="text-xs bg-green-100 text-green-700 px-3 py-1 rounded-full">
+              <span className="text-xs bg-success-soft text-success px-3 py-1 rounded-full">
                 {positivos} positivo{positivos !== 1 ? 's' : ''}
               </span>
-              <span className="text-xs bg-red-100 text-red-600 px-3 py-1 rounded-full">
+              <span className="text-xs bg-destructive/10 text-destructive px-3 py-1 rounded-full">
                 {negativos} negativo{negativos !== 1 ? 's' : ''}
               </span>
-              <span className="text-xs bg-purple-100 text-purple-700 px-3 py-1 rounded-full">
+              <span className="text-xs bg-info-soft text-primary px-3 py-1 rounded-full">
                 {pdisAtivos} PDI{pdisAtivos !== 1 ? 's' : ''} ativo{pdisAtivos !== 1 ? 's' : ''}
               </span>
             </div>
           </div>
           {isGestor && (
-            <Button onClick={onNovaObservacao} className="bg-blue-600 hover:bg-blue-700 self-start sm:self-center">
+            <Button onClick={onNovaObservacao} className="bg-primary hover:bg-primary/90 self-start sm:self-center">
               <Plus className="w-4 h-4 mr-2" />
               Nova Observação
             </Button>
@@ -182,10 +182,10 @@ export default function HistoricoColaborador({
       </div>
 
       {/* Filtros */}
-      <div className="bg-white border border-slate-200 rounded-xl p-4">
+      <div className="bg-card border border-border rounded-xl p-4">
         <div className="flex items-center gap-2 mb-3">
-          <Filter className="w-4 h-4 text-slate-400" />
-          <span className="text-sm font-medium text-slate-600">Filtros</span>
+          <Filter className="w-4 h-4 text-muted-foreground" />
+          <span className="text-sm font-medium text-muted-foreground">Filtros</span>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <Select value={filtroTipo} onValueChange={setFiltroTipo}>
@@ -220,7 +220,7 @@ export default function HistoricoColaborador({
           <Button
             variant="ghost"
             size="sm"
-            className="mt-2 text-xs text-slate-500"
+            className="mt-2 text-xs text-muted-foreground"
             onClick={() => { setFiltroTipo('todos'); setFiltroInicio(''); setFiltroFim(''); }}
           >
             Limpar filtros
@@ -230,15 +230,15 @@ export default function HistoricoColaborador({
 
       {/* Lista de Registros */}
       <div className="space-y-3">
-        <p className="text-sm text-slate-500">
+        <p className="text-sm text-muted-foreground">
           {obsFiltradas.length} registro{obsFiltradas.length !== 1 ? 's' : ''} encontrado{obsFiltradas.length !== 1 ? 's' : ''}
         </p>
 
         {obsFiltradas.length === 0 ? (
-          <div className="text-center py-16 bg-white border border-slate-200 rounded-xl">
-            <MessageSquare className="w-10 h-10 text-slate-300 mx-auto mb-3" />
-            <p className="text-slate-500 font-medium">Nenhum registro encontrado</p>
-            <p className="text-slate-400 text-sm mt-1">Tente ajustar os filtros.</p>
+          <div className="text-center py-16 bg-card border border-border rounded-xl">
+            <MessageSquare className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
+            <p className="text-muted-foreground font-medium">Nenhum registro encontrado</p>
+            <p className="text-muted-foreground text-sm mt-1">Tente ajustar os filtros.</p>
           </div>
         ) : (
           obsFiltradas.map(obs => (
@@ -262,7 +262,7 @@ export default function HistoricoColaborador({
           {viewObs && (
             <div className="space-y-4 mt-2">
               <div className="flex items-center gap-2 flex-wrap">
-                <Badge className={`text-xs border ${tipoCores[viewObs.tipo] || 'bg-slate-100 text-slate-700 border-slate-200'}`}>
+                <Badge className={`text-xs border ${tipoCores[viewObs.tipo] || 'bg-muted text-foreground border-border'}`}>
                   {tipoLabels[viewObs.tipo] || viewObs.tipo}
                 </Badge>
                 {viewObs.visibilidade === 'gestor' ? (
@@ -274,44 +274,44 @@ export default function HistoricoColaborador({
 
               <RichTextViewer content={viewObs.conteudo} maxHeight="350px" />
 
-              <div className="flex gap-4 text-sm text-slate-500">
+              <div className="flex gap-4 text-sm text-muted-foreground">
                 <span>Por: <strong>{viewObs.autor_nome}</strong></span>
                 <span>Em: <strong>{formatDateSP(viewObs.data_registro || viewObs.created_date, 'DD/MM/YYYY')}</strong></span>
               </div>
 
               {viewObs.analise_swot && Object.values(viewObs.analise_swot).some(v => v?.length > 0) && (
-                <Card className="bg-blue-50 border-blue-200">
+                <Card className="bg-info-soft border-info/25">
                   <CardHeader className="pb-2 pt-4 px-4"><CardTitle className="text-sm">Análise SWOT</CardTitle></CardHeader>
                   <CardContent className="grid grid-cols-2 gap-3 text-xs px-4 pb-4">
-                    {viewObs.analise_swot.forcas?.length > 0 && <div><p className="font-medium text-green-700 mb-1">Forças</p><ul className="list-disc list-inside text-slate-600">{viewObs.analise_swot.forcas.map((f,i) => <li key={i}>{f}</li>)}</ul></div>}
-                    {viewObs.analise_swot.fraquezas?.length > 0 && <div><p className="font-medium text-red-700 mb-1">Fraquezas</p><ul className="list-disc list-inside text-slate-600">{viewObs.analise_swot.fraquezas.map((f,i) => <li key={i}>{f}</li>)}</ul></div>}
-                    {viewObs.analise_swot.oportunidades?.length > 0 && <div><p className="font-medium text-blue-700 mb-1">Oportunidades</p><ul className="list-disc list-inside text-slate-600">{viewObs.analise_swot.oportunidades.map((f,i) => <li key={i}>{f}</li>)}</ul></div>}
-                    {viewObs.analise_swot.ameacas?.length > 0 && <div><p className="font-medium text-amber-700 mb-1">Ameaças</p><ul className="list-disc list-inside text-slate-600">{viewObs.analise_swot.ameacas.map((f,i) => <li key={i}>{f}</li>)}</ul></div>}
+                    {viewObs.analise_swot.forcas?.length > 0 && <div><p className="font-medium text-success mb-1">Forças</p><ul className="list-disc list-inside text-muted-foreground">{viewObs.analise_swot.forcas.map((f,i) => <li key={i}>{f}</li>)}</ul></div>}
+                    {viewObs.analise_swot.fraquezas?.length > 0 && <div><p className="font-medium text-destructive mb-1">Fraquezas</p><ul className="list-disc list-inside text-muted-foreground">{viewObs.analise_swot.fraquezas.map((f,i) => <li key={i}>{f}</li>)}</ul></div>}
+                    {viewObs.analise_swot.oportunidades?.length > 0 && <div><p className="font-medium text-primary mb-1">Oportunidades</p><ul className="list-disc list-inside text-muted-foreground">{viewObs.analise_swot.oportunidades.map((f,i) => <li key={i}>{f}</li>)}</ul></div>}
+                    {viewObs.analise_swot.ameacas?.length > 0 && <div><p className="font-medium text-warning mb-1">Ameaças</p><ul className="list-disc list-inside text-muted-foreground">{viewObs.analise_swot.ameacas.map((f,i) => <li key={i}>{f}</li>)}</ul></div>}
                   </CardContent>
                 </Card>
               )}
 
               {(viewObs.soft_skills_avaliadas && Object.keys(viewObs.soft_skills_avaliadas).length > 0) ||
                (viewObs.hard_skills_avaliadas && Object.keys(viewObs.hard_skills_avaliadas).length > 0) ? (
-                <Card className="bg-indigo-50 border-indigo-200">
+                <Card className="bg-info-soft border-indigo-200">
                   <CardHeader className="pb-2 pt-4 px-4"><CardTitle className="text-sm">Avaliação de Skills</CardTitle></CardHeader>
                   <CardContent className="grid grid-cols-2 gap-4 text-sm px-4 pb-4">
                     {viewObs.soft_skills_avaliadas && Object.keys(viewObs.soft_skills_avaliadas).length > 0 && (
-                      <div><p className="text-xs font-medium mb-2">Soft Skills</p>{Object.entries(viewObs.soft_skills_avaliadas).map(([s,v]) => <div key={s} className="flex justify-between py-0.5"><span className="text-slate-600 text-xs">{s}</span><Badge variant="outline">{v}/10</Badge></div>)}</div>
+                      <div><p className="text-xs font-medium mb-2">Soft Skills</p>{Object.entries(viewObs.soft_skills_avaliadas).map(([s,v]) => <div key={s} className="flex justify-between py-0.5"><span className="text-muted-foreground text-xs">{s}</span><Badge variant="outline">{v}/10</Badge></div>)}</div>
                     )}
                     {viewObs.hard_skills_avaliadas && Object.keys(viewObs.hard_skills_avaliadas).length > 0 && (
-                      <div><p className="text-xs font-medium mb-2">Hard Skills</p>{Object.entries(viewObs.hard_skills_avaliadas).map(([s,v]) => <div key={s} className="flex justify-between py-0.5"><span className="text-slate-600 text-xs">{s}</span><Badge variant="outline">{v}/10</Badge></div>)}</div>
+                      <div><p className="text-xs font-medium mb-2">Hard Skills</p>{Object.entries(viewObs.hard_skills_avaliadas).map(([s,v]) => <div key={s} className="flex justify-between py-0.5"><span className="text-muted-foreground text-xs">{s}</span><Badge variant="outline">{v}/10</Badge></div>)}</div>
                     )}
                   </CardContent>
                 </Card>
               ) : null}
 
               {(viewObs.sugestao_ia_soft_skills || viewObs.sugestao_ia_hard_skills) && (
-                <Card className="bg-purple-50 border-purple-200">
-                  <CardHeader className="pb-2 pt-4 px-4"><CardTitle className="text-sm flex items-center gap-2"><Sparkles className="w-4 h-4 text-purple-600"/>Sugestão da IA</CardTitle></CardHeader>
+                <Card className="bg-info-soft border-info/25">
+                  <CardHeader className="pb-2 pt-4 px-4"><CardTitle className="text-sm flex items-center gap-2"><Sparkles className="w-4 h-4 text-primary"/>Sugestão da IA</CardTitle></CardHeader>
                   <CardContent className="grid grid-cols-2 gap-4 text-sm px-4 pb-4">
-                    {viewObs.sugestao_ia_soft_skills && <div><p className="text-xs font-medium mb-2">Soft Skills</p>{Object.entries(viewObs.sugestao_ia_soft_skills).map(([s,v]) => <div key={s} className="flex justify-between py-0.5"><span className="capitalize text-slate-600 text-xs">{s.replace('_',' ')}</span><span className="text-xs">{v}/10</span></div>)}</div>}
-                    {viewObs.sugestao_ia_hard_skills && <div><p className="text-xs font-medium mb-2">Hard Skills</p>{Object.entries(viewObs.sugestao_ia_hard_skills).map(([s,v]) => <div key={s} className="flex justify-between py-0.5"><span className="capitalize text-slate-600 text-xs">{s.replace('_',' ')}</span><span className="text-xs">{v}/10</span></div>)}</div>}
+                    {viewObs.sugestao_ia_soft_skills && <div><p className="text-xs font-medium mb-2">Soft Skills</p>{Object.entries(viewObs.sugestao_ia_soft_skills).map(([s,v]) => <div key={s} className="flex justify-between py-0.5"><span className="capitalize text-muted-foreground text-xs">{s.replace('_',' ')}</span><span className="text-xs">{v}/10</span></div>)}</div>}
+                    {viewObs.sugestao_ia_hard_skills && <div><p className="text-xs font-medium mb-2">Hard Skills</p>{Object.entries(viewObs.sugestao_ia_hard_skills).map(([s,v]) => <div key={s} className="flex justify-between py-0.5"><span className="capitalize text-muted-foreground text-xs">{s.replace('_',' ')}</span><span className="text-xs">{v}/10</span></div>)}</div>}
                   </CardContent>
                 </Card>
               )}

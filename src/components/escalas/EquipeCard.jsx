@@ -6,13 +6,13 @@ import { Users, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const corPorTipo = {
-  home_office: 'bg-green-500',
-  presencial: 'bg-blue-500',
-  hibrido: 'bg-purple-500',
+  home_office: 'bg-success',
+  presencial: 'bg-primary',
+  hibrido: 'bg-primary',
   ferias: 'bg-cyan-500',
-  day_off: 'bg-amber-500',
-  falta: 'bg-red-500',
-  treinamento: 'bg-indigo-500',
+  day_off: 'bg-warning',
+  falta: 'bg-destructive',
+  treinamento: 'bg-primary',
   evento_especial: 'bg-pink-500'
 };
 
@@ -34,7 +34,7 @@ export default function EquipeCard({
     }, {});
 
   const tipoMaisComum = Object.entries(distribuicao).sort((a, b) => b[1] - a[1])[0];
-  const corPrincipal = tipoMaisComum ? corPorTipo[tipoMaisComum[0]] : equipe.cor || 'bg-blue-500';
+  const corPrincipal = tipoMaisComum ? corPorTipo[tipoMaisComum[0]] : equipe.cor || 'bg-primary';
 
   return (
     <Card 
@@ -46,12 +46,12 @@ export default function EquipeCard({
         <div className="p-5">
           <div className="flex items-start justify-between mb-4">
             <div className="flex-1">
-              <h3 className="text-lg font-bold text-slate-900 mb-1 group-hover:text-blue-600 transition-colors">
+              <h3 className="text-lg font-bold text-foreground mb-1 group-hover:text-primary transition-colors">
                 {equipe.nome}
               </h3>
-              <p className="text-sm text-slate-500">{equipe.descricao || 'Sem descrição'}</p>
+              <p className="text-sm text-muted-foreground">{equipe.descricao || 'Sem descrição'}</p>
             </div>
-            <ChevronRight className="w-5 h-5 text-slate-400 group-hover:text-blue-600 transition-colors" />
+            <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
           </div>
 
           <div className="flex items-center gap-2 mb-4">
@@ -59,13 +59,13 @@ export default function EquipeCard({
               {colaboradoresDaEquipe.slice(0, 5).map(colab => (
                 <Avatar key={colab.id} className="h-8 w-8 ring-2 ring-white">
                   <AvatarImage src={colab.foto_url} />
-                  <AvatarFallback className="bg-slate-200 text-slate-700 text-xs">
+                  <AvatarFallback className="bg-muted text-foreground text-xs">
                     {colab.nome_completo?.charAt(0)}
                   </AvatarFallback>
                 </Avatar>
               ))}
             </div>
-            <span className="text-sm text-slate-600 font-medium">
+            <span className="text-sm text-muted-foreground font-medium">
               {colaboradoresDaEquipe.length} {colaboradoresDaEquipe.length === 1 ? 'pessoa' : 'pessoas'}
             </span>
           </div>
@@ -75,7 +75,7 @@ export default function EquipeCard({
               {Object.entries(distribuicao).map(([tipo, count]) => (
                 <div key={tipo} className="flex items-center gap-1">
                   <div className={cn('w-2 h-2 rounded-full', corPorTipo[tipo])} />
-                  <span className="text-xs text-slate-600 font-medium">{count}</span>
+                  <span className="text-xs text-muted-foreground font-medium">{count}</span>
                 </div>
               ))}
             </div>

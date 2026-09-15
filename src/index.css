@@ -145,6 +145,27 @@
 @layer components {
   /* Linha de tabela compacta, porém respirável. */
   .tabela-operacional tbody tr { height: var(--linha-tabela); }
+
+  /*
+   * Blocos com fundo escuro — memória de cálculo, visualizador de POP,
+   * relatório de diretoria. Redefinem os tokens dentro do próprio escopo,
+   * então `text-muted-foreground` e `border-border` continuam significando
+   * "texto secundário" e "divisória" e seguem legíveis sobre o escuro.
+   *
+   * Sem isto, cada bloco escuro precisaria de exceção de cor cravada — que é
+   * exatamente o problema que estamos eliminando do sistema.
+   */
+  .superficie-escura {
+    --foreground: 0 0% 98%;
+    --muted-foreground: 214 14% 72%;
+    --card: 217 33% 20%;
+    --card-foreground: 0 0% 98%;
+    --muted: 217 30% 24%;
+    --border: 217 22% 32%;
+    --input: 217 22% 32%;
+    --accent: 217 30% 26%;
+    --accent-foreground: 0 0% 98%;
+  }
 }
 
 /* Nenhuma animação decorativa: quem pediu para reduzir movimento

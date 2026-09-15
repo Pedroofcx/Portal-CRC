@@ -46,9 +46,9 @@ export default function TimerReobertura({ tratativa, onConfirmar, isLoading }) {
   const urgente = !expirou && timer.dias <= 1;
 
   return (
-    <Card className={`border-0 shadow-sm ${expirou ? 'bg-green-50 border-green-200' : urgente ? 'bg-red-50 border-red-200' : 'bg-amber-50 border-amber-200'}`}>
+    <Card className={`border-0 shadow-sm ${expirou ? 'bg-success-soft border-success/25' : urgente ? 'bg-destructive/10 border-destructive/25' : 'bg-warning-soft border-warning/25'}`}>
       <CardHeader>
-        <CardTitle className={`flex items-center gap-2 text-base ${expirou ? 'text-green-900' : urgente ? 'text-red-900' : 'text-amber-900'}`}>
+        <CardTitle className={`flex items-center gap-2 text-base ${expirou ? 'text-success' : urgente ? 'text-destructive' : 'text-warning'}`}>
           <Timer className="w-5 h-5" />
           Timer de Reabertura — 7 dias corridos
         </CardTitle>
@@ -57,43 +57,43 @@ export default function TimerReobertura({ tratativa, onConfirmar, isLoading }) {
         {/* Barra de progresso */}
         <div>
           <div className="flex justify-between text-xs mb-1">
-            <span className="text-slate-500">Encerrado em {formatDateSP(tratativa.data_encerramento, 'DD/MM/YYYY HH:mm')}</span>
-            <span className={`font-medium ${expirou ? 'text-green-700' : urgente ? 'text-red-700' : 'text-amber-700'}`}>
+            <span className="text-muted-foreground">Encerrado em {formatDateSP(tratativa.data_encerramento, 'DD/MM/YYYY HH:mm')}</span>
+            <span className={`font-medium ${expirou ? 'text-success' : urgente ? 'text-destructive' : 'text-warning'}`}>
               {timer.percentual}%
             </span>
           </div>
-          <div className="w-full h-2 bg-slate-200 rounded-full overflow-hidden">
+          <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
             <div
-              className={`h-full rounded-full transition-all ${expirou ? 'bg-green-500' : urgente ? 'bg-red-500' : 'bg-amber-500'}`}
+              className={`h-full rounded-full transition-all ${expirou ? 'bg-success' : urgente ? 'bg-destructive' : 'bg-warning'}`}
               style={{ width: `${timer.percentual}%` }}
             />
           </div>
         </div>
 
         {/* Status do timer */}
-        <div className="p-4 bg-white rounded-lg border text-center">
+        <div className="p-4 bg-card rounded-lg border text-center">
           {expirou ? (
             <>
-              <CheckCircle className="w-10 h-10 text-green-600 mx-auto mb-2" />
-              <p className="font-semibold text-green-800">Período de 7 dias concluído</p>
-              <p className="text-xs text-slate-500 mt-1">
+              <CheckCircle className="w-10 h-10 text-success mx-auto mb-2" />
+              <p className="font-semibold text-success">Período de 7 dias concluído</p>
+              <p className="text-xs text-muted-foreground mt-1">
                 Prazo encerrado em {formatDateSP(timer.dataLimite, 'DD/MM/YYYY')}. Confirme o status abaixo.
               </p>
-              <Badge className="mt-2 bg-green-100 text-green-700">Pronto para confirmação</Badge>
+              <Badge className="mt-2 bg-success-soft text-success">Pronto para confirmação</Badge>
             </>
           ) : (
             <>
-              <div className={`text-5xl font-bold mb-1 ${urgente ? 'text-red-600' : 'text-amber-600'}`}>
+              <div className={`text-5xl font-bold mb-1 ${urgente ? 'text-destructive' : 'text-warning'}`}>
                 {timer.dias === 0 ? `${timer.horas}h` : `${timer.dias}d`}
               </div>
-              <p className="text-sm text-slate-600">
+              <p className="text-sm text-muted-foreground">
                 {timer.dias === 0 ? 'menos de 24h restantes' : timer.dias === 1 ? 'dia restante' : 'dias restantes'}
               </p>
-              <p className="text-xs text-slate-400 mt-1">
+              <p className="text-xs text-muted-foreground mt-1">
                 Prazo até {formatDateSP(timer.dataLimite, 'DD/MM/YYYY HH:mm')}
               </p>
               {urgente && (
-                <Badge className="mt-2 bg-red-100 text-red-700">Urgente</Badge>
+                <Badge className="mt-2 bg-destructive/10 text-destructive">Urgente</Badge>
               )}
             </>
           )}
@@ -104,7 +104,7 @@ export default function TimerReobertura({ tratativa, onConfirmar, isLoading }) {
           <Button
             onClick={() => onConfirmar(true)}
             variant="outline"
-            className="w-full border-red-200 text-red-700 hover:bg-red-50"
+            className="w-full border-destructive/25 text-destructive hover:bg-destructive/10"
             disabled={isLoading}
           >
             <AlertTriangle className="w-4 h-4 mr-2" />
@@ -113,7 +113,7 @@ export default function TimerReobertura({ tratativa, onConfirmar, isLoading }) {
 
           <Button
             onClick={() => onConfirmar(false)}
-            className={`w-full ${expirou ? 'bg-green-600 hover:bg-green-700' : 'bg-slate-400 hover:bg-slate-500 cursor-default'}`}
+            className={`w-full ${expirou ? 'bg-success hover:bg-success/90' : 'bg-slate-400 hover:bg-slate-500 cursor-default'}`}
             disabled={isLoading || !expirou}
             title={!expirou ? `Disponível após ${formatDateSP(timer.dataLimite, 'DD/MM/YYYY')}` : undefined}
           >
@@ -122,7 +122,7 @@ export default function TimerReobertura({ tratativa, onConfirmar, isLoading }) {
           </Button>
 
           {!expirou && (
-            <p className="text-xs text-center text-slate-400">
+            <p className="text-xs text-center text-muted-foreground">
               O botão de confirmação será liberado automaticamente após {formatDateSP(timer.dataLimite, 'DD/MM/YYYY')}
             </p>
           )}

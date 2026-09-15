@@ -29,10 +29,10 @@ export default function SalariosColaboradoresJornada({ colaboradores }) {
     <Card className="border-0 shadow-sm">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Wallet className="w-5 h-5 text-emerald-600" />
+          <Wallet className="w-5 h-5 text-success" />
           Salário dos Colaboradores
         </CardTitle>
-        <p className="text-sm text-slate-500 mt-1">
+        <p className="text-sm text-muted-foreground mt-1">
           Necessário para o cálculo correto do custo operacional (horas trabalhadas) em cada tratativa.
         </p>
       </CardHeader>
@@ -41,8 +41,8 @@ export default function SalariosColaboradoresJornada({ colaboradores }) {
           {colaboradoresAtivos.map((c) => {
             const valorEditando = editando[c.id] !== undefined ? editando[c.id] : c.salario;
             return (
-              <div key={c.id} className="p-3 bg-slate-50 border border-slate-200 rounded-lg">
-                <Label className="text-xs text-slate-600">{c.nome_completo}</Label>
+              <div key={c.id} className="p-3 bg-muted border border-border rounded-lg">
+                <Label className="text-xs text-muted-foreground">{c.nome_completo}</Label>
                 <CurrencyInput
                   className="mt-1"
                   value={valorEditando || 0}

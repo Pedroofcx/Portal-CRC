@@ -116,9 +116,9 @@ export default function Relatorios() {
   if (!isGestorCheck) {
     return (
       <div className="text-center py-16">
-        <BarChart3 className="w-12 h-12 text-slate-300 mx-auto mb-4" />
+        <BarChart3 className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
         <h2 className="text-xl font-semibold mb-2">Acesso Restrito</h2>
-        <p className="text-slate-500">Apenas gestores podem acessar relatórios.</p>
+        <p className="text-muted-foreground">Apenas gestores podem acessar relatórios.</p>
       </div>
     );
   }
@@ -356,8 +356,8 @@ export default function Relatorios() {
           </div>
 
           {/* Filtros Comerciais */}
-          <div className="pt-3 border-t border-slate-100">
-            <p className="text-xs font-semibold text-slate-500 uppercase mb-2">Filtros Comerciais</p>
+          <div className="pt-3 border-t border-border">
+            <p className="text-xs font-semibold text-muted-foreground uppercase mb-2">Filtros Comerciais</p>
             <div className="grid grid-cols-1 sm:grid-cols-5 gap-3">
               <div>
                 <Label className="text-xs">Plano</Label>
@@ -469,15 +469,15 @@ export default function Relatorios() {
           <Card className="border-0 shadow-sm bg-gradient-to-br from-blue-50 to-blue-100 p-6">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-lg font-semibold text-blue-900 mb-2">
+                <h3 className="text-lg font-semibold text-primary mb-2">
                   Análise Detalhada por Tipo de Tratativa
                 </h3>
-                <p className="text-sm text-blue-700">
+                <p className="text-sm text-primary">
                   Acesse relatórios completos com insights estratégicos, métricas de qualidade e impacto financeiro
                 </p>
               </div>
               <Link to={createPageUrl('RelatoriosTratativas')}>
-                <Button className="bg-blue-600 hover:bg-blue-700">
+                <Button className="bg-primary hover:bg-primary/90">
                   Ver Relatórios Detalhados
                   <ExternalLink className="w-4 h-4 ml-2" />
                 </Button>
@@ -487,28 +487,28 @@ export default function Relatorios() {
         </TabsContent>
 
         <TabsContent value="preditivo" className="mt-6">
-          <Card className="border-0 shadow-sm bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-50 p-6 border-2 border-purple-200">
+          <Card className="border-0 shadow-sm bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-50 p-6 border-2 border-info/25">
             <div className="flex items-center justify-between">
               <div className="flex-1">
                 <div className="flex items-center gap-3 mb-3">
-                  <div className="p-2 bg-purple-600 rounded-lg">
+                  <div className="p-2 bg-primary rounded-lg">
                     <Brain className="w-6 h-6 text-white" />
                   </div>
-                  <h3 className="text-xl font-bold text-purple-900">
+                  <h3 className="text-xl font-bold text-primary">
                     Inteligência Operacional Preditiva
                   </h3>
                   <Badge className="bg-gradient-to-r from-purple-600 to-blue-600 text-white">CMMI Nível 4</Badge>
                 </div>
-                <p className="text-sm text-purple-800 mb-4">
+                <p className="text-sm text-primary mb-4">
                   Controle quantitativo de processos com métricas preditivas: throughput, capacidade operacional, 
                   variabilidade estatística, previsão de backlog, simulação de cenários e alertas inteligentes.
                 </p>
                 <div className="flex gap-2 flex-wrap">
-                  <Badge variant="outline" className="bg-white/50">Throughput</Badge>
-                  <Badge variant="outline" className="bg-white/50">Saturação</Badge>
-                  <Badge variant="outline" className="bg-white/50">Previsão</Badge>
-                  <Badge variant="outline" className="bg-white/50">Simulações</Badge>
-                  <Badge variant="outline" className="bg-white/50">Alertas</Badge>
+                  <Badge variant="outline" className="bg-card/50">Throughput</Badge>
+                  <Badge variant="outline" className="bg-card/50">Saturação</Badge>
+                  <Badge variant="outline" className="bg-card/50">Previsão</Badge>
+                  <Badge variant="outline" className="bg-card/50">Simulações</Badge>
+                  <Badge variant="outline" className="bg-card/50">Alertas</Badge>
                 </div>
               </div>
               <Link to={createPageUrl('AnalyticsPreditivo')}>
@@ -530,16 +530,16 @@ export default function Relatorios() {
               </CardHeader>
               <CardContent>
                 {Object.entries(volumePorTipo).length === 0 ? (
-                  <p className="text-slate-500 text-center py-8">Sem dados</p>
+                  <p className="text-muted-foreground text-center py-8">Sem dados</p>
                 ) : (
                   <div className="space-y-3">
                     {Object.entries(volumePorTipo).map(([tipo, count]) => (
                       <div key={tipo} className="flex items-center justify-between">
                         <span className="text-sm">{tipoTratativaLabels[tipo] || tipo}</span>
                         <div className="flex items-center gap-2">
-                          <div className="w-32 bg-slate-100 rounded-full h-2">
+                          <div className="w-32 bg-muted rounded-full h-2">
                             <div 
-                              className="bg-blue-600 h-2 rounded-full" 
+                              className="bg-primary h-2 rounded-full" 
                               style={{ width: `${(count / stats.totalTratativas) * 100}%` }}
                             />
                           </div>
@@ -559,7 +559,7 @@ export default function Relatorios() {
               </CardHeader>
               <CardContent>
                 {Object.entries(volumePorCategoria).length === 0 ? (
-                  <p className="text-slate-500 text-center py-8">Sem dados</p>
+                  <p className="text-muted-foreground text-center py-8">Sem dados</p>
                 ) : (
                   <div className="space-y-3">
                     {Object.entries(volumePorCategoria)
@@ -569,9 +569,9 @@ export default function Relatorios() {
                         <div key={categoria} className="flex items-center justify-between">
                           <span className="text-sm">{categoria}</span>
                           <div className="flex items-center gap-2">
-                            <div className="w-32 bg-slate-100 rounded-full h-2">
+                            <div className="w-32 bg-muted rounded-full h-2">
                               <div 
-                                className="bg-green-600 h-2 rounded-full" 
+                                className="bg-success h-2 rounded-full" 
                                 style={{ width: `${(count / stats.totalTratativas) * 100}%` }}
                               />
                             </div>
@@ -593,18 +593,18 @@ export default function Relatorios() {
             <CardContent>
               <div className="grid sm:grid-cols-3 gap-6">
                 <div className="text-center">
-                  <p className="text-3xl font-bold text-blue-600">{Math.round(slaMedio / 60)}h</p>
-                  <p className="text-sm text-slate-500 mt-1">Tempo Médio de Resolução</p>
+                  <p className="text-3xl font-bold text-primary">{Math.round(slaMedio / 60)}h</p>
+                  <p className="text-sm text-muted-foreground mt-1">Tempo Médio de Resolução</p>
                 </div>
                 <div className="text-center">
-                  <p className="text-3xl font-bold text-green-600">
+                  <p className="text-3xl font-bold text-success">
                     {stats.encerradas > 0 ? Math.round((stats.dentraSLA / stats.encerradas) * 100) : 0}%
                   </p>
-                  <p className="text-sm text-slate-500 mt-1">Taxa de Cumprimento</p>
+                  <p className="text-sm text-muted-foreground mt-1">Taxa de Cumprimento</p>
                 </div>
                 <div className="text-center">
-                  <p className="text-3xl font-bold text-amber-600">{stats.encerradas - stats.dentraSLA}</p>
-                  <p className="text-sm text-slate-500 mt-1">Fora do SLA</p>
+                  <p className="text-3xl font-bold text-warning">{stats.encerradas - stats.dentraSLA}</p>
+                  <p className="text-sm text-muted-foreground mt-1">Fora do SLA</p>
                 </div>
               </div>
             </CardContent>
@@ -614,18 +614,18 @@ export default function Relatorios() {
           <Card className="border-0 shadow-sm">
             <CardHeader>
               <CardTitle className="text-base flex items-center gap-2">
-                <Handshake className="w-5 h-5 text-purple-600" />
+                <Handshake className="w-5 h-5 text-primary" />
                 Acordos de Contestação
                 <Badge variant="outline" className="ml-1">{acordosContestacao.length} acordo(s)</Badge>
               </CardTitle>
             </CardHeader>
             <CardContent>
               {acordosContestacao.length === 0 ? (
-                <p className="text-slate-500 text-center py-8">Nenhum acordo de contestação no período selecionado.</p>
+                <p className="text-muted-foreground text-center py-8">Nenhum acordo de contestação no período selecionado.</p>
               ) : (
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
-                    <thead className="bg-slate-100 text-slate-600">
+                    <thead className="bg-muted text-muted-foreground">
                       <tr>
                         <th className="text-left p-2">Tratativa</th>
                         <th className="text-left p-2">Agente</th>
@@ -638,29 +638,29 @@ export default function Relatorios() {
                     </thead>
                     <tbody>
                       {acordosContestacao.map(a => (
-                        <tr key={a.id} className="border-t hover:bg-slate-50">
+                        <tr key={a.id} className="border-t hover:bg-muted">
                           <td className="p-2 font-mono text-xs">{a.id_interno || '-'}</td>
                           <td className="p-2">{a.agente}</td>
                           <td className="p-2 text-right">{formatBRL(a.valor_original)}</td>
                           <td className="p-2 text-right">{formatBRL(a.valor_negociado)}</td>
                           <td className="p-2 text-right">
-                            <Badge variant="outline" className={a.percentual_reducao > 0 ? 'text-green-700' : 'text-slate-500'}>
+                            <Badge variant="outline" className={a.percentual_reducao > 0 ? 'text-success' : 'text-muted-foreground'}>
                               {a.percentual_reducao.toFixed(1)}%
                             </Badge>
                           </td>
-                          <td className="p-2 text-xs text-slate-700">{a.motivo_reducao}</td>
-                          <td className="p-2 text-right font-semibold text-purple-700">{a.pontuacao.toFixed(1)}</td>
+                          <td className="p-2 text-xs text-foreground">{a.motivo_reducao}</td>
+                          <td className="p-2 text-right font-semibold text-primary">{a.pontuacao.toFixed(1)}</td>
                         </tr>
                       ))}
                     </tbody>
-                    <tfoot className="bg-slate-50 font-semibold">
+                    <tfoot className="bg-muted font-semibold">
                       <tr>
                         <td className="p-2" colSpan={2}>Total ({acordosContestacao.length} acordo(s))</td>
                         <td className="p-2 text-right">{formatBRL(acordosContestacao.reduce((s, a) => s + a.valor_original, 0))}</td>
                         <td className="p-2 text-right">{formatBRL(acordosContestacao.reduce((s, a) => s + a.valor_negociado, 0))}</td>
                         <td className="p-2 text-right">—</td>
                         <td className="p-2">—</td>
-                        <td className="p-2 text-right text-purple-700">{acordosContestacao.reduce((s, a) => s + a.pontuacao, 0).toFixed(1)}</td>
+                        <td className="p-2 text-right text-primary">{acordosContestacao.reduce((s, a) => s + a.pontuacao, 0).toFixed(1)}</td>
                       </tr>
                     </tfoot>
                   </table>
@@ -682,16 +682,16 @@ export default function Relatorios() {
             </CardHeader>
             <CardContent>
               {topAgentes.length === 0 ? (
-                <p className="text-slate-500 text-center py-8">Sem dados</p>
+                <p className="text-muted-foreground text-center py-8">Sem dados</p>
               ) : (
                 <div className="space-y-3">
                   {topAgentes.map((agente, index) => (
                     <div key={agente.id} className="flex items-center gap-4">
                       <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${
-                        index === 0 ? 'bg-amber-100 text-amber-700' :
-                        index === 1 ? 'bg-slate-200 text-slate-700' :
-                        index === 2 ? 'bg-orange-100 text-orange-700' :
-                        'bg-blue-100 text-blue-700'
+                        index === 0 ? 'bg-warning-soft text-warning' :
+                        index === 1 ? 'bg-muted text-foreground' :
+                        index === 2 ? 'bg-critical-soft text-critical' :
+                        'bg-info-soft text-primary'
                       }`}>
                         {index + 1}
                       </div>
@@ -715,14 +715,14 @@ export default function Relatorios() {
               <CardContent>
                 <div className="space-y-3">
                   {apuracoes.slice(0, 5).map(ap => (
-                    <div key={ap.id} className="p-3 bg-slate-50 rounded-lg">
+                    <div key={ap.id} className="p-3 bg-muted rounded-lg">
                       <div className="flex items-center justify-between">
                         <p className="font-medium">{ap.colaborador_nome}</p>
-                        <Badge className="bg-blue-100 text-blue-700">
+                        <Badge className="bg-info-soft text-primary">
                           {ap.satisfacao_media?.toFixed(1)}%
                         </Badge>
                       </div>
-                      <p className="text-xs text-slate-500 mt-1">
+                      <p className="text-xs text-muted-foreground mt-1">
                         Período: {formatDateSP(ap.periodo_inicio, 'DD/MM')} - {formatDateSP(ap.periodo_fim, 'DD/MM')}
                       </p>
                     </div>
@@ -742,16 +742,16 @@ export default function Relatorios() {
             </CardHeader>
             <CardContent>
               {rankingPontuacao.length === 0 ? (
-                <p className="text-slate-500 text-center py-8">Sem dados de pontuação neste trimestre</p>
+                <p className="text-muted-foreground text-center py-8">Sem dados de pontuação neste trimestre</p>
               ) : (
                 <div className="space-y-3">
                   {rankingPontuacao.map((pontuacao, index) => (
-                    <div key={pontuacao.id} className="flex items-center gap-4 p-3 bg-slate-50 rounded-lg">
+                    <div key={pontuacao.id} className="flex items-center gap-4 p-3 bg-muted rounded-lg">
                       <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg ${
                         index === 0 ? 'bg-gradient-to-br from-amber-400 to-amber-600 text-white shadow-lg' :
                         index === 1 ? 'bg-gradient-to-br from-slate-300 to-slate-500 text-white shadow-md' :
                         index === 2 ? 'bg-gradient-to-br from-orange-400 to-orange-600 text-white shadow-md' :
-                        'bg-blue-100 text-blue-700'
+                        'bg-info-soft text-primary'
                       }`}>
                         {index + 1}
                       </div>
@@ -776,10 +776,10 @@ export default function Relatorios() {
                         </div>
                       </div>
                       <div className="text-right">
-                        <p className="text-2xl font-bold text-blue-600">
+                        <p className="text-2xl font-bold text-primary">
                           {pontuacao.total_pontos?.toFixed(1) || '0.0'}
                         </p>
-                        <p className="text-xs text-slate-500">pontos</p>
+                        <p className="text-xs text-muted-foreground">pontos</p>
                       </div>
                     </div>
                   ))}

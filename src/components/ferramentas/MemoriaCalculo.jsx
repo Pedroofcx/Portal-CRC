@@ -13,91 +13,91 @@ export default function MemoriaCalculo({ resultado, config, valorNota, aplicarMu
   const divergenciaImpostos = Math.abs(somaImpostosIndividuais - resultado.total_impostos_valor) > 0.01;
 
   return (
-    <div className="bg-slate-900 rounded-xl p-4 font-mono text-xs text-slate-300 space-y-1">
-      <p className="text-slate-500 text-[10px] uppercase tracking-widest mb-2">Memória de Cálculo Completa</p>
+    <div className="bg-slate-900 superficie-escura rounded-xl p-4 font-mono text-xs text-muted-foreground space-y-1">
+      <p className="text-muted-foreground text-[10px] uppercase tracking-widest mb-2">Memória de Cálculo Completa</p>
 
       {/* Valor base */}
       <div className="flex justify-between">
-        <span className="text-slate-400">Valor NF:</span>
+        <span className="text-muted-foreground">Valor NF:</span>
         <span className="text-white font-semibold">{fmtBRL(v)}</span>
       </div>
 
       {/* Classificação do plano (informativa) */}
       {classificacaoLabel && (
         <div className="flex justify-between">
-          <span className="text-slate-400">Classificação do Plano:</span>
-          <span className="text-blue-300">{classificacaoLabel}</span>
+          <span className="text-muted-foreground">Classificação do Plano:</span>
+          <span className="text-primary">{classificacaoLabel}</span>
         </div>
       )}
 
       <div className="border-t border-slate-700 my-1.5" />
 
       {/* Impostos individuais */}
-      <p className="text-slate-500 text-[10px] uppercase tracking-wider">Impostos</p>
+      <p className="text-muted-foreground text-[10px] uppercase tracking-wider">Impostos</p>
       {IMPOSTOS_KEYS.map(k => (
         <div key={k} className="flex justify-between">
-          <span className="text-slate-400">{IMPOSTO_LABELS[k]} ({Number(config[k]).toFixed(2)}%):</span>
+          <span className="text-muted-foreground">{IMPOSTO_LABELS[k]} ({Number(config[k]).toFixed(2)}%):</span>
           <span className="text-red-400">− {fmtBRL(resultado.detalhes_impostos?.[k] ?? 0)}</span>
         </div>
       ))}
-      <div className="flex justify-between text-slate-300 mt-0.5">
+      <div className="flex justify-between text-muted-foreground mt-0.5">
         <span className="font-semibold">Total Impostos ({resultado.total_impostos_pct?.toFixed(2)}%):</span>
         <span className="text-red-400 font-semibold">− {fmtBRL(resultado.total_impostos_valor)}</span>
       </div>
       {divergenciaImpostos && (
-        <div className="text-amber-400 text-[10px]">Divergência de arredondamento nos impostos detectada.</div>
+        <div className="text-warning text-[10px]">Divergência de arredondamento nos impostos detectada.</div>
       )}
 
       <div className="border-t border-slate-700 my-1.5" />
 
       {/* Comissão */}
-      <p className="text-slate-500 text-[10px] uppercase tracking-wider">Outros Descontos</p>
+      <p className="text-muted-foreground text-[10px] uppercase tracking-wider">Outros Descontos</p>
       <div className="flex justify-between">
-        <span className="text-slate-400">Comissão Vendedor ({Number(config.comissao_vendedor).toFixed(2)}%):</span>
-        <span className="text-amber-400">− {fmtBRL(resultado.comissao_valor)}</span>
+        <span className="text-muted-foreground">Comissão Vendedor ({Number(config.comissao_vendedor).toFixed(2)}%):</span>
+        <span className="text-warning">− {fmtBRL(resultado.comissao_valor)}</span>
       </div>
 
       {/* Uso proporcional detalhado — base mensal */}
       {uso && uso.valor > 0 && (
         <>
           <div className="border-t border-slate-700 my-1.5" />
-          <p className="text-slate-500 text-[10px] uppercase tracking-wider">
+          <p className="text-muted-foreground text-[10px] uppercase tracking-wider">
             Uso Proporcional — Plano {tipoPlano ? tipoPlano.label : ''} ({uso.mesesContrato} meses)
           </p>
 
-          <div className="flex justify-between text-slate-500">
+          <div className="flex justify-between text-muted-foreground">
             <span>Valor mensal ({fmtBRL(v)} ÷ {uso.mesesContrato} meses):</span>
-            <span className="text-purple-300">{fmtBRL(uso.valorMensal)}/mês</span>
+            <span className="text-primary">{fmtBRL(uso.valorMensal)}/mês</span>
           </div>
 
           {uso.diasAdicionais > 0 && (
-            <div className="flex justify-between text-slate-500">
+            <div className="flex justify-between text-muted-foreground">
               <span>Valor diário ({fmtBRL(uso.valorMensal)} ÷ 30 dias):</span>
-              <span className="text-purple-300">{fmtBRL(uso.valorDiario)}/dia</span>
+              <span className="text-primary">{fmtBRL(uso.valorDiario)}/dia</span>
             </div>
           )}
 
           {uso.mesesUsados > 0 && (
             <div className="flex justify-between">
-              <span className="text-slate-400">{uso.mesesUsados} {uso.mesesUsados === 1 ? 'mês' : 'meses'} × {fmtBRL(uso.valorMensal)}:</span>
-              <span className="text-purple-400">− {fmtBRL(uso.valorMeses)}</span>
+              <span className="text-muted-foreground">{uso.mesesUsados} {uso.mesesUsados === 1 ? 'mês' : 'meses'} × {fmtBRL(uso.valorMensal)}:</span>
+              <span className="text-primary">− {fmtBRL(uso.valorMeses)}</span>
             </div>
           )}
 
           {uso.diasAdicionais > 0 && (
             <div className="flex justify-between">
-              <span className="text-slate-400">{uso.diasAdicionais} dias × {fmtBRL(uso.valorDiario)}:</span>
-              <span className="text-purple-400">− {fmtBRL(uso.valorDias)}</span>
+              <span className="text-muted-foreground">{uso.diasAdicionais} dias × {fmtBRL(uso.valorDiario)}:</span>
+              <span className="text-primary">− {fmtBRL(uso.valorDias)}</span>
             </div>
           )}
 
-          <div className="flex justify-between text-purple-300 font-semibold">
+          <div className="flex justify-between text-primary font-semibold">
             <span>Total uso do sistema:</span>
             <span>− {fmtBRL(uso.valor)}</span>
           </div>
 
           {uso.excedeuContrato && (
-            <div className="text-amber-400 text-[10px] mt-0.5">
+            <div className="text-warning text-[10px] mt-0.5">
               Tempo utilizado excede o contrato — custo limitado ao valor da NF.
             </div>
           )}
@@ -107,7 +107,7 @@ export default function MemoriaCalculo({ resultado, config, valorNota, aplicarMu
       <div className="border-t border-slate-700 my-1.5" />
 
       {/* Custo total */}
-      <div className="flex justify-between text-slate-300">
+      <div className="flex justify-between text-muted-foreground">
         <span className="font-semibold">Custo total de descontos:</span>
         <span className="text-red-400 font-semibold">− {fmtBRL(resultado.total_descontos_valor)}</span>
       </div>
@@ -115,7 +115,7 @@ export default function MemoriaCalculo({ resultado, config, valorNota, aplicarMu
       <div className="border-t border-slate-700 my-1.5" />
 
       {/* Cenários */}
-      <p className="text-slate-500 text-[10px] uppercase tracking-wider">Cenários de Devolução</p>
+      <p className="text-muted-foreground text-[10px] uppercase tracking-wider">Cenários de Devolução</p>
 
       <div className="flex justify-between text-emerald-400">
         <span>✓ Devolução sem multa:</span>
@@ -123,7 +123,7 @@ export default function MemoriaCalculo({ resultado, config, valorNota, aplicarMu
       </div>
 
       <div className="flex justify-between">
-        <span className="text-slate-400">Multa contratual ({Number(config.multa_contratual).toFixed(2)}% sobre {fmtBRL(resultado.valor_sem_multa)}):</span>
+        <span className="text-muted-foreground">Multa contratual ({Number(config.multa_contratual).toFixed(2)}% sobre {fmtBRL(resultado.valor_sem_multa)}):</span>
         <span className="text-red-400">− {fmtBRL(resultado.valor_multa_calculado)}</span>
       </div>
 

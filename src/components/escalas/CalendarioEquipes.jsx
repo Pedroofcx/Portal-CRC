@@ -8,13 +8,13 @@ import { cn } from '@/lib/utils';
 const diasSemana = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 
 const statusConfig = {
-  home_office: { label: 'Home Office', cor: 'bg-green-500', text: 'text-white' },
-  presencial: { label: 'Presencial', cor: 'bg-blue-500', text: 'text-white' },
-  hibrido: { label: 'Híbrido', cor: 'bg-purple-500', text: 'text-white' },
+  home_office: { label: 'Home Office', cor: 'bg-success', text: 'text-white' },
+  presencial: { label: 'Presencial', cor: 'bg-primary', text: 'text-white' },
+  hibrido: { label: 'Híbrido', cor: 'bg-primary', text: 'text-white' },
   ferias: { label: 'Férias', cor: 'bg-cyan-400', text: 'text-white' },
   day_off: { label: 'Day Off', cor: 'bg-amber-400', text: 'text-white' },
-  falta: { label: 'Falta', cor: 'bg-red-500', text: 'text-white' },
-  treinamento: { label: 'Treinamento', cor: 'bg-indigo-500', text: 'text-white' },
+  falta: { label: 'Falta', cor: 'bg-destructive', text: 'text-white' },
+  treinamento: { label: 'Treinamento', cor: 'bg-primary', text: 'text-white' },
   evento_especial: { label: 'Evento', cor: 'bg-pink-500', text: 'text-white' }
 };
 
@@ -75,7 +75,7 @@ export default function CalendarioEquipes({
     <Card className="border-0 shadow-lg">
       <div className="p-4 border-b bg-gradient-to-r from-slate-50 to-slate-100">
         <div className="flex items-center justify-between">
-          <h2 className="text-xl font-bold text-slate-900">
+          <h2 className="text-xl font-bold text-foreground">
             {mesAtual.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' }).replace(/^\w/, c => c.toUpperCase())}
           </h2>
           <div className="flex items-center gap-2">
@@ -95,7 +95,7 @@ export default function CalendarioEquipes({
       <div className="p-4">
         <div className="grid grid-cols-7 gap-2 mb-2">
           {diasSemana.map((dia) => (
-            <div key={dia} className="text-center font-semibold text-sm text-slate-600 py-2">
+            <div key={dia} className="text-center font-semibold text-sm text-muted-foreground py-2">
               {dia}
             </div>
           ))}
@@ -113,15 +113,15 @@ export default function CalendarioEquipes({
                 className={cn(
                   'min-h-32 p-2 rounded-lg transition-all border-2',
                   diaObj.mesAtual 
-                    ? 'bg-white hover:shadow-md cursor-pointer' 
-                    : 'bg-slate-50/50 opacity-40 border-slate-100',
-                  isHoje && 'ring-2 ring-blue-500 bg-blue-50 border-blue-400'
+                    ? 'bg-card hover:shadow-md cursor-pointer' 
+                    : 'bg-muted/50 opacity-40 border-border',
+                  isHoje && 'ring-2 ring-blue-500 bg-info-soft border-primary/40'
                 )}
               >
                 <div className="flex items-center justify-between mb-2">
                   <span className={cn(
                     'text-base font-bold',
-                    isHoje ? 'text-blue-600' : 'text-slate-700'
+                    isHoje ? 'text-primary' : 'text-foreground'
                   )}>
                     {diaObj.data.getDate()}
                   </span>
@@ -152,7 +152,7 @@ export default function CalendarioEquipes({
                     );
                   })}
                   {equipesNoDia.length > 3 && (
-                    <div className="text-center text-[9px] text-slate-500 font-medium">
+                    <div className="text-center text-[9px] text-muted-foreground font-medium">
                       +{equipesNoDia.length - 3}
                     </div>
                   )}
@@ -163,12 +163,12 @@ export default function CalendarioEquipes({
         </div>
       </div>
 
-      <div className="px-4 pb-4 border-t bg-slate-50">
+      <div className="px-4 pb-4 border-t bg-muted">
         <div className="flex flex-wrap gap-3 text-xs pt-3">
           {Object.entries(statusConfig).map(([tipo, config]) => (
             <div key={tipo} className="flex items-center gap-1.5">
               <div className={cn('w-3 h-3 rounded', config.cor)} />
-              <span className="text-slate-600 font-medium">{config.label}</span>
+              <span className="text-muted-foreground font-medium">{config.label}</span>
             </div>
           ))}
         </div>

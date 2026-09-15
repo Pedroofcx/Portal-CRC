@@ -8,13 +8,13 @@ import { cn } from '@/lib/utils';
 const diasSemana = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 
 const corPorTipo = {
-  home_office: 'bg-green-500',
-  presencial: 'bg-blue-500',
-  hibrido: 'bg-purple-500',
+  home_office: 'bg-success',
+  presencial: 'bg-primary',
+  hibrido: 'bg-primary',
   ferias: 'bg-cyan-500',
-  day_off: 'bg-amber-500',
-  falta: 'bg-red-500',
-  treinamento: 'bg-indigo-500',
+  day_off: 'bg-warning',
+  falta: 'bg-destructive',
+  treinamento: 'bg-primary',
   evento_especial: 'bg-pink-500'
 };
 
@@ -67,7 +67,7 @@ export default function CalendarioLimpo({
     <Card className="border-0 shadow-lg">
       <div className="p-4 border-b bg-gradient-to-r from-slate-50 to-slate-100">
         <div className="flex items-center justify-between">
-          <h2 className="text-xl font-bold text-slate-900">
+          <h2 className="text-xl font-bold text-foreground">
             {mesAtual.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' }).replace(/^\w/, c => c.toUpperCase())}
           </h2>
           <div className="flex items-center gap-2">
@@ -87,7 +87,7 @@ export default function CalendarioLimpo({
       <div className="p-4">
         <div className="grid grid-cols-7 gap-2 mb-2">
           {diasSemana.map((dia) => (
-            <div key={dia} className="text-center font-semibold text-sm text-slate-600 py-2">
+            <div key={dia} className="text-center font-semibold text-sm text-muted-foreground py-2">
               {dia}
             </div>
           ))}
@@ -106,15 +106,15 @@ export default function CalendarioLimpo({
                 className={cn(
                   'min-h-20 p-2 rounded-lg transition-all border',
                   diaObj.mesAtual 
-                    ? 'bg-white hover:bg-slate-50' 
-                    : 'bg-slate-50/50 opacity-40',
-                  isHoje && 'ring-2 ring-blue-500 bg-blue-50'
+                    ? 'bg-card hover:bg-muted' 
+                    : 'bg-muted/50 opacity-40',
+                  isHoje && 'ring-2 ring-blue-500 bg-info-soft'
                 )}
               >
                 <div className="flex items-center justify-between mb-1">
                   <span className={cn(
                     'text-sm font-semibold',
-                    isHoje ? 'text-blue-600' : 'text-slate-700'
+                    isHoje ? 'text-primary' : 'text-foreground'
                   )}>
                     {diaObj.data.getDate()}
                   </span>
@@ -146,12 +146,12 @@ export default function CalendarioLimpo({
       </div>
 
       {/* Legenda Simplificada */}
-      <div className="px-4 pb-4 pt-2 border-t bg-slate-50">
+      <div className="px-4 pb-4 pt-2 border-t bg-muted">
         <div className="flex flex-wrap gap-3 text-xs">
           {Object.entries(labelPorTipo).map(([tipo, label]) => (
             <div key={tipo} className="flex items-center gap-1.5">
               <div className={cn('w-3 h-3 rounded-full', corPorTipo[tipo])} />
-              <span className="text-slate-600 font-medium">{label}</span>
+              <span className="text-muted-foreground font-medium">{label}</span>
             </div>
           ))}
         </div>

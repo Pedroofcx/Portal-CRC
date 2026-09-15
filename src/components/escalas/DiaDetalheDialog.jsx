@@ -7,13 +7,13 @@ import { Users, Calendar } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const statusConfig = {
-  home_office: { label: 'Home Office', cor: 'bg-green-500', text: 'text-white' },
-  presencial: { label: 'Presencial', cor: 'bg-blue-500', text: 'text-white' },
-  hibrido: { label: 'Híbrido', cor: 'bg-purple-500', text: 'text-white' },
+  home_office: { label: 'Home Office', cor: 'bg-success', text: 'text-white' },
+  presencial: { label: 'Presencial', cor: 'bg-primary', text: 'text-white' },
+  hibrido: { label: 'Híbrido', cor: 'bg-primary', text: 'text-white' },
   ferias: { label: 'Férias', cor: 'bg-cyan-400', text: 'text-white' },
   day_off: { label: 'Day Off', cor: 'bg-amber-400', text: 'text-white' },
-  falta: { label: 'Falta', cor: 'bg-red-500', text: 'text-white' },
-  treinamento: { label: 'Treinamento', cor: 'bg-indigo-500', text: 'text-white' },
+  falta: { label: 'Falta', cor: 'bg-destructive', text: 'text-white' },
+  treinamento: { label: 'Treinamento', cor: 'bg-primary', text: 'text-white' },
   evento_especial: { label: 'Evento', cor: 'bg-pink-500', text: 'text-white' }
 };
 
@@ -60,25 +60,25 @@ export default function DiaDetalheDialog({ open, onClose, data, atribuicoes, col
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Calendar className="w-5 h-5 text-blue-600" />
+            <Calendar className="w-5 h-5 text-primary" />
             {formatDateSP(data, 'DD/MM/YYYY')} - {data.toLocaleDateString('pt-BR', { weekday: 'long' })}
           </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4 mt-4">
           {/* Resumo */}
-          <Card className="p-4 bg-blue-50 border-blue-200">
-            <div className="flex items-center gap-2 text-blue-900">
+          <Card className="p-4 bg-info-soft border-info/25">
+            <div className="flex items-center gap-2 text-primary">
               <Users className="w-5 h-5" />
               <span className="font-semibold">{totalPessoas} pessoas escaladas</span>
-              <span className="text-blue-600">•</span>
-              <span className="text-blue-700">{equipesArray.length} equipes</span>
+              <span className="text-primary">•</span>
+              <span className="text-primary">{equipesArray.length} equipes</span>
             </div>
           </Card>
 
           {/* Lista por equipe */}
           {equipesArray.length === 0 ? (
-            <div className="text-center py-8 text-slate-500">
+            <div className="text-center py-8 text-muted-foreground">
               <Users className="w-10 h-10 mx-auto mb-2 opacity-50" />
               <p>Nenhuma escala para este dia</p>
             </div>
@@ -101,7 +101,7 @@ export default function DiaDetalheDialog({ open, onClose, data, atribuicoes, col
                       style={{ borderLeftWidth: '4px', borderLeftColor: equipe.cor }}
                     >
                       <div className="flex items-center gap-2">
-                        <h3 className="font-semibold text-slate-900">{equipe.nome}</h3>
+                        <h3 className="font-semibold text-foreground">{equipe.nome}</h3>
                         <Badge variant="secondary">
                           {equipe.colaboradores.length} pessoas
                         </Badge>
@@ -114,7 +114,7 @@ export default function DiaDetalheDialog({ open, onClose, data, atribuicoes, col
                           <div key={status}>
                             <div className="flex items-center gap-2 mb-2">
                               <div className={cn('w-3 h-3 rounded', config.cor)} />
-                              <span className="text-sm font-medium text-slate-700">
+                              <span className="text-sm font-medium text-foreground">
                                 {config.label} ({colabs.length})
                               </span>
                             </div>
@@ -122,7 +122,7 @@ export default function DiaDetalheDialog({ open, onClose, data, atribuicoes, col
                               {colabs.map(colab => (
                                 <div 
                                   key={colab.id}
-                                  className="flex items-center justify-between p-2 bg-slate-50 rounded-lg"
+                                  className="flex items-center justify-between p-2 bg-muted rounded-lg"
                                 >
                                   <div className="flex items-center gap-2">
                                     {colab.foto_url ? (
@@ -132,16 +132,16 @@ export default function DiaDetalheDialog({ open, onClose, data, atribuicoes, col
                                         className="w-8 h-8 rounded-full object-cover"
                                       />
                                     ) : (
-                                      <div className="w-8 h-8 rounded-full bg-slate-300 flex items-center justify-center text-xs font-bold text-white">
+                                      <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-xs font-bold text-white">
                                         {colab.nome_completo?.substring(0, 2).toUpperCase()}
                                       </div>
                                     )}
                                     <div>
-                                      <p className="text-sm font-medium text-slate-900">
+                                      <p className="text-sm font-medium text-foreground">
                                         {colab.nome_completo}
                                       </p>
                                       {colab.escala_nome && (
-                                        <p className="text-xs text-slate-500">
+                                        <p className="text-xs text-muted-foreground">
                                           Escala: {colab.escala_nome}
                                         </p>
                                       )}

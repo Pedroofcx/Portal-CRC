@@ -22,9 +22,9 @@ export default function ConfirmDialog({
   variant = "danger" // danger, warning, info
 }) {
   const variants = {
-    danger: "bg-red-600 hover:bg-red-700 text-white",
-    warning: "bg-amber-600 hover:bg-amber-700 text-white",
-    info: "bg-blue-600 hover:bg-blue-700 text-white"
+    danger: "bg-destructive hover:bg-destructive/90 text-white",
+    warning: "bg-warning hover:bg-amber-700 text-white",
+    info: "bg-primary hover:bg-primary/90 text-white"
   };
 
   return (
@@ -32,8 +32,8 @@ export default function ConfirmDialog({
       <AlertDialogContent className="max-w-md">
         <AlertDialogHeader>
           <div className="flex items-start gap-4">
-            <div className={`p-2 rounded-full ${variant === 'danger' ? 'bg-red-100' : variant === 'warning' ? 'bg-amber-100' : 'bg-blue-100'}`}>
-              <AlertTriangle className={`w-5 h-5 ${variant === 'danger' ? 'text-red-600' : variant === 'warning' ? 'text-amber-600' : 'text-blue-600'}`} />
+            <div className={`p-2 rounded-full ${variant === 'danger' ? 'bg-destructive/10' : variant === 'warning' ? 'bg-warning-soft' : 'bg-info-soft'}`}>
+              <AlertTriangle className={`w-5 h-5 ${variant === 'danger' ? 'text-destructive' : variant === 'warning' ? 'text-warning' : 'text-primary'}`} />
             </div>
             <div>
               <AlertDialogTitle className="text-lg">{title}</AlertDialogTitle>
@@ -44,7 +44,7 @@ export default function ConfirmDialog({
           </div>
         </AlertDialogHeader>
         <AlertDialogFooter className="mt-4">
-          <AlertDialogCancel className="border-slate-200">{cancelLabel}</AlertDialogCancel>
+          <AlertDialogCancel className="border-border">{cancelLabel}</AlertDialogCancel>
           <AlertDialogAction onClick={onConfirm} className={variants[variant]}>
             {confirmLabel}
           </AlertDialogAction>

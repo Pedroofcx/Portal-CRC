@@ -44,25 +44,25 @@ export default function CalendarioModerno({
   const hoje_data = new Date().toDateString();
 
   return (
-    <Card className="border-0 shadow-xl bg-white">
+    <Card className="border-0 shadow-xl bg-card">
       <div className="p-6 border-b bg-gradient-to-r from-blue-50 to-indigo-50">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-blue-100 rounded-lg">
-              <Calendar className="w-5 h-5 text-blue-600" />
+            <div className="p-2 bg-info-soft rounded-lg">
+              <Calendar className="w-5 h-5 text-primary" />
             </div>
-            <h2 className="text-2xl font-bold text-slate-900">
+            <h2 className="text-2xl font-bold text-foreground">
               {mesAtual.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' }).replace(/^\w/, c => c.toUpperCase())}
             </h2>
           </div>
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="icon" onClick={onMesAnterior} className="hover:bg-blue-50">
+            <Button variant="outline" size="icon" onClick={onMesAnterior} className="hover:bg-info-soft">
               <ChevronLeft className="w-4 h-4" />
             </Button>
-            <Button variant="outline" onClick={onHoje} className="hover:bg-blue-50 font-medium">
+            <Button variant="outline" onClick={onHoje} className="hover:bg-info-soft font-medium">
               Hoje
             </Button>
-            <Button variant="outline" size="icon" onClick={onMesPosterior} className="hover:bg-blue-50">
+            <Button variant="outline" size="icon" onClick={onMesPosterior} className="hover:bg-info-soft">
               <ChevronRight className="w-4 h-4" />
             </Button>
           </div>
@@ -72,8 +72,8 @@ export default function CalendarioModerno({
       <div className="p-6">
         <div className="grid grid-cols-7 gap-2">
           {diasSemanaFull.map((dia) => (
-            <div key={dia} className="p-3 text-center font-bold text-sm bg-gradient-to-b from-slate-100 to-slate-50 rounded-t-lg border-b-2 border-slate-300">
-              <div className="text-slate-900">{dia}</div>
+            <div key={dia} className="p-3 text-center font-bold text-sm bg-gradient-to-b from-slate-100 to-slate-50 rounded-t-lg border-b-2 border-border">
+              <div className="text-foreground">{dia}</div>
             </div>
           ))}
           {diasDoMes.map((diaObj, idx) => {
@@ -94,15 +94,15 @@ export default function CalendarioModerno({
                 className={cn(
                   'min-h-32 p-3 border-2 rounded-lg transition-all',
                   diaObj.mesAtual 
-                    ? 'bg-white hover:bg-slate-50 hover:shadow-md border-slate-200' 
-                    : 'bg-slate-50/50 text-slate-400 border-slate-100',
-                  isHoje && 'ring-4 ring-blue-400 border-blue-400 bg-blue-50/30'
+                    ? 'bg-card hover:bg-muted hover:shadow-md border-border' 
+                    : 'bg-muted/50 text-muted-foreground border-border',
+                  isHoje && 'ring-4 ring-blue-400 border-primary/40 bg-info-soft/30'
                 )}
               >
                 <div className="flex items-center justify-between mb-2">
                   <span className={cn(
                     'text-lg font-bold',
-                    isHoje ? 'text-blue-600' : diaObj.mesAtual ? 'text-slate-900' : 'text-slate-400'
+                    isHoje ? 'text-primary' : diaObj.mesAtual ? 'text-foreground' : 'text-muted-foreground'
                   )}>
                     {diaObj.data.getDate()}
                   </span>
@@ -111,7 +111,7 @@ export default function CalendarioModerno({
                       variant="secondary" 
                       className={cn(
                         'text-xs px-2 py-0.5 font-bold',
-                        isHoje ? 'bg-blue-500 text-white' : 'bg-slate-200 text-slate-700'
+                        isHoje ? 'bg-primary text-white' : 'bg-muted text-foreground'
                       )}
                     >
                       {atribsDia.length}
@@ -150,7 +150,7 @@ export default function CalendarioModerno({
                     );
                   })}
                   {Object.keys(atribsPorTipo).length > 3 && (
-                    <div className="text-center text-[10px] text-slate-500 font-medium pt-1">
+                    <div className="text-center text-[10px] text-muted-foreground font-medium pt-1">
                       +{Object.keys(atribsPorTipo).length - 3} tipos
                     </div>
                   )}

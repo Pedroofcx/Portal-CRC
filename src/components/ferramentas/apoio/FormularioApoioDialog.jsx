@@ -66,7 +66,7 @@ export default function FormularioApoioDialog({ open, onOpenChange, onSubmit, di
         </DialogHeader>
         <div className="space-y-4">
           <div className="space-y-1.5">
-            <Label className="text-xs">Tipo de Apoio <span className="text-red-500">*</span></Label>
+            <Label className="text-xs">Tipo de Apoio <span className="text-destructive">*</span></Label>
             <Select value={form.tipo_apoio} onValueChange={v => onChange('tipo_apoio', v)}>
               <SelectTrigger><SelectValue placeholder="Selecione..." /></SelectTrigger>
               <SelectContent>
@@ -84,7 +84,7 @@ export default function FormularioApoioDialog({ open, onOpenChange, onSubmit, di
               <Input placeholder="#123456" value={form.tipo_zendesk} onChange={e => onChange('tipo_zendesk', e.target.value)} />
             </div>
             <div className="space-y-1.5">
-              <Label className="text-xs">Cliente <span className="text-red-500">*</span></Label>
+              <Label className="text-xs">Cliente <span className="text-destructive">*</span></Label>
               <Input placeholder="Nome do cliente" value={form.nome_cliente} onChange={e => onChange('nome_cliente', e.target.value)} />
             </div>
             <div className="space-y-1.5">
@@ -121,18 +121,18 @@ export default function FormularioApoioDialog({ open, onOpenChange, onSubmit, di
                 </SelectContent>
               </Select>
               {form.vinculo_crc && (
-                <p className="text-xs text-blue-600">✓ Vinculado: {form.vinculo_crc}</p>
+                <p className="text-xs text-primary">✓ Vinculado: {form.vinculo_crc}</p>
               )}
             </div>
           </div>
 
           <div className="space-y-1.5">
-            <Label className="text-xs">Descrição / Justificativa <span className="text-red-500">*</span></Label>
+            <Label className="text-xs">Descrição / Justificativa <span className="text-destructive">*</span></Label>
             <Textarea rows={4} placeholder="Descreva: a dificuldade do cliente, por que o apoio é necessário, e o que precisa ser realizado pelo time especializado." value={form.descricao_justificativa} onChange={e => onChange('descricao_justificativa', e.target.value)} />
           </div>
 
           <div className="space-y-1.5">
-            <Label className="text-xs">Quantidade de Horas Solicitadas <span className="text-red-500">*</span></Label>
+            <Label className="text-xs">Quantidade de Horas Solicitadas <span className="text-destructive">*</span></Label>
             <Select value={form.horas_solicitadas} onValueChange={v => onChange('horas_solicitadas', v)}>
               <SelectTrigger><SelectValue placeholder="Selecione..." /></SelectTrigger>
               <SelectContent>
@@ -141,18 +141,18 @@ export default function FormularioApoioDialog({ open, onOpenChange, onSubmit, di
                 ))}
               </SelectContent>
             </Select>
-            <p className="text-xs text-slate-500">Disponível neste mês: {formatMinutos(disponivelMinutos)}</p>
+            <p className="text-xs text-muted-foreground">Disponível neste mês: {formatMinutos(disponivelMinutos)}</p>
             {saldoInsuficiente && (
-              <div className="p-3 bg-red-50 border border-red-200 rounded-lg flex items-start gap-2">
-                <AlertCircle className="w-4 h-4 text-red-600 mt-0.5 flex-shrink-0" />
-                <p className="text-sm text-red-700"><strong>Saldo insuficiente.</strong> Você possui apenas {formatMinutos(disponivelMinutos)} disponíveis neste mês. Reduza o tempo solicitado para continuar.</p>
+              <div className="p-3 bg-destructive/10 border border-destructive/25 rounded-lg flex items-start gap-2">
+                <AlertCircle className="w-4 h-4 text-destructive mt-0.5 flex-shrink-0" />
+                <p className="text-sm text-destructive"><strong>Saldo insuficiente.</strong> Você possui apenas {formatMinutos(disponivelMinutos)} disponíveis neste mês. Reduza o tempo solicitado para continuar.</p>
               </div>
             )}
           </div>
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>Cancelar</Button>
-          <Button onClick={handleSubmit} disabled={!canSubmit || isSubmitting} className="bg-violet-600 hover:bg-violet-700">
+          <Button onClick={handleSubmit} disabled={!canSubmit || isSubmitting} className="bg-primary hover:bg-violet-700">
             {isSubmitting ? 'Registrando...' : 'Criar Solicitação'}
           </Button>
         </DialogFooter>

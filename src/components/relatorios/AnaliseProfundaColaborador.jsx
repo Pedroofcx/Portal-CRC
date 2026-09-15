@@ -473,7 +473,7 @@ export default function AnaliseProfundaColaborador({
           <div className="flex items-center gap-4">
             <Avatar className="h-16 w-16">
               <AvatarImage src={colaborador?.foto_url} />
-              <AvatarFallback className="bg-blue-100 text-blue-600 text-xl">
+              <AvatarFallback className="bg-info-soft text-primary text-xl">
                 {colaborador?.nome_completo?.charAt(0)}
               </AvatarFallback>
             </Avatar>
@@ -484,7 +484,7 @@ export default function AnaliseProfundaColaborador({
               </CardDescription>
             </div>
             {colaborador.is_facilitador_interno && (
-              <Badge className="bg-purple-600">
+              <Badge className="bg-primary">
                 <Sparkles className="w-3 h-3 mr-1" />
                 Facilitador Interno
               </Badge>
@@ -498,7 +498,7 @@ export default function AnaliseProfundaColaborador({
         <Card className="border-0 shadow-sm">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <AlertCircle className="w-5 h-5 text-amber-600" />
+              <AlertCircle className="w-5 h-5 text-warning" />
               Alertas Inteligentes
             </CardTitle>
             <CardDescription>Sinais identificados automaticamente que requerem atenção</CardDescription>
@@ -509,24 +509,24 @@ export default function AnaliseProfundaColaborador({
                 key={idx}
                 className={
                   alerta.tipo === 'critical'
-                    ? 'border-red-300 bg-red-50'
+                    ? 'border-destructive/30 bg-destructive/10'
                     : alerta.tipo === 'warning'
-                    ? 'border-amber-300 bg-amber-50'
+                    ? 'border-warning/30 bg-warning-soft'
                     : alerta.tipo === 'success'
-                    ? 'border-green-300 bg-green-50'
-                    : 'border-blue-300 bg-blue-50'
+                    ? 'border-success/30 bg-success-soft'
+                    : 'border-info/30 bg-info-soft'
                 }
               >
                 <div className="flex items-start gap-3">
                   <alerta.icon
                     className={`w-5 h-5 mt-0.5 ${
                       alerta.tipo === 'critical'
-                        ? 'text-red-600'
+                        ? 'text-destructive'
                         : alerta.tipo === 'warning'
-                        ? 'text-amber-600'
+                        ? 'text-warning'
                         : alerta.tipo === 'success'
-                        ? 'text-green-600'
-                        : 'text-blue-600'
+                        ? 'text-success'
+                        : 'text-primary'
                     }`}
                   />
                   <div className="flex-1">
@@ -575,30 +575,30 @@ export default function AnaliseProfundaColaborador({
 
             {/* Métricas do Radar */}
             <div className="grid grid-cols-2 gap-3 mt-4">
-              <div className="p-3 bg-blue-50 rounded-lg">
-                <p className="text-xs text-slate-600 mb-1">CSAT</p>
-                <p className="text-2xl font-bold text-blue-600">
+              <div className="p-3 bg-info-soft rounded-lg">
+                <p className="text-xs text-muted-foreground mb-1">CSAT</p>
+                <p className="text-2xl font-bold text-primary">
                   {(ultimaApuracao?.canal_telefone?.csat || ultimaApuracao?.canal_chat?.csat || 0).toFixed(1)}%
                 </p>
               </div>
               {ultimaApuracao?.canal_telefone?.performance && (
-                <div className="p-3 bg-purple-50 rounded-lg">
-                  <p className="text-xs text-slate-600 mb-1">Performance</p>
-                  <p className="text-2xl font-bold text-purple-600">
+                <div className="p-3 bg-info-soft rounded-lg">
+                  <p className="text-xs text-muted-foreground mb-1">Performance</p>
+                  <p className="text-2xl font-bold text-primary">
                     {ultimaApuracao.canal_telefone.performance.toFixed(1)}%
                   </p>
                 </div>
               )}
               {softSkillDisplay > 0 && (
-                <div className="p-3 bg-green-50 rounded-lg">
-                  <p className="text-xs text-slate-600 mb-1">Soft Skills</p>
-                  <p className="text-2xl font-bold text-green-600">{softSkillDisplay.toFixed(1)}/5</p>
+                <div className="p-3 bg-success-soft rounded-lg">
+                  <p className="text-xs text-muted-foreground mb-1">Soft Skills</p>
+                  <p className="text-2xl font-bold text-success">{softSkillDisplay.toFixed(1)}/5</p>
                 </div>
               )}
               {hardSkillDisplay > 0 && (
-                <div className="p-3 bg-amber-50 rounded-lg">
-                  <p className="text-xs text-slate-600 mb-1">Hard Skills</p>
-                  <p className="text-2xl font-bold text-amber-600">{hardSkillDisplay.toFixed(1)}/5</p>
+                <div className="p-3 bg-warning-soft rounded-lg">
+                  <p className="text-xs text-muted-foreground mb-1">Hard Skills</p>
+                  <p className="text-2xl font-bold text-warning">{hardSkillDisplay.toFixed(1)}/5</p>
                 </div>
               )}
             </div>
@@ -609,7 +609,7 @@ export default function AnaliseProfundaColaborador({
         <Card className="border-0 shadow-sm">
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2">
-              <Heart className="w-5 h-5 text-pink-600" />
+              <Heart className="w-5 h-5 text-primary" />
               Indicadores Comportamentais
             </CardTitle>
           </CardHeader>
@@ -618,33 +618,33 @@ export default function AnaliseProfundaColaborador({
               <div key={idx}>
                 {ind.tipo === 'swot' && (
                   <div className="grid grid-cols-2 gap-3">
-                    <div className="p-3 bg-green-50 rounded-lg border border-green-200">
-                      <p className="text-xs font-semibold text-green-900 mb-2">Forças</p>
-                      <ul className="text-xs text-green-700 space-y-1">
+                    <div className="p-3 bg-success-soft rounded-lg border border-success/25">
+                      <p className="text-xs font-semibold text-success mb-2">Forças</p>
+                      <ul className="text-xs text-success space-y-1">
                         {ind.dados.forcas?.slice(0, 2).map((f, i) => (
                           <li key={i}>• {f}</li>
                         ))}
                       </ul>
                     </div>
-                    <div className="p-3 bg-red-50 rounded-lg border border-red-200">
-                      <p className="text-xs font-semibold text-red-900 mb-2">Fraquezas</p>
-                      <ul className="text-xs text-red-700 space-y-1">
+                    <div className="p-3 bg-destructive/10 rounded-lg border border-destructive/25">
+                      <p className="text-xs font-semibold text-destructive mb-2">Fraquezas</p>
+                      <ul className="text-xs text-destructive space-y-1">
                         {ind.dados.fraquezas?.slice(0, 2).map((f, i) => (
                           <li key={i}>• {f}</li>
                         ))}
                       </ul>
                     </div>
-                    <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
-                      <p className="text-xs font-semibold text-blue-900 mb-2">Oportunidades</p>
-                      <ul className="text-xs text-blue-700 space-y-1">
+                    <div className="p-3 bg-info-soft rounded-lg border border-info/25">
+                      <p className="text-xs font-semibold text-primary mb-2">Oportunidades</p>
+                      <ul className="text-xs text-primary space-y-1">
                         {ind.dados.oportunidades?.slice(0, 2).map((o, i) => (
                           <li key={i}>• {o}</li>
                         ))}
                       </ul>
                     </div>
-                    <div className="p-3 bg-amber-50 rounded-lg border border-amber-200">
-                      <p className="text-xs font-semibold text-amber-900 mb-2">Ameaças</p>
-                      <ul className="text-xs text-amber-700 space-y-1">
+                    <div className="p-3 bg-warning-soft rounded-lg border border-warning/25">
+                      <p className="text-xs font-semibold text-warning mb-2">Ameaças</p>
+                      <ul className="text-xs text-warning space-y-1">
                         {ind.dados.ameacas?.slice(0, 2).map((a, i) => (
                           <li key={i}>• {a}</li>
                         ))}
@@ -654,21 +654,21 @@ export default function AnaliseProfundaColaborador({
                 )}
 
                 {ind.tipo === 'feedback' && (
-                  <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                  <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
                     <div className="flex items-center gap-3">
-                      <MessageSquare className="w-5 h-5 text-slate-600" />
+                      <MessageSquare className="w-5 h-5 text-muted-foreground" />
                       <div>
                         <p className="text-sm font-medium">{ind.titulo}</p>
-                        <p className="text-xs text-slate-600">{ind.descricao}</p>
+                        <p className="text-xs text-muted-foreground">{ind.descricao}</p>
                       </div>
                     </div>
                     <Badge
                       variant="outline"
                       className={
                         ind.status === 'positivo'
-                          ? 'bg-green-50 text-green-700 border-green-200'
+                          ? 'bg-success-soft text-success border-success/25'
                           : ind.status === 'atencao'
-                          ? 'bg-red-50 text-red-700 border-red-200'
+                          ? 'bg-destructive/10 text-destructive border-destructive/25'
                           : ''
                       }
                     >
@@ -678,23 +678,23 @@ export default function AnaliseProfundaColaborador({
                 )}
 
                 {ind.tipo === 'consistencia' && (
-                  <div className="p-3 bg-slate-50 rounded-lg">
+                  <div className="p-3 bg-muted rounded-lg">
                     <div className="flex items-center justify-between mb-2">
                       <p className="text-sm font-medium">{ind.titulo}</p>
                       <Badge
                         variant="outline"
                         className={
                           ind.status === 'positivo'
-                            ? 'bg-green-50 text-green-700 border-green-200'
+                            ? 'bg-success-soft text-success border-success/25'
                             : ind.status === 'atencao'
-                            ? 'bg-amber-50 text-amber-700 border-amber-200'
+                            ? 'bg-warning-soft text-warning border-warning/25'
                             : ''
                         }
                       >
                         {ind.status === 'positivo' ? 'Consistente' : 'Variável'}
                       </Badge>
                     </div>
-                    <p className="text-xs text-slate-600">{ind.descricao}</p>
+                    <p className="text-xs text-muted-foreground">{ind.descricao}</p>
                     <Progress
                       value={ind.status === 'positivo' ? 90 : ind.status === 'neutro' ? 60 : 30}
                       className="mt-2"
@@ -712,7 +712,7 @@ export default function AnaliseProfundaColaborador({
         <Card className="border-0 shadow-sm">
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2">
-              <Activity className="w-5 h-5 text-indigo-600" />
+              <Activity className="w-5 h-5 text-primary" />
               Evolução Temporal de Performance
             </CardTitle>
             <CardDescription>Tendência das últimas {evolucaoPerformance.length} apurações</CardDescription>
@@ -738,23 +738,23 @@ export default function AnaliseProfundaColaborador({
         <Card className="border-0 shadow-sm bg-gradient-to-br from-indigo-50 to-purple-50">
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2">
-              <Brain className="w-5 h-5 text-indigo-600" />
+              <Brain className="w-5 h-5 text-primary" />
               Insights Estratégicos (IA)
             </CardTitle>
             <CardDescription>Análise inteligente para tomada de decisão</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
             {insightsEstrategicos.map((insight, idx) => (
-              <div key={idx} className="p-4 bg-white rounded-lg border border-indigo-100">
+              <div key={idx} className="p-4 bg-card rounded-lg border border-indigo-100">
                 <div className="flex items-start gap-3">
-                  {insight.tipo === 'positivo' && <CheckCircle className="w-5 h-5 text-green-600 mt-0.5" />}
-                  {insight.tipo === 'atencao' && <AlertTriangle className="w-5 h-5 text-amber-600 mt-0.5" />}
-                  {insight.tipo === 'neutro' && <Activity className="w-5 h-5 text-blue-600 mt-0.5" />}
+                  {insight.tipo === 'positivo' && <CheckCircle className="w-5 h-5 text-success mt-0.5" />}
+                  {insight.tipo === 'atencao' && <AlertTriangle className="w-5 h-5 text-warning mt-0.5" />}
+                  {insight.tipo === 'neutro' && <Activity className="w-5 h-5 text-primary mt-0.5" />}
                   <div className="flex-1">
                     <p className="font-semibold text-sm mb-1">{insight.titulo}</p>
-                    <p className="text-sm text-slate-700 mb-2">{insight.descricao}</p>
-                    <div className="p-2 bg-indigo-50 rounded border border-indigo-200">
-                      <p className="text-xs font-medium text-indigo-900">
+                    <p className="text-sm text-foreground mb-2">{insight.descricao}</p>
+                    <div className="p-2 bg-info-soft rounded border border-indigo-200">
+                      <p className="text-xs font-medium text-primary">
                         Recomendação: {insight.recomendacao}
                       </p>
                     </div>
@@ -772,31 +772,31 @@ export default function AnaliseProfundaColaborador({
           <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle className="text-base flex items-center gap-2">
-                <Zap className="w-5 h-5 text-purple-600" />
+                <Zap className="w-5 h-5 text-primary" />
                 Oráculo CRC — Avaliação Comportamental
               </CardTitle>
-              <span className="text-xs text-slate-500">
+              <span className="text-xs text-muted-foreground">
                 {formatDateSP(ultimoOraculo.data_lancamento, 'DD/MM/YYYY')} · por {ultimoOraculo.gestor_nome}
               </span>
             </div>
           </CardHeader>
           <CardContent className="space-y-4">
             {ultimoOraculo.texto_livre && (
-              <div className="p-4 bg-white rounded-lg border border-purple-100">
-                <p className="text-sm text-slate-700 italic">"{ultimoOraculo.texto_livre}"</p>
+              <div className="p-4 bg-card rounded-lg border border-purple-100">
+                <p className="text-sm text-foreground italic">"{ultimoOraculo.texto_livre}"</p>
               </div>
             )}
             <div className="grid sm:grid-cols-2 gap-4">
               {ultimoOraculo.soft_skills && (
                 <div>
-                  <p className="text-xs font-semibold text-purple-800 mb-2">Soft Skills</p>
+                  <p className="text-xs font-semibold text-primary mb-2">Soft Skills</p>
                   <div className="space-y-2">
                     {Object.entries(ultimoOraculo.soft_skills).map(([k, v]) => (
                       <div key={k} className="flex items-center justify-between">
-                        <span className="text-xs text-slate-600">{k}</span>
+                        <span className="text-xs text-muted-foreground">{k}</span>
                         <div className="flex gap-1">
                           {[1,2,3,4,5].map(i => (
-                            <div key={i} className={`w-3 h-3 rounded-full ${i <= v ? 'bg-purple-500' : 'bg-slate-200'}`} />
+                            <div key={i} className={`w-3 h-3 rounded-full ${i <= v ? 'bg-primary' : 'bg-muted'}`} />
                           ))}
                         </div>
                       </div>
@@ -806,14 +806,14 @@ export default function AnaliseProfundaColaborador({
               )}
               {ultimoOraculo.hard_skills && (
                 <div>
-                  <p className="text-xs font-semibold text-indigo-800 mb-2">Hard Skills</p>
+                  <p className="text-xs font-semibold text-primary mb-2">Hard Skills</p>
                   <div className="space-y-2">
                     {Object.entries(ultimoOraculo.hard_skills).map(([k, v]) => (
                       <div key={k} className="flex items-center justify-between">
-                        <span className="text-xs text-slate-600">{k}</span>
+                        <span className="text-xs text-muted-foreground">{k}</span>
                         <div className="flex gap-1">
                           {[1,2,3,4,5].map(i => (
-                            <div key={i} className={`w-3 h-3 rounded-full ${i <= v ? 'bg-indigo-500' : 'bg-slate-200'}`} />
+                            <div key={i} className={`w-3 h-3 rounded-full ${i <= v ? 'bg-primary' : 'bg-muted'}`} />
                           ))}
                         </div>
                       </div>
@@ -825,16 +825,16 @@ export default function AnaliseProfundaColaborador({
             {ultimoOraculo.contexto_performance && (
               <div className="grid grid-cols-3 gap-3 pt-2 border-t border-purple-100">
                 <div className="text-center">
-                  <p className="text-lg font-bold text-purple-700">{ultimoOraculo.contexto_performance.csat_recente?.toFixed(1) ?? '-'}%</p>
-                  <p className="text-xs text-slate-500">CSAT</p>
+                  <p className="text-lg font-bold text-primary">{ultimoOraculo.contexto_performance.csat_recente?.toFixed(1) ?? '-'}%</p>
+                  <p className="text-xs text-muted-foreground">CSAT</p>
                 </div>
                 <div className="text-center">
-                  <p className="text-lg font-bold text-indigo-700">{ultimoOraculo.contexto_performance.tratativas_periodo ?? '-'}</p>
-                  <p className="text-xs text-slate-500">Tratativas</p>
+                  <p className="text-lg font-bold text-primary">{ultimoOraculo.contexto_performance.tratativas_periodo ?? '-'}</p>
+                  <p className="text-xs text-muted-foreground">Tratativas</p>
                 </div>
                 <div className="text-center">
-                  <p className="text-lg font-bold text-blue-700">{ultimoOraculo.contexto_performance.pontos_trimestre ?? '-'}</p>
-                  <p className="text-xs text-slate-500">Pts Trimestre</p>
+                  <p className="text-lg font-bold text-primary">{ultimoOraculo.contexto_performance.pontos_trimestre ?? '-'}</p>
+                  <p className="text-xs text-muted-foreground">Pts Trimestre</p>
                 </div>
               </div>
             )}
@@ -849,26 +849,26 @@ export default function AnaliseProfundaColaborador({
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-            <div className="text-center p-4 bg-blue-50 rounded-lg">
-              <p className="text-sm text-slate-600 mb-1">Total Tratativas</p>
-              <p className="text-3xl font-bold text-blue-600">{tratativasColaborador.total}</p>
+            <div className="text-center p-4 bg-info-soft rounded-lg">
+              <p className="text-sm text-muted-foreground mb-1">Total Tratativas</p>
+              <p className="text-3xl font-bold text-primary">{tratativasColaborador.total}</p>
             </div>
-            <div className="text-center p-4 bg-green-50 rounded-lg">
-              <p className="text-sm text-slate-600 mb-1">Encerradas</p>
-              <p className="text-3xl font-bold text-green-600">{tratativasColaborador.encerradas}</p>
+            <div className="text-center p-4 bg-success-soft rounded-lg">
+              <p className="text-sm text-muted-foreground mb-1">Encerradas</p>
+              <p className="text-3xl font-bold text-success">{tratativasColaborador.encerradas}</p>
             </div>
-            <div className="text-center p-4 bg-purple-50 rounded-lg">
-              <p className="text-sm text-slate-600 mb-1">Taxa SLA</p>
-              <p className="text-3xl font-bold text-purple-600">{tratativasColaborador.taxaSLA.toFixed(0)}%</p>
+            <div className="text-center p-4 bg-info-soft rounded-lg">
+              <p className="text-sm text-muted-foreground mb-1">Taxa SLA</p>
+              <p className="text-3xl font-bold text-primary">{tratativasColaborador.taxaSLA.toFixed(0)}%</p>
             </div>
-            <div className="text-center p-4 bg-amber-50 rounded-lg">
-              <p className="text-sm text-slate-600 mb-1">Tempo Médio</p>
-              <p className="text-3xl font-bold text-amber-600">{tratativasColaborador.tempoMedioHoras}h</p>
+            <div className="text-center p-4 bg-warning-soft rounded-lg">
+              <p className="text-sm text-muted-foreground mb-1">Tempo Médio</p>
+              <p className="text-3xl font-bold text-warning">{tratativasColaborador.tempoMedioHoras}h</p>
             </div>
             {analiseClimaOrganizacional && (
-              <div className="text-center p-4 bg-pink-50 rounded-lg">
-                <p className="text-sm text-slate-600 mb-1">Clima/Engajamento</p>
-                <p className="text-3xl font-bold text-pink-600">
+              <div className="text-center p-4 bg-info-soft rounded-lg">
+                <p className="text-sm text-muted-foreground mb-1">Clima/Engajamento</p>
+                <p className="text-3xl font-bold text-primary">
                   {analiseClimaOrganizacional.mediaGeral?.toFixed(1) || '-'}/10
                 </p>
               </div>

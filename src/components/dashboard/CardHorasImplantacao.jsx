@@ -28,7 +28,7 @@ export default function CardHorasImplantacao({ utilizadosMinutos = 0 }) {
           <p className="text-white/80 text-xs mt-1">
             {isZero ? 'Todas as horas foram utilizadas neste mês' : `${formatMinutos(disponivelMinutos)} disponíveis`}
           </p>
-          <div className="mt-2 h-1.5 w-full bg-white/20 rounded-full overflow-hidden">
+          <div className="mt-2 h-1.5 w-full bg-card/20 rounded-full overflow-hidden">
             <div className={`h-full rounded-full transition-all ${barColor}`} style={{ width: `${Math.min(percentual, 100)}%` }} />
           </div>
         </CardContent>

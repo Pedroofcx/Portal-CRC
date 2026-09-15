@@ -326,9 +326,9 @@ export default function AnalyticsPreditivo() {
   if (!isGestor) {
     return (
       <div className="text-center py-16">
-        <Brain className="w-12 h-12 text-slate-300 mx-auto mb-4" />
+        <Brain className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
         <h2 className="text-xl font-semibold mb-2">Acesso Restrito</h2>
-        <p className="text-slate-500">Apenas gestores podem acessar Analytics Preditivo.</p>
+        <p className="text-muted-foreground">Apenas gestores podem acessar Analytics Preditivo.</p>
       </div>
     );
   }
@@ -354,14 +354,14 @@ export default function AnalyticsPreditivo() {
         <div className="space-y-3">
           {alertas.map((alerta, idx) => (
             <Alert key={idx} className={
-              alerta.tipo === 'CRÍTICO' ? 'border-red-300 bg-red-50' :
-              alerta.tipo === 'ALERTA' ? 'border-amber-300 bg-amber-50' :
-              'border-blue-300 bg-blue-50'
+              alerta.tipo === 'CRÍTICO' ? 'border-destructive/30 bg-destructive/10' :
+              alerta.tipo === 'ALERTA' ? 'border-warning/30 bg-warning-soft' :
+              'border-info/30 bg-info-soft'
             }>
               <AlertTriangle className={`w-4 h-4 ${
-                alerta.tipo === 'CRÍTICO' ? 'text-red-600' :
-                alerta.tipo === 'ALERTA' ? 'text-amber-600' :
-                'text-blue-600'
+                alerta.tipo === 'CRÍTICO' ? 'text-destructive' :
+                alerta.tipo === 'ALERTA' ? 'text-warning' :
+                'text-primary'
               }`} />
               <AlertDescription>
                 <p className="font-semibold">{alerta.mensagem}</p>
@@ -376,27 +376,27 @@ export default function AnalyticsPreditivo() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <Card className="border-0 shadow-sm">
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-slate-500">Throughput Diário</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">Throughput Diário</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-3xl font-bold text-blue-600">{throughput.mediaDiaria.toFixed(1)}</p>
-            <p className="text-xs text-slate-500 mt-1">tickets/dia (últimos {periodoAnalise}d)</p>
+            <p className="text-3xl font-bold text-primary">{throughput.mediaDiaria.toFixed(1)}</p>
+            <p className="text-xs text-muted-foreground mt-1">tickets/dia (últimos {periodoAnalise}d)</p>
           </CardContent>
         </Card>
 
         <Card className={`border-0 shadow-sm ${
-          capacidade.status === 'SOBRECARGA' ? 'bg-red-50 border-red-200' :
-          capacidade.status === 'ALERTA' ? 'bg-amber-50 border-amber-200' :
-          'bg-green-50 border-green-200'
+          capacidade.status === 'SOBRECARGA' ? 'bg-destructive/10 border-destructive/25' :
+          capacidade.status === 'ALERTA' ? 'bg-warning-soft border-warning/25' :
+          'bg-success-soft border-success/25'
         }`}>
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-slate-500">Saturação Operacional</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">Saturação Operacional</CardTitle>
           </CardHeader>
           <CardContent>
             <p className={`text-3xl font-bold ${
-              capacidade.status === 'SOBRECARGA' ? 'text-red-600' :
-              capacidade.status === 'ALERTA' ? 'text-amber-600' :
-              'text-green-600'
+              capacidade.status === 'SOBRECARGA' ? 'text-destructive' :
+              capacidade.status === 'ALERTA' ? 'text-warning' :
+              'text-success'
             }`}>
               {capacidade.saturacaoOperacional.toFixed(0)}%
             </p>
@@ -406,27 +406,27 @@ export default function AnalyticsPreditivo() {
 
         <Card className="border-0 shadow-sm">
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-slate-500">Backlog Previsto 7d</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">Backlog Previsto 7d</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
-              <p className="text-3xl font-bold text-purple-600">{previsao.backlogPrevisto7d}</p>
-              {previsao.tendencia === 'CRESCIMENTO' && <TrendingUp className="w-6 h-6 text-red-500" />}
-              {previsao.tendencia === 'REDUÇÃO' && <TrendingDown className="w-6 h-6 text-green-500" />}
+              <p className="text-3xl font-bold text-primary">{previsao.backlogPrevisto7d}</p>
+              {previsao.tendencia === 'CRESCIMENTO' && <TrendingUp className="w-6 h-6 text-destructive" />}
+              {previsao.tendencia === 'REDUÇÃO' && <TrendingDown className="w-6 h-6 text-success" />}
             </div>
-            <p className="text-xs text-slate-500 mt-1">atual: {previsao.backlogAtual}</p>
+            <p className="text-xs text-muted-foreground mt-1">atual: {previsao.backlogAtual}</p>
           </CardContent>
         </Card>
 
         <Card className="border-0 shadow-sm">
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-slate-500">Risco de SLA</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">Risco de SLA</CardTitle>
           </CardHeader>
           <CardContent>
             <p className={`text-3xl font-bold ${
-              previsao.riscoSLA === 'ALTO' ? 'text-red-600' :
-              previsao.riscoSLA === 'MÉDIO' ? 'text-amber-600' :
-              'text-green-600'
+              previsao.riscoSLA === 'ALTO' ? 'text-destructive' :
+              previsao.riscoSLA === 'MÉDIO' ? 'text-warning' :
+              'text-success'
             }`}>
               {previsao.probabilidadeQuebraSLA}%
             </p>
@@ -494,7 +494,7 @@ export default function AnalyticsPreditivo() {
               </CardHeader>
               <CardContent>
                 {Object.entries(throughput.por_agente).length === 0 ? (
-                  <p className="text-slate-500 text-center py-8">Sem dados</p>
+                  <p className="text-muted-foreground text-center py-8">Sem dados</p>
                 ) : (
                   <div className="space-y-3">
                     {Object.entries(throughput.por_agente)
@@ -538,14 +538,14 @@ export default function AnalyticsPreditivo() {
                 <CardTitle className="text-base">Capacidade Teórica</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-4xl font-bold text-blue-600 mb-4">{capacidade.capacidadeTeoriaDiaria.toFixed(1)}</p>
+                <p className="text-4xl font-bold text-primary mb-4">{capacidade.capacidadeTeoriaDiaria.toFixed(1)}</p>
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-slate-500">Agentes ativos:</span>
+                    <span className="text-muted-foreground">Agentes ativos:</span>
                     <span className="font-medium">{capacidade.agentesAtivos}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-slate-500">Por agente/dia:</span>
+                    <span className="text-muted-foreground">Por agente/dia:</span>
                     <span className="font-medium">{capacidade.capacidadePorAgente.toFixed(1)}</span>
                   </div>
                 </div>
@@ -557,10 +557,10 @@ export default function AnalyticsPreditivo() {
                 <CardTitle className="text-base">Demanda Atual</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-4xl font-bold text-amber-600 mb-4">{capacidade.ticketsAbertos}</p>
+                <p className="text-4xl font-bold text-warning mb-4">{capacidade.ticketsAbertos}</p>
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-slate-500">Tickets abertos</span>
+                    <span className="text-muted-foreground">Tickets abertos</span>
                     <Badge variant="outline">Em fila</Badge>
                   </div>
                 </div>
@@ -572,18 +572,18 @@ export default function AnalyticsPreditivo() {
                 <CardTitle className="text-base">Indicador de Saturação</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-4xl font-bold text-purple-600 mb-4">{capacidade.saturacaoOperacional.toFixed(0)}%</p>
-                <div className="w-full bg-slate-200 rounded-full h-3">
+                <p className="text-4xl font-bold text-primary mb-4">{capacidade.saturacaoOperacional.toFixed(0)}%</p>
+                <div className="w-full bg-muted rounded-full h-3">
                   <div 
                     className={`h-3 rounded-full transition-all ${
-                      capacidade.saturacaoOperacional > 100 ? 'bg-red-600' :
-                      capacidade.saturacaoOperacional > 70 ? 'bg-amber-600' :
-                      'bg-green-600'
+                      capacidade.saturacaoOperacional > 100 ? 'bg-destructive' :
+                      capacidade.saturacaoOperacional > 70 ? 'bg-warning' :
+                      'bg-success'
                     }`}
                     style={{ width: `${Math.min(capacidade.saturacaoOperacional, 100)}%` }}
                   />
                 </div>
-                <p className="text-xs text-slate-600 mt-3">
+                <p className="text-xs text-muted-foreground mt-3">
                   {capacidade.status === 'SOBRECARGA' && 'Operação em sobrecarga crítica'}
                   {capacidade.status === 'ALERTA' && 'Aproximando-se da capacidade máxima'}
                   {capacidade.status === 'SAUDÁVEL' && 'Operação dentro da normalidade'}
@@ -604,28 +604,28 @@ export default function AnalyticsPreditivo() {
                 </CardHeader>
                 <CardContent>
                   <div className="grid lg:grid-cols-4 gap-6">
-                    <div className="text-center p-4 bg-slate-50 rounded-lg">
-                      <p className="text-sm text-slate-500 mb-1">Média (μ)</p>
-                      <p className="text-2xl font-bold text-blue-600">{Math.round(variabilidade.media / 60)}h</p>
+                    <div className="text-center p-4 bg-muted rounded-lg">
+                      <p className="text-sm text-muted-foreground mb-1">Média (μ)</p>
+                      <p className="text-2xl font-bold text-primary">{Math.round(variabilidade.media / 60)}h</p>
                     </div>
-                    <div className="text-center p-4 bg-slate-50 rounded-lg">
-                      <p className="text-sm text-slate-500 mb-1">Desvio Padrão (σ)</p>
-                      <p className="text-2xl font-bold text-purple-600">{Math.round(variabilidade.desvioPadrao / 60)}h</p>
+                    <div className="text-center p-4 bg-muted rounded-lg">
+                      <p className="text-sm text-muted-foreground mb-1">Desvio Padrão (σ)</p>
+                      <p className="text-2xl font-bold text-primary">{Math.round(variabilidade.desvioPadrao / 60)}h</p>
                     </div>
-                    <div className="text-center p-4 bg-slate-50 rounded-lg">
-                      <p className="text-sm text-slate-500 mb-1">Coeficiente de Variação</p>
-                      <p className="text-2xl font-bold text-amber-600">{variabilidade.coeficienteVariacao}%</p>
+                    <div className="text-center p-4 bg-muted rounded-lg">
+                      <p className="text-sm text-muted-foreground mb-1">Coeficiente de Variação</p>
+                      <p className="text-2xl font-bold text-warning">{variabilidade.coeficienteVariacao}%</p>
                     </div>
                     <div className={`text-center p-4 rounded-lg ${
-                      variabilidade.estabilidade === 'ESTÁVEL' ? 'bg-green-50' :
-                      variabilidade.estabilidade === 'MODERADO' ? 'bg-amber-50' :
-                      'bg-red-50'
+                      variabilidade.estabilidade === 'ESTÁVEL' ? 'bg-success-soft' :
+                      variabilidade.estabilidade === 'MODERADO' ? 'bg-warning-soft' :
+                      'bg-destructive/10'
                     }`}>
-                      <p className="text-sm text-slate-500 mb-1">Estabilidade</p>
+                      <p className="text-sm text-muted-foreground mb-1">Estabilidade</p>
                       <p className={`text-lg font-bold ${
-                        variabilidade.estabilidade === 'ESTÁVEL' ? 'text-green-600' :
-                        variabilidade.estabilidade === 'MODERADO' ? 'text-amber-600' :
-                        'text-red-600'
+                        variabilidade.estabilidade === 'ESTÁVEL' ? 'text-success' :
+                        variabilidade.estabilidade === 'MODERADO' ? 'text-warning' :
+                        'text-destructive'
                       }`}>
                         {variabilidade.estabilidade}
                       </p>
@@ -635,25 +635,25 @@ export default function AnalyticsPreditivo() {
                   <div className="mt-6">
                     <h4 className="font-semibold mb-3">Percentis de Distribuição</h4>
                     <div className="grid grid-cols-3 gap-4">
-                      <div className="p-3 bg-blue-50 rounded-lg">
-                        <p className="text-xs text-slate-600 mb-1">P50 (Mediana)</p>
-                        <p className="text-xl font-bold text-blue-600">{Math.round(variabilidade.p50 / 60)}h</p>
+                      <div className="p-3 bg-info-soft rounded-lg">
+                        <p className="text-xs text-muted-foreground mb-1">P50 (Mediana)</p>
+                        <p className="text-xl font-bold text-primary">{Math.round(variabilidade.p50 / 60)}h</p>
                       </div>
-                      <div className="p-3 bg-purple-50 rounded-lg">
-                        <p className="text-xs text-slate-600 mb-1">P75</p>
-                        <p className="text-xl font-bold text-purple-600">{Math.round(variabilidade.p75 / 60)}h</p>
+                      <div className="p-3 bg-info-soft rounded-lg">
+                        <p className="text-xs text-muted-foreground mb-1">P75</p>
+                        <p className="text-xl font-bold text-primary">{Math.round(variabilidade.p75 / 60)}h</p>
                       </div>
-                      <div className="p-3 bg-amber-50 rounded-lg">
-                        <p className="text-xs text-slate-600 mb-1">P90</p>
-                        <p className="text-xl font-bold text-amber-600">{Math.round(variabilidade.p90 / 60)}h</p>
+                      <div className="p-3 bg-warning-soft rounded-lg">
+                        <p className="text-xs text-muted-foreground mb-1">P90</p>
+                        <p className="text-xl font-bold text-warning">{Math.round(variabilidade.p90 / 60)}h</p>
                       </div>
                     </div>
                   </div>
 
-                  <Alert className="mt-6 bg-blue-50 border-blue-200">
-                    <Info className="w-4 h-4 text-blue-600" />
+                  <Alert className="mt-6 bg-info-soft border-info/25">
+                    <Info className="w-4 h-4 text-primary" />
                     <AlertDescription>
-                      <p className="text-sm text-blue-900">
+                      <p className="text-sm text-primary">
                         <strong>Interpretação CMMI:</strong> {variabilidade.estabilidade === 'ESTÁVEL' 
                           ? 'Processo sob controle estatístico. CV < 30% indica previsibilidade operacional.' 
                           : variabilidade.estabilidade === 'MODERADO'
@@ -668,7 +668,7 @@ export default function AnalyticsPreditivo() {
           ) : (
             <Card className="border-0 shadow-sm">
               <CardContent className="p-8 text-center">
-                <p className="text-slate-500">Dados insuficientes para análise estatística</p>
+                <p className="text-muted-foreground">Dados insuficientes para análise estatística</p>
               </CardContent>
             </Card>
           )}
@@ -683,32 +683,32 @@ export default function AnalyticsPreditivo() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between p-3 bg-red-50 rounded-lg">
+                  <div className="flex items-center justify-between p-3 bg-destructive/10 rounded-lg">
                     <div className="flex items-center gap-2">
-                      <TrendingUp className="w-5 h-5 text-red-600" />
+                      <TrendingUp className="w-5 h-5 text-destructive" />
                       <span className="font-medium">Taxa de Entrada</span>
                     </div>
-                    <p className="text-2xl font-bold text-red-600">{previsao.taxaEntradaDiaria} /dia</p>
+                    <p className="text-2xl font-bold text-destructive">{previsao.taxaEntradaDiaria} /dia</p>
                   </div>
-                  <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+                  <div className="flex items-center justify-between p-3 bg-success-soft rounded-lg">
                     <div className="flex items-center gap-2">
-                      <TrendingDown className="w-5 h-5 text-green-600" />
+                      <TrendingDown className="w-5 h-5 text-success" />
                       <span className="font-medium">Taxa de Saída</span>
                     </div>
-                    <p className="text-2xl font-bold text-green-600">{previsao.taxaSaidaDiaria} /dia</p>
+                    <p className="text-2xl font-bold text-success">{previsao.taxaSaidaDiaria} /dia</p>
                   </div>
                   <Alert className={
                     parseFloat(previsao.taxaEntradaDiaria) > parseFloat(previsao.taxaSaidaDiaria)
-                      ? 'border-red-300 bg-red-50'
-                      : 'border-green-300 bg-green-50'
+                      ? 'border-destructive/30 bg-destructive/10'
+                      : 'border-success/30 bg-success-soft'
                   }>
                     <AlertDescription>
                       {parseFloat(previsao.taxaEntradaDiaria) > parseFloat(previsao.taxaSaidaDiaria) ? (
-                        <p className="text-sm text-red-900">
+                        <p className="text-sm text-destructive">
                           Entrada maior que saída: backlog crescendo
                         </p>
                       ) : (
-                        <p className="text-sm text-green-900">
+                        <p className="text-sm text-success">
                           Saída maior que entrada: backlog reduzindo
                         </p>
                       )}
@@ -724,21 +724,21 @@ export default function AnalyticsPreditivo() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  <div className="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
+                  <div className="flex justify-between items-center p-3 bg-muted rounded-lg">
                     <span className="text-sm">Cenário Base</span>
                     <Badge>{previsao.simulacoes.cenarioBase} tickets</Badge>
                   </div>
-                  <div className="flex justify-between items-center p-3 bg-green-50 rounded-lg border border-green-200">
+                  <div className="flex justify-between items-center p-3 bg-success-soft rounded-lg border border-success/25">
                     <span className="text-sm">+ 1 Agente (+10% capacidade)</span>
-                    <Badge className="bg-green-600 text-white">{previsao.simulacoes.mais1agente} tickets</Badge>
+                    <Badge className="bg-success text-white">{previsao.simulacoes.mais1agente} tickets</Badge>
                   </div>
-                  <div className="flex justify-between items-center p-3 bg-red-50 rounded-lg border border-red-200">
+                  <div className="flex justify-between items-center p-3 bg-destructive/10 rounded-lg border border-destructive/25">
                     <span className="text-sm">Aumento 20% demanda</span>
-                    <Badge className="bg-red-600 text-white">{previsao.simulacoes.aumento20demanda} tickets</Badge>
+                    <Badge className="bg-destructive text-white">{previsao.simulacoes.aumento20demanda} tickets</Badge>
                   </div>
-                  <div className="flex justify-between items-center p-3 bg-amber-50 rounded-lg border border-amber-200">
+                  <div className="flex justify-between items-center p-3 bg-warning-soft rounded-lg border border-warning/25">
                     <span className="text-sm">Queda 20% produtividade</span>
-                    <Badge className="bg-amber-600 text-white">{previsao.simulacoes.quedaProdutividade} tickets</Badge>
+                    <Badge className="bg-warning text-white">{previsao.simulacoes.quedaProdutividade} tickets</Badge>
                   </div>
                 </div>
               </CardContent>
@@ -753,20 +753,20 @@ export default function AnalyticsPreditivo() {
             <CardContent>
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-5xl font-bold text-purple-600 mb-2">{previsao.probabilidadeQuebraSLA}%</p>
+                  <p className="text-5xl font-bold text-primary mb-2">{previsao.probabilidadeQuebraSLA}%</p>
                   <Badge className={
-                    previsao.riscoSLA === 'ALTO' ? 'bg-red-600' :
-                    previsao.riscoSLA === 'MÉDIO' ? 'bg-amber-600' :
-                    'bg-green-600'
+                    previsao.riscoSLA === 'ALTO' ? 'bg-destructive' :
+                    previsao.riscoSLA === 'MÉDIO' ? 'bg-warning' :
+                    'bg-success'
                   }>
                     Risco {previsao.riscoSLA}
                   </Badge>
                 </div>
                 <div className="text-right">
-                  <p className="text-sm text-slate-600 mb-1">Backlog Atual</p>
-                  <p className="text-3xl font-bold text-slate-800">{previsao.backlogAtual}</p>
-                  <p className="text-sm text-slate-600 mt-3">Previsto em 7d</p>
-                  <p className="text-3xl font-bold text-purple-600">{previsao.backlogPrevisto7d}</p>
+                  <p className="text-sm text-muted-foreground mb-1">Backlog Atual</p>
+                  <p className="text-3xl font-bold text-foreground">{previsao.backlogAtual}</p>
+                  <p className="text-sm text-muted-foreground mt-3">Previsto em 7d</p>
+                  <p className="text-3xl font-bold text-primary">{previsao.backlogPrevisto7d}</p>
                 </div>
               </div>
             </CardContent>
@@ -781,8 +781,8 @@ export default function AnalyticsPreditivo() {
               <CardDescription>Governança de Métricas Quantitativas</CardDescription>
             </CardHeader>
             <CardContent className="prose prose-sm max-w-none">
-              <h3 className="font-semibold text-slate-900">Metodologia Estatística Aplicada</h3>
-              <ul className="text-sm text-slate-700 space-y-1">
+              <h3 className="font-semibold text-foreground">Metodologia Estatística Aplicada</h3>
+              <ul className="text-sm text-foreground space-y-1">
                 <li><strong>Throughput:</strong> Σ(tickets resolvidos) / período em dias</li>
                 <li><strong>Capacidade Teórica:</strong> Throughput médio × agentes ativos</li>
                 <li><strong>Saturação:</strong> (Backlog / Capacidade semanal) × 100</li>
@@ -791,27 +791,27 @@ export default function AnalyticsPreditivo() {
                 <li><strong>Previsão de Backlog:</strong> Backlog atual + (Taxa entrada - Taxa saída) × 7</li>
               </ul>
 
-              <h3 className="font-semibold text-slate-900 mt-6">Critérios de Alerta</h3>
+              <h3 className="font-semibold text-foreground mt-6">Critérios de Alerta</h3>
               <div className="grid grid-cols-3 gap-4 text-sm">
-                <div className="p-3 bg-green-50 rounded-lg">
-                  <p className="font-semibold text-green-900">Saudável</p>
-                  <ul className="text-xs text-green-700 mt-2 space-y-1">
+                <div className="p-3 bg-success-soft rounded-lg">
+                  <p className="font-semibold text-success">Saudável</p>
+                  <ul className="text-xs text-success mt-2 space-y-1">
                     <li>Saturação {'<'} 70%</li>
                     <li>CV {'<'} 30%</li>
                     <li>Risco SLA {'<'} 30%</li>
                   </ul>
                 </div>
-                <div className="p-3 bg-amber-50 rounded-lg">
-                  <p className="font-semibold text-amber-900">Alerta</p>
-                  <ul className="text-xs text-amber-700 mt-2 space-y-1">
+                <div className="p-3 bg-warning-soft rounded-lg">
+                  <p className="font-semibold text-warning">Alerta</p>
+                  <ul className="text-xs text-warning mt-2 space-y-1">
                     <li>Saturação 70-100%</li>
                     <li>CV 30-50%</li>
                     <li>Risco SLA 30-50%</li>
                   </ul>
                 </div>
-                <div className="p-3 bg-red-50 rounded-lg">
-                  <p className="font-semibold text-red-900">Crítico</p>
-                  <ul className="text-xs text-red-700 mt-2 space-y-1">
+                <div className="p-3 bg-destructive/10 rounded-lg">
+                  <p className="font-semibold text-destructive">Crítico</p>
+                  <ul className="text-xs text-destructive mt-2 space-y-1">
                     <li>Saturação {'>'} 100%</li>
                     <li>CV {'>'} 50%</li>
                     <li>Risco SLA {'>'} 50%</li>
@@ -819,25 +819,25 @@ export default function AnalyticsPreditivo() {
                 </div>
               </div>
 
-              <h3 className="font-semibold text-slate-900 mt-6">Rotina de Revisão</h3>
-              <div className="space-y-2 text-sm text-slate-700">
+              <h3 className="font-semibold text-foreground mt-6">Rotina de Revisão</h3>
+              <div className="space-y-2 text-sm text-foreground">
                 <p><strong>Diária:</strong> Monitoramento de saturação e alertas críticos</p>
                 <p><strong>Semanal:</strong> Análise de throughput e tendências</p>
                 <p><strong>Mensal:</strong> Revisão de variabilidade e calibração de modelos preditivos</p>
                 <p><strong>Trimestral:</strong> Validação de capacidade e ajuste de metas</p>
               </div>
 
-              <h3 className="font-semibold text-slate-900 mt-6">Evidências de Controle Quantitativo</h3>
-              <p className="text-sm text-slate-700">
+              <h3 className="font-semibold text-foreground mt-6">Evidências de Controle Quantitativo</h3>
+              <p className="text-sm text-foreground">
                 Este relatório fornece evidências auditáveis de controle estatístico de processo, 
                 conforme requisitos CMMI PA 4.1 (Quantitative Project Management) e PA 4.2 (Organizational Process Performance).
                 Todos os cálculos são baseados em dados reais da entidade Tratativa e seguem metodologia CMMI Nível 4.
               </p>
 
-              <Alert className="mt-6 bg-blue-50 border-blue-200">
-                <Info className="w-4 h-4 text-blue-600" />
+              <Alert className="mt-6 bg-info-soft border-info/25">
+                <Info className="w-4 h-4 text-primary" />
                 <AlertDescription>
-                  <p className="text-sm text-blue-900">
+                  <p className="text-sm text-primary">
                     <strong>Recomendação Executiva:</strong> Agende reuniões mensais de revisão de métricas preditivas 
                     com stakeholders para ajuste de estratégias operacionais baseadas em dados quantitativos.
                   </p>

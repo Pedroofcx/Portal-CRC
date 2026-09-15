@@ -168,9 +168,9 @@ export default function TratativaDetalhe() {
   if (!tratativa) {
     return (
       <div className="text-center py-16">
-        <AlertTriangle className="w-12 h-12 text-amber-500 mx-auto mb-4" />
+        <AlertTriangle className="w-12 h-12 text-warning mx-auto mb-4" />
         <h2 className="text-xl font-semibold mb-2">Tratativa não encontrada</h2>
-        <p className="text-slate-500">O registro solicitado não existe ou foi removido.</p>
+        <p className="text-muted-foreground">O registro solicitado não existe ou foi removido.</p>
       </div>
     );
   }
@@ -608,22 +608,22 @@ export default function TratativaDetalhe() {
 
       {/* Alerta de Tratativa Excluída */}
       {isExcluida && (
-        <Card className="border-0 shadow-sm bg-red-50 border-red-200">
+        <Card className="border-0 shadow-sm bg-destructive/10 border-destructive/25">
           <CardContent className="py-4">
             <div className="flex items-start gap-3">
-              <AlertTriangle className="w-5 h-5 text-red-600 mt-0.5" />
+              <AlertTriangle className="w-5 h-5 text-destructive mt-0.5" />
               <div className="flex-1">
-                <p className="font-semibold text-red-900">Tratativa Excluída</p>
-                <p className="text-sm text-red-700 mt-1">
+                <p className="font-semibold text-destructive">Tratativa Excluída</p>
+                <p className="text-sm text-destructive mt-1">
                   Esta tratativa foi excluída em {formatDateSP(tratativa.data_exclusao)} por {tratativa.excluida_por_nome}
                 </p>
                 {tratativa.justificativa_exclusao && (
-                  <div className="mt-3 p-3 bg-white rounded border border-red-200">
-                    <p className="text-xs font-medium text-red-900 mb-1">Justificativa:</p>
-                    <p className="text-sm text-slate-700">{tratativa.justificativa_exclusao}</p>
+                  <div className="mt-3 p-3 bg-card rounded border border-destructive/25">
+                    <p className="text-xs font-medium text-destructive mb-1">Justificativa:</p>
+                    <p className="text-sm text-foreground">{tratativa.justificativa_exclusao}</p>
                   </div>
                 )}
-                <p className="text-xs text-red-600 mt-3">
+                <p className="text-xs text-destructive mt-3">
                   Tratativas excluídas não podem ser editadas e não aparecem em indicadores operacionais
                 </p>
               </div>
@@ -652,41 +652,41 @@ export default function TratativaDetalhe() {
             <CardContent className="space-y-4">
               <div className="grid sm:grid-cols-2 gap-4">
                 <div>
-                  <Label className="text-slate-500 text-xs">Link Zendesk</Label>
+                  <Label className="text-muted-foreground text-xs">Link Zendesk</Label>
                   <a 
                     href={tratativa.link_zendesk}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-blue-600 hover:underline flex items-center gap-1 mt-1"
+                    className="text-primary hover:underline flex items-center gap-1 mt-1"
                   >
                     <ExternalLink className="w-4 h-4" />
                     Abrir ticket
                   </a>
                 </div>
                 <div>
-                  <Label className="text-slate-500 text-xs">Link Intranet</Label>
+                  <Label className="text-muted-foreground text-xs">Link Intranet</Label>
                   <a 
                     href={tratativa.link_intranet}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-blue-600 hover:underline flex items-center gap-1 mt-1"
+                    className="text-primary hover:underline flex items-center gap-1 mt-1"
                   >
                     <ExternalLink className="w-4 h-4" />
                     Abrir intranet
                   </a>
                 </div>
                 <div>
-                  <Label className="text-slate-500 text-xs">ID da Base</Label>
+                  <Label className="text-muted-foreground text-xs">ID da Base</Label>
                   <p className="font-medium">{tratativa.id_base_cliente || '-'}</p>
                 </div>
                 {tratativa.nome_cliente && (
                   <div>
-                    <Label className="text-slate-500 text-xs">Nome do Cliente</Label>
+                    <Label className="text-muted-foreground text-xs">Nome do Cliente</Label>
                     <div className="flex items-center gap-2">
                       <p className="font-medium">{tratativa.nome_cliente}</p>
                       {tratativa.cliente_recorrente && (
-                        <Badge className="bg-amber-100 text-amber-700 border-amber-300 flex items-center gap-1">
-                          <div className="w-2 h-2 bg-amber-500 rounded-full animate-pulse" />
+                        <Badge className="bg-warning-soft text-warning border-warning/30 flex items-center gap-1">
+                          <div className="w-2 h-2 bg-warning rounded-full animate-pulse" />
                           Recorrente ({tratativa.numero_ocorrencias}x)
                         </Badge>
                       )}
@@ -694,41 +694,41 @@ export default function TratativaDetalhe() {
                   </div>
                 )}
                 <div>
-                  <Label className="text-slate-500 text-xs">Tipo de Tratativa</Label>
+                  <Label className="text-muted-foreground text-xs">Tipo de Tratativa</Label>
                   <p className="font-medium">{tipoTratativaLabels[tratativa.tipo_tratativa]}</p>
                 </div>
                 <div>
-                  <Label className="text-slate-500 text-xs">SLA</Label>
+                  <Label className="text-muted-foreground text-xs">SLA</Label>
                   <p className="font-medium">{tratativa.sla_atribuido || 24} horas</p>
                 </div>
                 <div>
-                  <Label className="text-slate-500 text-xs">Agente Responsável</Label>
+                  <Label className="text-muted-foreground text-xs">Agente Responsável</Label>
                   <p className="font-medium">{tratativa.agente_responsavel_nome || '-'}</p>
                 </div>
                 <div>
-                  <Label className="text-slate-500 text-xs">Data de Registro</Label>
+                  <Label className="text-muted-foreground text-xs">Data de Registro</Label>
                   <p className="font-medium">{formatDateSP(tratativa.data_registro || tratativa.created_date)}</p>
                 </div>
                 {tratativa.motivo_nome && (
                   <>
                     <div>
-                      <Label className="text-slate-500 text-xs">Motivo</Label>
+                      <Label className="text-muted-foreground text-xs">Motivo</Label>
                       <p className="font-medium">{tratativa.motivo_nome}</p>
                     </div>
                     <div>
-                      <Label className="text-slate-500 text-xs">Submotivos</Label>
+                      <Label className="text-muted-foreground text-xs">Submotivos</Label>
                       <div className="flex flex-wrap gap-1 mt-1">
                         {tratativa.submotivos?.map((sub, i) => (
                           <Badge key={i} variant="outline" className="text-xs">{sub}</Badge>
-                        )) || <span className="text-slate-400">-</span>}
+                        )) || <span className="text-muted-foreground">-</span>}
                       </div>
                     </div>
                   </>
                 )}
                 {tratativa.etapa_jornada_nome && (
                   <div>
-                    <Label className="text-slate-500 text-xs">Etapa da Jornada</Label>
-                    <Badge className="bg-blue-100 text-blue-700 mt-1">
+                    <Label className="text-muted-foreground text-xs">Etapa da Jornada</Label>
+                    <Badge className="bg-info-soft text-primary mt-1">
                       <MapPin className="w-3 h-3 mr-1" />
                       {tratativa.etapa_jornada_nome}
                     </Badge>
@@ -736,7 +736,7 @@ export default function TratativaDetalhe() {
                 )}
                 {tratativa.causa_primaria && (
                   <div>
-                    <Label className="text-slate-500 text-xs">Causa Primária</Label>
+                    <Label className="text-muted-foreground text-xs">Causa Primária</Label>
                     <p className="font-medium capitalize">{tratativa.causa_primaria.replace('_', ' ')}</p>
                   </div>
                 )}
@@ -744,16 +744,16 @@ export default function TratativaDetalhe() {
                 {/* Devolução Financeira */}
                 {tratativa.tipo_tratativa !== 'contestacao' && tratativa.houve_devolucao_financeira !== undefined && (
                   <div className="col-span-2">
-                    <Label className="text-slate-500 text-xs">Devolução Financeira</Label>
+                    <Label className="text-muted-foreground text-xs">Devolução Financeira</Label>
                     {tratativa.houve_devolucao_financeira ? (
-                      <div className="mt-1 p-3 bg-orange-50 border border-orange-200 rounded-lg flex items-center gap-3">
-                        <span className="text-orange-700 text-sm">Houve devolução:</span>
-                        <span className="font-bold text-orange-900 text-lg">
+                      <div className="mt-1 p-3 bg-critical-soft border border-critical/25 rounded-lg flex items-center gap-3">
+                        <span className="text-critical text-sm">Houve devolução:</span>
+                        <span className="font-bold text-critical text-lg">
                           {formatBRL(tratativa.valor_devolvido_cliente)}
                         </span>
                       </div>
                     ) : (
-                      <Badge variant="outline" className="mt-1 text-slate-600">Sem devolução</Badge>
+                      <Badge variant="outline" className="mt-1 text-muted-foreground">Sem devolução</Badge>
                     )}
                   </div>
                 )}
@@ -763,31 +763,31 @@ export default function TratativaDetalhe() {
                   <>
                     {tratativa.numero_case_contestacao && (
                       <div>
-                        <Label className="text-slate-500 text-xs">Número do Case</Label>
+                        <Label className="text-muted-foreground text-xs">Número do Case</Label>
                         <p className="font-medium">{tratativa.numero_case_contestacao}</p>
                       </div>
                     )}
                     {tratativa.motivo_contestacao && (
                       <div className="col-span-2">
-                        <Label className="text-slate-500 text-xs">Motivo da Contestação</Label>
+                        <Label className="text-muted-foreground text-xs">Motivo da Contestação</Label>
                         <p className="font-medium">{tratativa.motivo_contestacao}</p>
                       </div>
                     )}
                     {tratativa.valor_contestado_inicial !== undefined && (
                      <div>
-                       <Label className="text-slate-500 text-xs">Valor Contestado Inicial</Label>
+                       <Label className="text-muted-foreground text-xs">Valor Contestado Inicial</Label>
                        <p className="font-medium">{formatBRL(tratativa.valor_contestado_inicial)}</p>
                      </div>
                     )}
                     {tratativa.prazo_sla_dias && (
                      <div>
-                       <Label className="text-slate-500 text-xs">Prazo Definido</Label>
+                       <Label className="text-muted-foreground text-xs">Prazo Definido</Label>
                        <p className="font-medium">{parseInt(tratativa.prazo_sla_dias)} dias ({parseInt(tratativa.prazo_sla_dias) * 24}h)</p>
                      </div>
                     )}
                     {tratativa.status_resolucao_contestacao && (
                        <div>
-                         <Label className="text-slate-500 text-xs">Status da Resolução</Label>
+                         <Label className="text-muted-foreground text-xs">Status da Resolução</Label>
                          <Badge variant="outline" className="capitalize">
                            {tratativa.status_resolucao_contestacao.replace('_', ' ')}
                          </Badge>
@@ -795,7 +795,7 @@ export default function TratativaDetalhe() {
                     )}
                     {tratativa.motivo_reducao_acordo && (
                       <div className="col-span-2">
-                        <Label className="text-slate-500 text-xs">Motivo da Redução (Acordo)</Label>
+                        <Label className="text-muted-foreground text-xs">Motivo da Redução (Acordo)</Label>
                         <p className="font-medium">{tratativa.motivo_reducao_acordo}</p>
                       </div>
                     )}
@@ -804,8 +804,8 @@ export default function TratativaDetalhe() {
               </div>
 
               {tratativa.data_inicio_tratativa && (
-                <div className="p-3 bg-blue-50 rounded-lg">
-                  <div className="flex items-center gap-2 text-blue-700">
+                <div className="p-3 bg-info-soft rounded-lg">
+                  <div className="flex items-center gap-2 text-primary">
                     <Clock className="w-4 h-4" />
                     <span className="text-sm">
                       Iniciada em {formatDateSP(tratativa.data_inicio_tratativa)}
@@ -815,8 +815,8 @@ export default function TratativaDetalhe() {
               )}
 
               {tratativa.data_encerramento && (
-                <div className="p-3 bg-green-50 rounded-lg">
-                  <div className="flex items-center gap-2 text-green-700">
+                <div className="p-3 bg-success-soft rounded-lg">
+                  <div className="flex items-center gap-2 text-success">
                     <CheckCircle className="w-4 h-4" />
                     <span className="text-sm">
                       Encerrada em {formatDateSP(tratativa.data_encerramento)}
@@ -832,21 +832,21 @@ export default function TratativaDetalhe() {
 
               {/* Painel de tempo ativo vs congelado — contestações */}
               {tratativa.congelamento_sla?.data_congelamento && (
-                <div className="p-3 bg-sky-50 border border-sky-200 rounded-lg space-y-2">
-                  <p className="text-xs font-semibold text-sky-800 flex items-center gap-1">
+                <div className="p-3 bg-info-soft border border-sky-200 rounded-lg space-y-2">
+                  <p className="text-xs font-semibold text-info flex items-center gap-1">
                     <Snowflake className="w-3.5 h-3.5" />
                     Histórico de SLA
                   </p>
                   <div className="grid grid-cols-2 gap-2 text-xs">
                     <div>
-                      <span className="text-slate-500">Tempo ativo antes do congelamento</span>
+                      <span className="text-muted-foreground">Tempo ativo antes do congelamento</span>
                       <p className="font-medium">
                         {(() => { const m = tratativa.congelamento_sla.tempo_ativo_antes_minutos || 0; return `${Math.floor(m/60)}h ${m%60}min`; })()}
                       </p>
                     </div>
                     <div>
-                      <span className="text-slate-500">Tempo congelado</span>
-                      <p className="font-medium text-sky-700">
+                      <span className="text-muted-foreground">Tempo congelado</span>
+                      <p className="font-medium text-info">
                         {(() => {
                           const m = tratativa.congelamento_sla.tempo_total_congelado_minutos ||
                             (tratativa.congelamento_sla.ativo ? Math.round((new Date() - new Date(tratativa.congelamento_sla.data_congelamento)) / 60000) : 0);
@@ -901,7 +901,7 @@ export default function TratativaDetalhe() {
                   {tratativa.status === 'registrada' && canTransitionTo('tratativa_iniciada') && (
                     <Button 
                       onClick={() => handleStatusChange('tratativa_iniciada')}
-                      className="bg-blue-600 hover:bg-blue-700"
+                      className="bg-primary hover:bg-primary/90"
                       disabled={updateMutation.isPending}
                     >
                       <Play className="w-4 h-4 mr-2" />
@@ -948,7 +948,7 @@ export default function TratativaDetalhe() {
                         />
                       </div>
 
-                      <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                      <div className="p-4 bg-info-soft border border-info/25 rounded-lg">
                         <div className="flex items-start gap-3 mb-2">
                           <Switch
                             checked={solucaoForm.solucao_replicavel}
@@ -956,7 +956,7 @@ export default function TratativaDetalhe() {
                           />
                           <div className="flex-1">
                             <Label className="font-medium">Solução Replicável Documentada (+0,5 pts)</Label>
-                            <p className="text-xs text-blue-700 mt-1">
+                            <p className="text-xs text-primary mt-1">
                               Marque se a solução pode ser replicada em outras tratativas E foi corretamente documentada, incluindo processos, fluxos e solução aplicada. Este item pode ser auditado pelo gestor.
                             </p>
                           </div>
@@ -965,18 +965,18 @@ export default function TratativaDetalhe() {
 
                       {/* Devolução Financeira OBRIGATÓRIA para reclamação interna, reclame aqui, google */}
                       {['reclamacao_interna', 'reclame_aqui', 'google_meu_negocio'].includes(tratativa.tipo_tratativa) && (
-                        <div className={`p-4 border rounded-lg space-y-3 ${solucaoForm.houve_devolucao_financeira === null ? 'bg-amber-50 border-amber-300' : 'bg-orange-50 border-orange-200'}`}>
-                          <h5 className="font-medium text-sm text-orange-900 flex items-center gap-2">
+                        <div className={`p-4 border rounded-lg space-y-3 ${solucaoForm.houve_devolucao_financeira === null ? 'bg-warning-soft border-warning/30' : 'bg-critical-soft border-critical/25'}`}>
+                          <h5 className="font-medium text-sm text-critical flex items-center gap-2">
                             Devolução / Estorno ao Cliente
-                            <Badge className="bg-red-100 text-red-700 text-xs">Obrigatório</Badge>
+                            <Badge className="bg-destructive/10 text-destructive text-xs">Obrigatório</Badge>
                           </h5>
-                          <p className="text-xs text-slate-600">Para encerrar a tratativa é necessário informar se houve devolução de valor ao cliente.</p>
+                          <p className="text-xs text-muted-foreground">Para encerrar a tratativa é necessário informar se houve devolução de valor ao cliente.</p>
                           <div className="flex gap-3">
                             <Button
                               type="button"
                               size="sm"
                               variant={solucaoForm.houve_devolucao_financeira === true ? 'default' : 'outline'}
-                              className={solucaoForm.houve_devolucao_financeira === true ? 'bg-orange-600 hover:bg-orange-700' : ''}
+                              className={solucaoForm.houve_devolucao_financeira === true ? 'bg-critical hover:bg-orange-700' : ''}
                               onClick={() => setSolucaoForm({ ...solucaoForm, houve_devolucao_financeira: true })}
                             >
                               Sim
@@ -999,7 +999,7 @@ export default function TratativaDetalhe() {
                                 onChange={(num) => setSolucaoForm({ ...solucaoForm, valor_devolvido_cliente: num })}
                                 className="mt-1 max-w-xs"
                               />
-                              <p className="text-xs text-orange-700 mt-1">
+                              <p className="text-xs text-critical mt-1">
                                 Este valor será registrado nos indicadores financeiros da gestão.
                               </p>
                             </div>
@@ -1009,7 +1009,7 @@ export default function TratativaDetalhe() {
 
                       {/* Campos específicos por tipo */}
                       {tratativa.tipo_tratativa === 'reclame_aqui' && (
-                        <div className="p-4 bg-slate-50 rounded-lg space-y-4">
+                        <div className="p-4 bg-muted rounded-lg space-y-4">
                           <h5 className="font-medium text-sm">Dados do Reclame Aqui</h5>
                           <div>
                             <Label>Categoria da Reclamação</Label>
@@ -1043,8 +1043,8 @@ export default function TratativaDetalhe() {
                       )}
 
                       {tratativa.tipo_tratativa === 'contestacao' && (
-                        <div className="p-4 bg-purple-50 border border-purple-200 rounded-lg space-y-4">
-                          <h5 className="font-medium text-sm text-purple-900">Encerramento Contestação de Compra</h5>
+                        <div className="p-4 bg-info-soft border border-info/25 rounded-lg space-y-4">
+                          <h5 className="font-medium text-sm text-primary">Encerramento Contestação de Compra</h5>
                           
                           <div>
                             <Label>Status da Resolução *</Label>
@@ -1090,13 +1090,13 @@ export default function TratativaDetalhe() {
                               value={solucaoForm.valor_contestado_final || tratativa.valor_contestado_inicial || 0}
                               onChange={(num) => setSolucaoForm({ ...solucaoForm, valor_contestado_final: num })}
                             />
-                            <p className="text-xs text-purple-700 mt-1">
+                            <p className="text-xs text-primary mt-1">
                               Valor inicial: {formatBRL(tratativa.valor_contestado_inicial)}
                             </p>
                           </div>
 
                           {solucaoForm.status_resolucao_contestacao === 'acordo' && (
-                            <div className="p-3 bg-amber-50 border border-amber-300 rounded-lg space-y-2">
+                            <div className="p-3 bg-warning-soft border border-warning/30 rounded-lg space-y-2">
                               <Label>Motivo da Redução * (máx. 50 caracteres)</Label>
                               <Input
                                 value={solucaoForm.motivo_reducao_acordo}
@@ -1105,14 +1105,14 @@ export default function TratativaDetalhe() {
                                 maxLength={50}
                                 className="mt-1"
                               />
-                              <p className="text-xs text-amber-700">{(solucaoForm.motivo_reducao_acordo || '').length}/50 caracteres — obrigatório para concluir o Acordo</p>
+                              <p className="text-xs text-warning">{(solucaoForm.motivo_reducao_acordo || '').length}/50 caracteres — obrigatório para concluir o Acordo</p>
                               <div className="flex flex-wrap gap-1.5">
                                 {['Redução para manutenção do contrato', 'Desconto aplicado por falha operacional', 'Ajuste comercial autorizado', 'Redução por custo de aplicativo', 'Adequação do plano contratado', 'Revisão financeira aprovada'].map(s => (
                                   <button
                                     key={s}
                                     type="button"
                                     onClick={() => setSolucaoForm({ ...solucaoForm, motivo_reducao_acordo: s.slice(0, 50) })}
-                                    className="text-xs px-2 py-1 bg-white border border-amber-200 rounded-full hover:bg-amber-100 text-amber-800"
+                                    className="text-xs px-2 py-1 bg-card border border-warning/25 rounded-full hover:bg-warning-soft text-warning"
                                   >
                                     {s}
                                   </button>
@@ -1142,7 +1142,7 @@ export default function TratativaDetalhe() {
                       )}
 
                       {tratativa.tipo_tratativa === 'google_meu_negocio' && (
-                        <div className="p-4 bg-slate-50 rounded-lg space-y-3">
+                        <div className="p-4 bg-muted rounded-lg space-y-3">
                           <h5 className="font-medium text-sm">Resultado Google Meu Negócio</h5>
                           <div>
                             <Label>Situação do Comentário *</Label>
@@ -1184,14 +1184,14 @@ export default function TratativaDetalhe() {
                       )}
 
                       {/* Confirmação de Motivo/Submotivo */}
-                      <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg space-y-3">
+                      <div className="p-4 bg-info-soft border border-info/25 rounded-lg space-y-3">
                         <h5 className="font-medium text-sm">Confirmação de Motivo e Submotivos</h5>
-                        <div className="p-3 bg-white rounded border">
-                          <p className="text-xs text-slate-500 mb-1">Motivo registrado</p>
+                        <div className="p-3 bg-card rounded border">
+                          <p className="text-xs text-muted-foreground mb-1">Motivo registrado</p>
                           <p className="font-medium">{tratativa.motivo_nome || 'Não definido'}</p>
                           {tratativa.submotivos?.length > 0 && (
                             <>
-                              <p className="text-xs text-slate-500 mt-2 mb-1">Submotivos</p>
+                              <p className="text-xs text-muted-foreground mt-2 mb-1">Submotivos</p>
                               <div className="flex flex-wrap gap-1">
                                 {tratativa.submotivos.map((sub, i) => (
                                   <Badge key={i} variant="outline" className="text-xs">{sub}</Badge>
@@ -1208,7 +1208,7 @@ export default function TratativaDetalhe() {
                           <Label>Manter informações de motivo/submotivo</Label>
                         </div>
                         {!solucaoForm.manter_motivo && (
-                          <p className="text-xs text-amber-700">
+                          <p className="text-xs text-warning">
                             Após encerrar, você poderá editar motivo e submotivos
                           </p>
                         )}
@@ -1269,7 +1269,7 @@ export default function TratativaDetalhe() {
                           title: 'Encerrar Tratativa',
                           description: 'Tem certeza que deseja encerrar esta tratativa? Esta ação é definitiva e não pode ser desfeita.'
                         })}
-                        className="bg-green-600 hover:bg-green-700"
+                        className="bg-success hover:bg-success/90"
                         disabled={updateMutation.isPending}
                       >
                         <CheckCircle className="w-4 h-4 mr-2" />
@@ -1289,9 +1289,9 @@ export default function TratativaDetalhe() {
                 <CardTitle>Solução Aplicada</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-slate-700">{tratativa.descricao_solucao}</p>
+                <p className="text-foreground">{tratativa.descricao_solucao}</p>
                 {tratativa.solucao_replicavel && (
-                  <Badge className="mt-3 bg-blue-100 text-blue-700">Solução Replicável</Badge>
+                  <Badge className="mt-3 bg-info-soft text-primary">Solução Replicável</Badge>
                 )}
               </CardContent>
             </Card>
@@ -1336,15 +1336,15 @@ export default function TratativaDetalhe() {
             </CardHeader>
             <CardContent>
               {(!tratativa.historico_estados || tratativa.historico_estados.length === 0) ? (
-                <p className="text-slate-500 text-sm">Nenhuma alteração registrada</p>
+                <p className="text-muted-foreground text-sm">Nenhuma alteração registrada</p>
               ) : (
                 <div className="space-y-3">
                   {tratativa.historico_estados.slice().reverse().map((h, i) => (
-                    <div key={i} className="relative pl-4 border-l-2 border-slate-200 pb-3 last:pb-0">
-                      <div className="absolute -left-1.5 top-0 w-3 h-3 bg-blue-500 rounded-full" />
+                    <div key={i} className="relative pl-4 border-l-2 border-border pb-3 last:pb-0">
+                      <div className="absolute -left-1.5 top-0 w-3 h-3 bg-primary rounded-full" />
                       <p className="text-sm font-medium">{statusLabels[h.estado_novo] || h.estado_novo}</p>
-                      <p className="text-xs text-slate-500">{h.usuario}</p>
-                      <p className="text-xs text-slate-400">{formatDateSP(h.data_mudanca)}</p>
+                      <p className="text-xs text-muted-foreground">{h.usuario}</p>
+                      <p className="text-xs text-muted-foreground">{formatDateSP(h.data_mudanca)}</p>
                     </div>
                   ))}
                 </div>
@@ -1368,21 +1368,21 @@ export default function TratativaDetalhe() {
       <Dialog open={dialogExclusao} onOpenChange={setDialogExclusao}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-red-700">
+            <DialogTitle className="flex items-center gap-2 text-destructive">
               <AlertTriangle className="w-5 h-5" />
               Excluir Tratativa
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4 mt-4">
-            <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg">
-              <p className="text-sm text-amber-800">
+            <div className="p-4 bg-warning-soft border border-warning/25 rounded-lg">
+              <p className="text-sm text-warning">
                 <strong>Atenção:</strong> Esta ação não pode ser desfeita facilmente. A tratativa será marcada como excluída e não aparecerá mais em fluxos operacionais nem indicadores.
               </p>
             </div>
             
             <div>
               <Label className="text-base font-medium">Justificativa Obrigatória *</Label>
-              <p className="text-xs text-slate-500 mb-2">
+              <p className="text-xs text-muted-foreground mb-2">
                 Informe o motivo da exclusão desta tratativa (mínimo 10 caracteres)
               </p>
               <Textarea
@@ -1390,9 +1390,9 @@ export default function TratativaDetalhe() {
                 onChange={(e) => setJustificativaExclusao(e.target.value)}
                 placeholder="Ex: Duplicidade de registro, erro de cadastro, tratativa criada por engano..."
                 rows={4}
-                className={justificativaExclusao.length > 0 && justificativaExclusao.length < 10 ? 'border-red-300' : ''}
+                className={justificativaExclusao.length > 0 && justificativaExclusao.length < 10 ? 'border-destructive/30' : ''}
               />
-              <p className="text-xs text-slate-400 mt-1">
+              <p className="text-xs text-muted-foreground mt-1">
                 {justificativaExclusao.length} caracteres
               </p>
             </div>

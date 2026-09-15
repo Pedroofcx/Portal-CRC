@@ -562,10 +562,10 @@ export default function Dashboard() {
   if (user && colaboradores.length > 0 && !colaborador) {
     return (
       <div className="text-center py-16">
-        <AlertCircle className="w-12 h-12 text-amber-500 mx-auto mb-4" />
+        <AlertCircle className="w-12 h-12 text-warning mx-auto mb-4" />
         <h2 className="text-xl font-semibold mb-2">Cadastro Pendente</h2>
-        <p className="text-slate-600">Seu usuário ainda não foi registrado como colaborador.</p>
-        <p className="text-slate-500 text-sm mt-2">Entre em contato com o gestor.</p>
+        <p className="text-muted-foreground">Seu usuário ainda não foi registrado como colaborador.</p>
+        <p className="text-muted-foreground text-sm mt-2">Entre em contato com o gestor.</p>
       </div>
     );
   }
@@ -663,22 +663,22 @@ export default function Dashboard() {
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle className="flex items-center gap-2 text-base">
-                    <Star className="w-5 h-5 text-amber-500" />
+                    <Star className="w-5 h-5 text-warning" />
                     Detalhamento de Pontos
                   </CardTitle>
-                  <button onClick={() => setDetalhamentoExpanded(!detalhamentoExpanded)} className="p-1 hover:bg-slate-100 rounded transition-colors">
+                  <button onClick={() => setDetalhamentoExpanded(!detalhamentoExpanded)} className="p-1 hover:bg-muted rounded transition-colors">
                     {detalhamentoExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                   </button>
                 </div>
               </CardHeader>
               <CardContent>
                 {!detalhamentoExpanded ? (
-                  <div className="text-center py-4 text-slate-500">
+                  <div className="text-center py-4 text-muted-foreground">
                     <p className="text-sm">Clique para expandir</p>
-                    <p className="text-2xl font-bold text-amber-600 mt-2">{pontosCalculados.toFixed(1)} pts</p>
+                    <p className="text-2xl font-bold text-warning mt-2">{pontosCalculados.toFixed(1)} pts</p>
                   </div>
                 ) : detalhamentoPontos.length === 0 ? (
-                  <div className="text-center py-6 text-slate-500">
+                  <div className="text-center py-6 text-muted-foreground">
                     <Award className="w-8 h-8 mx-auto mb-2 opacity-40" />
                     <p className="text-sm">Nenhuma pontuação registrada</p>
                     <p className="text-xs mt-1">Encerre tratativas para acumular pontos</p>
@@ -686,22 +686,22 @@ export default function Dashboard() {
                 ) : (
                   <div className="space-y-2 max-h-64 overflow-y-auto">
                     {detalhamentoPontos.map((item, index) => (
-                      <div key={index} className="flex items-center justify-between p-2.5 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors">
+                      <div key={index} className="flex items-center justify-between p-2.5 bg-muted rounded-lg hover:bg-muted transition-colors">
                         <div className="flex items-center gap-2">
-                          <div className="w-7 h-7 bg-amber-100 rounded-full flex items-center justify-center flex-shrink-0">
-                            <Star className="w-3.5 h-3.5 text-amber-600" />
+                          <div className="w-7 h-7 bg-warning-soft rounded-full flex items-center justify-center flex-shrink-0">
+                            <Star className="w-3.5 h-3.5 text-warning" />
                           </div>
                           <div>
-                            <p className="font-medium text-slate-900 text-xs">{item.tipo}</p>
-                            <p className="text-xs text-slate-400">#{item.tratativa_id?.substring(0, 8)}</p>
+                            <p className="font-medium text-foreground text-xs">{item.tipo}</p>
+                            <p className="text-xs text-muted-foreground">#{item.tratativa_id?.substring(0, 8)}</p>
                           </div>
                         </div>
-                        <Badge className="bg-amber-100 text-amber-700 border-amber-200 text-xs">+{item.pontos} pts</Badge>
+                        <Badge className="bg-warning-soft text-warning border-warning/25 text-xs">+{item.pontos} pts</Badge>
                       </div>
                     ))}
-                    <div className="flex justify-between items-center pt-3 border-t sticky bottom-0 bg-white">
-                      <span className="font-semibold text-slate-900 text-sm">Total</span>
-                      <span className="text-xl font-bold text-amber-600">{pontosCalculados.toFixed(1)}</span>
+                    <div className="flex justify-between items-center pt-3 border-t sticky bottom-0 bg-card">
+                      <span className="font-semibold text-foreground text-sm">Total</span>
+                      <span className="text-xl font-bold text-warning">{pontosCalculados.toFixed(1)}</span>
                     </div>
                   </div>
                 )}
@@ -773,7 +773,7 @@ export default function Dashboard() {
                     )}
                   </>
                 ) : (
-                  <p className="text-sm text-slate-500 text-center py-6">Sem apurações recentes</p>
+                  <p className="text-sm text-muted-foreground text-center py-6">Sem apurações recentes</p>
                 )}
               </CardContent>
             </Card>
@@ -787,7 +787,7 @@ export default function Dashboard() {
               >
                 <CardContent className="p-3 flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <div className="w-8 h-8 bg-card/20 rounded-lg flex items-center justify-center flex-shrink-0">
                       <TrendingUp className="w-4 h-4" />
                     </div>
                     <div>
@@ -797,7 +797,7 @@ export default function Dashboard() {
                   </div>
                   <div className="flex items-center gap-2">
                     {meusHansei.filter(h => !h.visualizado).length > 0 && (
-                      <Badge className="bg-white/25 text-white border-0 text-xs">{meusHansei.filter(h => !h.visualizado).length} novo(s)</Badge>
+                      <Badge className="bg-card/25 text-white border-0 text-xs">{meusHansei.filter(h => !h.visualizado).length} novo(s)</Badge>
                     )}
                     <ArrowRight className="w-4 h-4 text-blue-200" />
                   </div>
@@ -809,25 +809,25 @@ export default function Dashboard() {
                 <Card className="border-0 shadow-sm bg-gradient-to-br from-purple-50 to-purple-100 cursor-pointer hover:shadow-md transition-shadow" onClick={() => setSelectedPDI(pdiAtivo)}>
                   <CardContent className="p-4">
                     <div className="flex items-center gap-2 mb-2">
-                      <Target className="w-4 h-4 text-purple-700" />
-                      <span className="text-sm font-semibold text-purple-900">PDI em Andamento</span>
+                      <Target className="w-4 h-4 text-primary" />
+                      <span className="text-sm font-semibold text-primary">PDI em Andamento</span>
                     </div>
-                    <p className="font-medium text-purple-900 text-sm line-clamp-1">{pdiAtivo.titulo}</p>
+                    <p className="font-medium text-primary text-sm line-clamp-1">{pdiAtivo.titulo}</p>
                     <div className="mt-2">
-                      <div className="flex justify-between text-xs mb-1 text-purple-700">
+                      <div className="flex justify-between text-xs mb-1 text-primary">
                         <span>Progresso</span>
                         <span>{pdiAtivo.percentual_conclusao || 0}%</span>
                       </div>
                       <Progress value={pdiAtivo.percentual_conclusao || 0} className="h-1.5 bg-purple-200" />
                     </div>
-                    <p className="text-xs text-purple-500 mt-2">{pdiAtivo.etapas?.filter(e => !e.concluida).length || 0} etapa(s) pendente(s) · clique para detalhes</p>
+                    <p className="text-xs text-primary mt-2">{pdiAtivo.etapas?.filter(e => !e.concluida).length || 0} etapa(s) pendente(s) · clique para detalhes</p>
                   </CardContent>
                 </Card>
               ) : (
                 <Card className="border-0 shadow-sm">
                   <CardContent className="py-6 text-center">
-                    <Target className="w-8 h-8 mx-auto mb-1 text-slate-300" />
-                    <p className="text-slate-500 text-sm">Nenhum PDI ativo</p>
+                    <Target className="w-8 h-8 mx-auto mb-1 text-muted-foreground" />
+                    <p className="text-muted-foreground text-sm">Nenhum PDI ativo</p>
                   </CardContent>
                 </Card>
               )}
@@ -837,14 +837,14 @@ export default function Dashboard() {
                 <Card className="border-0 shadow-sm">
                   <CardContent className="p-4">
                     <div className="flex items-center gap-2 mb-3">
-                      <Award className="w-4 h-4 text-amber-600" />
-                      <span className="text-sm font-semibold text-slate-800">Elegibilidade Premiação</span>
+                      <Award className="w-4 h-4 text-warning" />
+                      <span className="text-sm font-semibold text-foreground">Elegibilidade Premiação</span>
                     </div>
                     <div className="space-y-1.5">
                       {elegibilidades.slice(0, 4).map(elegib => (
-                        <div key={elegib.id} className="flex items-center justify-between p-1.5 bg-slate-50 rounded text-xs">
-                          <span className="text-slate-700">{elegib.nome_exigencia}</span>
-                          <CheckCircle className="w-3.5 h-3.5 text-green-600" />
+                        <div key={elegib.id} className="flex items-center justify-between p-1.5 bg-muted rounded text-xs">
+                          <span className="text-foreground">{elegib.nome_exigencia}</span>
+                          <CheckCircle className="w-3.5 h-3.5 text-success" />
                         </div>
                       ))}
                     </div>
@@ -868,7 +868,7 @@ export default function Dashboard() {
                     Tratativas Recentes
                   </CardTitle>
                   <Link to={createPageUrl('Tratativas')}>
-                    <Button variant="ghost" size="sm" className="text-blue-600">
+                    <Button variant="ghost" size="sm" className="text-primary">
                       Ver todas <ArrowRight className="w-4 h-4 ml-1" />
                     </Button>
                   </Link>
@@ -876,18 +876,18 @@ export default function Dashboard() {
               </CardHeader>
               <CardContent>
                 {tratativasRecentes.length === 0 ? (
-                  <div className="text-center py-8 text-slate-500">
+                  <div className="text-center py-8 text-muted-foreground">
                     <ClipboardList className="w-10 h-10 mx-auto mb-2 opacity-50" />
                     <p>Nenhuma tratativa registrada</p>
                   </div>
                 ) : (
                   <div className="space-y-2">
                     {tratativasRecentes.map((tratativa) => (
-                      <Link key={tratativa.id} to={createPageUrl(`TratativaDetalhe?id=${tratativa.id}`)} className="block p-3 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors">
+                      <Link key={tratativa.id} to={createPageUrl(`TratativaDetalhe?id=${tratativa.id}`)} className="block p-3 bg-muted rounded-lg hover:bg-muted transition-colors">
                         <div className="flex items-start justify-between gap-3">
                           <div className="flex-1 min-w-0">
-                            <p className="font-medium text-slate-900 text-sm truncate">{tratativa.nome_cliente || tratativa.link_zendesk?.substring(0, 40)}</p>
-                            <p className="text-xs text-slate-500 mt-0.5">{formatDateSP(tratativa.created_date, 'DD/MM/YYYY HH:mm')}</p>
+                            <p className="font-medium text-foreground text-sm truncate">{tratativa.nome_cliente || tratativa.link_zendesk?.substring(0, 40)}</p>
+                            <p className="text-xs text-muted-foreground mt-0.5">{formatDateSP(tratativa.created_date, 'DD/MM/YYYY HH:mm')}</p>
                           </div>
                           <div className="flex items-center gap-1.5 flex-shrink-0">
                             <StatusBadge status={tratativa.prioridade} />
@@ -914,30 +914,30 @@ export default function Dashboard() {
                 <CardHeader className="pb-2">
                   <div className="flex items-center justify-between">
                     <CardTitle className="text-sm font-semibold flex items-center gap-2">
-                      <Bell className="w-4 h-4 text-blue-600" />
+                      <Bell className="w-4 h-4 text-primary" />
                       Avisos
                     </CardTitle>
                     <Link to={createPageUrl('Avisos')}>
-                      <Button variant="ghost" size="sm" className="text-blue-600 h-7 text-xs px-2">Ver todos</Button>
+                      <Button variant="ghost" size="sm" className="text-primary h-7 text-xs px-2">Ver todos</Button>
                     </Link>
                   </div>
                 </CardHeader>
                 <CardContent className="pt-0">
                   {avisosParaExibir.length === 0 ? (
-                    <p className="text-slate-500 text-xs text-center py-3">Nenhum aviso pendente</p>
+                    <p className="text-muted-foreground text-xs text-center py-3">Nenhum aviso pendente</p>
                   ) : (
                     <div className="space-y-2">
                       {avisosParaExibir.slice(0, 3).map((aviso) => {
                         const jaLeu = leituras.some(l => l.aviso_id === aviso.id && l.colaborador_id === colaborador?.id && l.confirmou === true);
                         return (
-                          <div key={aviso.id} className={`p-2.5 rounded-lg ${jaLeu ? 'bg-slate-50 opacity-60' : 'bg-slate-50'}`}>
+                          <div key={aviso.id} className={`p-2.5 rounded-lg ${jaLeu ? 'bg-muted opacity-60' : 'bg-muted'}`}>
                             <div className="flex items-start gap-1.5">
                               {aviso.tipo === 'urgente' && <Badge variant="destructive" className="text-xs py-0">Urgente</Badge>}
                               <div className="flex-1">
-                                <p className={`text-xs font-medium ${jaLeu ? 'text-slate-400' : 'text-slate-800'}`}>{aviso.titulo}</p>
-                                <p className="text-xs text-slate-400">{formatDateSP(aviso.data_publicacao, 'DD/MM/YYYY')}</p>
+                                <p className={`text-xs font-medium ${jaLeu ? 'text-muted-foreground' : 'text-foreground'}`}>{aviso.titulo}</p>
+                                <p className="text-xs text-muted-foreground">{formatDateSP(aviso.data_publicacao, 'DD/MM/YYYY')}</p>
                               </div>
-                              {jaLeu && <CheckCircle className="w-3.5 h-3.5 text-green-500 flex-shrink-0 mt-0.5" />}
+                              {jaLeu && <CheckCircle className="w-3.5 h-3.5 text-success flex-shrink-0 mt-0.5" />}
                             </div>
                           </div>
                         );
@@ -952,7 +952,7 @@ export default function Dashboard() {
                 <Card className="border-0 shadow-sm">
                   <CardHeader className="pb-2">
                     <CardTitle className="text-sm font-semibold flex items-center gap-2">
-                      <MessageSquare className="w-4 h-4 text-blue-600" />
+                      <MessageSquare className="w-4 h-4 text-primary" />
                       Feedbacks Recebidos
                     </CardTitle>
                   </CardHeader>
@@ -962,16 +962,16 @@ export default function Dashboard() {
                       const isPos = cat.toLowerCase().includes('reconhecimento') || cat.toLowerCase().includes('elogio');
                       const isDev = cat.toLowerCase().includes('desenvolvimento');
                       const isAlert = cat.toLowerCase().includes('alerta');
-                      const bg = isPos ? 'bg-green-50 border-green-200' : isDev ? 'bg-blue-50 border-blue-200' : isAlert ? 'bg-amber-50 border-amber-200' : 'bg-slate-50 border-slate-200';
-                      const badge = isPos ? 'bg-green-100 text-green-700' : isDev ? 'bg-blue-100 text-blue-700' : isAlert ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-700';
+                      const bg = isPos ? 'bg-success-soft border-success/25' : isDev ? 'bg-info-soft border-info/25' : isAlert ? 'bg-warning-soft border-warning/25' : 'bg-muted border-border';
+                      const badge = isPos ? 'bg-success-soft text-success' : isDev ? 'bg-info-soft text-primary' : isAlert ? 'bg-warning-soft text-warning' : 'bg-muted text-foreground';
                       return (
                         <div key={obs.id} className={`p-2.5 border rounded-lg cursor-pointer hover:shadow-sm transition-all ${bg}`} onClick={() => setSelectedFeedback(obs)}>
                           <div className="flex items-start justify-between gap-1 mb-1">
                             <Badge className={`${badge} text-xs py-0`}>{cat}</Badge>
-                            <span className="text-xs text-slate-400">{formatDateSP(obs.data_registro, 'DD/MM')}</span>
+                            <span className="text-xs text-muted-foreground">{formatDateSP(obs.data_registro, 'DD/MM')}</span>
                           </div>
-                          <p className="text-xs font-medium text-slate-800 line-clamp-2">{obs.titulo || obs.conteudo?.substring(0, 50)}</p>
-                          <p className="text-xs text-slate-500 mt-0.5">Por: {obs.autor_nome}</p>
+                          <p className="text-xs font-medium text-foreground line-clamp-2">{obs.titulo || obs.conteudo?.substring(0, 50)}</p>
+                          <p className="text-xs text-muted-foreground mt-0.5">Por: {obs.autor_nome}</p>
                         </div>
                       );
                     })}
@@ -987,22 +987,22 @@ export default function Dashboard() {
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2">
-                      <Palmtree className="w-4 h-4 text-green-600" />
-                      <span className="text-sm font-semibold text-slate-800">Minhas Férias</span>
+                      <Palmtree className="w-4 h-4 text-success" />
+                      <span className="text-sm font-semibold text-foreground">Minhas Férias</span>
                     </div>
                     {minhasferiasPendentes.length > 0 && (
-                      <Badge className="bg-amber-500 text-white text-xs">{minhasferiasPendentes.length} pendente{minhasferiasPendentes.length > 1 ? 's' : ''}</Badge>
+                      <Badge className="bg-warning text-white text-xs">{minhasferiasPendentes.length} pendente{minhasferiasPendentes.length > 1 ? 's' : ''}</Badge>
                     )}
                   </div>
                   {minhasferiasPendentes.length > 0 ? (
                     <div>
-                      <p className="text-xs text-amber-700 mb-1">Períodos pendentes de validação</p>
-                      <Button size="sm" className="w-full bg-amber-500 hover:bg-amber-600 text-white mt-1 h-7 text-xs">
+                      <p className="text-xs text-warning mb-1">Períodos pendentes de validação</p>
+                      <Button size="sm" className="w-full bg-warning hover:bg-warning text-white mt-1 h-7 text-xs">
                         <CalendarCheck className="w-3 h-3 mr-1" /> Ver e Validar
                       </Button>
                     </div>
                   ) : (
-                    <div className="flex items-center gap-2 text-green-700">
+                    <div className="flex items-center gap-2 text-success">
                       <CheckCircle className="w-4 h-4" />
                       <span className="text-xs font-medium">Nenhum período pendente</span>
                     </div>
@@ -1054,7 +1054,7 @@ export default function Dashboard() {
             <div className="flex items-center justify-between">
               <CardTitle className="text-lg font-semibold">Tratativas Recentes</CardTitle>
               <Link to={createPageUrl('Tratativas')}>
-                <Button variant="ghost" size="sm" className="text-blue-600">
+                <Button variant="ghost" size="sm" className="text-primary">
                   Ver todas <ArrowRight className="w-4 h-4 ml-1" />
                 </Button>
               </Link>
@@ -1062,7 +1062,7 @@ export default function Dashboard() {
           </CardHeader>
           <CardContent>
             {tratativasRecentes.length === 0 ? (
-              <div className="text-center py-8 text-slate-500">
+              <div className="text-center py-8 text-muted-foreground">
                 <ClipboardList className="w-10 h-10 mx-auto mb-2 opacity-50" />
                 <p>Nenhuma tratativa registrada</p>
               </div>
@@ -1072,14 +1072,14 @@ export default function Dashboard() {
                   <Link 
                     key={tratativa.id} 
                     to={createPageUrl(`TratativaDetalhe?id=${tratativa.id}`)}
-                    className="block p-4 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors"
+                    className="block p-4 bg-muted rounded-lg hover:bg-muted transition-colors"
                   >
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex-1 min-w-0">
-                        <p className="font-medium text-slate-900 truncate">
+                        <p className="font-medium text-foreground truncate">
                           {tratativa.nome_cliente || tratativa.link_zendesk?.substring(0, 50)}
                         </p>
-                        <p className="text-sm text-slate-500 mt-1">
+                        <p className="text-sm text-muted-foreground mt-1">
                           {formatDateSP(tratativa.created_date, 'DD/MM/YYYY HH:mm')}
                         </p>
                       </div>
@@ -1102,29 +1102,29 @@ export default function Dashboard() {
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-lg font-semibold flex items-center gap-2">
-                  <Bell className="w-5 h-5 text-blue-600" />
+                  <Bell className="w-5 h-5 text-primary" />
                   Avisos
                 </CardTitle>
                 <Link to={createPageUrl('Avisos')}>
-                  <Button variant="ghost" size="sm" className="text-blue-600">Ver todos</Button>
+                  <Button variant="ghost" size="sm" className="text-primary">Ver todos</Button>
                 </Link>
               </div>
             </CardHeader>
             <CardContent>
               {avisosParaExibir.length === 0 ? (
-                <p className="text-slate-500 text-sm text-center py-4">Nenhum aviso pendente</p>
+                <p className="text-muted-foreground text-sm text-center py-4">Nenhum aviso pendente</p>
               ) : (
                 <div className="space-y-3">
                   {avisosParaExibir.slice(0, 3).map((aviso) => {
                     const jaLeu = leituras.some(l => l.aviso_id === aviso.id && l.colaborador_id === colaborador?.id && l.confirmou === true);
                     return (
-                      <div key={aviso.id} className={`p-3 rounded-lg ${jaLeu ? 'bg-slate-100 opacity-60' : 'bg-slate-50'}`}>
+                      <div key={aviso.id} className={`p-3 rounded-lg ${jaLeu ? 'bg-muted opacity-60' : 'bg-muted'}`}>
                         <div className="flex items-start gap-2">
                           {aviso.tipo === 'urgente' && <Badge variant="destructive" className="text-xs">Urgente</Badge>}
-                          {jaLeu && <Badge className="bg-green-100 text-green-700 border-green-200 text-xs"><CheckCircle className="w-3 h-3 mr-1" />Lido</Badge>}
+                          {jaLeu && <Badge className="bg-success-soft text-success border-success/25 text-xs"><CheckCircle className="w-3 h-3 mr-1" />Lido</Badge>}
                           <div className="flex-1">
-                            <p className={`font-medium text-sm ${jaLeu ? 'text-slate-500' : 'text-slate-900'}`}>{aviso.titulo}</p>
-                            <p className="text-xs text-slate-500 mt-1">{formatDateSP(aviso.data_publicacao, 'DD/MM/YYYY')}</p>
+                            <p className={`font-medium text-sm ${jaLeu ? 'text-muted-foreground' : 'text-foreground'}`}>{aviso.titulo}</p>
+                            <p className="text-xs text-muted-foreground mt-1">{formatDateSP(aviso.data_publicacao, 'DD/MM/YYYY')}</p>
                           </div>
                         </div>
                       </div>
@@ -1191,13 +1191,13 @@ export default function Dashboard() {
         <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <Palmtree className="w-5 h-5 text-green-600" />
+              <Palmtree className="w-5 h-5 text-success" />
               Meus Períodos de Férias
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4 mt-2">
             {ciclosFerias.filter(c => c.colaborador_id === colaborador?.id).length === 0 ? (
-              <p className="text-slate-500 text-sm text-center py-6">Nenhum ciclo de férias cadastrado.</p>
+              <p className="text-muted-foreground text-sm text-center py-6">Nenhum ciclo de férias cadastrado.</p>
             ) : (
               ciclosFerias
                 .filter(c => c.colaborador_id === colaborador?.id)
@@ -1206,27 +1206,27 @@ export default function Dashboard() {
                   const frags = ciclo.fragmentos || [];
                   if (frags.length === 0) return null;
                   return (
-                    <div key={ciclo.id} className="border border-slate-200 rounded-xl p-4 space-y-3">
-                      <p className="text-sm font-semibold text-slate-700">
+                    <div key={ciclo.id} className="border border-border rounded-xl p-4 space-y-3">
+                      <p className="text-sm font-semibold text-foreground">
                         Período aquisitivo: {ciclo.aquisitivo_inicio} → {ciclo.aquisitivo_fim}
                       </p>
                       {frags.map((frag, idx) => {
                         const statusConfig = {
-                          agendado: { label: 'Agendado', cls: 'bg-slate-100 text-slate-600' },
-                          em_execucao: { label: 'Em execução', cls: 'bg-blue-100 text-blue-700' },
-                          pendente_validacao: { label: 'Pendente de validação', cls: 'bg-amber-100 text-amber-700' },
+                          agendado: { label: 'Agendado', cls: 'bg-muted text-muted-foreground' },
+                          em_execucao: { label: 'Em execução', cls: 'bg-info-soft text-primary' },
+                          pendente_validacao: { label: 'Pendente de validação', cls: 'bg-warning-soft text-warning' },
                         };
                         const sc = statusConfig[frag.status] || statusConfig.agendado;
                         return (
-                          <div key={frag.id || idx} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg border">
+                          <div key={frag.id || idx} className="flex items-center justify-between p-3 bg-muted rounded-lg border">
                             <div>
-                              <p className="text-sm font-medium text-slate-900">
+                              <p className="text-sm font-medium text-foreground">
                                 {frag.data_inicio} → {frag.data_fim}
                               </p>
                               <div className="flex items-center gap-2 mt-1 flex-wrap">
-                                <Badge className="bg-green-100 text-green-700 text-xs">{frag.dias} dias</Badge>
+                                <Badge className="bg-success-soft text-success text-xs">{frag.dias} dias</Badge>
                                 <Badge className={`text-xs ${sc.cls}`}>{sc.label}</Badge>
-                                {frag.observacao && <span className="text-xs text-slate-500 italic">{frag.observacao}</span>}
+                                {frag.observacao && <span className="text-xs text-muted-foreground italic">{frag.observacao}</span>}
                               </div>
                             </div>
                           </div>
@@ -1268,20 +1268,20 @@ export default function Dashboard() {
           >
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
-                <Bell className="w-5 h-5 text-blue-600" />
+                <Bell className="w-5 h-5 text-primary" />
                 {avisoAtual.titulo}
               </DialogTitle>
             </DialogHeader>
             <div className="space-y-4 mt-4" id="aviso-description">
               <div className={`p-3 rounded-lg ${
-                avisoAtual.tipo === 'urgente' ? 'bg-red-50 border border-red-200' :
-                avisoAtual.tipo === 'alerta' ? 'bg-amber-50 border border-amber-200' :
-                'bg-blue-50 border border-blue-200'
+                avisoAtual.tipo === 'urgente' ? 'bg-destructive/10 border border-destructive/25' :
+                avisoAtual.tipo === 'alerta' ? 'bg-warning-soft border border-warning/25' :
+                'bg-info-soft border border-info/25'
               }`}>
-                <p className="text-slate-700 whitespace-pre-wrap">{avisoAtual.conteudo}</p>
+                <p className="text-foreground whitespace-pre-wrap">{avisoAtual.conteudo}</p>
               </div>
               <Button 
-                className="w-full bg-blue-600 hover:bg-blue-700"
+                className="w-full bg-primary hover:bg-primary/90"
                 onClick={() => confirmarLeituraAviso.mutate(avisoAtual.id)}
                 disabled={confirmarLeituraAviso.isPending}
               >
@@ -1289,7 +1289,7 @@ export default function Dashboard() {
                 {confirmarLeituraAviso.isPending ? 'Confirmando...' : 'Li e Compreendi'}
               </Button>
               {avisoAttemptCount >= 3 && (
-                <p className="text-xs text-amber-600 text-center">
+                <p className="text-xs text-warning text-center">
                   Clique fora ou pressione ESC para fechar temporariamente
                 </p>
               )}
@@ -1309,27 +1309,27 @@ export default function Dashboard() {
           >
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
-                <TrendingUp className="w-5 h-5 text-blue-600" />
+                <TrendingUp className="w-5 h-5 text-primary" />
                 Novos Resultados Disponíveis
               </DialogTitle>
             </DialogHeader>
             <div className="space-y-4 mt-4" id="hansei-description">
-              <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                <p className="text-sm text-blue-900 font-medium mb-2">
+              <div className="p-4 bg-info-soft border border-info/25 rounded-lg">
+                <p className="text-sm text-primary font-medium mb-2">
                   Você tem {hanseiNaoVisualizados.length} resultado(s) de desempenho para visualizar
                 </p>
-                <p className="text-xs text-blue-700">
+                <p className="text-xs text-primary">
                   Acesse o módulo Hansei para ver suas métricas consolidadas e feedback do gestor.
                 </p>
               </div>
 
               <div className="space-y-2">
                 {hanseiNaoVisualizados.slice(0, 3).map(envio => (
-                  <div key={envio.id} className="p-3 bg-slate-50 rounded-lg border">
-                    <p className="text-sm font-medium text-slate-900">
+                  <div key={envio.id} className="p-3 bg-muted rounded-lg border">
+                    <p className="text-sm font-medium text-foreground">
                       {formatDateSP(envio.periodo_inicio, 'DD/MM')} - {formatDateSP(envio.periodo_fim, 'DD/MM/YYYY')}
                     </p>
-                    <p className="text-xs text-slate-500">Periodicidade: {envio.periodicidade}</p>
+                    <p className="text-xs text-muted-foreground">Periodicidade: {envio.periodicidade}</p>
                   </div>
                 ))}
               </div>
@@ -1345,7 +1345,7 @@ export default function Dashboard() {
                   Depois
                 </Button>
                 <Button 
-                  className="flex-1 bg-blue-600 hover:bg-blue-700"
+                  className="flex-1 bg-primary hover:bg-primary/90"
                   onClick={() => {
                     setHanseiPopupOpen(false);
                     navigate(createPageUrl('Hansei'));
@@ -1371,20 +1371,20 @@ export default function Dashboard() {
           >
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
-                <Star className="w-5 h-5 text-blue-600" />
+                <Star className="w-5 h-5 text-primary" />
                 {pesquisaAtual.titulo}
               </DialogTitle>
             </DialogHeader>
             <div className="space-y-4 mt-4" id="pesquisa-description">
               {pesquisaAtual.reenviar_timestamp && (
-                <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                  <p className="text-sm text-blue-800 font-medium">
+                <div className="p-3 bg-info-soft border border-info/25 rounded-lg">
+                  <p className="text-sm text-primary font-medium">
                     Pesquisa importante - Por favor, responda
                   </p>
                 </div>
               )}
               {pesquisaAtual.descricao && (
-                <p className="text-sm text-slate-600 bg-blue-50 p-3 rounded-lg">
+                <p className="text-sm text-muted-foreground bg-info-soft p-3 rounded-lg">
                   {pesquisaAtual.descricao}
                 </p>
               )}
@@ -1394,7 +1394,7 @@ export default function Dashboard() {
                   <CardContent className="p-4 space-y-2">
                     <Label className="flex items-center gap-2 font-medium">
                       {pergunta.texto}
-                      {pergunta.obrigatoria && <span className="text-red-500">*</span>}
+                      {pergunta.obrigatoria && <span className="text-destructive">*</span>}
                     </Label>
 
                     {pergunta.tipo_resposta === 'texto' && (
@@ -1416,7 +1416,7 @@ export default function Dashboard() {
                             key={num}
                             type="button"
                             variant={respostasPesquisaAtual[pergunta.id] === num.toString() ? 'default' : 'outline'}
-                            className={`flex-1 h-12 text-lg font-bold ${respostasPesquisaAtual[pergunta.id] === num.toString() ? 'bg-blue-600 text-white' : 'hover:bg-blue-50'}`}
+                            className={`flex-1 h-12 text-lg font-bold ${respostasPesquisaAtual[pergunta.id] === num.toString() ? 'bg-primary text-white' : 'hover:bg-info-soft'}`}
                             onClick={() => setRespostasPesquisaAtual({ 
                               ...respostasPesquisaAtual, 
                               [pergunta.id]: num.toString() 
@@ -1437,7 +1437,7 @@ export default function Dashboard() {
                               type="button"
                               size="sm"
                               variant={respostasPesquisaAtual[pergunta.id] === num.toString() ? 'default' : 'outline'}
-                              className={`h-10 text-sm font-bold ${respostasPesquisaAtual[pergunta.id] === num.toString() ? 'bg-blue-600 text-white' : 'hover:bg-blue-50'}`}
+                              className={`h-10 text-sm font-bold ${respostasPesquisaAtual[pergunta.id] === num.toString() ? 'bg-primary text-white' : 'hover:bg-info-soft'}`}
                               onClick={() => setRespostasPesquisaAtual({ 
                                 ...respostasPesquisaAtual, 
                                 [pergunta.id]: num.toString() 
@@ -1447,7 +1447,7 @@ export default function Dashboard() {
                             </Button>
                           ))}
                         </div>
-                        <div className="flex justify-between text-xs text-slate-500 px-1">
+                        <div className="flex justify-between text-xs text-muted-foreground px-1">
                           <span>Muito insatisfeito</span>
                           <span>Muito satisfeito</span>
                         </div>
@@ -1459,7 +1459,7 @@ export default function Dashboard() {
                         <Button
                           type="button"
                           variant={respostasPesquisaAtual[pergunta.id] === 'sim' ? 'default' : 'outline'}
-                          className={`flex-1 ${respostasPesquisaAtual[pergunta.id] === 'sim' ? 'bg-blue-600' : ''}`}
+                          className={`flex-1 ${respostasPesquisaAtual[pergunta.id] === 'sim' ? 'bg-primary' : ''}`}
                           onClick={() => setRespostasPesquisaAtual({ 
                             ...respostasPesquisaAtual, 
                             [pergunta.id]: 'sim' 
@@ -1470,7 +1470,7 @@ export default function Dashboard() {
                         <Button
                           type="button"
                           variant={respostasPesquisaAtual[pergunta.id] === 'nao' ? 'default' : 'outline'}
-                          className={`flex-1 ${respostasPesquisaAtual[pergunta.id] === 'nao' ? 'bg-blue-600' : ''}`}
+                          className={`flex-1 ${respostasPesquisaAtual[pergunta.id] === 'nao' ? 'bg-primary' : ''}`}
                           onClick={() => setRespostasPesquisaAtual({ 
                             ...respostasPesquisaAtual, 
                             [pergunta.id]: 'nao' 
@@ -1503,7 +1503,7 @@ export default function Dashboard() {
                     {pergunta.tipo_resposta === 'multipla_escolha_multipla' && (
                       <div className="space-y-2">
                         {pergunta.opcoes?.map((opcao, i) => (
-                          <label key={i} className="flex items-center gap-3 p-3 hover:bg-slate-50 rounded-lg cursor-pointer border border-slate-200">
+                          <label key={i} className="flex items-center gap-3 p-3 hover:bg-muted rounded-lg cursor-pointer border border-border">
                             <input
                               type="checkbox"
                               checked={(respostasPesquisaAtual[pergunta.id] || '').split(',').includes(opcao)}
@@ -1526,7 +1526,7 @@ export default function Dashboard() {
               ))}
 
               <Button 
-                className="w-full bg-blue-600 hover:bg-blue-700"
+                className="w-full bg-primary hover:bg-primary/90"
                 onClick={handleEnviarRespostaPesquisa}
                 disabled={responderPesquisaMutation.isPending}
               >

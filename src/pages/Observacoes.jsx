@@ -120,9 +120,9 @@ export default function Observacoes() {
   if (!isGestor) {
     return (
       <div className="text-center py-16">
-        <MessageSquare className="w-12 h-12 text-slate-300 mx-auto mb-4" />
+        <MessageSquare className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
         <h2 className="text-xl font-semibold mb-2">Acesso Restrito</h2>
-        <p className="text-slate-500">Apenas gestores podem acessar as observações.</p>
+        <p className="text-muted-foreground">Apenas gestores podem acessar as observações.</p>
       </div>
     );
   }
@@ -174,19 +174,19 @@ export default function Observacoes() {
                   />
                 </div>
               </div>
-              <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
+              <div className="flex items-center gap-3 p-3 bg-muted rounded-lg">
                 <Switch
                   checked={form.visibilidade === 'ambos'}
                   onCheckedChange={checked => setForm({ ...form, visibilidade: checked ? 'ambos' : 'gestor' })}
                 />
                 <div>
                   <Label className="cursor-pointer">Visível ao agente</Label>
-                  <p className="text-xs text-slate-500">{form.visibilidade === 'ambos' ? 'O agente poderá visualizar este registro' : 'Apenas gestores verão este registro'}</p>
+                  <p className="text-xs text-muted-foreground">{form.visibilidade === 'ambos' ? 'O agente poderá visualizar este registro' : 'Apenas gestores verão este registro'}</p>
                 </div>
               </div>
               <div className="flex justify-end gap-3 pt-2">
                 <Button variant="outline" onClick={() => setDialogNovaObs(false)}>Cancelar</Button>
-                <Button onClick={handleCriar} disabled={criarMutation.isPending} className="bg-blue-600 hover:bg-blue-700">
+                <Button onClick={handleCriar} disabled={criarMutation.isPending} className="bg-primary hover:bg-primary/90">
                   <Plus className="w-4 h-4 mr-2" />
                   {criarMutation.isPending ? 'Salvando...' : 'Salvar Observação'}
                 </Button>
@@ -207,7 +207,7 @@ export default function Observacoes() {
       />
 
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
         <Input
           placeholder="Buscar colaborador..."
           value={busca}
@@ -218,8 +218,8 @@ export default function Observacoes() {
 
       {agentesFiltrados.length === 0 ? (
         <div className="text-center py-16">
-          <MessageSquare className="w-12 h-12 text-slate-300 mx-auto mb-4" />
-          <p className="text-slate-500">Nenhum colaborador encontrado</p>
+          <MessageSquare className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+          <p className="text-muted-foreground">Nenhum colaborador encontrado</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -235,7 +235,7 @@ export default function Observacoes() {
         </div>
       )}
       {agentesFiltrados.length > 0 && (
-        <p className="text-xs text-slate-400 text-center">
+        <p className="text-xs text-muted-foreground text-center">
           Mostrando {agentesFiltrados.length} de {colaboradoresLista.length} colaboradores • {observacoes.length} observações carregadas
         </p>
       )}

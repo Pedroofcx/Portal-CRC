@@ -15,10 +15,10 @@ import { formatDateSP } from '@/components/utils/helpers';
 import AuditoriaDetalheTabela from '@/components/auditoria/AuditoriaDetalheTabela';
 
 const TIPOS_TRATATIVA = [
-  { value: 'reclamacao_interna', label: 'Reclamação Interna', color: 'bg-blue-100 text-blue-700 border-blue-300' },
-  { value: 'reclame_aqui', label: 'Reclame Aqui', color: 'bg-orange-100 text-orange-700 border-orange-300' },
-  { value: 'google_meu_negocio', label: 'Google Meu Negócio', color: 'bg-emerald-100 text-emerald-700 border-emerald-300' },
-  { value: 'contestacao', label: 'Contestação', color: 'bg-red-100 text-red-700 border-red-300' },
+  { value: 'reclamacao_interna', label: 'Reclamação Interna', color: 'bg-info-soft text-primary border-info/30' },
+  { value: 'reclame_aqui', label: 'Reclame Aqui', color: 'bg-critical-soft text-critical border-orange-300' },
+  { value: 'google_meu_negocio', label: 'Google Meu Negócio', color: 'bg-success-soft text-success border-emerald-300' },
+  { value: 'contestacao', label: 'Contestação', color: 'bg-destructive/10 text-destructive border-destructive/30' },
 ];
 
 export default function AuditoriaPontuacao() {
@@ -112,38 +112,38 @@ export default function AuditoriaPontuacao() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Card className="border-0 shadow-sm">
           <CardContent className="pt-5 text-center">
-            <p className="text-3xl font-bold text-blue-600">{auditoria.length}</p>
-            <p className="text-xs text-slate-500 mt-1">Agentes avaliados</p>
+            <p className="text-3xl font-bold text-primary">{auditoria.length}</p>
+            <p className="text-xs text-muted-foreground mt-1">Agentes avaliados</p>
           </CardContent>
         </Card>
         <Card className="border-0 shadow-sm">
           <CardContent className="pt-5 text-center">
-            <p className="text-3xl font-bold text-green-600">{totalTratativas}</p>
-            <p className="text-xs text-slate-500 mt-1">Tratativas no ciclo</p>
+            <p className="text-3xl font-bold text-success">{totalTratativas}</p>
+            <p className="text-xs text-muted-foreground mt-1">Tratativas no ciclo</p>
           </CardContent>
         </Card>
         <Card className="border-0 shadow-sm">
           <CardContent className="pt-5 text-center">
-            <p className="text-3xl font-bold text-amber-600">{totalGeral.toFixed(1)}</p>
-            <p className="text-xs text-slate-500 mt-1">Pontos totais distribuídos</p>
+            <p className="text-3xl font-bold text-warning">{totalGeral.toFixed(1)}</p>
+            <p className="text-xs text-muted-foreground mt-1">Pontos totais distribuídos</p>
           </CardContent>
         </Card>
         <Card className="border-0 shadow-sm">
           <CardContent className="pt-5 text-center">
-            <p className={`text-3xl font-bold ${totalForaCiclo > 0 ? 'text-red-600' : 'text-green-600'}`}>
+            <p className={`text-3xl font-bold ${totalForaCiclo > 0 ? 'text-destructive' : 'text-success'}`}>
               {totalForaCiclo}
             </p>
-            <p className="text-xs text-slate-500 mt-1">Tratativas fora do ciclo (excluídas)</p>
+            <p className="text-xs text-muted-foreground mt-1">Tratativas fora do ciclo (excluídas)</p>
           </CardContent>
         </Card>
       </div>
 
       {/* Alerta de ciclo inativo */}
       {!cicloAtivo && (
-        <Card className="border-amber-300 bg-amber-50">
+        <Card className="border-warning/30 bg-warning-soft">
           <CardContent className="py-4 flex items-center gap-3">
-            <AlertTriangle className="w-5 h-5 text-amber-600" />
-            <p className="text-sm text-amber-800 font-medium">
+            <AlertTriangle className="w-5 h-5 text-warning" />
+            <p className="text-sm text-warning font-medium">
               Nenhum ciclo trimestral está ativo. Configure um ciclo em Configurações → Ciclos Trimestrais para que a pontuação seja calculada corretamente.
             </p>
           </CardContent>
@@ -154,7 +154,7 @@ export default function AuditoriaPontuacao() {
       <Card className="border-0 shadow-sm">
         <CardContent className="py-3 px-4">
           <div className="flex flex-wrap items-center gap-3">
-            <div className="flex items-center gap-1.5 text-slate-500">
+            <div className="flex items-center gap-1.5 text-muted-foreground">
               <Filter className="w-4 h-4" />
               <span className="text-xs font-semibold uppercase tracking-wide">Filtrar por tipo:</span>
             </div>
@@ -168,7 +168,7 @@ export default function AuditoriaPontuacao() {
                     className={`px-3 py-1 rounded-full text-xs font-semibold border transition-all ${
                       ativo
                         ? tipo.color
-                        : 'bg-white text-slate-400 border-slate-200 opacity-50'
+                        : 'bg-card text-muted-foreground border-border opacity-50'
                     }`}
                   >
                     {ativo ? '✓ ' : ''}{tipo.label}
@@ -179,7 +179,7 @@ export default function AuditoriaPontuacao() {
             {tiposFiltro.length < TIPOS_TRATATIVA.length && (
               <button
                 onClick={() => setTiposFiltro(TIPOS_TRATATIVA.map(t => t.value))}
-                className="text-xs text-blue-600 hover:underline ml-auto"
+                className="text-xs text-primary hover:underline ml-auto"
               >
                 Selecionar todos
               </button>
@@ -190,7 +190,7 @@ export default function AuditoriaPontuacao() {
 
       {/* Busca */}
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
         <Input
           placeholder="Buscar agente..."
           value={busca}
@@ -202,7 +202,7 @@ export default function AuditoriaPontuacao() {
       {/* Lista de agentes */}
       <div className="space-y-3">
         {isLoading ? (
-          <p className="text-center text-slate-400 py-8">Calculando pontuações...</p>
+          <p className="text-center text-muted-foreground py-8">Calculando pontuações...</p>
         ) : auditoriafiltrada.map((item, idx) => (
           <Card key={item.agente.id} className="border-0 shadow-sm overflow-hidden">
             {/* Header do agente */}
@@ -210,38 +210,38 @@ export default function AuditoriaPontuacao() {
               onClick={() => setAgenteExpandido(agenteExpandido === item.agente.id ? null : item.agente.id)}
               className="w-full text-left"
             >
-              <CardHeader className="py-4 hover:bg-slate-50 transition-colors">
+              <CardHeader className="py-4 hover:bg-muted transition-colors">
                 <div className="flex items-center gap-4">
-                  <div className="flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 text-blue-700 font-bold text-sm flex-shrink-0">
+                  <div className="flex items-center justify-center w-8 h-8 rounded-full bg-info-soft text-primary font-bold text-sm flex-shrink-0">
                     {idx + 1}º
                   </div>
-                  <div className="w-9 h-9 rounded-full bg-slate-200 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                  <div className="w-9 h-9 rounded-full bg-muted flex items-center justify-center flex-shrink-0 overflow-hidden">
                     {item.agente.foto_url ? (
                       <img src={item.agente.foto_url} alt="" className="w-full h-full object-cover" />
                     ) : (
-                      <User className="w-4 h-4 text-slate-500" />
+                      <User className="w-4 h-4 text-muted-foreground" />
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-slate-800">{item.agente.nome_completo}</p>
-                    <p className="text-xs text-slate-500">
+                    <p className="font-semibold text-foreground">{item.agente.nome_completo}</p>
+                    <p className="text-xs text-muted-foreground">
                       {item.totalTratativas} tratativas no ciclo
                       {item.foraDosCiclo > 0 && (
-                        <span className="text-red-500 ml-2">· {item.foraDosCiclo} fora do ciclo (não contabilizadas)</span>
+                        <span className="text-destructive ml-2">· {item.foraDosCiclo} fora do ciclo (não contabilizadas)</span>
                       )}
                     </p>
                   </div>
                   <div className="flex items-center gap-3 flex-shrink-0">
                     <div className="text-right">
                       <div className="flex items-center gap-1.5">
-                        <Star className="w-4 h-4 text-amber-500" />
-                        <span className="text-xl font-bold text-amber-700">{item.totalPontos.toFixed(1)}</span>
+                        <Star className="w-4 h-4 text-warning" />
+                        <span className="text-xl font-bold text-warning">{item.totalPontos.toFixed(1)}</span>
                       </div>
-                      <p className="text-xs text-slate-400">pontos</p>
+                      <p className="text-xs text-muted-foreground">pontos</p>
                     </div>
                     {agenteExpandido === item.agente.id
-                      ? <ChevronDown className="w-5 h-5 text-slate-400" />
-                      : <ChevronRight className="w-5 h-5 text-slate-400" />
+                      ? <ChevronDown className="w-5 h-5 text-muted-foreground" />
+                      : <ChevronRight className="w-5 h-5 text-muted-foreground" />
                     }
                   </div>
                 </div>

@@ -76,20 +76,20 @@ export default function MeuTurnoCard({ colaboradorId }) {
       >
         <CardContent className="p-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center flex-shrink-0">
+            <div className="w-8 h-8 bg-card/20 rounded-lg flex items-center justify-center flex-shrink-0">
               {meuTurnoHoje === 'manha' ? (
                 <Sun className="w-4 h-4" />
               ) : meuTurnoHoje === 'tarde' ? (
                 <Moon className="w-4 h-4" />
               ) : (
-                <Clock className="w-4 h-4 text-slate-500" />
+                <Clock className="w-4 h-4 text-muted-foreground" />
               )}
             </div>
             <div>
-              <p className={`font-semibold text-sm ${!meuTurnoHoje ? 'text-slate-700' : ''}`}>
+              <p className={`font-semibold text-sm ${!meuTurnoHoje ? 'text-foreground' : ''}`}>
                 Meu Turno Hoje
               </p>
-              <p className={`text-xs ${meuTurnoHoje ? 'opacity-80' : 'text-slate-500'}`}>
+              <p className={`text-xs ${meuTurnoHoje ? 'opacity-80' : 'text-muted-foreground'}`}>
                 {meuTurnoHoje === 'manha'
                   ? 'Manhã'
                   : meuTurnoHoje === 'tarde'
@@ -98,7 +98,7 @@ export default function MeuTurnoCard({ colaboradorId }) {
               </p>
             </div>
           </div>
-          <ArrowRight className={`w-4 h-4 ${meuTurnoHoje ? 'opacity-70' : 'text-slate-400'}`} />
+          <ArrowRight className={`w-4 h-4 ${meuTurnoHoje ? 'opacity-70' : 'text-muted-foreground'}`} />
         </CardContent>
       </Card>
 
@@ -106,7 +106,7 @@ export default function MeuTurnoCard({ colaboradorId }) {
         <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <Clock className="w-5 h-5 text-blue-600" />
+              <Clock className="w-5 h-5 text-primary" />
               Agenda de Turnos — Semana {escalaAtual?.semana_referencia}
             </DialogTitle>
           </DialogHeader>
@@ -116,31 +116,31 @@ export default function MeuTurnoCard({ colaboradorId }) {
               return (
                 <div
                   key={turno.dia}
-                  className={`rounded-xl border p-3 ${isMeuDia ? 'border-blue-300 bg-blue-50' : 'border-slate-200 bg-white'}`}
+                  className={`rounded-xl border p-3 ${isMeuDia ? 'border-info/30 bg-info-soft' : 'border-border bg-card'}`}
                 >
-                  <p className={`font-semibold text-sm mb-2 ${isMeuDia ? 'text-blue-700' : 'text-slate-700'}`}>
+                  <p className={`font-semibold text-sm mb-2 ${isMeuDia ? 'text-primary' : 'text-foreground'}`}>
                     {DIAS_PT[turno.dia]}
-                    {isMeuDia && <Badge className="ml-2 bg-blue-600 text-white text-xs">Hoje</Badge>}
+                    {isMeuDia && <Badge className="ml-2 bg-primary text-white text-xs">Hoje</Badge>}
                   </p>
                   <div className="grid grid-cols-2 gap-2">
-                    <div className="bg-amber-50 border border-amber-200 rounded-lg p-2">
+                    <div className="bg-warning-soft border border-warning/25 rounded-lg p-2">
                       <div className="flex items-center gap-1.5 mb-1.5">
-                        <Sun className="w-3.5 h-3.5 text-amber-500" />
-                        <span className="text-xs font-semibold text-amber-700">Manhã</span>
+                        <Sun className="w-3.5 h-3.5 text-warning" />
+                        <span className="text-xs font-semibold text-warning">Manhã</span>
                       </div>
                       {turno.manha?.length > 0 ? turno.manha.map(c => (
-                        <div key={c.colaborador_id} className={`text-xs py-0.5 px-1.5 rounded mb-0.5 ${c.colaborador_id === colaboradorId ? 'bg-amber-200 font-semibold text-amber-900' : 'text-amber-800'}`}>
+                        <div key={c.colaborador_id} className={`text-xs py-0.5 px-1.5 rounded mb-0.5 ${c.colaborador_id === colaboradorId ? 'bg-amber-200 font-semibold text-warning' : 'text-warning'}`}>
                           {c.colaborador_nome?.split(' ')[0]}
                         </div>
-                      )) : <p className="text-xs text-amber-400 italic">—</p>}
+                      )) : <p className="text-xs text-warning italic">—</p>}
                     </div>
-                    <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-2">
+                    <div className="bg-info-soft border border-indigo-200 rounded-lg p-2">
                       <div className="flex items-center gap-1.5 mb-1.5">
-                        <Moon className="w-3.5 h-3.5 text-indigo-500" />
-                        <span className="text-xs font-semibold text-indigo-700">Tarde</span>
+                        <Moon className="w-3.5 h-3.5 text-primary" />
+                        <span className="text-xs font-semibold text-primary">Tarde</span>
                       </div>
                       {turno.tarde?.length > 0 ? turno.tarde.map(c => (
-                        <div key={c.colaborador_id} className={`text-xs py-0.5 px-1.5 rounded mb-0.5 ${c.colaborador_id === colaboradorId ? 'bg-indigo-200 font-semibold text-indigo-900' : 'text-indigo-800'}`}>
+                        <div key={c.colaborador_id} className={`text-xs py-0.5 px-1.5 rounded mb-0.5 ${c.colaborador_id === colaboradorId ? 'bg-indigo-200 font-semibold text-primary' : 'text-primary'}`}>
                           {c.colaborador_nome?.split(' ')[0]}
                         </div>
                       )) : <p className="text-xs text-indigo-400 italic">—</p>}

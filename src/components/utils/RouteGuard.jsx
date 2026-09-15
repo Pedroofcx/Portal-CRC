@@ -42,14 +42,14 @@ export function RouteGuard({
   if (requireColaborador && !colaborador) {
     return (
       <div className="text-center py-16">
-        <ShieldAlert className="w-12 h-12 text-amber-500 mx-auto mb-4" />
+        <ShieldAlert className="w-12 h-12 text-warning mx-auto mb-4" />
         <h2 className="text-xl font-semibold mb-2">Acesso Restrito</h2>
-        <p className="text-slate-600 mb-4">
+        <p className="text-muted-foreground mb-4">
           Você precisa estar cadastrado como colaborador para acessar esta página.
         </p>
         <Button 
           onClick={() => navigate(createPageUrl('Dashboard'))}
-          className="bg-blue-600"
+          className="bg-primary"
         >
           Voltar ao Dashboard
         </Button>
@@ -61,14 +61,14 @@ export function RouteGuard({
   if (allowedRoles && colaborador && !allowedRoles.includes(colaborador.papel)) {
     return (
       <div className="text-center py-16">
-        <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
+        <AlertCircle className="w-12 h-12 text-destructive mx-auto mb-4" />
         <h2 className="text-xl font-semibold mb-2">Sem Permissão</h2>
-        <p className="text-slate-600 mb-4">
+        <p className="text-muted-foreground mb-4">
           Você não tem permissão para acessar esta página.
         </p>
         <Button 
           onClick={() => navigate(createPageUrl('Dashboard'))}
-          className="bg-blue-600"
+          className="bg-primary"
         >
           Voltar ao Dashboard
         </Button>

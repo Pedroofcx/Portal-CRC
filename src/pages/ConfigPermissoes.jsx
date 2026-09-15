@@ -125,9 +125,9 @@ export default function ConfigPermissoes() {
   if (!isGestor) {
     return (
       <div className="text-center py-16">
-        <Shield className="w-12 h-12 text-slate-300 mx-auto mb-4" />
+        <Shield className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
         <h2 className="text-xl font-semibold mb-2">Acesso Restrito</h2>
-        <p className="text-slate-500">Apenas gestores podem configurar permissões.</p>
+        <p className="text-muted-foreground">Apenas gestores podem configurar permissões.</p>
       </div>
     );
   }
@@ -145,7 +145,7 @@ export default function ConfigPermissoes() {
         backTo="Configuracoes"
         actions={
           permissoes.length === 0 && (
-            <Button onClick={inicializarModulos} className="bg-blue-600 hover:bg-blue-700">
+            <Button onClick={inicializarModulos} className="bg-primary hover:bg-primary/90">
               Inicializar Módulos
             </Button>
           )
@@ -155,9 +155,9 @@ export default function ConfigPermissoes() {
       {permissoes.length === 0 ? (
         <Card className="border-0 shadow-sm">
           <CardContent className="py-12 text-center">
-            <Shield className="w-12 h-12 mx-auto mb-4 text-slate-300" />
-            <p className="text-slate-500 mb-4">Nenhuma permissão configurada ainda</p>
-            <Button onClick={inicializarModulos} className="bg-blue-600 hover:bg-blue-700">
+            <Shield className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+            <p className="text-muted-foreground mb-4">Nenhuma permissão configurada ainda</p>
+            <Button onClick={inicializarModulos} className="bg-primary hover:bg-primary/90">
               Inicializar Módulos com Permissões Padrão
             </Button>
           </CardContent>
@@ -175,12 +175,12 @@ export default function ConfigPermissoes() {
               <CardContent className="space-y-4">
                 {/* Visibilidade por Perfil */}
                 <div className="grid sm:grid-cols-2 gap-6">
-                  <div className="flex items-center justify-between p-4 bg-slate-50 rounded-lg">
+                  <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
                     <div className="flex items-center gap-3">
                       {permissao.visivel_para_agente ? (
-                        <Eye className="w-5 h-5 text-green-600" />
+                        <Eye className="w-5 h-5 text-success" />
                       ) : (
-                        <EyeOff className="w-5 h-5 text-slate-400" />
+                        <EyeOff className="w-5 h-5 text-muted-foreground" />
                       )}
                       <Label className="font-medium">Visível para Agentes</Label>
                     </div>
@@ -189,12 +189,12 @@ export default function ConfigPermissoes() {
                       onCheckedChange={() => handleToggleVisibilidade(permissao.id, 'agente')}
                     />
                   </div>
-                  <div className="flex items-center justify-between p-4 bg-slate-50 rounded-lg">
+                  <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
                     <div className="flex items-center gap-3">
                       {permissao.visivel_para_gestor ? (
-                        <Eye className="w-5 h-5 text-blue-600" />
+                        <Eye className="w-5 h-5 text-primary" />
                       ) : (
-                        <EyeOff className="w-5 h-5 text-slate-400" />
+                        <EyeOff className="w-5 h-5 text-muted-foreground" />
                       )}
                       <Label className="font-medium">Visível para Gestores</Label>
                     </div>
@@ -206,8 +206,8 @@ export default function ConfigPermissoes() {
                 </div>
 
                 {/* Exceções Individuais */}
-                <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg">
-                  <Label className="font-medium text-amber-900 mb-3 block">
+                <div className="p-4 bg-warning-soft border border-warning/25 rounded-lg">
+                  <Label className="font-medium text-warning mb-3 block">
                     Exceções Individuais (sobrescreve regra do perfil)
                   </Label>
                   <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-2 max-h-48 overflow-y-auto">
@@ -217,7 +217,7 @@ export default function ConfigPermissoes() {
                         <div 
                           key={colab.id}
                           className={`flex items-center gap-2 p-2 rounded-lg border transition-all cursor-pointer ${
-                            isExcecao ? 'bg-blue-50 border-blue-300' : 'bg-white border-slate-200 hover:border-blue-200'
+                            isExcecao ? 'bg-info-soft border-info/30' : 'bg-card border-border hover:border-info/25'
                           }`}
                           onClick={() => handleToggleExcecao(permissao.id, colab.id)}
                         >
@@ -227,7 +227,7 @@ export default function ConfigPermissoes() {
                           />
                           <Avatar className="h-6 w-6">
                             <AvatarImage src={colab.foto_url} />
-                            <AvatarFallback className="bg-blue-100 text-blue-600 text-xs">
+                            <AvatarFallback className="bg-info-soft text-primary text-xs">
                               {colab.nome_completo?.charAt(0)}
                             </AvatarFallback>
                           </Avatar>
@@ -236,7 +236,7 @@ export default function ConfigPermissoes() {
                       );
                     })}
                   </div>
-                  <p className="text-xs text-amber-700 mt-2">
+                  <p className="text-xs text-warning mt-2">
                     {permissao.colaboradores_excecao?.length || 0} colaborador(es) com acesso especial
                   </p>
                 </div>

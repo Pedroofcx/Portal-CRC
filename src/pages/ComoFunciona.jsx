@@ -361,7 +361,7 @@ export default function ComoFunciona() {
       <Card className="border-0 shadow-sm bg-gradient-to-r from-blue-600 to-blue-700 text-white">
         <CardContent className="py-6">
           <div className="flex items-start gap-4">
-            <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center flex-shrink-0">
+            <div className="w-12 h-12 bg-card/20 rounded-xl flex items-center justify-center flex-shrink-0">
               <BookOpen className="w-6 h-6" />
             </div>
             <div>
@@ -402,25 +402,25 @@ export default function ComoFunciona() {
                 <Card key={index} className="border-0 shadow-sm hover:shadow-md transition-shadow">
                   <CardHeader className="pb-3">
                     <div className="flex items-start gap-3">
-                      <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <Icon className="w-5 h-5 text-blue-600" />
+                      <div className="w-10 h-10 bg-info-soft rounded-lg flex items-center justify-center flex-shrink-0">
+                        <Icon className="w-5 h-5 text-primary" />
                       </div>
                       <div className="flex-1">
-                        <CardTitle className="text-lg font-semibold text-slate-900">
+                        <CardTitle className="text-lg font-semibold text-foreground">
                           {modulo.nome}
                         </CardTitle>
-                        <p className="text-sm text-slate-600 mt-1">{modulo.descricao}</p>
+                        <p className="text-sm text-muted-foreground mt-1">{modulo.descricao}</p>
                       </div>
                       <Badge variant="outline" className="text-xs">Gestor</Badge>
                     </div>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-2">
-                      <p className="text-sm font-medium text-slate-700 mb-3">Como usar:</p>
+                      <p className="text-sm font-medium text-foreground mb-3">Como usar:</p>
                       {modulo.comoUsar.map((passo, i) => (
                         <div key={i} className="flex items-start gap-2">
-                          <ChevronRight className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
-                          <p className="text-sm text-slate-600">{passo}</p>
+                          <ChevronRight className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
+                          <p className="text-sm text-muted-foreground">{passo}</p>
                         </div>
                       ))}
                     </div>
@@ -439,27 +439,27 @@ export default function ComoFunciona() {
                 <Card key={index} className="border-0 shadow-sm hover:shadow-md transition-shadow">
                   <CardHeader className="pb-3">
                     <div className="flex items-start gap-3">
-                      <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <Icon className="w-5 h-5 text-green-600" />
+                      <div className="w-10 h-10 bg-success-soft rounded-lg flex items-center justify-center flex-shrink-0">
+                        <Icon className="w-5 h-5 text-success" />
                       </div>
                       <div className="flex-1">
-                        <CardTitle className="text-lg font-semibold text-slate-900">
+                        <CardTitle className="text-lg font-semibold text-foreground">
                           {modulo.nome}
                         </CardTitle>
-                        <p className="text-sm text-slate-600 mt-1">{modulo.descricao}</p>
+                        <p className="text-sm text-muted-foreground mt-1">{modulo.descricao}</p>
                       </div>
-                      <Badge variant="outline" className="text-xs bg-green-50 text-green-700 border-green-200">
+                      <Badge variant="outline" className="text-xs bg-success-soft text-success border-success/25">
                         Agente
                       </Badge>
                     </div>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-2">
-                      <p className="text-sm font-medium text-slate-700 mb-3">Como usar:</p>
+                      <p className="text-sm font-medium text-foreground mb-3">Como usar:</p>
                       {modulo.comoUsar.map((passo, i) => (
                         <div key={i} className="flex items-start gap-2">
-                          <ChevronRight className="w-4 h-4 text-green-600 flex-shrink-0 mt-0.5" />
-                          <p className="text-sm text-slate-600">{passo}</p>
+                          <ChevronRight className="w-4 h-4 text-success flex-shrink-0 mt-0.5" />
+                          <p className="text-sm text-muted-foreground">{passo}</p>
                         </div>
                       ))}
                     </div>
@@ -471,13 +471,13 @@ export default function ComoFunciona() {
         </TabsContent>
 
         <TabsContent value="comum" className="space-y-4">
-          <Card className="border-0 shadow-sm bg-purple-50">
+          <Card className="border-0 shadow-sm bg-info-soft">
             <CardContent className="p-4">
               <div className="flex items-start gap-3">
-                <CheckCircle className="w-5 h-5 text-purple-600 flex-shrink-0 mt-0.5" />
+                <CheckCircle className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
                 <div>
-                  <p className="font-medium text-purple-900 mb-1">Módulos Compartilhados</p>
-                  <p className="text-sm text-purple-700">
+                  <p className="font-medium text-primary mb-1">Módulos Compartilhados</p>
+                  <p className="text-sm text-primary">
                     Estes módulos estão disponíveis tanto para gestores quanto para agentes, 
                     mas podem ter funcionalidades diferentes conforme o perfil.
                   </p>
@@ -493,15 +493,15 @@ export default function ComoFunciona() {
                 <Card key={index} className="border-0 shadow-sm hover:shadow-md transition-shadow">
                   <CardContent className="p-5">
                     <div className="flex items-start gap-3">
-                      <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <Icon className="w-5 h-5 text-purple-600" />
+                      <div className="w-10 h-10 bg-info-soft rounded-lg flex items-center justify-center flex-shrink-0">
+                        <Icon className="w-5 h-5 text-primary" />
                       </div>
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1">
-                          <h3 className="font-semibold text-slate-900">{modulo.nome}</h3>
+                          <h3 className="font-semibold text-foreground">{modulo.nome}</h3>
                           <Badge variant="outline" className="text-xs">{modulo.categoria}</Badge>
                         </div>
-                        <p className="text-sm text-slate-600">{modulo.resumo}</p>
+                        <p className="text-sm text-muted-foreground">{modulo.resumo}</p>
                       </div>
                     </div>
                   </CardContent>
@@ -512,15 +512,15 @@ export default function ComoFunciona() {
         </TabsContent>
       </Tabs>
 
-      <Card className="border-0 shadow-sm bg-amber-50">
+      <Card className="border-0 shadow-sm bg-warning-soft">
         <CardContent className="p-5">
           <div className="flex items-start gap-3">
-            <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center flex-shrink-0">
-              <Target className="w-5 h-5 text-amber-600" />
+            <div className="w-10 h-10 bg-warning-soft rounded-full flex items-center justify-center flex-shrink-0">
+              <Target className="w-5 h-5 text-warning" />
             </div>
             <div>
-              <h3 className="font-semibold text-amber-900 mb-2">Dica Importante</h3>
-              <p className="text-sm text-amber-800 leading-relaxed">
+              <h3 className="font-semibold text-warning mb-2">Dica Importante</h3>
+              <p className="text-sm text-warning leading-relaxed">
                 Explore cada módulo com calma e familiarize-se com as funcionalidades. 
                 Em caso de dúvidas, consulte seu gestor ou facilitador interno. 
                 Pesquisas e avisos obrigatórios devem ser respondidos prontamente para manter o sistema atualizado.

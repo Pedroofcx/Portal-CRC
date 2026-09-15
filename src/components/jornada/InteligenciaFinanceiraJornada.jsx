@@ -24,11 +24,11 @@ const tipoTratativaLabels = {
 };
 
 const RISCO_BADGE_CORES = {
-  green: 'bg-green-100 text-green-700',
-  amber: 'bg-amber-100 text-amber-700',
-  orange: 'bg-orange-100 text-orange-700',
-  red: 'bg-red-100 text-red-700',
-  slate: 'bg-slate-100 text-slate-700',
+  green: 'bg-success-soft text-success',
+  amber: 'bg-warning-soft text-warning',
+  orange: 'bg-critical-soft text-critical',
+  red: 'bg-destructive/10 text-destructive',
+  slate: 'bg-muted text-foreground',
 };
 
 export default function InteligenciaFinanceiraJornada({ tratativas, colaboradores, params }) {
@@ -78,76 +78,76 @@ export default function InteligenciaFinanceiraJornada({ tratativas, colaboradore
       <Card className="border-0 shadow-sm">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base">
-            <DollarSign className="w-5 h-5 text-red-600" />
+            <DollarSign className="w-5 h-5 text-destructive" />
             Impacto Financeiro Total Consolidado
           </CardTitle>
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-muted-foreground">
             Fórmula: Valor Devolvido + Custo Operacional (horas × custo/hora × encargos) + Perda de Receita + Risco Reputacional + Retrabalho.
           </p>
         </CardHeader>
         <CardContent>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-5">
-            <div className="p-4 rounded-lg bg-red-50 border border-red-200">
-              <p className="text-xs font-semibold text-red-600 uppercase">Impacto Total</p>
-              <p className="text-2xl font-bold text-red-700 mt-1">{formatBRL(impactoTotal.total)}</p>
+            <div className="p-4 rounded-lg bg-destructive/10 border border-destructive/25">
+              <p className="text-xs font-semibold text-destructive uppercase">Impacto Total</p>
+              <p className="text-2xl font-bold text-destructive mt-1">{formatBRL(impactoTotal.total)}</p>
             </div>
-            <div className="p-4 rounded-lg bg-slate-50 border border-slate-200">
-              <p className="text-xs font-semibold text-slate-500 uppercase">Faturamento Envolvido</p>
-              <p className="text-2xl font-bold text-slate-900 mt-1">{formatBRL(impactoTotal.faturam)}</p>
+            <div className="p-4 rounded-lg bg-muted border border-border">
+              <p className="text-xs font-semibold text-muted-foreground uppercase">Faturamento Envolvido</p>
+              <p className="text-2xl font-bold text-foreground mt-1">{formatBRL(impactoTotal.faturam)}</p>
             </div>
-            <div className="p-4 rounded-lg bg-amber-50 border border-amber-200">
-              <p className="text-xs font-semibold text-amber-600 uppercase">% sobre Faturamento Ref.</p>
-              <p className="text-2xl font-bold text-amber-700 mt-1">{pctFaturamento.toFixed(1)}%</p>
+            <div className="p-4 rounded-lg bg-warning-soft border border-warning/25">
+              <p className="text-xs font-semibold text-warning uppercase">% sobre Faturamento Ref.</p>
+              <p className="text-2xl font-bold text-warning mt-1">{pctFaturamento.toFixed(1)}%</p>
             </div>
-            <div className="p-4 rounded-lg bg-slate-50 border border-slate-200">
-              <p className="text-xs font-semibold text-slate-500 uppercase">Tolerância</p>
-              <p className="text-2xl font-bold text-slate-900 mt-1">{formatBRL(toleranciaReais)}</p>
+            <div className="p-4 rounded-lg bg-muted border border-border">
+              <p className="text-xs font-semibold text-muted-foreground uppercase">Tolerância</p>
+              <p className="text-2xl font-bold text-foreground mt-1">{formatBRL(toleranciaReais)}</p>
               <Badge className={`mt-1 ${RISCO_BADGE_CORES[riscoGeral.cor] || RISCO_BADGE_CORES.slate}`}>Risco {riscoGeral.label}</Badge>
             </div>
           </div>
 
           {/* Decomposição do impacto */}
           <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-3">
-            <div className="p-3 rounded-lg border border-slate-200 bg-white">
-              <p className="text-[11px] text-slate-500 uppercase">Valor Devolvido</p>
-              <p className="text-lg font-bold text-red-600">{formatBRL(impactoTotal.devolvido)}</p>
+            <div className="p-3 rounded-lg border border-border bg-card">
+              <p className="text-[11px] text-muted-foreground uppercase">Valor Devolvido</p>
+              <p className="text-lg font-bold text-destructive">{formatBRL(impactoTotal.devolvido)}</p>
             </div>
-            <div className="p-3 rounded-lg border border-slate-200 bg-white">
-              <p className="text-[11px] text-slate-500 uppercase">Custo Operacional</p>
-              <p className="text-lg font-bold text-orange-600">{formatBRL(impactoTotal.custoOp)}</p>
+            <div className="p-3 rounded-lg border border-border bg-card">
+              <p className="text-[11px] text-muted-foreground uppercase">Custo Operacional</p>
+              <p className="text-lg font-bold text-critical">{formatBRL(impactoTotal.custoOp)}</p>
             </div>
-            <div className="p-3 rounded-lg border border-slate-200 bg-white">
-              <p className="text-[11px] text-slate-500 uppercase">Perda de Receita</p>
-              <p className="text-lg font-bold text-pink-600">{formatBRL(impactoTotal.perdaRec)}</p>
+            <div className="p-3 rounded-lg border border-border bg-card">
+              <p className="text-[11px] text-muted-foreground uppercase">Perda de Receita</p>
+              <p className="text-lg font-bold text-primary">{formatBRL(impactoTotal.perdaRec)}</p>
             </div>
-            <div className="p-3 rounded-lg border border-slate-200 bg-white">
-              <p className="text-[11px] text-slate-500 uppercase">Risco Reputacional</p>
-              <p className="text-lg font-bold text-purple-600">{formatBRL(impactoTotal.riscoRep)}</p>
+            <div className="p-3 rounded-lg border border-border bg-card">
+              <p className="text-[11px] text-muted-foreground uppercase">Risco Reputacional</p>
+              <p className="text-lg font-bold text-primary">{formatBRL(impactoTotal.riscoRep)}</p>
             </div>
-            <div className="p-3 rounded-lg border border-slate-200 bg-white">
-              <p className="text-[11px] text-slate-500 uppercase">Retrabalho</p>
-              <p className="text-lg font-bold text-amber-600">{formatBRL(impactoTotal.retrab)}</p>
+            <div className="p-3 rounded-lg border border-border bg-card">
+              <p className="text-[11px] text-muted-foreground uppercase">Retrabalho</p>
+              <p className="text-lg font-bold text-warning">{formatBRL(impactoTotal.retrab)}</p>
             </div>
           </div>
 
           {/* Benchmarks */}
           <div className="mt-5 pt-4 border-t">
-            <p className="text-sm font-semibold text-slate-700 mb-3">Comparação com Benchmarks de Mercado</p>
+            <p className="text-sm font-semibold text-foreground mb-3">Comparação com Benchmarks de Mercado</p>
             <div className="grid sm:grid-cols-3 gap-4">
-              <div className="p-4 rounded-lg bg-slate-50 border border-slate-200">
-                <p className="text-xs font-semibold text-slate-500 uppercase">{BENCHMARKS_GLOBAIS.mckinsey.label}</p>
-                <p className="text-lg font-bold text-slate-900 mt-1">{BENCHMARKS_GLOBAIS.mckinsey.min}%–{BENCHMARKS_GLOBAIS.mckinsey.max}%</p>
-                <p className="text-[11px] text-slate-500 mt-1">{BENCHMARKS_GLOBAIS.mckinsey.descricao}</p>
+              <div className="p-4 rounded-lg bg-muted border border-border">
+                <p className="text-xs font-semibold text-muted-foreground uppercase">{BENCHMARKS_GLOBAIS.mckinsey.label}</p>
+                <p className="text-lg font-bold text-foreground mt-1">{BENCHMARKS_GLOBAIS.mckinsey.min}%–{BENCHMARKS_GLOBAIS.mckinsey.max}%</p>
+                <p className="text-[11px] text-muted-foreground mt-1">{BENCHMARKS_GLOBAIS.mckinsey.descricao}</p>
               </div>
-              <div className="p-4 rounded-lg bg-slate-50 border border-slate-200">
-                <p className="text-xs font-semibold text-slate-500 uppercase">{BENCHMARKS_GLOBAIS.gartner.label}</p>
-                <p className="text-lg font-bold text-slate-900 mt-1">{BENCHMARKS_GLOBAIS.gartner.valor}%</p>
-                <p className="text-[11px] text-slate-500 mt-1">{BENCHMARKS_GLOBAIS.gartner.descricao}</p>
+              <div className="p-4 rounded-lg bg-muted border border-border">
+                <p className="text-xs font-semibold text-muted-foreground uppercase">{BENCHMARKS_GLOBAIS.gartner.label}</p>
+                <p className="text-lg font-bold text-foreground mt-1">{BENCHMARKS_GLOBAIS.gartner.valor}%</p>
+                <p className="text-[11px] text-muted-foreground mt-1">{BENCHMARKS_GLOBAIS.gartner.descricao}</p>
               </div>
-              <div className="p-4 rounded-lg bg-slate-50 border border-slate-200">
-                <p className="text-xs font-semibold text-slate-500 uppercase">{BENCHMARKS_GLOBAIS.copq.label}</p>
-                <p className="text-lg font-bold text-slate-900 mt-1">{BENCHMARKS_GLOBAIS.copq.min}%–{BENCHMARKS_GLOBAIS.copq.max}%</p>
-                <p className="text-[11px] text-slate-500 mt-1">{BENCHMARKS_GLOBAIS.copq.descricao}</p>
+              <div className="p-4 rounded-lg bg-muted border border-border">
+                <p className="text-xs font-semibold text-muted-foreground uppercase">{BENCHMARKS_GLOBAIS.copq.label}</p>
+                <p className="text-lg font-bold text-foreground mt-1">{BENCHMARKS_GLOBAIS.copq.min}%–{BENCHMARKS_GLOBAIS.copq.max}%</p>
+                <p className="text-[11px] text-muted-foreground mt-1">{BENCHMARKS_GLOBAIS.copq.descricao}</p>
               </div>
             </div>
           </div>
@@ -179,7 +179,7 @@ export default function InteligenciaFinanceiraJornada({ tratativas, colaboradore
                 key={key}
                 onClick={() => setSubDim(key)}
                 className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                  subDim === key ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  subDim === key ? 'bg-primary text-white' : 'bg-muted text-muted-foreground hover:bg-muted'
                 }`}
               >
                 {cfg.label}

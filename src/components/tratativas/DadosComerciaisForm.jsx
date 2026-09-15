@@ -22,7 +22,7 @@ const MODALIDADES = ['Mensal', 'Trimestral', 'Semestral', 'Anual'];
 // são calculados dinamicamente pela aplicação, nunca persistidos.
 export default function DadosComerciaisForm({ formData, setFormData }) {
   return (
-    <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-lg space-y-4">
+    <div className="p-4 bg-success-soft border border-emerald-200 rounded-lg space-y-4">
       <h4 className="font-semibold text-emerald-900 flex items-center gap-2">
         <Building2 className="w-4 h-4" />
         Dados Comerciais do Cliente
@@ -99,7 +99,7 @@ export default function DadosComerciaisForm({ formData, setFormData }) {
             onChange={(e) => setFormData({ ...formData, data_primeira_contratacao: e.target.value })}
             className="mt-1"
           />
-          <p className="text-xs text-emerald-700 mt-1">
+          <p className="text-xs text-success mt-1">
             Início do relacionamento comercial do cliente com a empresa.
           </p>
         </div>
@@ -111,13 +111,13 @@ export default function DadosComerciaisForm({ formData, setFormData }) {
             onChange={(e) => setFormData({ ...formData, data_contratacao_plano_atual: e.target.value })}
             className="mt-1"
           />
-          <p className="text-xs text-emerald-700 mt-1">
+          <p className="text-xs text-success mt-1">
             Aderiu ao plano atual (permite identificar upgrades/downgrades).
           </p>
         </div>
       </div>
 
-      <p className="text-xs text-emerald-700">
+      <p className="text-xs text-success">
         O Tempo de Relacionamento (em meses) é calculado automaticamente a partir da Data da Primeira Contratação.
         Receitas mensal e anual equivalentes são derivadas da modalidade e do valor da contratação do plano atual.
       </p>

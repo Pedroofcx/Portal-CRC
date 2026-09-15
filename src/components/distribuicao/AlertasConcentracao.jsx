@@ -65,7 +65,7 @@ export default function AlertasConcentracao({ agentes, distribuicoes }) {
   }, [agentes, distribuicoes]);
 
   if (alertasGlobais.length === 0) return (
-    <div className="p-3 bg-green-50 border border-green-200 rounded-lg flex items-center gap-2 text-sm text-green-700">
+    <div className="p-3 bg-success-soft border border-success/25 rounded-lg flex items-center gap-2 text-sm text-success">
       <span></span>
       <span>Nenhum alerta de concentração operacional identificado.</span>
     </div>
@@ -76,14 +76,14 @@ export default function AlertasConcentracao({ agentes, distribuicoes }) {
       {alertasGlobais.map((al, i) => {
         const Icon = al.icon;
         const colors = {
-          critico: 'bg-red-50 border-red-200 text-red-800',
-          atencao: 'bg-amber-50 border-amber-200 text-amber-800',
-          info: 'bg-blue-50 border-blue-200 text-blue-800',
+          critico: 'bg-destructive/10 border-destructive/25 text-destructive',
+          atencao: 'bg-warning-soft border-warning/25 text-warning',
+          info: 'bg-info-soft border-info/25 text-primary',
         };
         const iconColors = {
-          critico: 'text-red-500',
-          atencao: 'text-amber-500',
-          info: 'text-blue-500',
+          critico: 'text-destructive',
+          atencao: 'text-warning',
+          info: 'text-primary',
         };
         return (
           <div key={i} className={`flex items-start gap-2 p-3 rounded-lg border text-xs ${colors[al.tipo]}`}>

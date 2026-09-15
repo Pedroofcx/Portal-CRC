@@ -187,9 +187,9 @@ export default function DocumentacaoTecnica() {
 
   return (
     <div className="space-y-6">
-      <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg flex items-start gap-3">
-        <FileText className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
-        <p className="text-sm text-blue-800">
+      <div className="p-4 bg-info-soft border border-info/25 rounded-lg flex items-start gap-3">
+        <FileText className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
+        <p className="text-sm text-primary">
           Documentação técnica de todos os módulos do sistema: objetivo, páginas/componentes, entidades,
           fluxo de negócio, campos-chave e integrações entre módulos. Use como referência ao planejar
           novas funcionalidades ou repassar contexto a um consultor.
@@ -198,7 +198,7 @@ export default function DocumentacaoTecnica() {
 
       <div className="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
         <div className="relative w-full sm:max-w-sm">
-          <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+          <Search className="w-4 h-4 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2" />
           <Input
             value={busca}
             onChange={(e) => setBusca(e.target.value)}
@@ -223,7 +223,7 @@ export default function DocumentacaoTecnica() {
         if (modulosDaCategoria.length === 0) return null;
         return (
           <div key={categoria}>
-            <h3 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-2">{categoria}</h3>
+            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-2">{categoria}</h3>
             <Accordion type="multiple" className="space-y-0">
               {modulosDaCategoria.map((modulo) => (
                 <ModuloDocCard key={modulo.id} modulo={modulo} />
@@ -234,7 +234,7 @@ export default function DocumentacaoTecnica() {
       })}
 
       {modulosFiltrados.length === 0 && (
-        <p className="text-center text-slate-500 py-10">Nenhum módulo encontrado para "{busca}"</p>
+        <p className="text-center text-muted-foreground py-10">Nenhum módulo encontrado para "{busca}"</p>
       )}
     </div>
   );
