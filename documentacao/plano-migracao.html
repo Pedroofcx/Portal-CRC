@@ -627,13 +627,13 @@
           <span class="n">02</span><span class="nome">Adaptador</span>
           <span class="est">Concluída</span>
         </div>
-        <div class="etapa agora">
+        <div class="etapa feita">
           <span class="n">03</span><span class="nome">Segurança</span>
-          <span class="est">Em teste</span>
+          <span class="est">Concluída</span>
         </div>
-        <div class="etapa espera">
+        <div class="etapa agora">
           <span class="n">04</span><span class="nome">Regras no servidor</span>
-          <span class="est">A fazer</span>
+          <span class="est">Próxima</span>
         </div>
         <div class="etapa espera">
           <span class="n">05</span><span class="nome">Frontend</span>
@@ -648,9 +648,16 @@
         <strong>O Portal CRC já roda fora do Base44.</strong> Banco próprio com as
         48 tabelas, adaptador no lugar do SDK, login próprio — que o sistema nunca
         teve, porque no Base44 a tela de login era da plataforma — e as regras de
-        acesso aplicadas. Falta o teste de invasão para dar a Fase 03 por fechada.
-        A Fase 00 continua sendo o único item verdadeiramente travado: o acesso ao
-        construtor do Base44 foi perdido, e sem ele o histórico não sai de lá.
+        acesso fechadas: <strong>9 de 9 testes de invasão passando</strong>, feitos
+        com a mesma chave que vai no navegador dos usuários, sem atalho de
+        administrador. O salário, que no sistema antigo chegava ao navegador de
+        todo agente barrado só por um <code>if</code> no React, agora é invisível
+        no próprio banco.
+        <br><br>
+        A Fase 00 é o único item travado: o acesso ao construtor do Base44 foi
+        perdido e sem ele o histórico não sai de lá. Isso não impediu nada até
+        agora — mas a Fase 04 precisa de dados reais para validar cálculo de SLA
+        e de pontuação contra o comportamento antigo.
       </p>
     </div>
 
