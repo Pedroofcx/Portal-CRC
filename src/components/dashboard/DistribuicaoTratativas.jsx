@@ -14,6 +14,7 @@ import CardAgenteEquidade from '@/components/distribuicao/CardAgenteEquidade';
 import RodizioAssistido from '@/components/distribuicao/RodizioAssistido';
 import AlertasConcentracao from '@/components/distribuicao/AlertasConcentracao';
 import DialogNovaAtribuicao from '@/components/distribuicao/DialogNovaAtribuicao';
+import db from '@/api/db';
 import {
   TIPOS_CONFIG, calcularSaturacao,
   calcularPesoOperacional

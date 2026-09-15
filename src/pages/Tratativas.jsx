@@ -30,7 +30,9 @@ import {
   Filter,
   ExternalLink,
   Eye,
-  Archive
+  Archive,
+  Columns2,
+  Rows3
 } from 'lucide-react';
 import ImportExportCSV from '@/components/tratativas/ImportExportCSV';
 import AdminBulkActions from '@/components/tratativas/AdminBulkActions';
