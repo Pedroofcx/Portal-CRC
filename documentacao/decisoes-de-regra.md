@@ -69,6 +69,48 @@ pergunta diferente.
 
 ---
 
+## Custo operacional — divisão pela carga simultânea (15/09/2026)
+
+**Decisão:** o custo de uma tratativa é dividido pelo número de tratativas que
+o mesmo agente tinha em atendimento ao mesmo tempo.
+
+**Por que foi preciso.** Quando o custo saiu do zero pela primeira vez, o
+número apareceu: R$ 683.446 no total, **125 horas efetivas por tratativa**.
+São mais de 15 dias úteis de alguém dedicado a uma única reclamação — o que
+não descreve a operação.
+
+O que a conta media não era tempo trabalhado, e sim tempo no estado
+`em_andamento`. Uma tratativa fica nesse estado durante dias enquanto o agente
+atende outras ao mesmo tempo. A premissa de dedicação exclusiva veio herdada
+do Base44 e só ficou visível quando o número deixou de ser zero.
+
+**A carga medida nos dados reais:**
+
+| Agente | Tratativas | Horas ativas | Carga simultânea | Pico |
+|---|---|---|---|---|
+| Sirlene | 102 | 5.306 | 6,65 | 12 |
+| Dayane | 103 | 3.977 | 1,74 | 5 |
+| Bárbara | 76 | 3.071 | 1,47 | 6 |
+| Ana Flávia | 68 | 767 | 1,03 | 2 |
+
+**Efeito:** custo total de R$ 683.446 para ~R$ 212.679 — redução de 69%.
+
+**A RESSALVA, que precisa andar junto com o número.** A carga simultânea é
+deduzida de **como cada pessoa usa o sistema**, não de quanto ela trabalha.
+Ana Flávia tem carga 1,03 porque encerra e passa ao próximo; Sirlene tem 6,65
+porque deixa vários abertos em paralelo. Isso muda o custo por tratativa de
+cada uma sem que nenhuma tenha trabalhado mais ou menos.
+
+O número ficou muito mais defensável que antes, mas continua sendo uma
+**estimativa de ocupação, não uma medição de esforço**. Medir esforço de
+verdade exigiria cronômetro na tratativa — preciso, porém com custo para quem
+opera.
+
+**Onde vive:** `supabase/migrations/11_custo_por_carga_simultanea.sql`.
+`npm run analisar-carga` remede a carga a partir dos dados a qualquer momento.
+
+---
+
 ## Custo operacional — salário ausente (15/09/2026)
 
 **Decisão:** salário não cadastrado resulta em custo zero e aviso na tela, não
