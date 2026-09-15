@@ -164,7 +164,7 @@ export default function Pesquisas() {
 
   const clonarMutation = useMutation({
     mutationFn: (pesquisa) => {
-      const { id, created_date, updated_date, created_by, publicada, data_publicacao, reenviar_timestamp, ...dadosPesquisa } = pesquisa;
+      const { _id, _created_date, _updated_date, _created_by, _publicada, _data_publicacao, _reenviar_timestamp, ...dadosPesquisa } = pesquisa;
       return db.entities.Pesquisa.create({
         ...dadosPesquisa,
         titulo: `${pesquisa.titulo} (Cópia)`,
@@ -174,12 +174,12 @@ export default function Pesquisas() {
         criado_por_nome: user?.full_name
       });
     },
-    onSuccess: (nova) => {
+    onSuccess: (_nova) => {
       queryClient.invalidateQueries(['pesquisas']);
       toast.success('Pesquisa clonada! Você pode editá-la agora.');
       // Após clonar, abrir para edição
       setTimeout(() => {
-        queryClient.fetchQuery({ queryKey: ['pesquisas'], queryFn: () => db.entities.Pesquisa.filter({ ativa: true }, '-created_date') }).then(lista => {
+        queryClient.fetchQuery({ queryKey: ['pesquisas'], queryFn: () => db.entities.Pesquisa.filter({ ativa: true }, '-created_date') }).then(_lista => {
           // Recarregar e abrir edição não é trivial sem o id novo, então apenas notificamos
         });
       }, 500);
@@ -725,7 +725,7 @@ export default function Pesquisas() {
               {selectedPesquisa.descricao && (
                 <p className="text-sm text-muted-foreground">{selectedPesquisa.descricao}</p>
               )}
-              {selectedPesquisa.perguntas?.map((pergunta, index) => (
+              {selectedPesquisa.perguntas?.map((pergunta, _index) => (
                 <Card key={pergunta.id}>
                   <CardContent className="p-4 space-y-2">
                     <Label className="flex items-center gap-2">

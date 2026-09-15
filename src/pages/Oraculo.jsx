@@ -24,7 +24,6 @@ import { toast } from 'sonner';
 export default function OraculoPage() {
   const [showWizard, setShowWizard] = useState(false);
   const [colaboradorSelecionado, setColaboradorSelecionado] = useState(null);
-  const [filtroColaborador, setFiltroColaborador] = useState('todos');
   const queryClient = useQueryClient();
 
   // Dados do usuário
@@ -234,10 +233,6 @@ export default function OraculoPage() {
       </div>
     );
   }
-
-  const colaboradoresFiltrados = filtroColaborador === 'todos' 
-    ? colaboradores 
-    : colaboradores.filter(c => c.id === filtroColaborador);
 
   return (
     <div className="min-h-screen p-6 bg-muted">

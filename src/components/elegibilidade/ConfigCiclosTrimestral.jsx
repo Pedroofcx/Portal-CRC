@@ -12,7 +12,7 @@ import { toast } from 'sonner';
 import { Plus, Trash2, CalendarDays, CheckCircle2, Circle } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 
-const MESES = [
+const _MESES = [
   '01','02','03','04','05','06','07','08','09','10','11','12'
 ];
 const MESES_LABEL = {

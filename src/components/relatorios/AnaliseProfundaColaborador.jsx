@@ -42,7 +42,7 @@ export default function AnaliseProfundaColaborador({
   apuracoes = [],
   observacoes = [],
   tratativas = [],
-  pontuacoes = [],
+  _pontuacoes = [],
   respostasPesquisas = [],
   pesquisas = [],
   oraculoLancamentos = []

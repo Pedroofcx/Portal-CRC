@@ -95,7 +95,7 @@ const menuItems = [
   }
 ];
 
-function Sidebar({ user, colaborador, currentPageName, onNavigate, isMobile = false, permissoesModulo = [], recolhido = false, onAlternar }) {
+function Sidebar({ _user, colaborador, currentPageName, onNavigate, isMobile = false, permissoesModulo = [], recolhido = false, onAlternar }) {
   const isGestor = colaborador?.papel === 'gestor';
   const isFI = colaborador?.is_facilitador_interno;
 
@@ -228,7 +228,7 @@ export default function Layout({ children, currentPageName }) {
     });
   };
   const [showWelcome, setShowWelcome] = useState(false);
-  const navigate = useNavigate();
+  const _navigate = useNavigate();
   const queryClient = useQueryClient();
 
   // Expor queryClient globalmente para ErrorBoundary

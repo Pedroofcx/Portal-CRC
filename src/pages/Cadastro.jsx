@@ -441,7 +441,7 @@ export default function Cadastro() {
                                 setFormData({ ...formData, foto_url: result.file_url });
                                 setImageUrlValidation({ valid: true, message: 'Upload realizado com sucesso' });
                                 toast.success('Foto enviada!');
-                              } catch (error) {
+                              } catch (_error) {
                                 toast.error('Erro ao fazer upload');
                               }
                             }}
@@ -818,7 +818,7 @@ export default function Cadastro() {
                             setFormData({ ...formData, foto_url: result.file_url });
                             setImageUrlValidation({ valid: true, message: 'Upload realizado com sucesso' });
                             toast.success('Foto enviada!');
-                          } catch (error) {
+                          } catch (_error) {
                             toast.error('Erro ao fazer upload');
                           }
                         }}

@@ -5,7 +5,7 @@ import { formatDateSP } from '@/components/utils/helpers';
 
 export default function CardsAcompanhamento({
   titulo,
-  icon: Icon,
+  icon: _Icon,
   ultimoAcionado,
   proximo,
   totalCadastrados,
@@ -13,7 +13,7 @@ export default function CardsAcompanhamento({
   totalAcionamentosCiclo,
   acionamentosPorPessoa,
   naoAcionadosCount,
-  statusLabels,
+  _statusLabels,
 }) {
   return (
     <div className="space-y-3">

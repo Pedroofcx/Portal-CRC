@@ -75,7 +75,7 @@ export default function ConfigCategoriasTratativa() {
     e.preventDefault();
     
     // Validação: deve ter pelo menos 2 categorias ativas
-    const ativasCount = categorias.filter(c => c.ativa).length;
+    const _ativasCount = categorias.filter(c => c.ativa).length;
     if (editingCategoria) {
       updateMutation.mutate({ id: editingCategoria.id, data: formData });
     } else {

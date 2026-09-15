@@ -35,7 +35,7 @@ export default function CalendarioLimpo({
   onMesPosterior, 
   onHoje,
   atribuicoes,
-  equipes
+  _equipes
 }) {
   const getDiasDoMes = (data) => {
     const ano = data.getFullYear();

@@ -39,7 +39,7 @@ const modulosDisponiveis = [
 ];
 
 export default function ConfigPermissoes() {
-  const [selectedColaboradores, setSelectedColaboradores] = useState([]);
+  const [_selectedColaboradores, _setSelectedColaboradores] = useState([]);
   const queryClient = useQueryClient();
 
   const { data: user } = useQuery({

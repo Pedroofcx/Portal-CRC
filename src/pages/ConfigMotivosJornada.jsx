@@ -70,7 +70,7 @@ export default function ConfigMotivosJornada() {
     },
   });
 
-  const createEtapaMutation = useMutation({
+  const _createEtapaMutation = useMutation({
     mutationFn: (data) => db.entities.EtapaJornada.create(data),
     onSuccess: () => {
       queryClient.invalidateQueries(['etapas-jornada']);

@@ -79,7 +79,7 @@ export default function AgenteN2Config() {
     onError: () => toast({ title: 'Erro ao salvar', variant: 'destructive' }),
   });
 
-  const removerMutation = useMutation({
+  const _removerMutation = useMutation({
     mutationFn: async (agente) => {
       await db.entities.AgenteN2.update(agente.id, { ativo: false });
       await logAuditoria('excluir', agente.id, agente, { ativo: false });

@@ -176,7 +176,7 @@ export function classificarRisco(totalImpacto, toleranciaReais) {
 
 // ── Gera respostas automáticas para perguntas estratégicas ──
 export function gerarPerguntasEstrategicas(tratativas, colaboradores, params) {
-  const colabMap = (colaboradores || []).reduce((acc, c) => { acc[c.id] = c; return acc; }, {});
+  const _colabMap = (colaboradores || []).reduce((acc, c) => { acc[c.id] = c; return acc; }, {});
   const respostas = [];
 
   // 1. Qual etapa gera mais perdas?
@@ -246,7 +246,7 @@ export function gerarPerguntasEstrategicas(tratativas, colaboradores, params) {
   // 6. Quanto dinheiro pode ser recuperado?
   const recuperavel = tratativas.reduce((acc, t) => {
     const recuperado = parseFloat(t.valor_recuperado) || 0;
-    const contestado = parseFloat(t.valor_contestado_inicial) || 0;
+    const _contestado = parseFloat(t.valor_contestado_inicial) || 0;
     const devolvido = parseFloat(t.valor_devolvido_cliente) || 0;
     // O que foi devolvido mas não recuperado é potencial de recuperação futura
     return acc + Math.max(0, devolvido - recuperado);

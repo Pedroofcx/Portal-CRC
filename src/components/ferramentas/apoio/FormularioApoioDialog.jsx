@@ -29,7 +29,7 @@ export default function FormularioApoioDialog({ open, onOpenChange, onSubmit, di
 
   useEffect(() => {
     if (open && user?.full_name) {
-      setForm(f => ({ ...FORM_VAZIO, operador_nome: user.full_name, data_solicitacao: new Date().toISOString().split('T')[0] }));
+      setForm(_f => ({ ...FORM_VAZIO, operador_nome: user.full_name, data_solicitacao: new Date().toISOString().split('T')[0] }));
     }
     if (!open) setForm(FORM_VAZIO);
   }, [open, user]);

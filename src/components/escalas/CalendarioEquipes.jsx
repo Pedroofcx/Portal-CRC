@@ -32,7 +32,7 @@ export default function CalendarioEquipes({
   onHoje,
   atribuicoes,
   colaboradores,
-  equipes,
+  _equipes,
   onDiaClick
 }) {
   const getDiasDoMes = (data) => {

@@ -55,6 +55,12 @@ export default [
           varsIgnorePattern: "^_",
           args: "after-used",
           argsIgnorePattern: "^_",
+          // O ESLint 9 trata o parâmetro do catch separadamente de vars e
+          // args. Sem esta linha, `catch (_error)` continua sendo cobrado,
+          // e o prefixo _ — que é justamente a convenção do projeto para
+          // "existe e não é usado de propósito" — não vale ali.
+          caughtErrors: "all",
+          caughtErrorsIgnorePattern: "^_",
         },
       ],
       "react/prop-types": "off",

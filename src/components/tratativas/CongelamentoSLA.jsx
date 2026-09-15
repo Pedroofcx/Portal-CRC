@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Snowflake, Play, AlertTriangle } from 'lucide-react';
 import { formatDateSP } from '@/components/utils/helpers';
 
-export default function CongelamentoSLA({ tratativa, user, onCongelar, onDescongelar, isLoading }) {
+export default function CongelamentoSLA({ tratativa, _user, onCongelar, onDescongelar, isLoading }) {
   const [dataDefesa, setDataDefesa] = useState('');
   const [showForm, setShowForm] = useState(false);
 

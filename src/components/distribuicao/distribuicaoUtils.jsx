@@ -22,7 +22,7 @@ const LIMIAR_CRITICO  = 85;
  * Calcula o índice de saturação operacional (0-100) de um agente
  * baseado em: volume, tickets críticos, canais prioritários, diversidade
  */
-export function calcularSaturacao(agenteId, distribuicoes, tratativasAtivas) {
+export function calcularSaturacao(agenteId, distribuicoes, _tratativasAtivas) {
   const minhas = distribuicoes.filter(d => d.agente_id === agenteId);
   // Calcular data de corte uma única vez fora do filter
   const ultimos7dias = new Date(Date.now() - 7 * 86400000).toISOString().split('T')[0];

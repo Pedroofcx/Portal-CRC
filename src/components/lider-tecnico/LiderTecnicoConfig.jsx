@@ -77,7 +77,7 @@ export default function LiderTecnicoConfig() {
     onError: () => toast({ title: 'Erro ao salvar', variant: 'destructive' }),
   });
 
-  const removerMutation = useMutation({
+  const _removerMutation = useMutation({
     mutationFn: async (lider) => {
       await db.entities.LiderTecnico.update(lider.id, { ativo: false });
       await logAuditoria('excluir', lider.id, lider, { ativo: false });

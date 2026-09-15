@@ -74,7 +74,7 @@ export default function HomeOfficeEscolha() {
     queryFn: () => db.entities.ConfiguracaoHomeOffice.list(),
   });
 
-  const { data: atribuicoes = [] } = useQuery({
+  const { data: _atribuicoes = [] } = useQuery({
     queryKey: ['escalaAtribuicoes'],
     queryFn: () => db.entities.EscalaAtribuicao.list(),
   });

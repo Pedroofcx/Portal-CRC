@@ -345,7 +345,7 @@ export default function Tratativas() {
     setNumeroOcorrencias(0);
   };
 
-  const categoriaContestacaoLabels = {
+  const _categoriaContestacaoLabels = {
     erro_cobranca: 'Erro de Cobrança',
     fraude: 'Fraude',
     cancelamento_compra: 'Cancelamento de Compra',

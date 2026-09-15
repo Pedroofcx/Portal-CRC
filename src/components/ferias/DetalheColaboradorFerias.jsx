@@ -162,7 +162,7 @@ function RegistrarFeriasDialog({ open, onOpenChange, ciclos, onSalvar, loading }
 
 // ── Componente Principal ─────────────────────────────────────────────────────
 
-export default function DetalheColaboradorFerias({ colaborador, ciclos, onBack, onAdicionarFragmento, onRemoverFragmento, onEditarCiclo, onDeletarCiclo, loadingMutation }) {
+export default function DetalheColaboradorFerias({ colaborador, ciclos, onBack, onAdicionarFragmento, onRemoverFragmento, _onEditarCiclo, onDeletarCiclo, loadingMutation }) {
   const [dialogFerias, setDialogFerias] = useState(false);
 
   const ciclosOrdenados = [...ciclos].sort((a, b) =>

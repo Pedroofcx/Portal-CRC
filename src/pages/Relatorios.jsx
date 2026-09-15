@@ -97,7 +97,7 @@ export default function Relatorios() {
     colaboradores.find(c => c.email === currentUser?.email),
     [colaboradores, currentUser]
   );
-  const isGestor = colaboradorAtual?.papel === 'gestor';
+  const _isGestor = colaboradorAtual?.papel === 'gestor';
 
   const isGestorCheck = useMemo(() => colaboradorAtual?.papel === 'gestor', [colaboradorAtual]);
 

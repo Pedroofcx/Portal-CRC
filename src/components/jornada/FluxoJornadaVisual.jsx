@@ -15,7 +15,7 @@ import {
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Progress } from '@/components/ui/progress';
 
-export default function FluxoJornadaVisual({ etapas = [], tratativas = [], motivos = [] }) {
+export default function FluxoJornadaVisual({ etapas = [], tratativas = [], _motivos = [] }) {
   const [etapaSelecionada, setEtapaSelecionada] = useState(null);
   const [mostrarDetalhes, setMostrarDetalhes] = useState(false);
 

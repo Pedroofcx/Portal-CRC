@@ -232,9 +232,6 @@ export default function Dashboard() {
   );
   const isGestor = colaborador?.papel === 'gestor';
 
-  // Aliases de compatibilidade (remover referências antigas)
-  const avisos = todosAvisos;
-  const avisosNaoLidos = todosAvisos;
 
   // Férias pendentes de validação para o agente atual
   const minhasferiasPendentes = React.useMemo(() => {
@@ -293,7 +290,7 @@ export default function Dashboard() {
   }, [minhasTratativas]);
 
   // Minha pontuação do trimestre atual
-  const minhaPontuacao = React.useMemo(() => {
+  const _minhaPontuacao = React.useMemo(() => {
     if (!colaborador?.id || !Array.isArray(pontuacoes)) return null;
     const trimestreAtual = getCurrentTrimester();
     return pontuacoes.find(p => 
@@ -1383,7 +1380,7 @@ export default function Dashboard() {
                 </p>
               )}
               
-              {pesquisaAtual.perguntas?.map((pergunta, index) => (
+              {pesquisaAtual.perguntas?.map((pergunta, _index) => (
                 <Card key={pergunta.id} className="border-0 shadow-sm">
                   <CardContent className="p-4 space-y-2">
                     <Label className="flex items-center gap-2 font-medium">

@@ -33,7 +33,7 @@ import {
 
 export default function Universidade() {
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [selectedCurso, setSelectedCurso] = useState(null);
+  const [_selectedCurso, setSelectedCurso] = useState(null);
   const [formData, setFormData] = useState({
     titulo: '',
     descricao: '',
@@ -151,7 +151,7 @@ export default function Universidade() {
     createCursoMutation.mutate(formData);
   };
 
-  const isInscrito = (cursoId) => minhasMatriculas.some(m => m.curso_id === cursoId);
+  const _isInscrito = (cursoId) => minhasMatriculas.some(m => m.curso_id === cursoId);
   const getMatricula = (cursoId) => minhasMatriculas.find(m => m.curso_id === cursoId);
 
   // Stats

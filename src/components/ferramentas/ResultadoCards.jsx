@@ -16,7 +16,7 @@ function MiniCard({ label, value, colorClass, icon: Icon, negative = false }) {
   );
 }
 
-function BigCard({ label, value, colorClass, icon: Icon, sublabel }) {
+function _BigCard({ label, value, colorClass, icon: Icon, sublabel }) {
   return (
     <div className={`rounded-xl border p-4 col-span-2 ${colorClass}`}>
       <div className="flex items-center justify-between mb-1">

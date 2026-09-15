@@ -14,8 +14,8 @@ export default function CalendarioModerno({
   onMesPosterior, 
   onHoje,
   atribuicoes,
-  colaboradores,
-  escalas
+  _colaboradores,
+  _escalas
 }) {
   const getDiasDoMes = (data) => {
     const ano = data.getFullYear();

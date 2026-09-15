@@ -46,7 +46,7 @@ export default function Configuracoes() {
     avaliacao_cx_minimo: ''
   });
   const [rankingVisivel, setRankingVisivel] = useState(true);
-  const [backupDialogOpen, setBackupDialogOpen] = useState(false);
+  const [_backupDialogOpen, setBackupDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deleteModulo, setDeleteModulo] = useState('');
 
@@ -161,7 +161,7 @@ export default function Configuracoes() {
       a.click();
       toast.success('Backup realizado');
       setBackupDialogOpen(false);
-    } catch (error) {
+    } catch (_error) {
       toast.error('Erro ao gerar backup');
     }
   };

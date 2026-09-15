@@ -41,7 +41,7 @@ const periodosSobrepoem = (atrib, dataInicio, dataFim) => {
 };
 
 const diasSemana = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
-const diasSemanaFull = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
+const _diasSemanaFull = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
 
 export default function Escalas() {
   const [visao, setVisao] = useState('equipes'); // 'equipes', 'calendario', 'lista'
@@ -52,8 +52,6 @@ export default function Escalas() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedEscala, setSelectedEscala] = useState(null);
   const [selectedEquipe, setSelectedEquipe] = useState(null);
-  const [colaboradoresSelecionados, setColaboradoresSelecionados] = useState([]);
-  const [periodoAtribuicao, setPeriodoAtribuicao] = useState({ inicio: '', fim: '', tipoEvento: 'presencial' });
   const [formData, setFormData] = useState({
     nome: '',
     descricao: '',
@@ -237,36 +235,11 @@ export default function Escalas() {
     createMutation.mutate(formData);
   };
 
-  const handleAtribuir = () => {
-    if (colaboradoresSelecionados.length === 0) {
-      toast.error('Selecione ao menos um colaborador');
-      return;
-    }
-    if (!periodoAtribuicao.inicio) {
-      toast.error('Defina a data de início');
-      return;
-    }
-    atribuirMutation.mutate({
-      escalaId: selectedEscala.id,
-      colaboradorIds: colaboradoresSelecionados,
-      periodo: periodoAtribuicao,
-      tipoEvento: periodoAtribuicao.tipoEvento
-    });
-  };
-
-  const toggleColaborador = (colabId) => {
-    setColaboradoresSelecionados(prev => 
-      prev.includes(colabId)
-        ? prev.filter(id => id !== colabId)
-        : [...prev, colabId]
-    );
-  };
-
   // Minhas escalas (se não for gestor)
   const minhasAtribuicoes = atribuicoes.filter(a => a.colaborador_id === colaborador?.id && a.ativa);
 
   // Funções do calendário
-  const getDiasDoMes = (data) => {
+  const _getDiasDoMes = (data) => {
     const ano = data.getFullYear();
     const mes = data.getMonth();
     const primeiroDia = new Date(ano, mes, 1);
@@ -280,7 +253,7 @@ export default function Escalas() {
     return dias;
   };
 
-  const getAtribuicoesDoDia = (data) => {
+  const _getAtribuicoesDoDia = (data) => {
     const dataStr = data.toISOString().split('T')[0];
     return atribuicoes.filter(atrib => {
       const inicio = new Date(atrib.data_inicio).toISOString().split('T')[0];

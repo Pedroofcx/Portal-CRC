@@ -100,7 +100,7 @@ export function formatarRotuloSemana(inicioSemana, numero) {
 // =====================================================
 export function calcularTelefone(dados, mapeamento) {
   const resultados = {};
-  let totalRegistrosImportados = dados.length;
+  let _totalRegistrosImportados = dados.length;
 
   dados.forEach(row => {
     const agente = (row[mapeamento.agente] || '').trim();
@@ -260,7 +260,7 @@ export function calcularTelefone(dados, mapeamento) {
     });
 
     r.consolidadoSemanal = semanasOrd.map(k => r.porSemana[k]);
-    const nS = r.consolidadoSemanal.length;
+    const _nS = r.consolidadoSemanal.length;
 
     // Totais consolidados calculados diretamente das semanas (sem média de médias)
     const totalAtendidas = r.totalAtendidas;
@@ -489,7 +489,7 @@ export function calcularCX(dados, mapeamento) {
 // =====================================================
 
 // Agrupa dados_por_data de apurações salvas por período (semanal seg→sex)
-export function agruparDadosPorSemana(dadosPorData, tipo) {
+export function agruparDadosPorSemana(dadosPorData, _tipo) {
   const semanas = {};
   (dadosPorData || []).forEach(dia => {
     const dataN = dia.data?.split('T')[0];

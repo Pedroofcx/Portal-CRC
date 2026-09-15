@@ -111,7 +111,7 @@ export default function HistoricoColaborador({
   const [filtroTipo, setFiltroTipo] = useState('todos');
   const [filtroInicio, setFiltroInicio] = useState('');
   const [filtroFim, setFiltroFim] = useState('');
-  const [filtroPDI, setFiltroPDI] = useState(false);
+  const [_filtroPDI, _setFiltroPDI] = useState(false);
   const [viewObs, setViewObs] = useState(null);
   const [deleteObs, setDeleteObs] = useState(null);
 

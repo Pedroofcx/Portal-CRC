@@ -59,7 +59,7 @@ const FSM_TRANSITIONS = {
 };
 
 // Labels para todos os status incluindo novo
-const STATUS_LABELS_EXTRA = {
+const _STATUS_LABELS_EXTRA = {
   aguardando_financeiro: 'Aguardando Retorno Financeiro'
 };
 
@@ -112,7 +112,7 @@ export default function TratativaDetalhe({ idExterno = null, embutido = false })
     motivo_reducao_acordo: ''
   });
 
-  const [diasRestantes, setDiasRestantes] = useState(null);
+  const [_diasRestantes, setDiasRestantes] = useState(null);
 
   const urlParams = new URLSearchParams(window.location.search);
   const tratativaId = idExterno || urlParams.get('id');
@@ -134,7 +134,7 @@ export default function TratativaDetalhe({ idExterno = null, embutido = false })
     queryFn: () => db.entities.EtapaJornada.filter({ ativa: true }),
   });
 
-  const { data: motivos = [] } = useQuery({
+  const { data: _motivos = [] } = useQuery({
     queryKey: ['motivos'],
     queryFn: () => db.entities.MotivoTratativa.filter({ ativo: true }),
   });

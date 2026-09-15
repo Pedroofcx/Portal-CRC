@@ -71,7 +71,7 @@ export default function MinhaPerformance() {
   const {
     totalPontos: totalPontosAgente,
     pontosCalculados,
-    pontuacaoSalva: minhaPontuacao,
+    pontuacaoSalva: _minhaPontuacao,
     detalhamentoPontos,
     tratativasEncerradas,
     trimestre,
