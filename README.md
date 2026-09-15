@@ -12,8 +12,8 @@ está no documento de migração compartilhado com o responsável pelo projeto.
 |------|-------|----------|
 | 00 | Recuperar os dados do Base44 | **Pendente** — acesso ao construtor perdido, ver trilhas abaixo |
 | 01 | Banco novo a partir dos schemas | **Concluída** — 48 tabelas aplicadas no Supabase |
-| 02 | Adaptador (`src/api/db.js`) | **Em andamento** — escrito, build passa, falta testar com dados |
-| 03 | Segurança (RLS) | Não iniciada |
+| 02 | Adaptador (`src/api/db.js`) | **Concluída** — app roda no Supabase, com login próprio |
+| 03 | Segurança (RLS) | **Em andamento** — políticas e máscaras geradas, falta aplicar |
 | 04 | Regras de negócio no servidor | Não iniciada |
 | 05 | Frontend e design | Não iniciada |
 | 06 | Publicação e backup automático | Não iniciada |
