@@ -1,0 +1,28 @@
+{
+  "name": "AvisoLeitura",
+  "type": "object",
+  "properties": {
+    "aviso_id": {
+      "type": "string",
+      "description": "ID do aviso"
+    },
+    "colaborador_id": {
+      "type": "string",
+      "description": "ID do colaborador"
+    },
+    "data_leitura": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Data/hora que leu"
+    },
+    "confirmou": {
+      "type": "boolean",
+      "default": false,
+      "description": "Clicou em 'Li e compreendi'"
+    }
+  },
+  "required": [
+    "aviso_id",
+    "colaborador_id"
+  ]
+}

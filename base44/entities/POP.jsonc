@@ -1,0 +1,79 @@
+{
+  "name": "POP",
+  "type": "object",
+  "properties": {
+    "codigo": {
+      "type": "string",
+      "description": "C\u00f3digo do POP (ex: POP-001)"
+    },
+    "titulo": {
+      "type": "string",
+      "description": "T\u00edtulo do procedimento"
+    },
+    "categoria": {
+      "type": "string",
+      "description": "Categoria do POP"
+    },
+    "objetivo": {
+      "type": "string",
+      "description": "Objetivo, contexto operacional e resultado esperado"
+    },
+    "ferramentas": {
+      "type": "string",
+      "description": "Ferramentas utilizadas no procedimento (texto livre)"
+    },
+    "criterio_qualidade": {
+      "type": "string",
+      "description": "Crit\u00e9rios de qualidade, conformidade e status Zendesk"
+    },
+    "fluxo_operacional": {
+      "type": "string",
+      "description": "Passo a passo operacional do processo"
+    },
+    "outras_informacoes": {
+      "type": "string",
+      "description": "Observa\u00e7\u00f5es, exce\u00e7\u00f5es, diretrizes e pol\u00edticas internas"
+    },
+    "raci": {
+      "type": "array",
+      "description": "Tabela RACI com responsabilidades operacionais",
+      "items": {
+        "type": "object",
+        "properties": {
+          "atividade": {
+            "type": "string"
+          },
+          "responsavel": {
+            "type": "string"
+          },
+          "aprovador": {
+            "type": "string"
+          },
+          "consultado": {
+            "type": "string"
+          },
+          "informado": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "versao": {
+      "type": "string",
+      "default": "1.0"
+    },
+    "ativo": {
+      "type": "boolean",
+      "default": true
+    },
+    "data_criacao": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "codigo",
+    "titulo",
+    "objetivo"
+  ]
+}

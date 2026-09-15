@@ -1,0 +1,54 @@
+{
+  "name": "EscalaAtribuicao",
+  "type": "object",
+  "properties": {
+    "escala_id": {
+      "type": "string",
+      "description": "ID da escala"
+    },
+    "escala_nome": {
+      "type": "string",
+      "description": "Nome da escala"
+    },
+    "colaborador_id": {
+      "type": "string",
+      "description": "ID do colaborador"
+    },
+    "colaborador_nome": {
+      "type": "string",
+      "description": "Nome do colaborador"
+    },
+    "data_inicio": {
+      "type": "string",
+      "format": "date"
+    },
+    "data_fim": {
+      "type": "string",
+      "format": "date"
+    },
+    "tipo_evento": {
+      "type": "string",
+      "enum": [
+        "home_office",
+        "presencial",
+        "hibrido",
+        "ferias",
+        "day_off",
+        "falta",
+        "treinamento",
+        "evento_especial"
+      ],
+      "default": "presencial",
+      "description": "Tipo do evento/escala"
+    },
+    "ativa": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "required": [
+    "escala_id",
+    "colaborador_id",
+    "data_inicio"
+  ]
+}

@@ -1,0 +1,71 @@
+{
+  "name": "ConfigEstorno",
+  "type": "object",
+  "properties": {
+    "nome": {
+      "type": "string"
+    },
+    "iss": {
+      "type": "number",
+      "default": 2.5
+    },
+    "pis": {
+      "type": "number",
+      "default": 0.65
+    },
+    "cofins": {
+      "type": "number",
+      "default": 3.0
+    },
+    "irpj": {
+      "type": "number",
+      "default": 4.8
+    },
+    "csll": {
+      "type": "number",
+      "default": 2.88
+    },
+    "comissao_vendedor": {
+      "type": "number",
+      "default": 4.0
+    },
+    "multa_contratual": {
+      "type": "number",
+      "default": 10.0
+    },
+    "ativa": {
+      "type": "boolean",
+      "default": true
+    },
+    "atualizado_por_nome": {
+      "type": "string"
+    },
+    "log_alteracoes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "usuario": {
+            "type": "string"
+          },
+          "campo": {
+            "type": "string"
+          },
+          "valor_anterior": {
+            "type": "number"
+          },
+          "valor_novo": {
+            "type": "number"
+          }
+        }
+      }
+    }
+  },
+  "required": [
+    "nome"
+  ]
+}

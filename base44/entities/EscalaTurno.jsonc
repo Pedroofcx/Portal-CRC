@@ -1,0 +1,137 @@
+{
+  "name": "EscalaTurno",
+  "type": "object",
+  "properties": {
+    "semana_referencia": {
+      "type": "string",
+      "description": "Semana de refer\u00eancia no formato YYYY-WW (ex: 2026-W10)"
+    },
+    "data_inicio_semana": {
+      "type": "string",
+      "format": "date",
+      "description": "Data da segunda-feira da semana"
+    },
+    "colaboradores_participantes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "IDs dos colaboradores participantes"
+    },
+    "turnos": {
+      "type": "array",
+      "description": "Distribui\u00e7\u00e3o dos turnos por dia",
+      "items": {
+        "type": "object",
+        "properties": {
+          "dia": {
+            "type": "string",
+            "enum": [
+              "segunda",
+              "terca",
+              "quarta",
+              "quinta",
+              "sexta"
+            ],
+            "description": "Dia da semana"
+          },
+          "data": {
+            "type": "string",
+            "format": "date"
+          },
+          "manha": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "colaborador_id": {
+                  "type": "string"
+                },
+                "colaborador_nome": {
+                  "type": "string"
+                },
+                "slot": {
+                  "type": "string",
+                  "enum": [
+                    "atendimento",
+                    "analise"
+                  ],
+                  "description": "Fun\u00e7\u00e3o do slot: atendimento (front) ou analise (back)"
+                },
+                "travado": {
+                  "type": "boolean",
+                  "default": false,
+                  "description": "Se true, o algoritmo n\u00e3o modifica este slot"
+                }
+              }
+            }
+          },
+          "tarde": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "colaborador_id": {
+                  "type": "string"
+                },
+                "colaborador_nome": {
+                  "type": "string"
+                },
+                "slot": {
+                  "type": "string",
+                  "enum": [
+                    "atendimento",
+                    "analise"
+                  ],
+                  "description": "Fun\u00e7\u00e3o do slot: atendimento (front) ou analise (back)"
+                },
+                "travado": {
+                  "type": "boolean",
+                  "default": false,
+                  "description": "Se true, o algoritmo n\u00e3o modifica este slot"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "gerado_por_id": {
+      "type": "string"
+    },
+    "gerado_por_nome": {
+      "type": "string"
+    },
+    "alertas": {
+      "type": "array",
+      "description": "Alertas gerados pelo algoritmo (regras relaxadas, dobras, etc)",
+      "items": {
+        "type": "object",
+        "properties": {
+          "dia": {
+            "type": "string"
+          },
+          "slot": {
+            "type": "string"
+          },
+          "mensagem": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "publicada": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se a escala foi publicada para os agentes"
+    },
+    "ativa": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "required": [
+    "semana_referencia",
+    "data_inicio_semana"
+  ]
+}

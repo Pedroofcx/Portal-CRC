@@ -1,0 +1,73 @@
+{
+  "name": "AnotacaoPessoal",
+  "type": "object",
+  "properties": {
+    "colaborador_id": {
+      "type": "string",
+      "description": "ID do colaborador propriet\u00e1rio da anota\u00e7\u00e3o"
+    },
+    "colaborador_nome": {
+      "type": "string",
+      "description": "Nome do colaborador"
+    },
+    "titulo": {
+      "type": "string",
+      "description": "T\u00edtulo da anota\u00e7\u00e3o"
+    },
+    "conteudo": {
+      "type": "string",
+      "description": "Conte\u00fado da anota\u00e7\u00e3o"
+    },
+    "tipo": {
+      "type": "string",
+      "enum": [
+        "anotacao",
+        "aviso"
+      ],
+      "default": "anotacao",
+      "description": "Tipo: anota\u00e7\u00e3o simples ou aviso com alerta"
+    },
+    "data_alerta": {
+      "type": "string",
+      "format": "date",
+      "description": "Data quando o aviso deve ser exibido (apenas para tipo 'aviso')"
+    },
+    "visualizado": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se o aviso foi visualizado"
+    },
+    "data_visualizacao": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Data/hora quando o aviso foi visualizado"
+    },
+    "cor": {
+      "type": "string",
+      "enum": [
+        "amarelo",
+        "azul",
+        "verde",
+        "rosa",
+        "roxo"
+      ],
+      "default": "amarelo",
+      "description": "Cor da anota\u00e7\u00e3o para organiza\u00e7\u00e3o visual"
+    },
+    "prioridade": {
+      "type": "string",
+      "enum": [
+        "baixa",
+        "media",
+        "alta"
+      ],
+      "default": "media",
+      "description": "N\u00edvel de prioridade"
+    }
+  },
+  "required": [
+    "colaborador_id",
+    "titulo",
+    "conteudo"
+  ]
+}

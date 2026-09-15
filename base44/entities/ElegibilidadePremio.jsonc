@@ -1,0 +1,60 @@
+{
+  "name": "ElegibilidadePremio",
+  "type": "object",
+  "properties": {
+    "nome_exigencia": {
+      "type": "string",
+      "description": "Nome da exig\u00eancia"
+    },
+    "descricao": {
+      "type": "string",
+      "description": "Descri\u00e7\u00e3o da exig\u00eancia"
+    },
+    "tipo_validacao": {
+      "type": "string",
+      "enum": [
+        "csat_minimo",
+        "performance_minima",
+        "presenca_minima",
+        "tratativas_minimas",
+        "cursos_obrigatorios",
+        "avaliacoes_cx",
+        "execucao_tratativas_categoria",
+        "volume_minimo_canal",
+        "personalizado"
+      ],
+      "description": "Tipo de valida\u00e7\u00e3o"
+    },
+    "valor_minimo": {
+      "type": "number",
+      "description": "Valor m\u00ednimo necess\u00e1rio"
+    },
+    "categorias_tratativa": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Categorias de tratativa exigidas (para tipo execucao_tratativas_categoria)"
+    },
+    "volume_minimo_canal": {
+      "type": "number",
+      "default": 4,
+      "description": "Volume m\u00ednimo de ocorr\u00eancias para um canal ser considerado na valida\u00e7\u00e3o"
+    },
+    "ativa": {
+      "type": "boolean",
+      "default": true
+    },
+    "obrigatoria": {
+      "type": "boolean",
+      "default": true
+    },
+    "ordem": {
+      "type": "number"
+    }
+  },
+  "required": [
+    "nome_exigencia",
+    "tipo_validacao"
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "name": "AgenteN2",
+  "type": "object",
+  "properties": {
+    "colaborador_id": {
+      "type": "string",
+      "description": "ID do colaborador de refer\u00eancia (n\u00e3o cria usu\u00e1rio)"
+    },
+    "colaborador_nome": {
+      "type": "string",
+      "description": "Nome do Agente N2"
+    },
+    "ordem": {
+      "type": "number",
+      "description": "Ordem no rod\u00edzio (1, 2, 3...)"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "permitido",
+        "ferias",
+        "bloqueado"
+      ],
+      "default": "permitido",
+      "description": "Status do Agente N2 no rod\u00edzio"
+    },
+    "ativo": {
+      "type": "boolean",
+      "default": true,
+      "description": "Se o agente ainda participa do rod\u00edzio"
+    }
+  },
+  "required": [
+    "colaborador_nome",
+    "ordem",
+    "status"
+  ]
+}

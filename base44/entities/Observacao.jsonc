@@ -1,0 +1,145 @@
+{
+  "name": "Observacao",
+  "type": "object",
+  "properties": {
+    "colaboradores_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "IDs dos colaboradores relacionados"
+    },
+    "colaboradores_nomes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Nomes dos colaboradores relacionados"
+    },
+    "tipo": {
+      "type": "string",
+      "description": "Tipo de observa\u00e7\u00e3o"
+    },
+    "titulo": {
+      "type": "string",
+      "description": "T\u00edtulo da observa\u00e7\u00e3o"
+    },
+    "conteudo": {
+      "type": "string",
+      "description": "Conte\u00fado detalhado"
+    },
+    "visibilidade": {
+      "type": "string",
+      "enum": [
+        "gestor",
+        "agente",
+        "ambos"
+      ],
+      "description": "Quem pode visualizar"
+    },
+    "data_registro": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Data/hora do registro"
+    },
+    "autor_id": {
+      "type": "string",
+      "description": "ID do autor"
+    },
+    "autor_nome": {
+      "type": "string",
+      "description": "Nome do autor"
+    },
+    "sugestao_ia_soft_skills": {
+      "type": "object",
+      "description": "Sugest\u00e3o de soft skills pela IA (1-10)",
+      "properties": {
+        "comunicacao": {
+          "type": "number"
+        },
+        "empatia": {
+          "type": "number"
+        },
+        "resiliencia": {
+          "type": "number"
+        },
+        "proatividade": {
+          "type": "number"
+        },
+        "trabalho_equipe": {
+          "type": "number"
+        }
+      }
+    },
+    "sugestao_ia_hard_skills": {
+      "type": "object",
+      "description": "Sugest\u00e3o de hard skills pela IA (1-10)",
+      "properties": {
+        "conhecimento_tecnico": {
+          "type": "number"
+        },
+        "uso_ferramentas": {
+          "type": "number"
+        },
+        "resolucao_problemas": {
+          "type": "number"
+        },
+        "organizacao": {
+          "type": "number"
+        },
+        "analise_dados": {
+          "type": "number"
+        }
+      }
+    },
+    "analise_swot": {
+      "type": "object",
+      "description": "An\u00e1lise SWOT do colaborador",
+      "properties": {
+        "forcas": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "fraquezas": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "oportunidades": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "ameacas": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "soft_skills_avaliadas": {
+      "type": "object",
+      "description": "Soft skills avaliadas manualmente (0-10)",
+      "additionalProperties": {
+        "type": "number"
+      }
+    },
+    "hard_skills_avaliadas": {
+      "type": "object",
+      "description": "Hard skills avaliadas manualmente (0-10)",
+      "additionalProperties": {
+        "type": "number"
+      }
+    }
+  },
+  "required": [
+    "colaboradores_ids",
+    "conteudo",
+    "visibilidade"
+  ]
+}

@@ -1,0 +1,186 @@
+{
+  "name": "Apuracao",
+  "type": "object",
+  "properties": {
+    "colaborador_id": {
+      "type": "string",
+      "description": "ID do colaborador"
+    },
+    "colaborador_nome": {
+      "type": "string",
+      "description": "Nome do colaborador"
+    },
+    "periodo_inicio": {
+      "type": "string",
+      "format": "date"
+    },
+    "periodo_fim": {
+      "type": "string",
+      "format": "date"
+    },
+    "modo": {
+      "type": "string",
+      "enum": [
+        "incremental",
+        "completo"
+      ],
+      "description": "Modo de apura\u00e7\u00e3o"
+    },
+    "tipo_apuracao": {
+      "type": "string",
+      "enum": [
+        "telefone",
+        "chat",
+        "cx"
+      ],
+      "description": "Tipo de apura\u00e7\u00e3o"
+    },
+    "intervalo": {
+      "type": "string",
+      "enum": [
+        "semanal",
+        "total"
+      ],
+      "description": "Intervalo da apura\u00e7\u00e3o"
+    },
+    "dados_por_data": {
+      "type": "array",
+      "description": "Dados estruturados por data (eixo de an\u00e1lise)",
+      "items": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "string",
+            "format": "date"
+          },
+          "telefone": {
+            "type": "object",
+            "properties": {
+              "total_ligacoes": {
+                "type": "number"
+              },
+              "total_atendidas": {
+                "type": "number"
+              },
+              "total_avaliadas": {
+                "type": "number"
+              },
+              "total_positivas": {
+                "type": "number"
+              },
+              "performance": {
+                "type": "number"
+              },
+              "csat": {
+                "type": "number"
+              },
+              "percentual_avaliados": {
+                "type": "number"
+              },
+              "transferencias": {
+                "type": "number"
+              }
+            }
+          },
+          "chat": {
+            "type": "object",
+            "properties": {
+              "total_chats": {
+                "type": "number"
+              },
+              "total_avaliados": {
+                "type": "number"
+              },
+              "total_positivos": {
+                "type": "number"
+              },
+              "percentual_avaliados": {
+                "type": "number"
+              },
+              "csat": {
+                "type": "number"
+              }
+            }
+          }
+        }
+      }
+    },
+    "canal_telefone": {
+      "type": "object",
+      "properties": {
+        "csat": {
+          "type": "number"
+        },
+        "fcr": {
+          "type": "number"
+        },
+        "performance": {
+          "type": "number"
+        },
+        "avaliados": {
+          "type": "number"
+        },
+        "total_atendimentos": {
+          "type": "number"
+        }
+      }
+    },
+    "canal_chat": {
+      "type": "object",
+      "properties": {
+        "csat": {
+          "type": "number"
+        },
+        "avaliados": {
+          "type": "number"
+        },
+        "total_atendimentos": {
+          "type": "number"
+        }
+      }
+    },
+    "avaliacao_cx": {
+      "type": "object",
+      "properties": {
+        "nota_media": {
+          "type": "number"
+        },
+        "total_avaliacoes": {
+          "type": "number"
+        }
+      }
+    },
+    "satisfacao_media": {
+      "type": "number",
+      "description": "M\u00e9dia de satisfa\u00e7\u00e3o"
+    },
+    "percentual_avaliados": {
+      "type": "number",
+      "description": "Percentual m\u00e9dio de avaliados"
+    },
+    "historico_detalhado": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "description": "Hist\u00f3rico detalhado da apura\u00e7\u00e3o"
+    },
+    "data_apuracao": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "apurado_por_id": {
+      "type": "string"
+    },
+    "apurado_por_nome": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "colaborador_id",
+    "periodo_inicio",
+    "periodo_fim",
+    "modo",
+    "tipo_apuracao"
+  ]
+}

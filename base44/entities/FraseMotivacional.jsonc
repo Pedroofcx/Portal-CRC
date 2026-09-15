@@ -1,0 +1,32 @@
+{
+  "name": "FraseMotivacional",
+  "type": "object",
+  "properties": {
+    "texto": {
+      "type": "string",
+      "description": "Texto da frase motivacional"
+    },
+    "autor": {
+      "type": "string",
+      "description": "Autor da frase"
+    },
+    "categoria": {
+      "type": "string",
+      "enum": [
+        "proposito",
+        "qualidade",
+        "cx",
+        "crescimento",
+        "equipe"
+      ],
+      "description": "Categoria da frase"
+    },
+    "ativa": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "required": [
+    "texto"
+  ]
+}

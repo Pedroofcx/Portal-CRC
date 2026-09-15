@@ -1,0 +1,53 @@
+{
+  "name": "OraculoPalavra",
+  "type": "object",
+  "properties": {
+    "palavra": {
+      "type": "string",
+      "description": "Palavra-chave"
+    },
+    "categoria": {
+      "type": "string",
+      "enum": [
+        "engajamento",
+        "ritmo_cadencia",
+        "comunicacao",
+        "responsabilidade",
+        "qualidade_entrega",
+        "postura_profissional",
+        "colaboracao_time",
+        "aprendizado_evolucao",
+        "organizacao_metodo",
+        "foco_prioridade"
+      ],
+      "description": "Categoria da palavra"
+    },
+    "valenca": {
+      "type": "string",
+      "enum": [
+        "positiva",
+        "neutra",
+        "atencao"
+      ],
+      "description": "Val\u00eancia sem\u00e2ntica"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "ativa",
+        "validacao"
+      ],
+      "default": "ativa",
+      "description": "Status da palavra no dicion\u00e1rio"
+    },
+    "ordem": {
+      "type": "number",
+      "description": "Ordem de exibi\u00e7\u00e3o"
+    }
+  },
+  "required": [
+    "palavra",
+    "categoria",
+    "valenca"
+  ]
+}

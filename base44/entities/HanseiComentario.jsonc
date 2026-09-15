@@ -1,0 +1,40 @@
+{
+  "name": "HanseiComentario",
+  "type": "object",
+  "properties": {
+    "hansei_envio_id": {
+      "type": "string",
+      "description": "ID do envio Hansei relacionado"
+    },
+    "colaborador_id": {
+      "type": "string",
+      "description": "ID do colaborador que comentou"
+    },
+    "colaborador_nome": {
+      "type": "string",
+      "description": "Nome do colaborador"
+    },
+    "comentario": {
+      "type": "string",
+      "description": "Coment\u00e1rio/feedback do agente sobre os resultados"
+    },
+    "sentimento": {
+      "type": "string",
+      "enum": [
+        "positivo",
+        "neutro",
+        "negativo"
+      ],
+      "description": "Sentimento do agente em rela\u00e7\u00e3o aos resultados"
+    },
+    "data_comentario": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "hansei_envio_id",
+    "colaborador_id",
+    "comentario"
+  ]
+}

@@ -1,0 +1,1166 @@
+[
+  {
+    "id": "tratativas",
+    "categoria": "Operações",
+    "nome": "Tratativas CRC",
+    "paginas": [
+      "src/pages/Tratativas.jsx",
+      "src/pages/TratativaDetalhe.jsx"
+    ],
+    "entidades": [
+      "Tratativa",
+      "MotivoTratativa",
+      "TipoTratativa",
+      "CategoriaTratativa",
+      "EtapaJornada"
+    ],
+    "objetivo": "Registro, tratamento e encerramento de ocorrências de relacionamento com o cliente (reclamações internas, Reclame Aqui, Google Meu Negócio e Contestação de Compra).",
+    "fluxo": "Máquina de estados (FSM) fixa no código (FSM_TRANSITIONS em TratativaDetalhe.jsx): registrada → tratativa_iniciada → em_andamento/dependencia_externa → encerrada. Para tipo \"reclamacao_interna\", ao encerrar o sistema desvia automaticamente para \"aguardando_confirmacao_reabertura\" por 7 dias corridos; passado o prazo (ou confirmação manual do agente via TimerReobertura), retorna para \"encerrada\" definitivo com status_reabertura = \"nao_houve\" ou \"cliente_reabriu\". Para contestações, existe o estado \"aguardando_financeiro\" controlado por congelamento de SLA (CongelamentoSLA.jsx) enquanto se aguarda retorno do setor financeiro; o desfecho final é registrado separadamente (DesfechoContestacao.jsx).",
+    "campos_chave": [
+      {
+        "campo": "id_interno",
+        "descricao": "Código sequencial TRT-XXXX gerado no cliente (Math.max dos existentes + 1) — não é atômico no servidor, risco de colisão sob concorrência."
+      },
+      {
+        "campo": "status",
+        "descricao": "Estado atual da FSM."
+      },
+      {
+        "campo": "tipo_tratativa",
+        "descricao": "reclamacao_interna | reclame_aqui | google_meu_negocio | contestacao — define quais campos e regras de pontuação se aplicam."
+      },
+      {
+        "campo": "sla_atribuido / tempo_total_minutos / encerrado_no_sla",
+        "descricao": "Controle de SLA: sla em horas, tempo total calculado como diferença entre data_inicio_tratativa e data_encerramento; encerrado_no_sla = tempo_total_minutos <= sla*60."
+      },
+      {
+        "campo": "historico_estados[]",
+        "descricao": "Log append-only de toda transição (estado_anterior, estado_novo, usuario, data, observacao) — auditável."
+      },
+      {
+        "campo": "houve_devolucao_financeira / valor_devolvido_cliente",
+        "descricao": "Obrigatório no encerramento para reclamacao_interna, reclame_aqui e google_meu_negocio."
+      },
+      {
+        "campo": "pontuacao_calculada",
+        "descricao": "Flag de controle para evitar dupla atribuição de pontos — porém a rotina que a define nunca persiste com sucesso (ver Auditoria de Pontuação)."
+      },
+      {
+        "campo": "excluida / justificativa_exclusao",
+        "descricao": "Soft delete: tratativa some de indicadores e do ranking mas permanece no banco."
+      }
+    ],
+    "regras_negocio": [
+      "Encerramento exige: etapa_jornada_id, causa_primaria, e (para os 3 tipos citados) resposta explícita sobre devolução financeira.",
+      "Contestação exige adicionalmente status_resolucao_contestacao e status_final_contestacao no encerramento.",
+      "Reabertura (reclamacao_interna): 7 dias corridos a partir de data_encerramento; se o agente confirmar \"sem reabertura\" após esse prazo, ganha +1 ponto (regra de pontuação).",
+      "Toda mudança de estado grava uma entrada em historico_estados — nunca é sobrescrito.",
+      "Tratativas com excluida=true são ignoradas em todos os indicadores, ranking e auditoria (filtro !t.excluida aplicado em todas as telas)."
+    ],
+    "integracoes": [
+      "Colaborador: agente_responsavel_id/nome referenciam o colaborador; usado no Dashboard, Ranking, Auditoria e Distribuição.",
+      "EtapaJornada / MotivoTratativa: selecionados via Configurações → Motivos & Jornada.",
+      "Pontuação (cálculo ao vivo): AuditoriaPontuacao, usePontuacaoAgente e RankingTrimestral recalculam pontos a partir dos campos da própria Tratativa via calculateTratativaPoints() (src/components/utils/helpers.jsx) — não leem nenhum valor pré-calculado.",
+      "DistribuicaoTratativa: registra a atribuição inicial do ticket ao agente (rodízio), mas não altera a Tratativa em si."
+    ]
+  },
+  {
+    "id": "distribuicao",
+    "categoria": "Operações",
+    "nome": "Distribuição de Tratativas (Rodízio)",
+    "paginas": [
+      "src/components/dashboard/DistribuicaoTratativas.jsx",
+      "src/components/distribuicao/RodizioAssistido.jsx",
+      "src/components/distribuicao/DialogNovaAtribuicao.jsx"
+    ],
+    "entidades": [
+      "DistribuicaoTratativa",
+      "Colaborador"
+    ],
+    "objetivo": "Auxiliar o gestor a distribuir novas tratativas entre agentes de forma equilibrada, sugerindo o próximo agente por rodízio (round-robin) baseado no histórico de atribuições.",
+    "fluxo": "Gestor abre \"Nova Atribuição\" → sistema sugere agente_sugerido com base na menor quantidade de atribuições recentes por tipo/prioridade → gestor pode aceitar ou fazer override (com justificativa obrigatória) → grava um registro em DistribuicaoTratativa.",
+    "campos_chave": [
+      {
+        "campo": "override_rodizio / justificativa_override",
+        "descricao": "Quando o gestor ignora a sugestão do sistema, é obrigatório justificar."
+      },
+      {
+        "campo": "agente_sugerido_id/nome",
+        "descricao": "Guarda o que o algoritmo sugeriu, mesmo se não seguido — permite auditar desvios."
+      },
+      {
+        "campo": "turno (manha/tarde)",
+        "descricao": "Segmenta o rodízio por turno de trabalho."
+      }
+    ],
+    "regras_negocio": [
+      "É um registro de apoio à decisão — não cria a Tratativa nem altera seu agente_responsavel automaticamente; a vinculação real ao ticket é manual pelo gestor.",
+      "CardAgenteEquidade e AlertasConcentracao exibem se algum agente está recebendo volume desproporcional."
+    ],
+    "integracoes": [
+      "Não altera a entidade Tratativa diretamente — é um módulo de apoio/histórico, consumido apenas no Dashboard."
+    ]
+  },
+  {
+    "id": "apuracao",
+    "categoria": "Operações",
+    "nome": "Apuração (CSAT / Performance)",
+    "paginas": [
+      "src/pages/Apuracao.jsx",
+      "src/components/apuracao/ApuracaoWizard.jsx",
+      "src/components/apuracao/calculosApuracao.jsx",
+      "src/pages/RelatoriosApuracao.jsx"
+    ],
+    "entidades": [
+      "Apuracao",
+      "Colaborador"
+    ],
+    "objetivo": "Consolidar manualmente (via wizard, geralmente a partir de exportações do sistema de telefonia/chat) os indicadores de atendimento por colaborador: CSAT, FCR, performance e volume, por canal (telefone/chat) e por período.",
+    "fluxo": "Gestor roda o Wizard de Apuração escolhendo colaborador, período (semanal ou total) e tipo (telefone/chat/cx) → o sistema calcula métricas agregadas (dados_por_data) e grava um snapshot na entidade Apuracao (modo incremental soma sobre apurações existentes, completo substitui o período).",
+    "campos_chave": [
+      {
+        "campo": "modo (incremental/completo)",
+        "descricao": "Define se a apuração soma-se a dados já existentes ou recalcula do zero para o período."
+      },
+      {
+        "campo": "canal_telefone / canal_chat / avaliacao_cx",
+        "descricao": "Blocos de métricas consolidadas por canal."
+      },
+      {
+        "campo": "dados_por_data[]",
+        "descricao": "Granularidade diária usada para os gráficos em RelatoriosApuracao."
+      }
+    ],
+    "regras_negocio": [
+      "Performance e CSAT usados como referência nas Metas de Performance configuradas em Configurações (não há bloqueio automático, é apenas indicador visual).",
+      "Cada apuração é um snapshot histórico — reprocessar o mesmo período em modo \"completo\" sobrescreve os valores anteriores daquele período."
+    ],
+    "integracoes": [
+      "Colaborador: vínculo direto para exibir indicadores em Minha Performance e Relatórios.",
+      "Elegibilidade de Prêmios: os tipos de validação csat_minimo/performance_minima leem estes dados agregados."
+    ]
+  },
+  {
+    "id": "auditoria-pontuacao",
+    "categoria": "Operações",
+    "nome": "Auditoria de Pontuação",
+    "paginas": [
+      "src/pages/AuditoriaPontuacao.jsx",
+      "src/components/auditoria/AuditoriaDetalheTabela.jsx"
+    ],
+    "entidades": [
+      "Tratativa",
+      "Colaborador",
+      "Pontuacao (não utilizada na prática)"
+    ],
+    "objetivo": "Permitir ao gestor auditar, tratativa a tratativa, a pontuação atribuída no trimestre, recalculando ao vivo com a mesma função usada no Ranking e em Minha Performance.",
+    "fluxo": "Filtra Tratativas por período/agente/tipo → aplica calculateTratativaPoints() em cada uma → exibe detalhamento por regra aplicada (ex: \"Encerramento no SLA\", \"Sem reabertura em 7 dias\", \"Solução replicável\").",
+    "campos_chave": [
+      {
+        "campo": "calculateTratativaPoints(tratativa)",
+        "descricao": "Função pura em src/components/utils/helpers.jsx — única fonte de verdade da pontuação em todo o sistema. Regras: reclamacao_interna (SLA +1, sem reabertura em 7d +1, solução replicável +0.5), reclame_aqui (nota 7-8 +0.5, nota 9 +1.5, nota 10 +2.5, voltaria negociar c/ nota>8 +1), google_meu_negocio (reavaliação positiva +2, exclusão negativa +1), contestacao (cancelamento/pagou +2.5, acordo +1)."
+      }
+    ],
+    "regras_negocio": [
+      "Não existe persistência de pontos por tratativa — tudo é recalculado em tempo real a cada carregamento da tela, garantindo que Ranking, Auditoria e Minha Performance nunca divirjam entre si.",
+      "A entidade Pontuacao existe no schema e possui um fluxo de criação em TratativaDetalhe.jsx (calcularEAtribuirPontuacao), mas na prática nunca persiste dados (0 registros na base) — é código morto hoje. O único uso real planejado da entidade Pontuacao é bônus manual do gestor (tipo=\"bonus_manual\", vinculado a um ciclo_id), consumido pelo Ranking."
+    ],
+    "integracoes": [
+      "CicloTrimestral: define o período oficial usado por RankingTrimestral (tratativaNosCiclo) para filtrar quais tratativas entram no trimestre vigente."
+    ]
+  },
+  {
+    "id": "dashboard",
+    "categoria": "Operações",
+    "nome": "Dashboard (Página Inicial)",
+    "paginas": [
+      "src/pages/Dashboard.jsx",
+      "src/components/dashboard/RankingTrimestral.jsx",
+      "src/components/dashboard/DistribuicaoTratativas.jsx",
+      "src/components/dashboard/MinhasAnotacoes.jsx",
+      "src/components/turnos/MeuTurnoCard.jsx",
+      "src/components/ui/MotivationalQuote.jsx"
+    ],
+    "entidades": [
+      "Tratativa",
+      "Colaborador",
+      "AnotacaoPessoal",
+      "FraseMotivacional",
+      "Aviso",
+      "Pesquisa",
+      "HanseiEnvio",
+      "EscalaTurno",
+      "PDI"
+    ],
+    "objetivo": "Página inicial do sistema — visão geral consolidada da operação. Para gestores: KPIs globais, ranking trimestral, distribuição de tratativas e atalhos. Para agentes: suas próprias métricas, ranking (se visível), anotações pessoais, turno do dia e popups de avisos/pesquisas/Hansei pendentes.",
+    "fluxo": "Ao carregar, busca Tratativa (todas), Colaborador, Aviso, Pesquisa, HanseiEnvio e EscalaTurno. Gestores veem contadores agregados (abertas, encerradas, críticas, no SLA) + RankingTrimestral + DistribuicaoTratativas. Agentes veem seus próprios números via usePontuacaoAgente + MinhasAnotacoes + MeuTurnoCard. Popups automáticos verificam avisos não lidos, pesquisas pendentes e envios Hansei não visualizados — exibidos em sequência (modal sobreposto).",
+    "campos_chave": [
+      {
+        "campo": "usePontuacaoAgente(colaboradorId)",
+        "descricao": "Hook (src/hooks/usePontuacaoAgente.js) que recalcula ao vivo a pontuação do agente a partir de suas Tratativas usando calculateTratativaPoints() — mesma fonte de verdade do Ranking e da Auditoria."
+      },
+      {
+        "campo": "AnotacaoPessoal",
+        "descricao": "Anotações privadas do próprio colaborador (sticky notes) com cor, prioridade e tipo \"aviso\" com data_alerta — exibidas em MinhasAnotacoes no Dashboard do agente."
+      },
+      {
+        "campo": "FraseMotivacional",
+        "descricao": "Frases exibidas no componente MotivationalQuote (categoria: proposito/qualidade/cx/crescimento/equipe) — carregadas aleatoriamente a cada acesso."
+      },
+      {
+        "campo": "Popups automáticos",
+        "descricao": "Avisos não lidos, Pesquisas com requer_confirmacao_leitura pendente, HanseiEnvio não visualizado — exibidos como modais sequenciais ao entrar no Dashboard."
+      }
+    ],
+    "regras_negocio": [
+      "ranking_visivel_agentes (Configuracao) controla se o RankingTrimestral aparece para agentes — gestor sempre vê.",
+      "Os popups são exibidos um por vez (índice controlado por estado) e só desaparecem após confirmação/leitura — não há auto-dismiss."
+    ],
+    "integracoes": [
+      "Consolida dados de praticamente todos os módulos: Tratativa (KPIs), Apuracao (CSAT/performance), PDI (planos ativos), Avisos/Pesquisas/Hansei (comunicação), EscalaTurno (turno do dia), AnotacaoPessoal (notas pessoais)."
+    ]
+  },
+  {
+    "id": "jornada-cliente",
+    "categoria": "Operações",
+    "nome": "Jornada do Cliente (Inteligência Financeira)",
+    "paginas": [
+      "src/pages/JornadaCliente.jsx",
+      "src/components/jornada/FluxoJornadaVisual.jsx",
+      "src/components/jornada/RelatorioImpactoFinanceiro.jsx",
+      "src/components/jornada/MatrizEsforcoImpacto.jsx",
+      "src/components/jornada/InteligenciaFinanceiraJornada.jsx",
+      "src/components/jornada/GraficoBenchmarkingJornada.jsx",
+      "src/components/jornada/ResumoIAEtapa.jsx",
+      "src/components/jornada/PerfilComercialCliente.jsx",
+      "src/components/jornada/PerfilComercialClienteAgregado.jsx",
+      "src/components/jornada/SalariosColaboradoresJornada.jsx",
+      "src/components/jornada/RiscoCarteira.jsx",
+      "src/components/jornada/ConfigFinanceiraJornada.jsx",
+      "src/components/jornada/PerguntasEstrategicas.jsx",
+      "src/components/jornada/ImpactoPorPeriodo.jsx",
+      "src/components/jornada/ImpactoPorDimensao.jsx",
+      "src/components/jornada/inteligenciaFinanceira.js",
+      "src/components/utils/periodoJornada.js"
+    ],
+    "entidades": [
+      "Tratativa",
+      "EtapaJornada",
+      "MotivoTratativa",
+      "Colaborador",
+      "Configuracao"
+    ],
+    "objetivo": "Módulo de análise financeira e risco da jornada do cliente: mapeia cada etapa da jornada, calcula impacto financeiro total (devolução + custo operacional + perda de receita + risco reputacional + retrabalho), cruza com benchmarks globais (McKinsey/Gartner/COPQ) e gera insights de IA por etapa. Restrito a gestores.",
+    "fluxo": "Gestor seleciona período (mês atual/trimestre/ano/customizado via FiltroPeriodoJornada) → sistema agrega Tratativas encerradas por etapa_jornada → calcula impacto financeiro por etapa (InteligenciaFinanceiraJornada) → exibe em abas: Fluxo visual, Impacto Financeiro, Benchmarking, Matriz Esforço×Impacto, Risco de Carteira, Perfil Comercial, Perguntas Estratégicas (IA).",
+    "campos_chave": [
+      {
+        "campo": "calcularImpactoTotal(t, colaborador, params)",
+        "descricao": "Função central em inteligenciaFinanceira.js: valor_devolvido + custo_operacional (tempo efetivo × custo/hora × encargos) + perda_receita (churn) + risco_reputacional (Reclame Aqui/Google) + retrabalho (reabertura). Tudo calculado em tempo real, nunca lê campos estáticos."
+      },
+      {
+        "campo": "PARAMETROS_PADRAO",
+        "descricao": "custoHora=14, multiplicadorEncargos=1.6, cargaHorariaMensal=220, faturamentoReferencia=320000, tolerancia (percentual ou fixo). Configuráveis pelo gestor via ConfigFinanceiraJornada e persistidos em Configuracao."
+      },
+      {
+        "campo": "BENCHMARKS_GLOBAIS",
+        "descricao": "McKinsey (20-30% desperdício), Gartner (40% tempo em falhas), COPQ (5-20% custo má qualidade) — exibidos como faixas visuais min-max nos gráficos de benchmarking."
+      },
+      {
+        "campo": "calcularTempoEfetivo(t)",
+        "descricao": "Em helpers.jsx — calcula minutos efetivos trabalhados descontando congelamento de SLA e tempo em dependência externa. Base do custo operacional."
+      },
+      {
+        "campo": "calcularCustoOperacional(t, colaborador, params)",
+        "descricao": "tempo_efetivo × (salário/hora) × multiplicadorEncargos — usa salário ATUAL do colaborador, nunca valor estático gravado."
+      },
+      {
+        "campo": "MINUTOS_POR_FTE = 13200",
+        "descricao": "FTE = Full-Time Equivalent (min/mês). Usado para converter tempo gasto em \"pessoas inteiras perdidas\" na análise de impacto."
+      },
+      {
+        "campo": "Perfil Comercial (Tratativa)",
+        "descricao": "plano_cliente (Bronze/Prata/Ouro/Platina/ClickNotas/Outros), modalidade_plano, valor_contratacao_plano_atual, data_primeira_contratacao, tempo_contrato_meses, segmento_cliente — enriquecimento comercial para análise de risco de carteira."
+      }
+    ],
+    "regras_negocio": [
+      "Apenas Tratativas encerradas (status=encerrada ou aguardando_confirmacao_reabertura) e não excluídas entram no cálculo (isEncerradaEfetiva).",
+      "Cálculo de custo operacional é sempre dinâmico (salário atual do colaborador) — o campo custo_operacional_reais na Tratativa é gravado ao encerrar mas NUNCA lido nos relatórios (preferência pelo cálculo em tempo real).",
+      "Métricas agregadas são sempre recalculadas via reduce nos componentes — não dependem de campos estáticos gravados, para ignorar possíveis erros de gravação.",
+      "Linhas de benchmark são faixas visuais de referência (min-max), não limites de bloqueio.",
+      "Pontos de impacto financeiro que excedem a tolerância definida pelo gestor são destacados visualmente nos gráficos."
+    ],
+    "integracoes": [
+      "Tratativa: fonte de todos os dados de ocorrência e valores comerciais.",
+      "Colaborador: salário atual para custo operacional (restrito a gestores).",
+      "EtapaJornada/MotivoTratativa: dimensões de agregação.",
+      "Configuracao: parâmetros financeiros configuráveis.",
+      "InvokeLLM: gera ResumoIAEtapa e PerguntasEstrategicas a partir dos dados agregados."
+    ]
+  },
+  {
+    "id": "relatorios",
+    "categoria": "Operações",
+    "nome": "Relatórios Consolidados",
+    "paginas": [
+      "src/pages/Relatorios.jsx",
+      "src/pages/RelatoriosApuracao.jsx",
+      "src/pages/RelatoriosTratativas.jsx",
+      "src/components/relatorios/AnaliseProfundaColaborador.jsx",
+      "src/components/relatorios/RelatorioFinanceiroConsolidado.jsx"
+    ],
+    "entidades": [
+      "Tratativa",
+      "Colaborador",
+      "Apuracao",
+      "Pontuacao",
+      "CicloTrimestral"
+    ],
+    "objetivo": "Relatórios gerenciais consolidados com filtros por período, categoria, plano, segmento, tempo de contrato e faixa de receita. Inclui análise profunda por colaborador e relatório financeiro consolidado. Restrito a gestores.",
+    "fluxo": "Gestor aplica filtros (período, categoria, plano_cliente, segmento, tempo de contrato, faixa de receita mensal/anual) → sistema agrega Tratativas via reduce → exibe KPIs, tabelas detalhadas, gráficos e análise profunda por colaborador. Aba de Apuração delega para RelatoriosApuracao.",
+    "campos_chave": [
+      {
+        "campo": "Filtros comerciais",
+        "descricao": "planoFiltro, segmentoFiltro, tempoContratoFiltro, faixaReceitaMensalFiltro, faixaReceitaAnualFiltro — cruzam dados comerciais da Tratativa (plano_cliente, segmento_cliente, tempo_contrato_meses, receita equivalente)."
+      },
+      {
+        "campo": "calcularReceitaMensalEquivalente / calcularReceitaAnualEquivalente",
+        "descricao": "Em helpers.jsx — normaliza valor_contratacao_plano_atual pela modalidade (mensal/trimestral/semestral/anual) para comparar planos diferentes em base mensal/anual."
+      },
+      {
+        "campo": "AnaliseProfundaColaborador",
+        "descricao": "Componente que detalha por colaborador: tratativas, CSAT, pontuação, impacto financeiro, PDI ativo, observações — visão 360° individual."
+      }
+    ],
+    "regras_negocio": [
+      "Carrega até 2000 Tratativas (limite alto) para garantir relatórios completos.",
+      "Todos os valores monetários exibidos em formato BRL (formatBRL).",
+      "Receita equivalente sempre derivada em tempo de execução a partir do contrato (valor original + modalidade) — nunca lê campo mensal/anual estático."
+    ],
+    "integracoes": [
+      "Tratativa: fonte principal.",
+      "Apuracao: dados de CSAT/performance por colaborador.",
+      "Colaborador: vínculo e dados salariais.",
+      "CicloTrimestral: referência de período para filtros."
+    ]
+  },
+  {
+    "id": "analytics-preditivo",
+    "categoria": "Operações",
+    "nome": "Analytics Preditivo (CMMI 4)",
+    "paginas": [
+      "src/pages/AnalyticsPreditivo.jsx"
+    ],
+    "entidades": [
+      "Tratativa",
+      "Colaborador",
+      "Apuracao"
+    ],
+    "objetivo": "Análise preditiva e estatística avançada (nível CMMI 4): throughput, tendências, previsão de volume, análise de capacidade, distribuição estatística de SLA e identificação de outliers. Restrito a gestores.",
+    "fluxo": "Calcula métricas matemáticas (throughput por período, média móvel, desvio-padrão, limites de controle, previsão por regressão linear) sobre Tratativas encerradas → exibe gráficos de linha/área/barra com bandas de previsão e alertas de outliers.",
+    "campos_chave": [
+      {
+        "campo": "calcularThroughput(tratativas, periodoEmDias)",
+        "descricao": "Tickets resolvidos por período + média diária + por agente."
+      },
+      {
+        "campo": "Regressão linear / média móvel",
+        "descricao": "Previsão de volume futuro baseada em histórico — sem modelo de ML externo, é estatística clássica no cliente."
+      },
+      {
+        "campo": "Limites de controle (±2σ)",
+        "descricao": "Identificação de outliers estatísticos em SLA e throughput."
+      }
+    ],
+    "regras_negocio": [
+      "Tudo calculado no cliente a partir das Tratativas — não há backend function de ML.",
+      "Filtros por período e agente aplicados antes dos cálculos estatísticos."
+    ],
+    "integracoes": [
+      "Tratativa: fonte de dados.",
+      "Colaborador: segmentação por agente.",
+      "Apuracao: dados de CSAT para correlação."
+    ]
+  },
+  {
+    "id": "relatorio-jornada-diretoria",
+    "categoria": "Operações",
+    "nome": "Relatório de Jornada para Diretoria",
+    "paginas": [
+      "src/pages/RelatorioJornadaDiretoria.jsx"
+    ],
+    "entidades": [
+      "Tratativa",
+      "Colaborador",
+      "MotivoTratativa"
+    ],
+    "objetivo": "Relatório executivo simplificado (linguagem \"explique como se eu tivesse 5 anos\") para diretoria: glossário didático, impacto financeiro por etapa da jornada, insight de IA e impressão amigável. Rota dedicada (/RelatorioJornadaDiretoria) fora do menu principal.",
+    "fluxo": "Agrega Tratativas encerradas por etapa_jornada → calcula volumetria, custo operacional (dinâmico), devolução ao cliente e perda de receita → exibe em cards com glossário explicativo → gestor pode gerar insight via InvokeLLM (construirContextoComercialIA) → impressão via window.print().",
+    "campos_chave": [
+      {
+        "campo": "GLOSSARIO[]",
+        "descricao": "Definições didáticas: Quantidade de Reclamações, Dinheiro Devolvido, Contratos Perdidos, Custo do Tempo da Equipe, Prejuízo Total — exibidas junto aos números."
+      },
+      {
+        "campo": "MINUTOS_POR_FTE = 13200",
+        "descricao": "Conversão de tempo gasto em FTE (pessoas equivalentes) para a diretoria entender escala."
+      },
+      {
+        "campo": "isEncerradaEfetiva(t)",
+        "descricao": "Filtra apenas status=encerrada ou aguardando_confirmacao_reabertura, excluídas=false."
+      }
+    ],
+    "regras_negocio": [
+      "Custo operacional sempre recalculado com salário atual (nunca lê campo estático).",
+      "Acesso por rota direta, não está no menu — para gestores."
+    ],
+    "integracoes": [
+      "Tratativa + Colaborador (salário) + MotivoTratativa + InvokeLLM (insight)."
+    ]
+  },
+  {
+    "id": "colaboradores",
+    "categoria": "Gestão de Pessoas",
+    "nome": "Colaboradores (Cadastro)",
+    "paginas": [
+      "src/pages/Cadastro.jsx"
+    ],
+    "entidades": [
+      "Colaborador",
+      "Equipe",
+      "User (built-in)"
+    ],
+    "objetivo": "Cadastro central de todos os colaboradores — base de referência (por email) usada em praticamente todos os módulos para vincular o usuário logado ao seu registro operacional.",
+    "fluxo": "O vínculo usuário↔colaborador é feito por e-mail (colaboradores.find(c => c.email === user.email) em Layout.jsx). Não existe criação de User pela aplicação — o usuário entra pelo convite da plataforma; o registro Colaborador precisa ser criado manualmente com o mesmo e-mail para o sistema reconhecer o papel (agente/gestor) e liberar o menu correto.",
+    "campos_chave": [
+      {
+        "campo": "email",
+        "descricao": "Chave de vínculo com o usuário autenticado da plataforma — deve ser idêntico ao e-mail de login."
+      },
+      {
+        "campo": "papel (agente/gestor/fi)",
+        "descricao": "Controla visibilidade de menus (Layout.jsx: gestorOnly) e permissões em quase todas as telas administrativas."
+      },
+      {
+        "campo": "is_facilitador_interno / fi_expiracao",
+        "descricao": "Papel temporário adicional (FI) exibido com destaque na sidebar; não há job automático que expire — a expiração é apenas checada visualmente."
+      },
+      {
+        "campo": "equipe_id/nome",
+        "descricao": "Vínculo com Equipe, usado em CalendarioEquipes e EquipeDetalhes (módulo Escalas)."
+      },
+      {
+        "campo": "historico_cargos[] / promocoes[]",
+        "descricao": "Histórico de carreira exibido no perfil."
+      }
+    ],
+    "regras_negocio": [
+      "ativo=false remove o colaborador de listagens operacionais (distribuição, escalas, ranking) mas mantém o histórico.",
+      "salario é considerado sensível — visível apenas a gestores nas telas que o exibem."
+    ],
+    "integracoes": [
+      "Praticamente todos os módulos referenciam Colaborador por colaborador_id/nome (Tratativa, Observação, PDI, Pontuação, Escalas, Férias, Home Office, etc)."
+    ]
+  },
+  {
+    "id": "observacoes",
+    "categoria": "Gestão de Pessoas",
+    "nome": "Observações",
+    "paginas": [
+      "src/pages/Observacoes.jsx",
+      "src/components/observacoes/ColaboradorCard.jsx",
+      "src/components/observacoes/HistoricoColaborador.jsx"
+    ],
+    "entidades": [
+      "Observacao",
+      "TipoObservacao",
+      "SkillMestre"
+    ],
+    "objetivo": "Registro qualitativo de feedbacks/observações sobre colaboradores, com sugestão de IA para soft/hard skills e análise SWOT.",
+    "campos_chave": [
+      {
+        "campo": "visibilidade (gestor/agente/ambos)",
+        "descricao": "Controla quem enxerga a observação — \"agente\" permite que o próprio colaborador veja o feedback."
+      },
+      {
+        "campo": "sugestao_ia_soft_skills / sugestao_ia_hard_skills",
+        "descricao": "Preenchidas via InvokeLLM a partir do texto da observação; ficam separadas dos valores avaliados manualmente pelo gestor (soft_skills_avaliadas/hard_skills_avaliadas)."
+      },
+      {
+        "campo": "analise_swot",
+        "descricao": "Estrutura livre (forças/fraquezas/oportunidades/ameaças) gerada por IA ou preenchida manualmente."
+      }
+    ],
+    "regras_negocio": [
+      "Uma observação pode referenciar múltiplos colaboradores (colaboradores_ids[]) simultaneamente — ex: feedback de equipe."
+    ],
+    "integracoes": [
+      "SkillMestre (Configurações → Skills) define a lista de soft/hard skills disponíveis para avaliação.",
+      "PDI pode ser criado a partir de fraquezas identificadas na observação (uso manual pelo gestor)."
+    ]
+  },
+  {
+    "id": "pdi",
+    "categoria": "Gestão de Pessoas",
+    "nome": "PDI (Plano de Desenvolvimento Individual)",
+    "paginas": [
+      "src/pages/PDI.jsx",
+      "src/components/performance/PDIModal.jsx"
+    ],
+    "entidades": [
+      "PDI",
+      "Colaborador"
+    ],
+    "objetivo": "Planos de desenvolvimento com etapas e prazos por colaborador, acompanhados até conclusão.",
+    "campos_chave": [
+      {
+        "campo": "etapas[]",
+        "descricao": "Cada etapa tem título, conteúdo_profissional, prazo e flag concluida com data_conclusao."
+      },
+      {
+        "campo": "percentual_conclusao",
+        "descricao": "Calculado a partir da proporção de etapas concluídas (client-side, sem trigger de servidor)."
+      }
+    ],
+    "regras_negocio": [
+      "status muda para \"concluido\" apenas manualmente — não há automação que feche o PDI ao concluir todas as etapas."
+    ],
+    "integracoes": [
+      "Colaborador: cada PDI pertence a um colaborador; exibido em Minha Performance e no Cadastro."
+    ]
+  },
+  {
+    "id": "plano-setorial",
+    "categoria": "Gestão de Pessoas",
+    "nome": "Plano Setorial",
+    "paginas": [
+      "src/pages/PlanoSetorial.jsx"
+    ],
+    "entidades": [
+      "PlanoSetorial"
+    ],
+    "objetivo": "Planejamento estratégico do setor: estratégias, objetivos com meta/prazo, ações com responsável/status e indicadores de acompanhamento (meta vs atual).",
+    "campos_chave": [
+      {
+        "campo": "objetivos[] / acoes[] / indicadores[]",
+        "descricao": "Três blocos independentes de planejamento — sem qualquer vínculo automático entre eles ou com dados operacionais (indicadores.atual é preenchido manualmente, não calculado a partir de Tratativa/Apuracao)."
+      }
+    ],
+    "regras_negocio": [
+      "Módulo 100% de gestão manual — não há automação nem leitura de dados de outros módulos."
+    ],
+    "integracoes": [
+      "Nenhuma integração automática com outros módulos — é isolado."
+    ]
+  },
+  {
+    "id": "oraculo",
+    "categoria": "Gestão de Pessoas",
+    "nome": "ORÁCULO CRC",
+    "paginas": [
+      "src/pages/Oraculo.jsx",
+      "src/components/oraculo/OraculoWizard.jsx"
+    ],
+    "entidades": [
+      "OraculoLancamento",
+      "OraculoPalavra",
+      "Colaborador"
+    ],
+    "objetivo": "Ferramenta assistida por IA para gerar perguntas estratégicas de avaliação de colaboradores a partir de palavras-chave categorizadas (engajamento, comunicação, etc.), somada a um snapshot de contexto de performance.",
+    "fluxo": "Gestor seleciona um colaborador e escolhe palavras-chave do dicionário (OraculoPalavra, com categoria e valência positiva/neutra/atenção) → sistema monta contexto_performance (csat recente, tratativas do período, pontos do trimestre) → gera pergunta_gerada via InvokeLLM → gestor avalia soft_skills/hard_skills (1-5) e registra texto livre.",
+    "campos_chave": [
+      {
+        "campo": "palavras_chave[]",
+        "descricao": "Cada palavra tem origem \"dicionario\" (pré-cadastrada) ou \"manual\" (digitada na hora)."
+      },
+      {
+        "campo": "contexto_performance",
+        "descricao": "Snapshot read-only no momento do lançamento — não é atualizado retroativamente."
+      }
+    ],
+    "regras_negocio": [
+      "OraculoPalavra com status=\"validacao\" fica pendente de aprovação do gestor antes de entrar no dicionário ativo (ativa)."
+    ],
+    "integracoes": [
+      "Lê dados de Apuracao/Tratativa/Pontuacao apenas para montar o snapshot de contexto — não escreve de volta neles."
+    ]
+  },
+  {
+    "id": "gestao-ferias",
+    "categoria": "Gestão de Pessoas",
+    "nome": "Gestão de Férias",
+    "paginas": [
+      "src/pages/GestaoFerias.jsx",
+      "src/components/ferias/ColaboradorFeriasCard.jsx",
+      "src/components/ferias/DetalheColaboradorFerias.jsx",
+      "src/components/ferias/validacaoFerias.jsx"
+    ],
+    "entidades": [
+      "SolicitacaoFerias",
+      "SaldoFerias",
+      "CicloFerias",
+      "Colaborador"
+    ],
+    "objetivo": "Controle de períodos aquisitivos/concessivos de férias (regra CLT), saldo disponível, fracionamento (integral/2x/3x), venda de abono (até 10 dias) e workflow de aprovação.",
+    "campos_chave": [
+      {
+        "campo": "SaldoFerias.periodos[]",
+        "descricao": "Histórico por período aquisitivo com status calculado: em_aquisicao, disponivel, vencendo_30/60/90d, vencido, utilizado."
+      },
+      {
+        "campo": "SolicitacaoFerias.tipo_fracionamento",
+        "descricao": "integral | fracionado_2 | fracionado_3 — controla quantas solicitações compõem um único período de direito."
+      },
+      {
+        "campo": "venda_dias",
+        "descricao": "Abono pecuniário, máximo 10 dias, gera adicional_um_terco calculado e data_limite_pagamento (2 dias antes do início)."
+      },
+      {
+        "campo": "validacoes_aplicadas[] / conflitos_detectados[]",
+        "descricao": "Auditoria das regras verificadas automaticamente no momento da solicitação (ex: prazo mínimo, staff crítico)."
+      },
+      {
+        "campo": "CicloFerias",
+        "descricao": "Entidade paralela/legada que também guarda ciclo de férias por colaborador com fragmentos — se sobrepõe conceitualmente a SaldoFerias.periodos; validar qual é a fonte de verdade atual antes de estender."
+      }
+    ],
+    "regras_negocio": [
+      "staff_critico=true aciona validação extra de mínimo de colaboradores presenciais/disponíveis no período.",
+      "Status da solicitação: em_analise → aprovada/recusada/sugestao_nova_data/cancelada — decisão sempre manual do gestor/RH."
+    ],
+    "integracoes": [
+      "Colaborador.data_admissao é a base do cálculo dos períodos aquisitivos.",
+      "EscalaAtribuicao pode registrar o período de férias aprovado como evento tipo \"ferias\" no calendário de equipe."
+    ]
+  },
+  {
+    "id": "home-office",
+    "categoria": "Gestão de Pessoas",
+    "nome": "Home Office Escolha",
+    "paginas": [
+      "src/pages/HomeOfficeEscolha.jsx",
+      "src/components/escalas/SolicitarHomeOfficeDialog.jsx"
+    ],
+    "entidades": [
+      "SolicitacaoHomeOffice",
+      "ConfiguracaoHomeOffice"
+    ],
+    "objetivo": "Permitir que o colaborador escolha semanas de home office dentro de regras configuráveis pelo gestor, com validação automática de várias regras de negócio.",
+    "campos_chave": [
+      {
+        "campo": "ConfiguracaoHomeOffice (por mes_referencia)",
+        "descricao": "Define: dias_elegiveis_home_office, prazo_minimo_dias, maximo_semanas_mes (padrão 2), intervalo_minimo_dias_uteis (padrão 5), minimo_colaboradores_presenciais, click_days[] e reunioes_obrigatorias[]."
+      },
+      {
+        "campo": "SolicitacaoHomeOffice.validacoes{}",
+        "descricao": "Objeto com 8 flags booleanas (uma por regra) preenchido automaticamente ao validar a solicitação — permite auditar exatamente qual regra passou/falhou."
+      },
+      {
+        "campo": "liberacao_coletiva",
+        "descricao": "Quando true na configuração do mês, suspende temporariamente todas as regras (ex: situações excepcionais)."
+      }
+    ],
+    "regras_negocio": [
+      "Regras padrão: máx. 2 semanas de HO por mês, semanas não-consecutivas, intervalo mínimo de 5 dias úteis entre elas, respeitar Click Days e reuniões obrigatórias, e garantir mínimo de colaboradores presenciais no dia.",
+      "fora_do_prazo=true quando solicitado com menos de prazo_minimo_dias de antecedência — não bloqueia, mas gera alerta ao gestor."
+    ],
+    "integracoes": [
+      "Não depende de SaldoFerias nem de EscalaAtribuicao — é um módulo próprio; a checagem de \"mínimo de colaboradores presenciais\" é feita cruzando outras solicitações aprovadas do mesmo mês."
+    ]
+  },
+  {
+    "id": "escalas-turnos",
+    "categoria": "Gestão de Pessoas",
+    "nome": "Escalas / Turnos (WFM)",
+    "paginas": [
+      "src/pages/Escalas.jsx",
+      "src/pages/Turnos.jsx",
+      "src/components/escalas/CalendarioEquipes.jsx",
+      "src/components/escalas/wfm/PainelWFM.jsx",
+      "src/components/escalas/wfm/GradeSemanasWFM.jsx",
+      "src/components/escalas/wfm/gerarEscala.jsx"
+    ],
+    "entidades": [
+      "Escala",
+      "EscalaAtribuicao",
+      "EscalaTurno",
+      "Equipe",
+      "Colaborador"
+    ],
+    "objetivo": "Dois sistemas coexistem: (1) Escalas — calendário de eventos por equipe (presencial/home_office/férias/day_off/treinamento) via EscalaAtribuicao; (2) Turnos — módulo WFM (aba dentro de Turnos) que gera e gerencia a grade semanal de atendimento/análise (manhã/tarde) por slot, com atribuição de múltiplos colaboradores por slot.",
+    "fluxo": "WFM: gerarEscala.jsx aplica regras de negócio (R0–R4, ex.: cobertura mínima por slot, rodízio de folgas, evitar dobra do mesmo colaborador manhã+tarde) e gera automaticamente um rascunho de EscalaTurno para a semana; o gestor ajusta manualmente via ModalAtribuicaoSlot (substituiu o antigo drag-and-drop) e publica (publicada=true) para os agentes visualizarem em MeuTurnoCard.",
+    "campos_chave": [
+      {
+        "campo": "EscalaTurno.turnos[].manha/tarde[]",
+        "descricao": "Array de alocações por dia/período — cada item tem colaborador_id, slot (atendimento/analise) e travado (true impede que o gerador automático sobrescreva aquele slot)."
+      },
+      {
+        "campo": "EscalaTurno.alertas[]",
+        "descricao": "Avisos gerados pelo algoritmo quando uma regra precisou ser relaxada (ex: cobertura mínima não atingida)."
+      },
+      {
+        "campo": "EscalaAtribuicao.tipo_evento",
+        "descricao": "home_office | presencial | hibrido | ferias | day_off | falta | treinamento | evento_especial — usado no calendário de equipe (visão macro), independente da grade WFM de turnos."
+      }
+    ],
+    "regras_negocio": [
+      "Slots suportam múltiplos colaboradores simultâneos (refatoração recente removeu o limite de 1 colaborador por slot e o drag-and-drop, substituído por modal de atribuição).",
+      "travado=true em um slot é respeitado pelo motor de geração automática — nunca é sobrescrito em reprocessamentos.",
+      "publicada controla se a escala já é visível para os agentes (antes disso é apenas rascunho do gestor)."
+    ],
+    "integracoes": [
+      "Colaborador ativo (ativo=true) é a fonte da lista de participantes elegíveis.",
+      "RelatorioProdutividadeTurnos (Turnos) cruza EscalaTurno com produtividade para relatórios gerenciais."
+    ]
+  },
+  {
+    "id": "minha-performance",
+    "categoria": "Gestão de Pessoas",
+    "nome": "Minha Performance",
+    "paginas": [
+      "src/pages/MinhaPerformance.jsx",
+      "src/components/performance/EmptyPerformanceState.jsx",
+      "src/components/performance/PDIModal.jsx",
+      "src/components/performance/FeedbackModal.jsx"
+    ],
+    "entidades": [
+      "Tratativa",
+      "Apuracao",
+      "Observacao",
+      "HanseiEnvio",
+      "PDI",
+      "Colaborador",
+      "Pontuacao"
+    ],
+    "objetivo": "Visão pessoal do colaborador sobre sua própria performance: pontuação trimestral (recalculada ao vivo), CSAT/performance da apuração, PDIs ativos, observações recebidas e envios Hansei. Acessível a todos (agentes e gestores) via menu de perfil.",
+    "fluxo": "Identifica o colaborador logado (por email) → usePontuacaoAgente recalcula pontos a partir de suas Tratativas → busca Apuracao, Observacao, PDI e HanseiEnvio do colaborador → exibe StatCards + detalhamento expansível + links para PDIs e feedbacks.",
+    "campos_chave": [
+      {
+        "campo": "usePontuacaoAgente",
+        "descricao": "Hook que recalcula pontuação ao vivo (calculateTratativaPoints) — mesma fonte de verdade do Ranking e da Auditoria, garantindo consistência."
+      },
+      {
+        "campo": "EmptyPerformanceState",
+        "descricao": "Estado vazio amigável quando o colaborador ainda não tem tratativas/apurações no período."
+      }
+    ],
+    "regras_negocio": [
+      "O colaborador vê apenas seus próprios dados (filtro por colaborador_id) — não há RLS no banco, o filtro é no cliente.",
+      "Gestores acessam sua própria performance também (não é painel de gestão de outros)."
+    ],
+    "integracoes": [
+      "Tratativa (pontuação), Apuracao (CSAT/performance), Observacao (feedbacks recebidos), PDI (planos ativos), HanseiEnvio (reflexões recebidas)."
+    ]
+  },
+  {
+    "id": "avisos",
+    "categoria": "Comunicação",
+    "nome": "Avisos",
+    "paginas": [
+      "src/pages/Avisos.jsx"
+    ],
+    "entidades": [
+      "Aviso",
+      "AvisoLeitura"
+    ],
+    "objetivo": "Mural de comunicados internos com controle de leitura obrigatória.",
+    "campos_chave": [
+      {
+        "campo": "destinatarios (todos/agentes/gestores)",
+        "descricao": "Filtra quem vê o aviso na listagem."
+      },
+      {
+        "campo": "lido_por[] (no Aviso) vs AvisoLeitura",
+        "descricao": "Existem dois mecanismos de leitura: um array simples de IDs no próprio Aviso e uma entidade dedicada (AvisoLeitura) com confirmou=true (\"Li e compreendi\") e data_leitura — usar AvisoLeitura como fonte de verdade para exigência formal de leitura, o array lido_por é um atalho mais simples."
+      },
+      {
+        "campo": "data_expiracao",
+        "descricao": "Quando definida, o aviso deixa de aparecer como ativo após essa data (checagem client-side, sem job de servidor)."
+      }
+    ],
+    "regras_negocio": [
+      "prioridade e tipo (informativo/urgente/alerta/comunicado) apenas afetam estilo visual, sem lógica adicional."
+    ],
+    "integracoes": [
+      "Nenhuma integração automática com outros módulos."
+    ]
+  },
+  {
+    "id": "pesquisas",
+    "categoria": "Comunicação",
+    "nome": "Pesquisas",
+    "paginas": [
+      "src/pages/Pesquisas.jsx",
+      "src/components/pesquisas/AgendamentoPesquisa.jsx",
+      "src/components/pesquisas/ResultadosVisuais.jsx"
+    ],
+    "entidades": [
+      "Pesquisa",
+      "RespostaPesquisa"
+    ],
+    "objetivo": "Pesquisas internas (CSAT/NPS/CES/Clima Organizacional/Personalizada) com agendamento de envio, lembrete e cálculo de contribuição para um \"Health Score\".",
+    "campos_chave": [
+      {
+        "campo": "agendamento{}",
+        "descricao": "tipo (unico/semanal/quinzenal/mensal/personalizado), prazo_resposta_dias, enviar_lembrete e dias_antes_lembrete — porém não há backend function/cron no app: o agendamento é apenas metadado, o disparo real depende de o usuário acessar a tela dentro do prazo (não há envio automático de fato)."
+      },
+      {
+        "campo": "peso_health_score",
+        "descricao": "Peso (0-10) que esta pesquisa tem no Health Score consolidado do colaborador."
+      },
+      {
+        "campo": "RespostaPesquisa.contribuiu_health_score",
+        "descricao": "Flag para evitar contar a mesma resposta duas vezes no cálculo do Health Score."
+      },
+      {
+        "campo": "requer_confirmacao_leitura",
+        "descricao": "Quando true, o respondente deve confirmar leitura (RespostaPesquisa.confirmou_leitura/data_leitura) antes de responder."
+      }
+    ],
+    "regras_negocio": [
+      "reenviar_timestamp permite forçar reenvio a todos os colaboradores (reset de status para quem já respondeu)."
+    ],
+    "integracoes": [
+      "Independente — não há gatilho automático real (sem backend function agendada); todo envio/lembrete depende de ação manual/acesso à tela."
+    ]
+  },
+  {
+    "id": "hansei",
+    "categoria": "Comunicação",
+    "nome": "Hansei",
+    "paginas": [
+      "src/pages/Hansei.jsx",
+      "src/components/hansei/HanseiEnvioDialog.jsx",
+      "src/components/hansei/HanseiVisualizarDialog.jsx",
+      "src/components/hansei/HanseiAgenteDashboard.jsx",
+      "src/components/hansei/hanseiUtils.jsx"
+    ],
+    "entidades": [
+      "HanseiEnvio",
+      "HanseiComentario",
+      "Colaborador"
+    ],
+    "objetivo": "Prática de \"reflexão\" (Hansei) periódica: gestor envia um consolidado de desempenho do período (tratativas, CSAT, chats/ligações, SLA, performance, pontuação) com comentário qualitativo; o colaborador visualiza e pode reagir com comentário/sentimento.",
+    "campos_chave": [
+      {
+        "campo": "dados_consolidados{}",
+        "descricao": "Snapshot manual preenchido pelo gestor no momento do envio (não é recalculado automaticamente a partir de Tratativa/Apuracao/Pontuacao) — depende de o gestor preencher/copiar os números corretos."
+      },
+      {
+        "campo": "HanseiComentario.sentimento",
+        "descricao": "positivo/neutro/negativo — resposta do colaborador ao feedback recebido."
+      }
+    ],
+    "regras_negocio": [
+      "visualizado/data_visualizacao no HanseiEnvio controla se o colaborador já abriu o envio."
+    ],
+    "integracoes": [
+      "Dados de contexto (tratativas, CSAT, pontuação) são digitados manualmente — não há leitura automática de Tratativa/Apuracao/Pontuacao no momento do envio."
+    ]
+  },
+  {
+    "id": "universidade",
+    "categoria": "Comunicação",
+    "nome": "Universidade CRC",
+    "paginas": [
+      "src/pages/Universidade.jsx"
+    ],
+    "entidades": [
+      "Curso",
+      "CursoMatricula",
+      "Colaborador"
+    ],
+    "objetivo": "Catálogo de cursos internos com matrícula e progresso por colaborador.",
+    "campos_chave": [
+      {
+        "campo": "Curso.obrigatorio",
+        "descricao": "Sinaliza cursos obrigatórios — usado como referência em ElegibilidadePremio (tipo cursos_obrigatorios)."
+      },
+      {
+        "campo": "CursoMatricula.status/progresso",
+        "descricao": "inscrito → em_andamento → concluido; progresso é percentual manual/estimado, não há player de vídeo com tracking automático."
+      }
+    ],
+    "regras_negocio": [
+      "Conclusão de curso obrigatório pode ser pré-requisito de elegibilidade a prêmios (ver Elegibilidade de Prêmios)."
+    ],
+    "integracoes": [
+      "ElegibilidadePremio: tipo_validacao=\"cursos_obrigatorios\" verifica CursoMatricula.status=\"concluido\" para os cursos marcados obrigatorio=true."
+    ]
+  },
+  {
+    "id": "pop",
+    "categoria": "Comunicação",
+    "nome": "POP (Procedimentos Operacionais)",
+    "paginas": [
+      "src/pages/POP.jsx",
+      "src/components/pop/POPForm.jsx",
+      "src/components/pop/POPViewer.jsx"
+    ],
+    "entidades": [
+      "POP"
+    ],
+    "objetivo": "Documentação formal de processos operacionais (passo a passo, ferramentas, critérios de qualidade, matriz RACI) usada como manual de consulta pelos agentes.",
+    "campos_chave": [
+      {
+        "campo": "raci[]",
+        "descricao": "Tabela RACI por atividade (responsável/aprovador/consultado/informado) em texto livre."
+      },
+      {
+        "campo": "versao",
+        "descricao": "Controle de versão manual (string livre, ex: \"1.0\", \"2.1\") — não há histórico automático de revisões, apenas o campo atual."
+      }
+    ],
+    "regras_negocio": [
+      "ativo=false arquiva o POP sem excluir (mantém para referência histórica)."
+    ],
+    "integracoes": [
+      "Nenhuma integração automática — é referência de consulta."
+    ]
+  },
+  {
+    "id": "configuracoes",
+    "categoria": "Sistema",
+    "nome": "Configurações Gerais",
+    "paginas": [
+      "src/pages/Configuracoes.jsx",
+      "src/pages/ConfigPermissoes.jsx",
+      "src/pages/ConfigTiposTratativa.jsx",
+      "src/pages/ConfigCategoriasTratativa.jsx",
+      "src/pages/ConfigMotivosJornada.jsx",
+      "src/pages/ConfigEtapasJornada.jsx",
+      "src/pages/ConfigElegibilidade.jsx",
+      "src/pages/ConfigSkills.jsx",
+      "src/pages/ConfigTiposObservacao.jsx"
+    ],
+    "entidades": [
+      "Configuracao",
+      "PermissaoModulo",
+      "TipoTratativa",
+      "CategoriaTratativa",
+      "MotivoTratativa",
+      "EtapaJornada",
+      "ElegibilidadePremio",
+      "SkillMestre",
+      "TipoObservacao",
+      "LogAuditoria"
+    ],
+    "objetivo": "Painel administrativo central (visível apenas a gestores no menu) reunindo em abas todos os parâmetros configuráveis do sistema, backup, exclusão de dados e trilha de auditoria.",
+    "campos_chave": [
+      {
+        "campo": "Configuracao (chave/valor/tipo/categoria)",
+        "descricao": "Tabela genérica chave-valor (valor sempre string, JSON.stringify quando tipo=\"json\") — usada hoje para metas_performance e ranking_visivel_agentes."
+      },
+      {
+        "campo": "PermissaoModulo",
+        "descricao": "Por módulo (modulo_rota), define visivel_para_agente/visivel_para_gestor e uma lista colaboradores_excecao (IDs com acesso individual, ignorando a regra de perfil) — consumida em Layout.jsx (Sidebar.podeVerModulo) para montar o menu dinamicamente."
+      },
+      {
+        "campo": "LogAuditoria",
+        "descricao": "Log genérico (acao/modulo/entidade/dados_anteriores/dados_novos) — schema existe mas hoje só é populado/consumido na aba \"Logs\" de Configurações; a maioria das mutações do sistema (Tratativa, Colaborador, etc.) NÃO grava LogAuditoria automaticamente hoje."
+      },
+      {
+        "campo": "Exclusão de Dados",
+        "descricao": "Ação irreversível direta no cliente (Promise.all de .delete()) por módulo ou \"todos\" — sem soft-delete, sem backup automático prévio (o backup é uma ação separada e manual)."
+      },
+      {
+        "campo": "Backup",
+        "descricao": "Exporta um .json local (download no navegador) com os principais dados; não existe restauração automatizada — \"entre em contato com o suporte técnico\"."
+      }
+    ],
+    "regras_negocio": [
+      "ranking_visivel_agentes controla se RankingTrimestral aparece para agentes no Dashboard (gestor sempre vê).",
+      "Metas de performance (csat_minimo, performance_minimo, avaliacao_cx_minimo) são apenas referência visual em relatórios — não bloqueiam nada automaticamente."
+    ],
+    "integracoes": [
+      "Este é o hub que alimenta os \"vocabulários\" usados por Tratativas (TipoTratativa/CategoriaTratativa/MotivoTratativa/EtapaJornada), Observações (TipoObservacao/SkillMestre) e Elegibilidade de prêmios."
+    ]
+  },
+  {
+    "id": "elegibilidade-premios",
+    "categoria": "Sistema",
+    "nome": "Elegibilidade de Prêmios",
+    "paginas": [
+      "src/pages/ConfigElegibilidade.jsx",
+      "src/components/elegibilidade/ConfigCiclosTrimestral.jsx"
+    ],
+    "entidades": [
+      "ElegibilidadePremio",
+      "CicloTrimestral"
+    ],
+    "objetivo": "Define os requisitos obrigatórios/opcionais que um colaborador precisa cumprir para ser elegível à premiação do ciclo trimestral (ex: CSAT mínimo, performance mínima, presença mínima, cursos obrigatórios).",
+    "campos_chave": [
+      {
+        "campo": "tipo_validacao",
+        "descricao": "9 tipos suportados: csat_minimo, performance_minima, presenca_minima, tratativas_minimas, cursos_obrigatorios, avaliacoes_cx, execucao_tratativas_categoria, volume_minimo_canal, personalizado."
+      },
+      {
+        "campo": "obrigatoria",
+        "descricao": "Se false, a exigência é apenas informativa/não elimina o colaborador do ranking de premiação."
+      },
+      {
+        "campo": "CicloTrimestral.ativo",
+        "descricao": "Apenas um ciclo pode estar ativo por vez — é a referência de data_inicio/data_fim usada por tratativaNosCiclo() para filtrar tratativas no Ranking."
+      }
+    ],
+    "regras_negocio": [
+      "O motor de verificação efetiva de cada tipo_validacao contra os dados reais do colaborador está encapsulado nas telas de configuração/relatório — a entidade apenas guarda a regra, o cálculo de \"quem é elegível\" é feito sob demanda."
+    ],
+    "integracoes": [
+      "CicloTrimestral é a fonte de verdade de período usada também pelo RankingTrimestral e pela aba Bônus Manual (Pontuacao com ciclo_id)."
+    ]
+  },
+  {
+    "id": "ferramentas-operacionais",
+    "categoria": "Sistema",
+    "nome": "Ferramentas Operacionais (Cálculo de Estorno)",
+    "paginas": [
+      "src/pages/FerramentasOperacionais.jsx",
+      "src/components/ferramentas/ImpostosPanel.jsx",
+      "src/components/ferramentas/ResultadoCards.jsx",
+      "src/components/ferramentas/HistoricoEstornos.jsx",
+      "src/components/ferramentas/ExportacaoEstorno.jsx",
+      "src/components/ferramentas/calculos.jsx",
+      "src/components/ferramentas/MemoriaCalculo.jsx"
+    ],
+    "entidades": [
+      "EstornoParcial",
+      "ConfigEstorno"
+    ],
+    "objetivo": "Calculadora financeira de estorno parcial de planos: aplica os percentuais vigentes de impostos e comissão (ConfigEstorno) sobre o valor da nota fiscal, considerando tempo de uso do plano e multa contratual, para chegar ao valor final de devolução ao cliente.",
+    "campos_chave": [
+      {
+        "campo": "ConfigEstorno (iss/pis/cofins/irpj/csll/comissao_vendedor/multa_contratual)",
+        "descricao": "Percentuais vigentes — apenas uma config deve estar ativa=true por vez; log_alteracoes[] audita mudanças de percentual."
+      },
+      {
+        "campo": "EstornoParcial.percentuais_snapshot",
+        "descricao": "Cópia dos percentuais no momento do cálculo — garante que o histórico não mude se a config for alterada depois (rastreabilidade fiscal)."
+      },
+      {
+        "campo": "EstornoParcial.resultado{}",
+        "descricao": "Todo o memorial de cálculo persistido: impostos, comissão, valor líquido, multa e valor final de devolução."
+      },
+      {
+        "campo": "numero_calculo (EST-XXXX) / status",
+        "descricao": "rascunho → finalizado → vinculado (quando associado a uma Tratativa de estorno) ou cancelado."
+      }
+    ],
+    "regras_negocio": [
+      "O cálculo tem como entrada valor_nota_fiscal, valor_contratado e tempo_uso (convertido sempre para dias) — a fórmula completa está em src/components/ferramentas/calculos.jsx."
+    ],
+    "integracoes": [
+      "Pode ser referenciado por uma Tratativa de contestação/devolução financeira, mas a vinculação (tratativa_id/ticket_zendesk) é manual, sem FK automática no banco."
+    ]
+  },
+  {
+    "id": "como-funciona",
+    "categoria": "Sistema",
+    "nome": "Como Funciona (Onboarding)",
+    "paginas": [
+      "src/pages/ComoFunciona.jsx"
+    ],
+    "entidades": [],
+    "objetivo": "Guia interativo de onboarding com instruções passo a passo de como usar cada módulo do sistema, separado por perfil (gestor e agente). Visível a todos no menu Principal.",
+    "fluxo": "Renderiza abas por perfil (Gestor/Agente) → cada módulo listado com ícone, descrição e lista de \"como usar\" → accordion expansível por módulo.",
+    "campos_chave": [
+      {
+        "campo": "modulosGestor / modulosAgente",
+        "descricao": "Arrays hardcoded no componente descrevendo cada módulo do sistema, seu propósito e passo a passo de uso — é documentação embutida na UI."
+      }
+    ],
+    "regras_negocio": [
+      "Conteúdo estático (hardcoded) — não lê do banco; precisa ser atualizado manualmente quando módulos mudam."
+    ],
+    "integracoes": [
+      "Referencia todos os módulos descritivamente — não consome nem grava dados."
+    ]
+  },
+  {
+    "id": "documentacao-tecnica",
+    "categoria": "Sistema",
+    "nome": "Documentação Técnica",
+    "paginas": [
+      "src/components/documentacao/DocumentacaoTecnica.jsx",
+      "src/components/documentacao/ModuloDocCard.jsx",
+      "src/components/documentacao/dadosOperacoes.js",
+      "src/components/documentacao/dadosGestaoPessoas.js",
+      "src/components/documentacao/dadosComunicacao.js",
+      "src/components/documentacao/dadosSistema.js"
+    ],
+    "entidades": [],
+    "objetivo": "Documentação técnica estruturada de todos os módulos do sistema: objetivo, páginas/componentes, entidades, fluxo de negócio, campos-chave, regras de negócio e integrações. Permite busca e exportação (JSON e Markdown) para repassar contexto a outra IA ou consultor replicar o sistema.",
+    "fluxo": "Carrega TODOS_MODULOS (concatenação dos 4 arquivos de dados) → filtra por termo de busca → agrupa por categoria (Operações/Gestão de Pessoas/Comunicação/Sistema) → exibe em accordions via ModuloDocCard. Botão de exportação gera arquivo .md completo para download.",
+    "campos_chave": [
+      {
+        "campo": "TODOS_MODULOS",
+        "descricao": "Array único com todos os módulos — cada módulo tem: id, categoria, nome, paginas[], entidades[], objetivo, fluxo, campos_chave[], regras_negocio[], integracoes[]. É a fonte de verdade da documentação."
+      },
+      {
+        "campo": "Exportar Markdown",
+        "descricao": "Gera um arquivo .md estruturado com TODOS os módulos, entidades e regras — formatado para outra IA entender a arquitetura e replicar o sistema."
+      }
+    ],
+    "regras_negocio": [
+      "A documentação é mantida em arquivos JS (dados*.js) — precisa ser atualizada manualmente quando o sistema evolui.",
+      "A exportação .md inclui sumário, índice de entidades e seção por categoria."
+    ],
+    "integracoes": [
+      "Referencia todos os módulos e entidades do sistema de forma descritiva."
+    ]
+  },
+  {
+    "id": "infraestrutura-tecnica",
+    "categoria": "Sistema",
+    "nome": "Infraestrutura Técnica e Padrões",
+    "paginas": [
+      "src/App.jsx",
+      "src/Layout.jsx",
+      "src/main.jsx",
+      "src/lib/AuthContext.jsx",
+      "src/lib/query-client.js",
+      "src/components/ProtectedRoute.jsx",
+      "src/components/ui/ErrorBoundary.jsx",
+      "src/components/utils/helpers.jsx",
+      "src/components/utils/SafeRoute.jsx",
+      "src/components/utils/RouteGuard.jsx"
+    ],
+    "entidades": [
+      "User (built-in)",
+      "Colaborador",
+      "PermissaoModulo"
+    ],
+    "objetivo": "Camada de infraestrutura compartilhada: roteamento (React Router), autenticação (AuthProvider da plataforma), cache de dados (React Query), layout/sidebar dinâmico, utilitários de data/moeda/cálculo, error boundaries e guards de rota.",
+    "fluxo": "App.jsx envolve tudo em AuthProvider → QueryClientProvider → Router → NavigationTracker. AuthenticatedApp verifica auth (isLoadingAuth/authError) e renderiza Routes. Layout.jsx busca user + Colaborador + PermissaoModulo, monta Sidebar com permissões e ErrorBoundary aninhado por página.",
+    "campos_chave": [
+      {
+        "campo": "AuthContext (useAuth)",
+        "descricao": "Provê isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin. Erro tipo \"user_not_registered\" renderiza UserNotRegisteredError; \"auth_required\" redireciona para login."
+      },
+      {
+        "campo": "Layout.jsx → Sidebar.podeVerModulo",
+        "descricao": "Monta o menu dinamicamente: cada item tem gestorOnly (bool) e é filtrado por PermissaoModulo (visivel_para_agente/visivel_para_gestor + colaboradores_excecao). Item sem PermissaoModulo = permitido por padrão."
+      },
+      {
+        "campo": "helpers.jsx",
+        "descricao": "Núcleo de utilitários: formatDateSP/nowSP/todaySP (fuso São Paulo), getCurrentTrimester, calculateTratativaPoints (pontuação), calcularTempoEfetivo, calcularCustoOperacional, calcularReceitaMensalEquivalente, formatBRL, PLANOS_CLIENTE, labels de status/tipo/prioridade."
+      },
+      {
+        "campo": "CurrencyInput",
+        "descricao": "Componente de input monetário com acumulador de centavos — garante precisão sem erros de casas decimais. Contrato de dado: sempre number (centavos), nunca string."
+      },
+      {
+        "campo": "ErrorBoundary",
+        "descricao": "Captura erros de renderização por página (aninhado em Layout) — evita que uma página quebrada derrube o app inteiro."
+      }
+    ],
+    "regras_negocio": [
+      "Vínculo usuário↔colaborador é por email (colaboradores.find(c => c.email === user.email)) — não há FK no banco.",
+      "Datas persistidas em ISO (UTC); exibição sempre em fuso de São Paulo (formatDateSP/todaySP).",
+      "Todos os inputs monetários seguem o padrão acumulador de centavos (CurrencyInput) — cálculos financeiros sempre com number, nunca string parseada.",
+      "RLS não configurado no banco — toda segregação de acesso é feita no cliente (filtro por colaborador_id + checagem de papel)."
+    ],
+    "integracoes": [
+      "Camada base consumida por todas as páginas e componentes do sistema."
+    ]
+  }
+]

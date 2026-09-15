@@ -1,0 +1,102 @@
+{
+  "name": "PlanoSetorial",
+  "type": "object",
+  "properties": {
+    "titulo": {
+      "type": "string",
+      "description": "T\u00edtulo do plano"
+    },
+    "periodo": {
+      "type": "string",
+      "description": "Per\u00edodo de vig\u00eancia"
+    },
+    "estrategias": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Estrat\u00e9gias definidas"
+    },
+    "objetivos": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "descricao": {
+            "type": "string"
+          },
+          "meta": {
+            "type": "string"
+          },
+          "prazo": {
+            "type": "string",
+            "format": "date"
+          }
+        }
+      },
+      "description": "Objetivos do plano"
+    },
+    "acoes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "descricao": {
+            "type": "string"
+          },
+          "responsavel": {
+            "type": "string"
+          },
+          "prazo": {
+            "type": "string",
+            "format": "date"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pendente",
+              "em_andamento",
+              "concluida"
+            ]
+          }
+        }
+      },
+      "description": "A\u00e7\u00f5es planejadas"
+    },
+    "indicadores": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "nome": {
+            "type": "string"
+          },
+          "meta": {
+            "type": "number"
+          },
+          "atual": {
+            "type": "number"
+          },
+          "unidade": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Indicadores de acompanhamento"
+    },
+    "criado_por_id": {
+      "type": "string"
+    },
+    "criado_por_nome": {
+      "type": "string"
+    },
+    "data_criacao": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "titulo",
+    "periodo"
+  ]
+}

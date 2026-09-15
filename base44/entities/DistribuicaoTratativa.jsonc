@@ -1,0 +1,91 @@
+{
+  "name": "DistribuicaoTratativa",
+  "type": "object",
+  "properties": {
+    "agente_id": {
+      "type": "string",
+      "description": "ID do colaborador que recebeu a tratativa"
+    },
+    "agente_nome": {
+      "type": "string",
+      "description": "Nome do agente"
+    },
+    "ticket_id": {
+      "type": "string",
+      "description": "ID do ticket da tratativa"
+    },
+    "tipo_tratativa": {
+      "type": "string",
+      "enum": [
+        "google_meu_negocio",
+        "reclame_aqui",
+        "reclamacao_interna",
+        "contestacao_compra",
+        "procon"
+      ],
+      "description": "Tipo da tratativa distribu\u00edda"
+    },
+    "prioridade": {
+      "type": "string",
+      "enum": [
+        "baixa",
+        "media",
+        "alta",
+        "critica"
+      ],
+      "default": "media"
+    },
+    "data_atribuicao": {
+      "type": "string",
+      "format": "date",
+      "description": "Data da atribui\u00e7\u00e3o"
+    },
+    "horario_atribuicao": {
+      "type": "string",
+      "description": "Hor\u00e1rio da atribui\u00e7\u00e3o (HH:MM)"
+    },
+    "turno": {
+      "type": "string",
+      "enum": [
+        "manha",
+        "tarde"
+      ],
+      "description": "Turno de atribui\u00e7\u00e3o"
+    },
+    "gestor_id": {
+      "type": "string",
+      "description": "ID do gestor que realizou a distribui\u00e7\u00e3o"
+    },
+    "gestor_nome": {
+      "type": "string",
+      "description": "Nome do gestor"
+    },
+    "observacao": {
+      "type": "string",
+      "description": "Observa\u00e7\u00e3o opcional"
+    },
+    "override_rodizio": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se a lideran\u00e7a optou por ignorar a sugest\u00e3o do rod\u00edzio"
+    },
+    "justificativa_override": {
+      "type": "string",
+      "description": "Justificativa quando houve override do rod\u00edzio"
+    },
+    "agente_sugerido_id": {
+      "type": "string",
+      "description": "ID do agente que o rod\u00edzio sugeria"
+    },
+    "agente_sugerido_nome": {
+      "type": "string",
+      "description": "Nome do agente sugerido pelo rod\u00edzio"
+    }
+  },
+  "required": [
+    "agente_id",
+    "ticket_id",
+    "tipo_tratativa",
+    "data_atribuicao"
+  ]
+}

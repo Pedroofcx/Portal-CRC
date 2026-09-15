@@ -1,0 +1,70 @@
+{
+  "name": "AcionamentoN2",
+  "type": "object",
+  "properties": {
+    "tratativa_id": {
+      "type": "string",
+      "description": "ID da Tratativa vinculada"
+    },
+    "tratativa_id_interno": {
+      "type": "string",
+      "description": "ID interno da tratativa (TRT-XXXX)"
+    },
+    "tratativa_nome_cliente": {
+      "type": "string",
+      "description": "Nome do cliente da tratativa"
+    },
+    "tratativa_tipo": {
+      "type": "string",
+      "description": "Tipo/canal da tratativa (PROCON, GMN, RA, etc)"
+    },
+    "agente_n2_id": {
+      "type": "string",
+      "description": "ID do Agente N2 acionado"
+    },
+    "agente_n2_nome": {
+      "type": "string",
+      "description": "Nome do Agente N2 acionado"
+    },
+    "agente_n2_ordem": {
+      "type": "number",
+      "description": "Posi\u00e7\u00e3o do agente no rod\u00edzio no momento do acionamento"
+    },
+    "tipo_acionamento": {
+      "type": "string",
+      "enum": [
+        "rodizio",
+        "supervisor"
+      ],
+      "description": "Tipo de acionamento: rod\u00edzio autom\u00e1tico ou escolha de supervisor"
+    },
+    "usuario_id": {
+      "type": "string",
+      "description": "ID do usu\u00e1rio que realizou o acionamento"
+    },
+    "usuario_nome": {
+      "type": "string",
+      "description": "Nome do usu\u00e1rio que realizou o acionamento"
+    },
+    "status_n2_momento": {
+      "type": "string",
+      "enum": [
+        "permitido",
+        "ferias",
+        "bloqueado"
+      ],
+      "description": "Status do agente N2 no momento do acionamento"
+    },
+    "data_acionamento": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Data e hora do acionamento"
+    }
+  },
+  "required": [
+    "tratativa_id",
+    "agente_n2_id",
+    "tipo_acionamento",
+    "data_acionamento"
+  ]
+}

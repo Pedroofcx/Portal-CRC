@@ -1,0 +1,46 @@
+import React from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { DollarSign, TrendingDown } from 'lucide-react';
+import { formatBRL } from '@/components/utils/helpers';
+
+// Restrito: só deve ser renderizado quando o usuário logado é gestor.
+export default function CustoOperacionalCard({ tratativa }) {
+  const temDados = tratativa.custo_operacional_reais > 0 || tratativa.teve_churn || tratativa.valor_perda_receita > 0;
+  if (!temDados) return null;
+
+  return (
+    <Card className="border-0 shadow-sm bg-slate-900 text-white">
+      <CardHeader className="pb-2">
+        <CardTitle className="text-sm font-medium text-slate-300 flex items-center gap-2">
+          <DollarSign className="w-4 h-4" />
+          Impacto Financeiro (restrito)
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-2 text-sm">
+        {tratativa.custo_operacional_reais > 0 && (
+          <div className="flex justify-between">
+            <span className="text-slate-400">Custo operacional</span>
+            <span className="font-semibold">
+              {formatBRL(tratativa.custo_operacional_reais)}
+            </span>
+          </div>
+        )}
+        {tratativa.valor_perda_receita > 0 && (
+          <div className="flex justify-between">
+            <span className="text-slate-400">Perda de receita estimada</span>
+            <span className="font-semibold">
+              {formatBRL(tratativa.valor_perda_receita)}
+            </span>
+          </div>
+        )}
+        {tratativa.teve_churn && (
+          <Badge className="bg-red-500/20 text-red-300 border-red-500/40 flex items-center gap-1 w-fit">
+            <TrendingDown className="w-3 h-3" />
+            Churn registrado
+          </Badge>
+        )}
+      </CardContent>
+    </Card>
+  );
+}

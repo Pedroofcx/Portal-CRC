@@ -1,0 +1,169 @@
+{
+  "name": "EstornoParcial",
+  "type": "object",
+  "properties": {
+    "numero_calculo": {
+      "type": "string",
+      "description": "N\u00famero sequencial (EST-XXXX)"
+    },
+    "ticket_zendesk": {
+      "type": "string"
+    },
+    "tratativa_id": {
+      "type": "string"
+    },
+    "tratativa_id_interno": {
+      "type": "string"
+    },
+    "nome_cliente": {
+      "type": "string"
+    },
+    "documento_cliente": {
+      "type": "string",
+      "description": "CPF ou CNPJ"
+    },
+    "operador_id": {
+      "type": "string"
+    },
+    "operador_nome": {
+      "type": "string"
+    },
+    "data_solicitacao": {
+      "type": "string",
+      "format": "date"
+    },
+    "tipo_estorno": {
+      "type": "string",
+      "enum": [
+        "contestacao_compra",
+        "reclamacao_interna",
+        "cancelamento",
+        "devolucao_proporcional",
+        "ajuste_financeiro",
+        "reclame_aqui",
+        "procon",
+        "outros"
+      ]
+    },
+    "classificacao_plano": {
+      "type": "string",
+      "enum": [
+        "bronze",
+        "prata",
+        "ouro",
+        "platina",
+        "outros"
+      ],
+      "description": "Classifica\u00e7\u00e3o informativa do plano contratado"
+    },
+    "tipo_plano": {
+      "type": "string",
+      "enum": [
+        "mensal",
+        "trimestral",
+        "semestral",
+        "anual"
+      ],
+      "description": "Tipo de plano contratado"
+    },
+    "meses_usados": {
+      "type": "number"
+    },
+    "dias_adicionais": {
+      "type": "number"
+    },
+    "valor_nota_fiscal": {
+      "type": "number"
+    },
+    "valor_contratado": {
+      "type": "number"
+    },
+    "tempo_uso_valor": {
+      "type": "number"
+    },
+    "tempo_uso_unidade": {
+      "type": "string",
+      "enum": [
+        "dias",
+        "semanas",
+        "meses"
+      ]
+    },
+    "tempo_uso_dias_convertido": {
+      "type": "number"
+    },
+    "percentuais_snapshot": {
+      "type": "object",
+      "properties": {
+        "iss": {
+          "type": "number"
+        },
+        "pis": {
+          "type": "number"
+        },
+        "cofins": {
+          "type": "number"
+        },
+        "irpj": {
+          "type": "number"
+        },
+        "csll": {
+          "type": "number"
+        },
+        "comissao_vendedor": {
+          "type": "number"
+        },
+        "multa_contratual": {
+          "type": "number"
+        }
+      }
+    },
+    "resultado": {
+      "type": "object",
+      "properties": {
+        "total_impostos_pct": {
+          "type": "number"
+        },
+        "total_impostos_valor": {
+          "type": "number"
+        },
+        "comissao_valor": {
+          "type": "number"
+        },
+        "total_descontos_valor": {
+          "type": "number"
+        },
+        "valor_liquido": {
+          "type": "number"
+        },
+        "valor_sem_multa": {
+          "type": "number"
+        },
+        "valor_multa": {
+          "type": "number"
+        },
+        "valor_final_devolucao": {
+          "type": "number"
+        }
+      }
+    },
+    "observacao_operacional": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "rascunho",
+        "finalizado",
+        "vinculado",
+        "cancelado"
+      ],
+      "default": "rascunho"
+    }
+  },
+  "required": [
+    "nome_cliente",
+    "valor_nota_fiscal",
+    "tipo_estorno"
+  ]
+}

@@ -1,0 +1,47 @@
+{
+  "name": "TipoTratativa",
+  "type": "object",
+  "properties": {
+    "nome": {
+      "type": "string",
+      "description": "Nome do tipo de tratativa"
+    },
+    "chave": {
+      "type": "string",
+      "description": "Chave \u00fanica do tipo (ex: reclamacao_interna)"
+    },
+    "descricao": {
+      "type": "string",
+      "description": "Descri\u00e7\u00e3o do tipo"
+    },
+    "sla_horas": {
+      "type": "number",
+      "default": 24,
+      "description": "SLA padr\u00e3o em horas"
+    },
+    "permite_reabertura": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se permite controle de reabertura"
+    },
+    "campos_especificos": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Campos espec\u00edficos que este tipo utiliza"
+    },
+    "ativa": {
+      "type": "boolean",
+      "default": true
+    },
+    "cor": {
+      "type": "string",
+      "description": "Cor do badge (hex)"
+    }
+  },
+  "required": [
+    "nome",
+    "chave"
+  ]
+}

@@ -1,0 +1,46 @@
+{
+  "name": "MotivoTratativa",
+  "type": "object",
+  "properties": {
+    "motivo": {
+      "type": "string",
+      "description": "Nome do motivo principal"
+    },
+    "descricao": {
+      "type": "string",
+      "description": "Descri\u00e7\u00e3o do motivo"
+    },
+    "submotivos": {
+      "type": "array",
+      "description": "Lista de submotivos associados",
+      "items": {
+        "type": "string"
+      }
+    },
+    "cor": {
+      "type": "string",
+      "description": "Cor do badge (hex)",
+      "default": "#3B82F6"
+    },
+    "ativo": {
+      "type": "boolean",
+      "default": true
+    },
+    "ordem": {
+      "type": "number",
+      "description": "Ordem de exibi\u00e7\u00e3o"
+    },
+    "esforco_correcao_ti": {
+      "type": "string",
+      "enum": [
+        "Baixo",
+        "Medio",
+        "Alto"
+      ],
+      "description": "Esfor\u00e7o estimado de TI/Produto para corrigir a causa raiz deste motivo \u2014 usado na Matriz de Esfor\u00e7o x Impacto"
+    }
+  },
+  "required": [
+    "motivo"
+  ]
+}

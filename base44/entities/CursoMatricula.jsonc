@@ -1,0 +1,48 @@
+{
+  "name": "CursoMatricula",
+  "type": "object",
+  "properties": {
+    "curso_id": {
+      "type": "string",
+      "description": "ID do curso"
+    },
+    "curso_titulo": {
+      "type": "string",
+      "description": "T\u00edtulo do curso"
+    },
+    "colaborador_id": {
+      "type": "string",
+      "description": "ID do colaborador"
+    },
+    "colaborador_nome": {
+      "type": "string",
+      "description": "Nome do colaborador"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "inscrito",
+        "em_andamento",
+        "concluido"
+      ],
+      "default": "inscrito"
+    },
+    "progresso": {
+      "type": "number",
+      "default": 0,
+      "description": "Percentual de progresso"
+    },
+    "data_inscricao": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "data_conclusao": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "curso_id",
+    "colaborador_id"
+  ]
+}

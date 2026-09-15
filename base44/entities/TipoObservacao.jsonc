@@ -1,0 +1,25 @@
+{
+  "name": "TipoObservacao",
+  "type": "object",
+  "properties": {
+    "nome": {
+      "type": "string",
+      "description": "Nome do tipo de observa\u00e7\u00e3o"
+    },
+    "descricao": {
+      "type": "string",
+      "description": "Descri\u00e7\u00e3o do tipo"
+    },
+    "cor": {
+      "type": "string",
+      "description": "Cor do badge (hex)"
+    },
+    "ativa": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "required": [
+    "nome"
+  ]
+}

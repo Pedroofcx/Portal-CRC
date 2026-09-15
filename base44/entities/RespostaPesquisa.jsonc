@@ -1,0 +1,83 @@
+{
+  "name": "RespostaPesquisa",
+  "type": "object",
+  "properties": {
+    "pesquisa_id": {
+      "type": "string"
+    },
+    "pesquisa_titulo": {
+      "type": "string"
+    },
+    "pesquisa_tipo": {
+      "type": "string"
+    },
+    "colaborador_id": {
+      "type": "string"
+    },
+    "colaborador_nome": {
+      "type": "string"
+    },
+    "respostas": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "pergunta_id": {
+            "type": "string"
+          },
+          "pergunta_texto": {
+            "type": "string"
+          },
+          "resposta": {
+            "type": "string"
+          },
+          "respostas_multiplas": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Para perguntas de m\u00faltipla escolha com v\u00e1rias sele\u00e7\u00f5es"
+          }
+        }
+      }
+    },
+    "confirmou_leitura": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se confirmou que leu a pesquisa"
+    },
+    "data_leitura": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Data/hora da confirma\u00e7\u00e3o de leitura"
+    },
+    "data_resposta": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Data/hora do envio das respostas"
+    },
+    "nota_calculada": {
+      "type": "number",
+      "description": "Nota calculada para CSAT/NPS (0-10)"
+    },
+    "sentimento": {
+      "type": "string",
+      "enum": [
+        "positivo",
+        "neutro",
+        "negativo"
+      ],
+      "description": "Sentimento geral da resposta"
+    },
+    "contribuiu_health_score": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se j\u00e1 contribuiu para o c\u00e1lculo do Health Score"
+    }
+  },
+  "required": [
+    "pesquisa_id",
+    "colaborador_id",
+    "respostas"
+  ]
+}

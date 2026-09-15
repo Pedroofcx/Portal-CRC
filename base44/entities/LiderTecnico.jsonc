@@ -1,0 +1,34 @@
+{
+  "name": "LiderTecnico",
+  "type": "object",
+  "properties": {
+    "colaborador_nome": {
+      "type": "string",
+      "description": "Nome do L\u00edder T\u00e9cnico"
+    },
+    "ordem": {
+      "type": "number",
+      "description": "Ordem no rod\u00edzio (1, 2, 3...)"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "permitido",
+        "ferias",
+        "bloqueado"
+      ],
+      "default": "permitido",
+      "description": "Status do l\u00edder t\u00e9cnico no rod\u00edzio"
+    },
+    "ativo": {
+      "type": "boolean",
+      "default": true,
+      "description": "Se o l\u00edder ainda participa do rod\u00edzio"
+    }
+  },
+  "required": [
+    "colaborador_nome",
+    "ordem",
+    "status"
+  ]
+}

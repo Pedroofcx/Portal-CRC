@@ -1,0 +1,71 @@
+{
+  "name": "Aviso",
+  "type": "object",
+  "properties": {
+    "titulo": {
+      "type": "string",
+      "description": "T\u00edtulo do aviso"
+    },
+    "conteudo": {
+      "type": "string",
+      "description": "Conte\u00fado do aviso"
+    },
+    "tipo": {
+      "type": "string",
+      "enum": [
+        "informativo",
+        "urgente",
+        "alerta",
+        "comunicado"
+      ],
+      "default": "informativo"
+    },
+    "prioridade": {
+      "type": "string",
+      "enum": [
+        "baixa",
+        "media",
+        "alta"
+      ],
+      "default": "media"
+    },
+    "destinatarios": {
+      "type": "string",
+      "enum": [
+        "todos",
+        "agentes",
+        "gestores"
+      ],
+      "default": "todos"
+    },
+    "data_publicacao": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "data_expiracao": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "autor_id": {
+      "type": "string"
+    },
+    "autor_nome": {
+      "type": "string"
+    },
+    "ativo": {
+      "type": "boolean",
+      "default": true
+    },
+    "lido_por": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "IDs dos usu\u00e1rios que leram"
+    }
+  },
+  "required": [
+    "titulo",
+    "conteudo"
+  ]
+}

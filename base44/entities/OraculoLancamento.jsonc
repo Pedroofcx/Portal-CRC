@@ -1,0 +1,90 @@
+{
+  "name": "OraculoLancamento",
+  "type": "object",
+  "properties": {
+    "colaborador_id": {
+      "type": "string",
+      "description": "ID do colaborador observado"
+    },
+    "colaborador_nome": {
+      "type": "string",
+      "description": "Nome do colaborador"
+    },
+    "gestor_id": {
+      "type": "string",
+      "description": "ID do gestor que fez o lan\u00e7amento"
+    },
+    "gestor_nome": {
+      "type": "string",
+      "description": "Nome do gestor"
+    },
+    "pergunta_gerada": {
+      "type": "string",
+      "description": "Pergunta estrat\u00e9gica gerada pelo sistema"
+    },
+    "palavras_chave": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "palavra": {
+            "type": "string"
+          },
+          "categoria": {
+            "type": "string"
+          },
+          "origem": {
+            "type": "string",
+            "enum": [
+              "dicionario",
+              "manual"
+            ]
+          }
+        }
+      },
+      "description": "Palavras-chave selecionadas"
+    },
+    "soft_skills": {
+      "type": "object",
+      "description": "Pontua\u00e7\u00e3o de soft skills (1-5)",
+      "additionalProperties": {
+        "type": "number"
+      }
+    },
+    "hard_skills": {
+      "type": "object",
+      "description": "Pontua\u00e7\u00e3o de hard skills (1-5)",
+      "additionalProperties": {
+        "type": "number"
+      }
+    },
+    "texto_livre": {
+      "type": "string",
+      "description": "Observa\u00e7\u00e3o contextual opcional"
+    },
+    "contexto_performance": {
+      "type": "object",
+      "description": "Snapshot do contexto de performance",
+      "properties": {
+        "csat_recente": {
+          "type": "number"
+        },
+        "tratativas_periodo": {
+          "type": "number"
+        },
+        "pontos_trimestre": {
+          "type": "number"
+        }
+      }
+    },
+    "data_lancamento": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "colaborador_id",
+    "gestor_id",
+    "palavras_chave"
+  ]
+}

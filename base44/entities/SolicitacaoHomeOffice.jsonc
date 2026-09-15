@@ -1,0 +1,142 @@
+{
+  "name": "SolicitacaoHomeOffice",
+  "type": "object",
+  "properties": {
+    "colaborador_id": {
+      "type": "string",
+      "description": "ID do colaborador solicitante"
+    },
+    "colaborador_nome": {
+      "type": "string",
+      "description": "Nome do colaborador"
+    },
+    "semana_inicio": {
+      "type": "string",
+      "format": "date",
+      "description": "Primeiro dia da semana solicitada"
+    },
+    "semana_fim": {
+      "type": "string",
+      "format": "date",
+      "description": "\u00daltimo dia da semana solicitada"
+    },
+    "dias_escolhidos": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "format": "date"
+      },
+      "description": "Datas espec\u00edficas escolhidas para home office"
+    },
+    "dias_semana_escolhidos": {
+      "type": "array",
+      "items": {
+        "type": "number"
+      },
+      "description": "Dias da semana escolhidos (0=domingo, 1=segunda, etc)"
+    },
+    "justificativa": {
+      "type": "string",
+      "description": "Justificativa do colaborador"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pendente",
+        "aprovada",
+        "recusada",
+        "cancelada"
+      ],
+      "default": "pendente",
+      "description": "Status da solicita\u00e7\u00e3o"
+    },
+    "data_solicitacao": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Data/hora da solicita\u00e7\u00e3o"
+    },
+    "data_resposta": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Data/hora da aprova\u00e7\u00e3o/recusa"
+    },
+    "aprovador_id": {
+      "type": "string",
+      "description": "ID do gestor que aprovou/recusou"
+    },
+    "aprovador_nome": {
+      "type": "string",
+      "description": "Nome do gestor"
+    },
+    "motivo_recusa": {
+      "type": "string",
+      "description": "Motivo da recusa (obrigat\u00f3rio se recusada)"
+    },
+    "validacoes": {
+      "type": "object",
+      "properties": {
+        "regra_2_semanas_mes": {
+          "type": "boolean",
+          "description": "Valida\u00e7\u00e3o: m\u00e1ximo 2 semanas no m\u00eas"
+        },
+        "regra_nao_consecutivas": {
+          "type": "boolean",
+          "description": "Valida\u00e7\u00e3o: semanas n\u00e3o consecutivas"
+        },
+        "regra_intervalo_5_dias": {
+          "type": "boolean",
+          "description": "Valida\u00e7\u00e3o: intervalo m\u00ednimo de 5 dias \u00fateis"
+        },
+        "regra_dias_elegiveis": {
+          "type": "boolean",
+          "description": "Valida\u00e7\u00e3o: dias dentro do padr\u00e3o eleg\u00edvel"
+        },
+        "regra_prazo_minimo": {
+          "type": "boolean",
+          "description": "Valida\u00e7\u00e3o: solicita\u00e7\u00e3o dentro do prazo"
+        },
+        "regra_minimo_presencial": {
+          "type": "boolean",
+          "description": "Valida\u00e7\u00e3o: m\u00ednimo 2 colaboradores presenciais"
+        },
+        "regra_click_day": {
+          "type": "boolean",
+          "description": "Valida\u00e7\u00e3o: n\u00e3o coincide com Click Day"
+        },
+        "regra_reuniao_obrigatoria": {
+          "type": "boolean",
+          "description": "Valida\u00e7\u00e3o: n\u00e3o coincide com reuni\u00e3o obrigat\u00f3ria"
+        }
+      },
+      "description": "Valida\u00e7\u00f5es aplicadas automaticamente"
+    },
+    "alertas": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Alertas de valida\u00e7\u00e3o para o gestor"
+    },
+    "mes_referencia": {
+      "type": "string",
+      "description": "M\u00eas de refer\u00eancia (YYYY-MM)"
+    },
+    "prazo_solicitacao_dias": {
+      "type": "number",
+      "default": 7,
+      "description": "Prazo m\u00ednimo em dias para solicitar"
+    },
+    "fora_do_prazo": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se a solicita\u00e7\u00e3o foi feita fora do prazo m\u00ednimo"
+    }
+  },
+  "required": [
+    "colaborador_id",
+    "semana_inicio",
+    "semana_fim",
+    "dias_escolhidos",
+    "mes_referencia"
+  ]
+}

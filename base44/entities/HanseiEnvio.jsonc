@@ -1,0 +1,102 @@
+{
+  "name": "HanseiEnvio",
+  "type": "object",
+  "properties": {
+    "colaborador_id": {
+      "type": "string",
+      "description": "ID do colaborador destinat\u00e1rio"
+    },
+    "colaborador_nome": {
+      "type": "string",
+      "description": "Nome do colaborador"
+    },
+    "periodo_inicio": {
+      "type": "string",
+      "format": "date",
+      "description": "In\u00edcio do per\u00edodo de an\u00e1lise"
+    },
+    "periodo_fim": {
+      "type": "string",
+      "format": "date",
+      "description": "Fim do per\u00edodo de an\u00e1lise"
+    },
+    "periodicidade": {
+      "type": "string",
+      "enum": [
+        "diario",
+        "semanal",
+        "mensal",
+        "personalizado"
+      ],
+      "default": "semanal",
+      "description": "Frequ\u00eancia de envio"
+    },
+    "dados_consolidados": {
+      "type": "object",
+      "properties": {
+        "tratativas_solucionadas": {
+          "type": "number",
+          "default": 0
+        },
+        "tratativas_em_aberto": {
+          "type": "number",
+          "default": 0
+        },
+        "csat_individual": {
+          "type": "number"
+        },
+        "chats_atendidos": {
+          "type": "number",
+          "default": 0
+        },
+        "ligacoes_atendidas": {
+          "type": "number",
+          "default": 0
+        },
+        "slas_cumpridos": {
+          "type": "number",
+          "default": 0
+        },
+        "slas_estourados": {
+          "type": "number",
+          "default": 0
+        },
+        "performance_percentual": {
+          "type": "number"
+        },
+        "pontuacao_trimestre": {
+          "type": "number"
+        }
+      }
+    },
+    "comentario_gestor": {
+      "type": "string",
+      "description": "Coment\u00e1rio do gestor sobre o desempenho"
+    },
+    "data_envio": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Data/hora do envio"
+    },
+    "enviado_por_id": {
+      "type": "string"
+    },
+    "enviado_por_nome": {
+      "type": "string"
+    },
+    "visualizado": {
+      "type": "boolean",
+      "default": false
+    },
+    "data_visualizacao": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "colaborador_id",
+    "periodo_inicio",
+    "periodo_fim",
+    "periodicidade"
+  ]
+}

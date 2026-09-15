@@ -1,0 +1,39 @@
+{
+  "name": "CicloTrimestral",
+  "type": "object",
+  "properties": {
+    "nome": {
+      "type": "string",
+      "description": "Nome do ciclo (ex: Ciclo 1 \u2013 Mar/Abr/Mai)"
+    },
+    "data_inicio": {
+      "type": "string",
+      "format": "date",
+      "description": "Data de in\u00edcio do per\u00edodo de avalia\u00e7\u00e3o"
+    },
+    "data_fim": {
+      "type": "string",
+      "format": "date",
+      "description": "Data de t\u00e9rmino do per\u00edodo de avalia\u00e7\u00e3o"
+    },
+    "mes_pagamento": {
+      "type": "string",
+      "description": "M\u00eas de pagamento da premia\u00e7\u00e3o (YYYY-MM)"
+    },
+    "ativo": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se \u00e9 o ciclo atualmente ativo"
+    },
+    "descricao": {
+      "type": "string",
+      "description": "Observa\u00e7\u00f5es adicionais"
+    }
+  },
+  "required": [
+    "nome",
+    "data_inicio",
+    "data_fim",
+    "mes_pagamento"
+  ]
+}

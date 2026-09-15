@@ -1,0 +1,102 @@
+{
+  "name": "CicloFerias",
+  "type": "object",
+  "properties": {
+    "colaborador_id": {
+      "type": "string",
+      "description": "ID do colaborador"
+    },
+    "colaborador_nome": {
+      "type": "string",
+      "description": "Nome do colaborador"
+    },
+    "colaborador_setor": {
+      "type": "string",
+      "description": "Setor do colaborador"
+    },
+    "data_admissao": {
+      "type": "string",
+      "format": "date",
+      "description": "Data de admiss\u00e3o (base para c\u00e1lculo dos ciclos)"
+    },
+    "aquisitivo_inicio": {
+      "type": "string",
+      "format": "date",
+      "description": "In\u00edcio do per\u00edodo aquisitivo"
+    },
+    "aquisitivo_fim": {
+      "type": "string",
+      "format": "date",
+      "description": "Fim do per\u00edodo aquisitivo"
+    },
+    "concessivo_fim": {
+      "type": "string",
+      "format": "date",
+      "description": "Data limite para concess\u00e3o (1 ano ap\u00f3s fim do aquisitivo)"
+    },
+    "dias_direito": {
+      "type": "number",
+      "default": 30,
+      "description": "Total de dias de direito (30)"
+    },
+    "abono_dias": {
+      "type": "number",
+      "default": 0,
+      "enum": [
+        0,
+        10
+      ],
+      "description": "Dias de abono (venda): 0 ou 10"
+    },
+    "fragmentos": {
+      "type": "array",
+      "description": "Per\u00edodos de f\u00e9rias agendados (at\u00e9 3)",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "data_inicio": {
+            "type": "string",
+            "format": "date"
+          },
+          "data_fim": {
+            "type": "string",
+            "format": "date"
+          },
+          "dias": {
+            "type": "number"
+          },
+          "observacao": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "dias_utilizados": {
+      "type": "number",
+      "default": 0,
+      "description": "Total de dias de f\u00e9rias j\u00e1 utilizados (excluindo abono)"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "em_aquisicao",
+        "disponivel",
+        "parcialmente_utilizado",
+        "utilizado",
+        "vencendo",
+        "vencido"
+      ],
+      "default": "em_aquisicao",
+      "description": "Status do ciclo de f\u00e9rias"
+    }
+  },
+  "required": [
+    "colaborador_id",
+    "data_admissao",
+    "aquisitivo_inicio",
+    "aquisitivo_fim"
+  ]
+}

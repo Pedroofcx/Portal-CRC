@@ -1,0 +1,79 @@
+{
+  "name": "ConfiguracaoHomeOffice",
+  "type": "object",
+  "properties": {
+    "mes_referencia": {
+      "type": "string",
+      "description": "M\u00eas de refer\u00eancia (YYYY-MM)"
+    },
+    "dias_elegiveis_home_office": {
+      "type": "array",
+      "items": {
+        "type": "number"
+      },
+      "description": "Dias da semana eleg\u00edveis para home office (0=dom, 1=seg, etc)"
+    },
+    "prazo_minimo_dias": {
+      "type": "number",
+      "default": 7,
+      "description": "Prazo m\u00ednimo em dias para solicitar home office"
+    },
+    "maximo_semanas_mes": {
+      "type": "number",
+      "default": 2,
+      "description": "M\u00e1ximo de semanas por m\u00eas que o agente pode escolher"
+    },
+    "intervalo_minimo_dias_uteis": {
+      "type": "number",
+      "default": 5,
+      "description": "Intervalo m\u00ednimo de dias \u00fateis entre semanas escolhidas"
+    },
+    "minimo_colaboradores_presenciais": {
+      "type": "number",
+      "default": 2,
+      "description": "M\u00ednimo de colaboradores presenciais por dia"
+    },
+    "click_days": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "format": "date"
+      },
+      "description": "Datas de Click Day (presen\u00e7a obrigat\u00f3ria)"
+    },
+    "reunioes_obrigatorias": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "string",
+            "format": "date"
+          },
+          "descricao": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Reuni\u00f5es obrigat\u00f3rias presenciais"
+    },
+    "liberacao_coletiva": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se h\u00e1 libera\u00e7\u00e3o coletiva tempor\u00e1ria das regras"
+    },
+    "motivo_liberacao": {
+      "type": "string",
+      "description": "Motivo da libera\u00e7\u00e3o coletiva"
+    },
+    "ativo": {
+      "type": "boolean",
+      "default": true,
+      "description": "Se o sistema de escolha est\u00e1 ativo"
+    }
+  },
+  "required": [
+    "mes_referencia",
+    "dias_elegiveis_home_office"
+  ]
+}

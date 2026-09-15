@@ -1,0 +1,503 @@
+{
+  "name": "Tratativa",
+  "type": "object",
+  "properties": {
+    "id_interno": {
+      "type": "string",
+      "description": "ID interno da tratativa (TRT-XXXX)"
+    },
+    "link_zendesk": {
+      "type": "string",
+      "description": "Link do ticket no Zendesk"
+    },
+    "link_intranet": {
+      "type": "string",
+      "description": "Link da Intranet"
+    },
+    "id_base_cliente": {
+      "type": "string",
+      "description": "ID da base do cliente"
+    },
+    "nome_cliente": {
+      "type": "string",
+      "description": "Nome completo do cliente"
+    },
+    "cliente_recorrente": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se o cliente j\u00e1 possui outras tratativas"
+    },
+    "numero_ocorrencias": {
+      "type": "number",
+      "default": 0,
+      "description": "N\u00famero de tratativas anteriores deste cliente"
+    },
+    "motivo_id": {
+      "type": "string",
+      "description": "ID do motivo selecionado"
+    },
+    "motivo_nome": {
+      "type": "string",
+      "description": "Nome do motivo principal"
+    },
+    "submotivos": {
+      "type": "array",
+      "description": "At\u00e9 3 submotivos selecionados",
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 3
+    },
+    "motivo_confirmado": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se o motivo foi confirmado no encerramento"
+    },
+    "etapa_jornada_id": {
+      "type": "string",
+      "description": "ID da etapa da jornada impactada"
+    },
+    "etapa_jornada_nome": {
+      "type": "string",
+      "description": "Nome da etapa da jornada"
+    },
+    "causa_primaria": {
+      "type": "string",
+      "enum": [
+        "processo",
+        "produto_sistema",
+        "comunicacao",
+        "expectativa_cliente",
+        "operacao_interna",
+        "terceiro"
+      ],
+      "description": "Origem raiz do problema"
+    },
+    "tipo_tratativa": {
+      "type": "string",
+      "enum": [
+        "reclamacao_interna",
+        "reclame_aqui",
+        "google_meu_negocio",
+        "contestacao"
+      ],
+      "description": "Tipo de tratativa"
+    },
+    "prioridade": {
+      "type": "string",
+      "enum": [
+        "baixa",
+        "media",
+        "alta",
+        "critica"
+      ],
+      "description": "N\u00edvel de prioridade"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "registrada",
+        "tratativa_iniciada",
+        "em_andamento",
+        "dependencia_externa",
+        "aguardando_financeiro",
+        "encerrada",
+        "aguardando_confirmacao_reabertura",
+        "excluida"
+      ],
+      "default": "registrada",
+      "description": "Estado atual (FSM)"
+    },
+    "agente_responsavel_id": {
+      "type": "string"
+    },
+    "agente_responsavel_nome": {
+      "type": "string"
+    },
+    "data_registro": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "data_inicio_tratativa": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "data_encerramento": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "tempo_total_minutos": {
+      "type": "number"
+    },
+    "sla_atribuido": {
+      "type": "number"
+    },
+    "encerrado_no_sla": {
+      "type": "boolean"
+    },
+    "houve_reabertura": {
+      "type": "boolean",
+      "default": false
+    },
+    "status_reabertura": {
+      "type": "string",
+      "enum": [
+        "aguardando",
+        "nao_houve",
+        "cliente_reabriu"
+      ]
+    },
+    "data_confirmacao_reabertura": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "solucao_replicavel": {
+      "type": "boolean",
+      "default": false
+    },
+    "solucao_replicavel_auditada": {
+      "type": "boolean",
+      "default": false
+    },
+    "solucao_replicavel_valida": {
+      "type": "boolean"
+    },
+    "descricao_solucao": {
+      "type": "string"
+    },
+    "houve_devolucao_financeira": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se houve devolu\u00e7\u00e3o de valor ao cliente"
+    },
+    "valor_devolvido_cliente": {
+      "type": "number",
+      "description": "Valor devolvido ao cliente em R$"
+    },
+    "historico_estados": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "estado_anterior": {
+            "type": "string"
+          },
+          "estado_novo": {
+            "type": "string"
+          },
+          "data_mudanca": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "usuario": {
+            "type": "string"
+          },
+          "observacao": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "nota_reclame_aqui": {
+      "type": "number",
+      "description": "Nota recebida no Reclame Aqui (7-10)"
+    },
+    "voltaria_fazer_negocio": {
+      "type": "boolean",
+      "description": "Cliente voltaria a fazer neg\u00f3cio"
+    },
+    "categoria_reclame_aqui": {
+      "type": "string",
+      "description": "Categoria da reclama\u00e7\u00e3o no Reclame Aqui"
+    },
+    "situacao_comentario_google": {
+      "type": "string",
+      "enum": [
+        "comentario_mantido",
+        "comentario_editado",
+        "comentario_excluido"
+      ],
+      "description": "Situa\u00e7\u00e3o do coment\u00e1rio no Google ap\u00f3s encerramento"
+    },
+    "reavaliacao_positiva_google": {
+      "type": "boolean"
+    },
+    "exclusao_avaliacao_negativa_google": {
+      "type": "boolean"
+    },
+    "categoria_contestacao": {
+      "type": "string",
+      "enum": [
+        "erro_cobranca",
+        "fraude",
+        "cancelamento_compra",
+        "erro_operacional",
+        "outros"
+      ],
+      "description": "Categoria do motivo da contesta\u00e7\u00e3o"
+    },
+    "tipo_resolucao_contestacao": {
+      "type": "string",
+      "enum": [
+        "cancelamento",
+        "pagamento_integral",
+        "acordo_custo_reduzido"
+      ]
+    },
+    "valor_contestacao": {
+      "type": "number"
+    },
+    "valor_recuperado": {
+      "type": "number"
+    },
+    "excluida": {
+      "type": "boolean",
+      "default": false
+    },
+    "justificativa_exclusao": {
+      "type": "string"
+    },
+    "data_exclusao": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "excluida_por_id": {
+      "type": "string"
+    },
+    "excluida_por_nome": {
+      "type": "string"
+    },
+    "numero_case_contestacao": {
+      "type": "string"
+    },
+    "motivo_contestacao": {
+      "type": "string",
+      "description": "Motivo da contesta\u00e7\u00e3o (at\u00e9 150 caracteres)"
+    },
+    "valor_contestado_inicial": {
+      "type": "number"
+    },
+    "valor_contestado_final": {
+      "type": "number"
+    },
+    "prazo_sla_dias": {
+      "type": "number"
+    },
+    "status_resolucao_contestacao": {
+      "type": "string",
+      "enum": [
+        "acordo",
+        "cancelou_contestacao",
+        "contestou_prazo_cancelamento",
+        "contestou_pagamento_duplicidade",
+        "pagou",
+        "sem_acordo",
+        "sem_contato"
+      ]
+    },
+    "status_final_contestacao": {
+      "type": "string",
+      "enum": [
+        "finalizada",
+        "cancelada",
+        "defesa_enviada"
+      ]
+    },
+    "resolvemos_contestacao": {
+      "type": "boolean"
+    },
+    "conta_bloqueada_contestacao": {
+      "type": "boolean"
+    },
+    "motivo_reducao_acordo": {
+      "type": "string",
+      "maxLength": 50,
+      "description": "Motivo da redu\u00e7\u00e3o aplicada em acordo de contesta\u00e7\u00e3o (obrigat\u00f3rio quando status_resolucao_contestacao = acordo, m\u00e1x. 50 caracteres)"
+    },
+    "congelamento_sla": {
+      "type": "object",
+      "description": "Dados de congelamento de SLA (apenas contesta\u00e7\u00f5es)",
+      "properties": {
+        "ativo": {
+          "type": "boolean",
+          "default": false
+        },
+        "data_congelamento": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "data_descongelamento": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "tempo_ativo_antes_minutos": {
+          "type": "number"
+        },
+        "tempo_total_congelado_minutos": {
+          "type": "number"
+        },
+        "data_envio_defesa": {
+          "type": "string",
+          "format": "date"
+        },
+        "congelado_por_nome": {
+          "type": "string"
+        },
+        "descongelado_por_nome": {
+          "type": "string"
+        }
+      }
+    },
+    "desfecho_contestacao": {
+      "type": "object",
+      "description": "Desfecho final ap\u00f3s retorno do financeiro",
+      "properties": {
+        "resultado": {
+          "type": "string",
+          "enum": [
+            "favor_emissor",
+            "favor_estabelecimento",
+            "protesto_recusado",
+            "outros"
+          ],
+          "description": "Resultado da contesta\u00e7\u00e3o"
+        },
+        "descricao_outros": {
+          "type": "string",
+          "description": "Descri\u00e7\u00e3o quando resultado = outros"
+        },
+        "data_desfecho": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "registrado_por": {
+          "type": "string"
+        }
+      }
+    },
+    "pontuacao_calculada": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se a pontua\u00e7\u00e3o j\u00e1 foi calculada/atribu\u00edda"
+    },
+    "teve_churn": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se o cliente cancelou/evadiu em decorr\u00eancia desta tratativa"
+    },
+    "valor_perda_receita": {
+      "type": "number",
+      "default": 0,
+      "description": "Valor de receita perdida estimado por churn decorrente desta tratativa (R$)"
+    },
+    "custo_operacional_reais": {
+      "type": "number",
+      "default": 0,
+      "description": "Custo operacional calculado automaticamente ao encerrar (tempo efetivo trabalhado x custo/minuto do agente). Campo restrito: n\u00e3o deve ser exibido para usu\u00e1rios com papel 'agente'."
+    },
+    "plano_cliente": {
+      "type": "string",
+      "enum": [
+        "Bronze",
+        "Prata",
+        "Ouro",
+        "Platina",
+        "ClickNotas",
+        "Outros"
+      ],
+      "description": "Plano contratado pelo cliente (lista fixa padronizada)"
+    },
+    "modalidade_plano": {
+      "type": "string",
+      "enum": [
+        "Mensal",
+        "Trimestral",
+        "Semestral",
+        "Anual"
+      ],
+      "description": "Modalidade de cobran\u00e7a do plano contratado"
+    },
+    "valor_contratacao_plano_atual": {
+      "type": "number",
+      "description": "Valor da contrata\u00e7\u00e3o do plano atual em R$ (respeita a modalidade de cobran\u00e7a; nunca derivar mensal/anual deste campo)"
+    },
+    "data_primeira_contratacao": {
+      "type": "string",
+      "format": "date",
+      "description": "Data em que o cliente iniciou seu relacionamento comercial com a empresa (base do tempo total de relacionamento)"
+    },
+    "data_contratacao_plano_atual": {
+      "type": "string",
+      "format": "date",
+      "description": "Data em que o cliente aderiu ao plano atualmente contratado (permite identificar upgrades/downgrades)"
+    },
+    "tempo_contrato_meses": {
+      "type": "number",
+      "description": "Tempo total de relacionamento em meses (calculado automaticamente a partir da data_primeira_contratacao; n\u00e3o deve ser preenchido manualmente)"
+    },
+    "segmento_cliente": {
+      "type": "string",
+      "description": "Segmento de mercado do cliente (ex: Varejo, Finan\u00e7as, Sa\u00fade)"
+    },
+    "lider_tecnico_id": {
+      "type": "string",
+      "description": "ID do L\u00edder T\u00e9cnico vinculado"
+    },
+    "lider_tecnico_nome": {
+      "type": "string",
+      "description": "Nome do L\u00edder T\u00e9cnico vinculado"
+    },
+    "tipo_acionamento_lider": {
+      "type": "string",
+      "enum": [
+        "rodizio",
+        "supervisor"
+      ],
+      "description": "Tipo de acionamento do l\u00edder t\u00e9cnico"
+    },
+    "data_acionamento_lider": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Data/hora do acionamento do l\u00edder t\u00e9cnico"
+    },
+    "usuario_acionamento_lider": {
+      "type": "string",
+      "description": "Usu\u00e1rio que realizou o acionamento do l\u00edder t\u00e9cnico"
+    },
+    "n2_id": {
+      "type": "string",
+      "description": "ID do Agente N2 vinculado"
+    },
+    "n2_nome": {
+      "type": "string",
+      "description": "Nome do Agente N2 vinculado"
+    },
+    "tipo_acionamento_n2": {
+      "type": "string",
+      "enum": [
+        "rodizio",
+        "supervisor"
+      ],
+      "description": "Tipo de acionamento do N2"
+    },
+    "data_acionamento_n2": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Data/hora do acionamento do N2"
+    },
+    "usuario_acionamento_n2": {
+      "type": "string",
+      "description": "Usu\u00e1rio que realizou o acionamento do N2"
+    }
+  },
+  "required": [
+    "link_zendesk",
+    "link_intranet",
+    "id_base_cliente",
+    "nome_cliente",
+    "tipo_tratativa",
+    "prioridade",
+    "motivo_id",
+    "submotivos"
+  ]
+}

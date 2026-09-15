@@ -1,0 +1,121 @@
+{
+  "name": "Colaborador",
+  "type": "object",
+  "properties": {
+    "nome_completo": {
+      "type": "string",
+      "description": "Nome completo do colaborador"
+    },
+    "email": {
+      "type": "string",
+      "description": "E-mail corporativo (usado como login)"
+    },
+    "cargo_atual": {
+      "type": "string",
+      "description": "Cargo atual do colaborador"
+    },
+    "salario": {
+      "type": "number",
+      "description": "Sal\u00e1rio do colaborador (vis\u00edvel apenas para gestores)"
+    },
+    "historico_cargos": {
+      "type": "array",
+      "description": "Hist\u00f3rico de cargos anteriores",
+      "items": {
+        "type": "object",
+        "properties": {
+          "cargo": {
+            "type": "string"
+          },
+          "data_inicio": {
+            "type": "string",
+            "format": "date"
+          },
+          "data_fim": {
+            "type": "string",
+            "format": "date"
+          }
+        }
+      }
+    },
+    "promocoes": {
+      "type": "array",
+      "description": "Hist\u00f3rico de promo\u00e7\u00f5es",
+      "items": {
+        "type": "object",
+        "properties": {
+          "cargo_anterior": {
+            "type": "string"
+          },
+          "cargo_novo": {
+            "type": "string"
+          },
+          "data_promocao": {
+            "type": "string",
+            "format": "date"
+          },
+          "salario_anterior": {
+            "type": "number"
+          },
+          "salario_novo": {
+            "type": "number"
+          },
+          "observacoes": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "data_admissao": {
+      "type": "string",
+      "format": "date",
+      "description": "Data de admiss\u00e3o na empresa"
+    },
+    "foto_url": {
+      "type": "string",
+      "description": "URL p\u00fablica da foto do colaborador"
+    },
+    "papel": {
+      "type": "string",
+      "enum": [
+        "agente",
+        "gestor",
+        "fi"
+      ],
+      "description": "Papel no sistema: agente, gestor ou facilitador interno"
+    },
+    "is_facilitador_interno": {
+      "type": "boolean",
+      "default": false,
+      "description": "Flag de Facilitador Interno (tempor\u00e1rio)"
+    },
+    "fi_expiracao": {
+      "type": "string",
+      "format": "date",
+      "description": "Data de expira\u00e7\u00e3o do papel FI"
+    },
+    "ativo": {
+      "type": "boolean",
+      "default": true,
+      "description": "Status de ativa\u00e7\u00e3o do colaborador"
+    },
+    "user_id": {
+      "type": "string",
+      "description": "ID do usu\u00e1rio vinculado no sistema"
+    },
+    "equipe_id": {
+      "type": "string",
+      "description": "ID da equipe"
+    },
+    "equipe_nome": {
+      "type": "string",
+      "description": "Nome da equipe"
+    }
+  },
+  "required": [
+    "nome_completo",
+    "email",
+    "cargo_atual",
+    "papel"
+  ]
+}
