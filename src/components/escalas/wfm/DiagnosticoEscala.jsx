@@ -1,7 +1,7 @@
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { CheckCircle2, AlertTriangle, Lock, Scale, RotateCcw } from 'lucide-react';
+import { CheckCircle2, AlertTriangle, Lock, Scale } from 'lucide-react';
 import { validarEscala } from './gerarEscala';
 
 export default function DiagnosticoEscala({ escala, agentes, historicoMes = [] }) {

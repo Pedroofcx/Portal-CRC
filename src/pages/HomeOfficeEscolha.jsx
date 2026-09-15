@@ -13,12 +13,10 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { toast } from 'sonner';
 import {
   Home,
-  Calendar,
   CheckCircle2,
   XCircle,
   Clock,
   AlertCircle,
-  Building2,
   Plus,
   Eye,
   ThumbsUp,
@@ -33,13 +31,8 @@ import {
 } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
+import StatusBadge from '@/components/ui/StatusBadge';
 
-const statusColors = {
-  pendente: 'bg-warning-soft text-warning border-warning/25',
-  aprovada: 'bg-success-soft text-success border-success/25',
-  recusada: 'bg-destructive/10 text-destructive border-destructive/25',
-  cancelada: 'bg-muted text-foreground border-border'
-};
 
 const statusIcons = {
   pendente: Clock,
@@ -214,10 +207,10 @@ export default function HomeOfficeEscolha() {
                 Semana: {formatDateSP(solicitacao.semana_inicio, 'DD/MM')} a {formatDateSP(solicitacao.semana_fim, 'DD/MM')}
               </p>
             </div>
-            <Badge className={statusColors[solicitacao.status]}>
-              <StatusIcon className="w-3 h-3 mr-1" />
-              {solicitacao.status}
-            </Badge>
+            <span className="flex shrink-0 items-center gap-1.5">
+              {StatusIcon && <StatusIcon className="h-3.5 w-3.5 text-muted-foreground" aria-hidden="true" />}
+              <StatusBadge status={solicitacao.status} />
+            </span>
           </div>
         </CardHeader>
         <CardContent className="space-y-3">
@@ -417,9 +410,7 @@ export default function HomeOfficeEscolha() {
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Status</p>
-                  <Badge className={statusColors[detalheDialog.status]}>
-                    {detalheDialog.status}
-                  </Badge>
+                  <StatusBadge status={detalheDialog.status} />
                 </div>
               </div>
 

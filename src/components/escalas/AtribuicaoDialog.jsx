@@ -5,17 +5,24 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { X } from 'lucide-react';
+import { configDoStatus, classesSolidasDoStatus } from '@/components/ui/StatusBadge';
 
-const statusConfig = {
-  home_office: { label: 'Home Office', cor: 'bg-success' },
-  presencial: { label: 'Presencial', cor: 'bg-primary' },
-  hibrido: { label: 'Híbrido', cor: 'bg-primary' },
-  ferias: { label: 'Férias', cor: 'bg-cyan-400' },
-  day_off: { label: 'Day Off', cor: 'bg-amber-400' },
-  falta: { label: 'Falta', cor: 'bg-destructive' },
-  treinamento: { label: 'Treinamento', cor: 'bg-primary' },
-  evento_especial: { label: 'Evento', cor: 'bg-pink-500' }
-};
+/**
+ * Os rótulos e cores vêm do StatusBadge, que é a fonte única do sistema.
+ * Este arquivo mantinha uma cópia própria do mapa — a mesma, palavra por
+ * palavra, que existia em CalendarioEquipes e DiaDetalheDialog. Três cópias
+ * do mesmo mapa significam que mudar a cor de "Férias" exigia lembrar de
+ * três lugares.
+ *
+ * `cor` e `text` continuam existindo para o JSX abaixo não precisar mudar.
+ */
+const statusConfig = new Proxy({}, {
+  get(_, chave) {
+    if (typeof chave !== 'string') return undefined;
+    const { label } = configDoStatus(chave);
+    return { label, cor: classesSolidasDoStatus(chave), text: '' };
+  },
+});
 
 const ColaboradorItem = React.memo(({ colab, isSelected, onToggle }) => {
   return (

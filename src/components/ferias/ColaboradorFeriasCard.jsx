@@ -1,9 +1,9 @@
 import React from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { ChevronRight, Calendar, AlertTriangle } from 'lucide-react';
 import { differenceInDays, parseISO, format } from 'date-fns';
+import StatusBadge from '@/components/ui/StatusBadge';
 
 function fmtDate(d) {
   if (!d) return '—';
@@ -16,18 +16,9 @@ function parseDataLocal(d) {
   return new Date(y, m - 1, dia);
 }
 
-const STATUS_CONFIG = {
-  em_aquisicao: { label: 'Em Aquisição', cls: 'bg-muted text-muted-foreground' },
-  disponivel: { label: 'Disponível', cls: 'bg-success-soft text-success' },
-  parcialmente_utilizado: { label: 'Parcialmente Utilizado', cls: 'bg-info-soft text-primary' },
-  utilizado: { label: 'Utilizado', cls: 'bg-muted text-muted-foreground' },
-  vencendo: { label: 'Vencendo', cls: 'bg-warning-soft text-warning' },
-  vencido: { label: 'Vencido', cls: 'bg-destructive/10 text-destructive' },
-};
 
 export default function ColaboradorFeriasCard({ colaborador, cicloAtivo, onClick }) {
   const status = cicloAtivo?.status || 'em_aquisicao';
-  const config = STATUS_CONFIG[status] || STATUS_CONFIG.em_aquisicao;
   const diasDireito = cicloAtivo?.dias_direito || 30;
   const abono = cicloAtivo?.abono_dias || 0;
   const utilizados = cicloAtivo?.dias_utilizados || 0;
@@ -69,7 +60,7 @@ export default function ColaboradorFeriasCard({ colaborador, cicloAtivo, onClick
 
         {cicloAtivo ? (
           <>
-            <Badge className={`${config.cls} text-xs mb-3`}>{config.label}</Badge>
+            <StatusBadge status={status} className=" text-xs mb-3" />
 
             <div className="grid grid-cols-3 gap-2 mb-3 text-center">
               <div className="bg-muted rounded-lg p-2">

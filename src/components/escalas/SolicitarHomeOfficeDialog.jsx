@@ -6,7 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { AlertCircle, Calendar, CheckCircle2, Home, XCircle } from 'lucide-react';
+import { AlertCircle, Calendar, CheckCircle2, Home } from 'lucide-react';
 
 const diasSemanaLabels = {
   0: 'Domingo',

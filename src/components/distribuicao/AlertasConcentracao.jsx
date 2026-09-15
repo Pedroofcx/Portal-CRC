@@ -89,7 +89,7 @@ export default function AlertasConcentracao({ agentes, distribuicoes }) {
           <div key={i} className={`flex items-start gap-2 p-3 rounded-lg border text-xs ${colors[al.tipo]}`}>
             <Icon className={`w-3.5 h-3.5 flex-shrink-0 mt-0.5 ${iconColors[al.tipo]}`} />
             <div>
-              <span className="font-semibold">{al.titulo}: </span>
+              <span className="font-semibold">{al.titulo}:</span>
               <span>{al.msg}</span>
             </div>
           </div>

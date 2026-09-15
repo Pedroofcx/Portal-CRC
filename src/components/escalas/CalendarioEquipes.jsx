@@ -4,19 +4,26 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { configDoStatus, classesSolidasDoStatus } from '@/components/ui/StatusBadge';
 
 const diasSemana = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 
-const statusConfig = {
-  home_office: { label: 'Home Office', cor: 'bg-success', text: 'text-white' },
-  presencial: { label: 'Presencial', cor: 'bg-primary', text: 'text-white' },
-  hibrido: { label: 'Híbrido', cor: 'bg-primary', text: 'text-white' },
-  ferias: { label: 'Férias', cor: 'bg-cyan-400', text: 'text-white' },
-  day_off: { label: 'Day Off', cor: 'bg-amber-400', text: 'text-white' },
-  falta: { label: 'Falta', cor: 'bg-destructive', text: 'text-white' },
-  treinamento: { label: 'Treinamento', cor: 'bg-primary', text: 'text-white' },
-  evento_especial: { label: 'Evento', cor: 'bg-pink-500', text: 'text-white' }
-};
+/**
+ * Os rótulos e cores vêm do StatusBadge, que é a fonte única do sistema.
+ * Este arquivo mantinha uma cópia própria do mapa — a mesma, palavra por
+ * palavra, que existia em CalendarioEquipes e DiaDetalheDialog. Três cópias
+ * do mesmo mapa significam que mudar a cor de "Férias" exigia lembrar de
+ * três lugares.
+ *
+ * `cor` e `text` continuam existindo para o JSX abaixo não precisar mudar.
+ */
+const statusConfig = new Proxy({}, {
+  get(_, chave) {
+    if (typeof chave !== 'string') return undefined;
+    const { label } = configDoStatus(chave);
+    return { label, cor: classesSolidasDoStatus(chave), text: '' };
+  },
+});
 
 export default function CalendarioEquipes({ 
   mesAtual, 

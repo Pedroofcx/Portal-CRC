@@ -1,6 +1,6 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
-import { Lock, LockOpen, AlertTriangle, Phone, Search, Plus, Users } from 'lucide-react';
+import { Lock, AlertTriangle, Phone, Search, Plus } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { getSlotConfig } from './SlotConfig';
 

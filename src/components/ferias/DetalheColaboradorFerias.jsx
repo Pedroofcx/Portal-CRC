@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -7,20 +7,13 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { ArrowLeft, Plus, Trash2, Calendar, AlertTriangle, Info, ChevronDown, DollarSign } from 'lucide-react';
+import { ArrowLeft, Plus, Trash2, Calendar, AlertTriangle, Info, DollarSign } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { format, parseISO, differenceInCalendarDays, differenceInDays } from 'date-fns';
+import { parseISO, differenceInCalendarDays, differenceInDays } from 'date-fns';
 import { toast } from 'sonner';
 import { parseDataLocal, fmtDate, identificarCiclo, calcularStatus } from '@/pages/GestaoFerias';
+import StatusBadge from '@/components/ui/StatusBadge';
 
-const STATUS_CONFIG = {
-  em_aquisicao: { label: 'Em Aquisição', cls: 'bg-muted text-muted-foreground' },
-  disponivel: { label: 'Disponível', cls: 'bg-success-soft text-success' },
-  parcialmente_utilizado: { label: 'Parcial', cls: 'bg-info-soft text-primary' },
-  utilizado: { label: 'Utilizado', cls: 'bg-muted text-muted-foreground' },
-  vencendo: { label: 'Vencendo ', cls: 'bg-warning-soft text-warning' },
-  vencido: { label: 'Vencido ', cls: 'bg-destructive/10 text-destructive' },
-};
 
 // ── Dialog: Registrar Férias ─────────────────────────────────────────────────
 
@@ -220,7 +213,6 @@ export default function DetalheColaboradorFerias({ colaborador, ciclos, onBack, 
         </div>
       ) : ciclosOrdenados.map(ciclo => {
         const status = calcularStatus(ciclo);
-        const config = STATUS_CONFIG[status] || STATUS_CONFIG.em_aquisicao;
         const diasDireito = ciclo.dias_direito || 30;
         const abono = ciclo.abono_dias || 0;
         const utilizados = ciclo.dias_utilizados || 0;
@@ -246,7 +238,7 @@ export default function DetalheColaboradorFerias({ colaborador, ciclos, onBack, 
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Badge className={config.cls}>{config.label}</Badge>
+                  <StatusBadge status={status} />
                   <Button variant="ghost" size="icon" className="h-7 w-7 text-red-400" onClick={() => { if (confirm('Excluir este ciclo?')) onDeletarCiclo(ciclo.id); }}>
                     <Trash2 className="w-3.5 h-3.5" />
                   </Button>

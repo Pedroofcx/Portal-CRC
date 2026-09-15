@@ -445,7 +445,7 @@ export default function RelatoriosApuracao() {
               )}
               {dadosAgregados.length > 0 && (
                 <div className="mt-4 p-3 bg-warning-soft border border-warning/25 rounded-lg text-sm">
-                  <span className="font-medium">Transferências totais (excluídas dos cálculos de avaliação): </span>
+                  <span className="font-medium">Transferências totais (excluídas dos cálculos de avaliação):</span>
                   <span className="font-bold text-warning">{dadosAgregados.reduce((acc, agg) => acc + (agg.telefone.transferencias || 0), 0)}</span>
                 </div>
               )}

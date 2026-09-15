@@ -59,12 +59,21 @@ export function calcularConcentracao(distribuicoes) {
 }
 
 /**
- * Status operacional do agente
+ * Status operacional do agente, pela saturação da carga.
+ *
+ * Antes, o indicador visual era um emoji cravado aqui — vermelho, amarelo e
+ * verde. A remoção dos emojis da interface deixou o campo vazio e o sinal
+ * sumiu da tela, sobrando só o rótulo em texto.
+ *
+ * Agora o estado devolve um `tom`, e quem renderiza usa o StatusBadge. Isso
+ * traz duas coisas que o emoji não dava: o rótulo acompanha a cor, então
+ * quem não distingue vermelho de verde continua entendendo; e a cor passa a
+ * vir dos tokens, como no resto do sistema.
  */
 export function getStatusOperacional(saturacao) {
-  if (saturacao >= LIMIAR_CRITICO) return { label: 'Sobrecarga', icon: '', class: 'text-destructive',   bg: 'bg-destructive/10 border-destructive/25' };
-  if (saturacao >= LIMIAR_ATENCAO) return { label: 'Atenção',    icon: '', class: 'text-warning', bg: 'bg-warning-soft border-warning/25' };
-  return                                  { label: 'Saudável',   icon: '', class: 'text-success', bg: 'bg-success-soft border-success/25' };
+  if (saturacao >= LIMIAR_CRITICO) return { label: 'Sobrecarga', tom: 'critico', bg: 'bg-critical-soft border-critical/25' };
+  if (saturacao >= LIMIAR_ATENCAO) return { label: 'Atenção',    tom: 'atencao', bg: 'bg-warning-soft border-warning/25' };
+  return                                  { label: 'Saudável',   tom: 'sucesso', bg: 'bg-success-soft border-success/25' };
 }
 
 /**

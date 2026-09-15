@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { ChevronDown, ChevronUp, AlertTriangle, Info, TrendingUp, Zap } from 'lucide-react';
+import StatusBadge from '@/components/ui/StatusBadge';
 import {
   TIPOS_CONFIG, calcularSaturacao, getStatusOperacional,
   calcularPesoOperacional, calcularPontuacaoEstimada, gerarAlertas
@@ -48,8 +49,7 @@ export default function CardAgenteEquidade({ agente, distribuicoes, todas }) {
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
             <span className="font-semibold text-foreground text-sm truncate">{agente.nome_completo}</span>
-            <span className="text-base">{status.icon}</span>
-            <span className={`text-xs font-medium ${status.class}`}>{status.label}</span>
+            <StatusBadge status={status.tom} customLabel={status.label} className="text-xs" />
           </div>
           <p className="text-xs text-muted-foreground mt-0.5">{agente.cargo_atual || 'Agente'}</p>
         </div>

@@ -602,9 +602,9 @@ export default function FerramentasOperacionais() {
                           <div key={i} className="flex items-start gap-3 text-xs p-2.5 rounded-lg bg-muted border border-border">
                             <div className="flex-1">
                               <span className="font-semibold text-foreground">{l.campo?.toUpperCase()}</span>
-                              <span className="text-muted-foreground"> de </span>
+                              <span className="text-muted-foreground"> de</span>
                               <span className="text-destructive font-medium">{l.valor_anterior}%</span>
-                              <span className="text-muted-foreground"> → </span>
+                              <span className="text-muted-foreground"> →</span>
                               <span className="text-success font-medium">{l.valor_novo}%</span>
                             </div>
                             <div className="text-right text-muted-foreground shrink-0">

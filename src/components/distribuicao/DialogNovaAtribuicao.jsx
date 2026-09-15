@@ -6,7 +6,6 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Badge } from '@/components/ui/badge';
 import { AlertTriangle, RotateCcw, User } from 'lucide-react';
 import { TIPOS_CONFIG, PRIORIDADE_CONFIG, sugerirProximoAgente } from './distribuicaoUtils';
 

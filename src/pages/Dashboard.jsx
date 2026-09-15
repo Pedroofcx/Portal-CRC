@@ -1211,12 +1211,6 @@ export default function Dashboard() {
                         Período aquisitivo: {ciclo.aquisitivo_inicio} → {ciclo.aquisitivo_fim}
                       </p>
                       {frags.map((frag, idx) => {
-                        const statusConfig = {
-                          agendado: { label: 'Agendado', cls: 'bg-muted text-muted-foreground' },
-                          em_execucao: { label: 'Em execução', cls: 'bg-info-soft text-primary' },
-                          pendente_validacao: { label: 'Pendente de validação', cls: 'bg-warning-soft text-warning' },
-                        };
-                        const sc = statusConfig[frag.status] || statusConfig.agendado;
                         return (
                           <div key={frag.id || idx} className="flex items-center justify-between p-3 bg-muted rounded-lg border">
                             <div>
@@ -1225,7 +1219,7 @@ export default function Dashboard() {
                               </p>
                               <div className="flex items-center gap-2 mt-1 flex-wrap">
                                 <Badge className="bg-success-soft text-success text-xs">{frag.dias} dias</Badge>
-                                <Badge className={`text-xs ${sc.cls}`}>{sc.label}</Badge>
+                                <StatusBadge status={frag.status || 'agendado'} className="text-xs" />
                                 {frag.observacao && <span className="text-xs text-muted-foreground italic">{frag.observacao}</span>}
                               </div>
                             </div>
