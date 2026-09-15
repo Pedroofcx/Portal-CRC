@@ -29,15 +29,16 @@ export class ErrorBoundary extends React.Component {
     
     console.error('🚨 ErrorBoundary caught:', error, errorInfo);
     console.error('Error count:', newErrorCount);
-    
-    // Se houver muitos erros consecutivos, forçar reload completo
-    if (newErrorCount >= 3) {
-      console.error('🔥 Loop de erros detectado! Forçando reset completo...');
-      this.forceSystemReset();
-      return;
-    }
-    
-    this.setState({ 
+
+    // ATENÇÃO: aqui havia um reset automático a partir de 3 erros em 5 segundos.
+    // Ele recarregava a página em 500ms — e, se a causa do erro persistisse, o
+    // erro voltava e recarregava de novo, em laço. O efeito para o usuário era
+    // uma tela branca: o painel de erro aparecia e sumia antes de ser lido, e a
+    // mensagem que diria o que houve nunca chegava à tela.
+    //
+    // O reset continua disponível, mas só pelo botão "Modo Seguro", com a
+    // pessoa decidindo. Erro tem que ser mostrado, não escondido.
+    this.setState({
       error, 
       errorInfo,
       errorCount: newErrorCount,

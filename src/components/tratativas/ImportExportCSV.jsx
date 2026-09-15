@@ -172,7 +172,7 @@ export default function ImportExportCSV({ tratativas, onRefresh }) {
 
     try {
       // Buscar todos os registros existentes (limite alto para cobrir bases grandes)
-      const existentes = await db.entities.Tratative.list('-created_date', 5000);
+      const existentes = await db.entities.Tratativa.list('-created_date', 5000);
 
       // Múltiplos mapas para matching robusto (id_interno pode duplicar no banco)
       const byIdAndLink = {};
@@ -213,7 +213,7 @@ export default function ImportExportCSV({ tratativas, onRefresh }) {
           const temComercial = camposAtualizados.some(f => COMMERCIAL_FIELDS.includes(f));
           if (temComercial) comercialPreenchido++;
           try {
-            await db.entities.Tratative.update(existente.id, updatePayload);
+            await db.entities.Tratativa.update(existente.id, updatePayload);
             atualizadas++;
             logs.push({
               linha: linhaNum,
@@ -239,7 +239,7 @@ export default function ImportExportCSV({ tratativas, onRefresh }) {
       for (let i = 0; i < novosRegistros.length; i += 100) {
         const batch = novosRegistros.slice(i, i + 100);
         try {
-          await db.entities.Tratative.bulkCreate(batch.map(r => r.data));
+          await db.entities.Tratativa.bulkCreate(batch.map(r => r.data));
           criadas += batch.length;
           batch.forEach(r => logs.push({ linha: r.linha, status: 'ok', msg: `Criado: ${r.data.id_interno || 'novo registro'}` }));
         } catch (err) {
