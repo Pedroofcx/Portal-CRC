@@ -27,7 +27,7 @@ export class ErrorBoundary extends React.Component {
     const isErrorLoop = lastErrorTime && (now - lastErrorTime) < 5000;
     const newErrorCount = isErrorLoop ? errorCount + 1 : 1;
     
-    console.error('🚨 ErrorBoundary caught:', error, errorInfo);
+    console.error('ErrorBoundary caught:', error, errorInfo);
     console.error('Error count:', newErrorCount);
 
     // ATENÇÃO: aqui havia um reset automático a partir de 3 erros em 5 segundos.
@@ -66,7 +66,7 @@ export class ErrorBoundary extends React.Component {
         }
       });
 
-      console.log('✅ Storage de UI temporária limpo após erro — dados do usuário preservados');
+      console.log('Storage de UI temporária limpo após erro — dados do usuário preservados');
     } catch (e) {
       console.error('Erro ao limpar storage:', e);
     }
@@ -83,7 +83,7 @@ export class ErrorBoundary extends React.Component {
         window.queryClient.clear();
       }
       
-      console.log('🔄 Reset completo do sistema...');
+      console.log('Reset completo do sistema...');
       
       // Reload forçado
       setTimeout(() => {
@@ -97,7 +97,7 @@ export class ErrorBoundary extends React.Component {
   };
 
   handleReset = () => {
-    console.log('🔄 Resetando ErrorBoundary...');
+    console.log('Resetando ErrorBoundary...');
     
     // Limpar estado do erro
     this.setState({ 
@@ -118,13 +118,13 @@ export class ErrorBoundary extends React.Component {
   };
 
   handleReload = () => {
-    console.log('🔄 Recarregando aplicação...');
+    console.log('Recarregando aplicação...');
     this.cleanupCorruptedStorage();
     window.location.reload();
   };
 
   handleSafeMode = () => {
-    console.log('🛡️ Ativando modo seguro...');
+    console.log('Ativando modo seguro...');
     
     // Reset completo incluindo cache
     this.forceSystemReset();

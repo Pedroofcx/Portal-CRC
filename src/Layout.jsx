@@ -7,6 +7,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import WelcomeScreen from '@/components/ui/WelcomeScreen';
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
 import BuscaGlobal from '@/components/ui/BuscaGlobal';
+import MenuUsuario from '@/components/ui/MenuUsuario';
 import {
   LayoutDashboard as Home,
   Users,
@@ -18,10 +19,7 @@ import {
   Bell,
   Calendar,
   Settings,
-  LogOut,
   Menu,
-  ChevronDown,
-  Award,
   Search,
   GraduationCap,
   Star,
@@ -37,27 +35,21 @@ import {
   PanelLeftClose
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+
+
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 
 const menuItems = [
   { 
-    section: '📊 Principal',
+    section: 'Principal',
     items: [
       { name: 'Dashboard', page: 'Dashboard', icon: Home },
       { name: 'Como Funciona', page: 'ComoFunciona', icon: BookOpen },
     ]
   },
   { 
-    section: '👥 Gestão',
+    section: 'Gestão',
     items: [
       { name: 'Colaboradores', page: 'Cadastro', icon: Users, gestorOnly: true },
       { name: 'Observações', page: 'Observacoes', icon: MessageSquare, gestorOnly: true },
@@ -67,7 +59,7 @@ const menuItems = [
     ]
   },
   { 
-    section: '🎯 Operações',
+    section: 'Operações',
     items: [
       { name: 'Tratativas CRC', page: 'Tratativas', icon: ClipboardList },
       { name: 'Apuração', page: 'Apuracao', icon: Search, gestorOnly: true },
@@ -75,7 +67,7 @@ const menuItems = [
     ]
   },
   { 
-    section: '📚 Recursos',
+    section: 'Recursos',
     items: [
       { name: 'Universidade CRC', page: 'Universidade', icon: GraduationCap },
       { name: 'POP', page: 'POP', icon: FileText },
@@ -86,7 +78,7 @@ const menuItems = [
     ]
   },
   { 
-    section: '🔔 Comunicação',
+    section: 'Comunicação',
     items: [
       { name: 'Avisos', page: 'Avisos', icon: Bell },
       { name: 'Pesquisas', page: 'Pesquisas', icon: ClipboardCheck, gestorOnly: true },
@@ -94,7 +86,7 @@ const menuItems = [
     ]
   },
   { 
-    section: '⚙️ Admin',
+    section: 'Admin',
     items: [
       { name: 'Relatórios', page: 'Relatorios', icon: BarChart3, gestorOnly: true },
       { name: 'Auditoria de Pontuação', page: 'AuditoriaPontuacao', icon: ShieldCheck, gestorOnly: true },
@@ -178,7 +170,7 @@ function Sidebar({ user, colaborador, currentPageName, onNavigate, isMobile = fa
                 {recolhido ? (
                   <div className="mx-3 mb-2 border-t border-sidebar-border" aria-hidden="true" />
                 ) : (
-                  <p className="mb-1.5 px-3 text-[11px] font-semibold uppercase tracking-wider text-sidebar-foreground/45">
+                  <p className="mb-1.5 px-3 text-[11px] font-bold uppercase tracking-wider text-sidebar-foreground/75">
                     {section.section}
                   </p>
                 )}
@@ -213,46 +205,6 @@ function Sidebar({ user, colaborador, currentPageName, onNavigate, isMobile = fa
         </nav>
       </ScrollArea>
 
-      {/* User Profile */}
-      <div className="border-t border-sidebar-border p-3">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button
-              title={recolhido ? (user?.full_name || 'Usuário') : undefined}
-              className={`flex w-full items-center gap-3 rounded-lg p-2 transition-colors hover:bg-sidebar-accent ${recolhido ? 'justify-center' : ''}`}
-            >
-              <Avatar className="h-9 w-9">
-                <AvatarImage src={colaborador?.foto_url} />
-                <AvatarFallback className="bg-sidebar-primary text-sm text-sidebar-primary-foreground">
-                  {user?.full_name?.charAt(0) || 'U'}
-                </AvatarFallback>
-              </Avatar>
-              {!recolhido && (
-                <>
-                  <div className="flex-1 text-left">
-                    <p className="truncate text-sm font-medium text-sidebar-foreground">{user?.full_name || 'Usuário'}</p>
-                    <p className="text-xs capitalize text-sidebar-foreground/55">{colaborador?.papel || 'Agente'}</p>
-                  </div>
-                  <ChevronDown className="h-4 w-4 text-sidebar-foreground/55" aria-hidden="true" />
-                </>
-              )}
-            </button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-56">
-            <DropdownMenuItem asChild>
-              <Link to={createPageUrl('MinhaPerformance')} className="flex items-center gap-2">
-                <Award className="w-4 h-4" />
-                Minha Performance
-              </Link>
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => db.auth.logout()} className="text-destructive">
-              <LogOut className="w-4 h-4 mr-2" />
-              Sair
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
     </div>
   );
 }
@@ -430,12 +382,7 @@ export default function Layout({ children, currentPageName }) {
               </div>
               <span className="font-semibold text-foreground">Portal CRC</span>
             </div>
-            <Avatar className="h-8 w-8">
-              <AvatarImage src={colaborador?.foto_url} />
-              <AvatarFallback className="bg-primary text-xs text-primary-foreground">
-                {user?.full_name?.charAt(0) || 'U'}
-              </AvatarFallback>
-            </Avatar>
+            <MenuUsuario user={user} colaborador={colaborador} compacto />
           </div>
         </div>
       </div>
@@ -443,8 +390,9 @@ export default function Layout({ children, currentPageName }) {
       {/* Main Content - Wrapped in nested ErrorBoundary for page isolation */}
       <main className={`transition-[padding] duration-150 ${menuRecolhido ? 'lg:pl-16' : 'lg:pl-64'}`}>
         <div className="min-h-screen pt-16 lg:pt-0">
-          <div className="hidden border-b border-border bg-card px-8 py-3 lg:block">
+          <div className="hidden items-center justify-between gap-6 border-b border-border bg-card px-8 py-2.5 lg:flex">
             <BuscaGlobal />
+            <MenuUsuario user={user} colaborador={colaborador} />
           </div>
           <div className="p-4 lg:p-8">
             <ErrorBoundary>

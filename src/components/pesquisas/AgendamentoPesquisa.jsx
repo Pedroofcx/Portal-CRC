@@ -133,7 +133,7 @@ export default function AgendamentoPesquisa({ agendamento = {}, onChange }) {
 
             {agendamento.tipo !== 'unico' && (
               <div className="p-2 bg-blue-100 rounded text-xs text-blue-900">
-                <p className="font-medium">ℹ️ Recorrência Ativa</p>
+                <p className="font-medium">Recorrência Ativa</p>
                 <p className="text-blue-700 mt-1">
                   Esta pesquisa será enviada automaticamente a cada{' '}
                   {agendamento.tipo === 'semanal' && '7 dias (semanalmente)'}

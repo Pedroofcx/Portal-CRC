@@ -66,7 +66,7 @@ export default function AlertasConcentracao({ agentes, distribuicoes }) {
 
   if (alertasGlobais.length === 0) return (
     <div className="p-3 bg-green-50 border border-green-200 rounded-lg flex items-center gap-2 text-sm text-green-700">
-      <span>✅</span>
+      <span></span>
       <span>Nenhum alerta de concentração operacional identificado.</span>
     </div>
   );

@@ -48,7 +48,7 @@ export default function Hansei() {
     mutationFn: (data) => db.entities.HanseiEnvio.create(data),
     onSuccess: () => {
       queryClient.invalidateQueries(['hansei-envios']);
-      toast.success('✅ Resultados enviados com sucesso!');
+      toast.success('Resultados enviados com sucesso!');
       setEnvioDialogOpen(false);
     },
     onError: () => toast.error('Erro ao enviar resultados'),
@@ -63,7 +63,7 @@ export default function Hansei() {
     mutationFn: (data) => db.entities.HanseiComentario.create(data),
     onSuccess: () => {
       queryClient.invalidateQueries(['hansei-comentarios']);
-      toast.success('✅ Feedback enviado!');
+      toast.success('Feedback enviado!');
       setFeedbackForm({ comentario: '', sentimento: 'neutro' });
     },
     onError: () => toast.error('Erro ao enviar feedback'),

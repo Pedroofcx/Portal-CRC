@@ -281,12 +281,12 @@ export default function LiderTecnicoConfig() {
                 </p>
                 {temHistorico ? (
                   <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg text-sm text-amber-700">
-                    <p className="font-semibold mb-1">⚠️ Este líder possui acionamentos vinculados.</p>
+                    <p className="font-semibold mb-1">Este líder possui acionamentos vinculados.</p>
                     <p>O cadastro será inativado (removido do rodízio), mas o histórico de acionamentos será preservado para auditoria.</p>
                   </div>
                 ) : (
                   <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
-                    <p className="font-semibold mb-1">🗑️ Exclusão permanente</p>
+                    <p className="font-semibold mb-1">Exclusão permanente</p>
                     <p>Este líder não possui acionamentos vinculados. O cadastro será removido permanentemente do sistema.</p>
                   </div>
                 )}

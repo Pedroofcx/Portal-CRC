@@ -462,7 +462,7 @@ export default function Relatorios() {
           <TabsTrigger value="apuracoes">Relatórios Apuração</TabsTrigger>
           <TabsTrigger value="ranking">Ranking</TabsTrigger>
           <TabsTrigger value="colaboradores">Análise por Colaborador</TabsTrigger>
-          <TabsTrigger value="preditivo">🧠 Analytics Preditivo</TabsTrigger>
+          <TabsTrigger value="preditivo">Analytics Preditivo</TabsTrigger>
         </TabsList>
 
         <TabsContent value="tratativas" className="mt-6">
@@ -504,11 +504,11 @@ export default function Relatorios() {
                   variabilidade estatística, previsão de backlog, simulação de cenários e alertas inteligentes.
                 </p>
                 <div className="flex gap-2 flex-wrap">
-                  <Badge variant="outline" className="bg-white/50">📊 Throughput</Badge>
-                  <Badge variant="outline" className="bg-white/50">⚡ Saturação</Badge>
-                  <Badge variant="outline" className="bg-white/50">📈 Previsão</Badge>
-                  <Badge variant="outline" className="bg-white/50">🎯 Simulações</Badge>
-                  <Badge variant="outline" className="bg-white/50">🔔 Alertas</Badge>
+                  <Badge variant="outline" className="bg-white/50">Throughput</Badge>
+                  <Badge variant="outline" className="bg-white/50">Saturação</Badge>
+                  <Badge variant="outline" className="bg-white/50">Previsão</Badge>
+                  <Badge variant="outline" className="bg-white/50">Simulações</Badge>
+                  <Badge variant="outline" className="bg-white/50">Alertas</Badge>
                 </div>
               </div>
               <Link to={createPageUrl('AnalyticsPreditivo')}>

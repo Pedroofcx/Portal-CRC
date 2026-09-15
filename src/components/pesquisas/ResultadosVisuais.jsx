@@ -200,10 +200,10 @@ export function ResultadosVisuaisNPS({ respostas }) {
   }
 
   const getCorNPS = (nps) => {
-    if (nps >= 75) return { cor: 'text-green-600', bg: 'bg-green-50', label: 'Excelente', emoji: '🎉' };
-    if (nps >= 50) return { cor: 'text-green-600', bg: 'bg-green-50', label: 'Muito Bom', emoji: '😊' };
-    if (nps >= 0) return { cor: 'text-yellow-600', bg: 'bg-yellow-50', label: 'Bom', emoji: '😐' };
-    return { cor: 'text-red-600', bg: 'bg-red-50', label: 'Crítico', emoji: '😟' };
+    if (nps >= 75) return { cor: 'text-green-600', bg: 'bg-green-50', label: 'Excelente', emoji: '' };
+    if (nps >= 50) return { cor: 'text-green-600', bg: 'bg-green-50', label: 'Muito Bom', emoji: '' };
+    if (nps >= 0) return { cor: 'text-yellow-600', bg: 'bg-yellow-50', label: 'Bom', emoji: '' };
+    return { cor: 'text-red-600', bg: 'bg-red-50', label: 'Crítico', emoji: '' };
   };
 
   const classificacao = getCorNPS(stats.nps);

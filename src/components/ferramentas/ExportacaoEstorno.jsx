@@ -182,7 +182,7 @@ function gerarHTML({ form, config, resultado, aplicarMulta }) {
   <!-- LINHA 1: DADOS DO CLIENTE + TICKET -->
   <div class="two-col">
     <div class="section">
-      <div class="section-title blue">📋 Dados do Cliente</div>
+      <div class="section-title blue">Dados do Cliente</div>
       <div class="info-grid three">
         <div class="info-item"><label>Nome completo</label><span>${form.nome_cliente || '—'}</span></div>
         <div class="info-item"><label>CPF / CNPJ</label><span>${form.documento_cliente || '—'}</span></div>
@@ -190,7 +190,7 @@ function gerarHTML({ form, config, resultado, aplicarMulta }) {
       </div>
     </div>
     <div class="section">
-      <div class="section-title blue">🎫 Dados do Ticket</div>
+      <div class="section-title blue">Dados do Ticket</div>
       <div class="info-grid three">
         <div class="info-item"><label>Ticket Zendesk</label><span>${form.ticket_zendesk || '—'}</span></div>
         <div class="info-item"><label>Operador Responsável</label><span>${form.operador_nome || '—'}</span></div>
@@ -204,7 +204,7 @@ function gerarHTML({ form, config, resultado, aplicarMulta }) {
 
     <!-- Dados Financeiros -->
     <div class="section">
-      <div class="section-title purple">💰 Dados Financeiros</div>
+      <div class="section-title purple">Dados Financeiros</div>
       <div class="info-grid three">
         <div class="info-item"><label>Valor da Nota Fiscal</label><span class="big">${fmtBRL(v)}</span></div>
         <div class="info-item"><label>Classificação do Plano</label><span>${classificacaoLabel || '—'}</span></div>
@@ -217,7 +217,7 @@ function gerarHTML({ form, config, resultado, aplicarMulta }) {
 
     <!-- Impostos -->
     <div class="section">
-      <div class="section-title red">🧾 Impostos e Deduções</div>
+      <div class="section-title red">Impostos e Deduções</div>
       <table>
         <thead>
           <tr>
@@ -239,7 +239,7 @@ function gerarHTML({ form, config, resultado, aplicarMulta }) {
 
     <!-- Comissão + Uso + Total Descontos -->
     <div class="section">
-      <div class="section-title red">💸 Outros Descontos</div>
+      <div class="section-title red">Outros Descontos</div>
       <table>
         <thead>
           <tr>
@@ -274,14 +274,14 @@ function gerarHTML({ form, config, resultado, aplicarMulta }) {
       <div class="scenario-sub">Devolução líquida ao cliente</div>
     </div>
     <div class="scenario-box">
-      <div class="scenario-label red-l">⚠️ Com Multa Contratual (${Number(config.multa_contratual).toFixed(2)}%)</div>
+      <div class="scenario-label red-l">Com Multa Contratual (${Number(config.multa_contratual).toFixed(2)}%)</div>
       <div class="scenario-value">${fmtBRL(resultado.valor_final_devolucao)}</div>
       <div class="scenario-sub">Multa deduzida: − ${fmtBRL(resultado.valor_multa_calculado)}</div>
     </div>
     <div class="scenario-box ${highlightClass}">
       <div class="badge-cenario ${aplicarMulta ? 'red' : 'green'}">CENÁRIO SELECIONADO: ${cenario}</div>
       <div class="scenario-label ${aplicarMulta ? 'red-l' : 'green'}">
-        💰 VALOR FINAL DE DEVOLUÇÃO
+        VALOR FINAL DE DEVOLUÇÃO
       </div>
       <div class="scenario-value">${fmtBRL(valorFinal)}</div>
       <div class="scenario-sub">
@@ -294,7 +294,7 @@ function gerarHTML({ form, config, resultado, aplicarMulta }) {
     </div>
   </div>
 
-  ${form.observacao_operacional ? `<div class="obs-box"><strong>📝 Observação Operacional</strong>${form.observacao_operacional}</div>` : ''}
+  ${form.observacao_operacional ? `<div class="obs-box"><strong>Observação Operacional</strong>${form.observacao_operacional}</div>` : ''}
 
   <!-- FOOTER -->
   <div class="doc-footer">

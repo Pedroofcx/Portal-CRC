@@ -39,7 +39,7 @@ export default function SlotCard({
             </div>
         }
         <span className={cn('text-xs font-medium flex-1 text-left', temAlerta ? 'text-red-500' : 'text-slate-400')}>
-          {temAlerta ? 'Vazio ⚠️' : 'Sem alocação'}
+          {temAlerta ? 'Vazio ' : 'Sem alocação'}
         </span>
         {isGestor && <Plus className="w-3.5 h-3.5 text-slate-300" />}
       </button>

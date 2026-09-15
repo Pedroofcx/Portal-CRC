@@ -242,7 +242,7 @@ export default function MinhasAnotacoes({ colaboradorId }) {
                       <p className="text-xs opacity-65 truncate mt-0.5">{anotacao.conteudo.substring(0, 45)}</p>
                       {anotacao.data_alerta && (
                         <p className="text-xs opacity-50 mt-0.5">
-                          📅 {new Date(`${anotacao.data_alerta}T00:00`).toLocaleDateString('pt-BR')}
+                          {new Date(`${anotacao.data_alerta}T00:00`).toLocaleDateString('pt-BR')}
                           {anotacao.hora_alerta && ` ${anotacao.hora_alerta}`}
                           {anotacao.visualizado && ' ✓'}
                         </p>
@@ -250,7 +250,7 @@ export default function MinhasAnotacoes({ colaboradorId }) {
                     </div>
                     <div className="flex gap-0.5 flex-shrink-0">
                       <Button size="icon" variant="ghost" className="h-6 w-6 opacity-60 hover:opacity-100" onClick={() => handleEditar(anotacao)}>
-                        ✏️
+                        
                       </Button>
                       <Button size="icon" variant="ghost" className="h-6 w-6 text-red-500 hover:bg-red-50 opacity-60 hover:opacity-100" onClick={() => deletarMutation.mutate(anotacao.id)}>
                         <X className="w-3 h-3" />

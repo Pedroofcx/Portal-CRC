@@ -103,7 +103,7 @@ export default function PainelWFM({ colaboradores, isGestor }) {
     onSuccess: () => {
       queryClient.invalidateQueries(['escalaTurno', semanaRef]);
       setEscalaDraft(null);
-      toast.success('✅ Escala publicada para a equipe!');
+      toast.success('Escala publicada para a equipe!');
     },
     onError: (e) => toast.error('Erro: ' + e.message),
   });
@@ -363,7 +363,7 @@ export default function PainelWFM({ colaboradores, isGestor }) {
           <div className="flex justify-end gap-2 mt-4">
             <Button variant="outline" onClick={() => setConfirmGerarOpen(false)}>Cancelar</Button>
             <Button className="bg-blue-600 hover:bg-blue-700" onClick={executarGeracao}>
-              ✅ Continuar
+              Continuar
             </Button>
           </div>
         </DialogContent>

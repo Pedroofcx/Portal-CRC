@@ -74,10 +74,10 @@ export default function HanseiVisualizarDialog({
     // Mescla reflexão + ação na área de comentário
     let textoCompleto = feedbackForm.comentario || '';
     const partes = [];
-    if (reflexao.q1.trim()) partes.push(`✅ O que funcionou bem: ${reflexao.q1}`);
-    if (reflexao.q2.trim()) partes.push(`🔧 O que poderia melhorar: ${reflexao.q2}`);
-    if (reflexao.q3.trim()) partes.push(`🎯 Ajuste para próxima semana: ${reflexao.q3}`);
-    if (acaoSelecionada) partes.push(`⚡ Ação de melhoria: ${acaoSelecionada}`);
+    if (reflexao.q1.trim()) partes.push(`O que funcionou bem: ${reflexao.q1}`);
+    if (reflexao.q2.trim()) partes.push(`O que poderia melhorar: ${reflexao.q2}`);
+    if (reflexao.q3.trim()) partes.push(`Ajuste para próxima semana: ${reflexao.q3}`);
+    if (acaoSelecionada) partes.push(`Ação de melhoria: ${acaoSelecionada}`);
     if (partes.length > 0 && textoCompleto.trim()) {
       textoCompleto = textoCompleto + '\n\n' + partes.join('\n');
     } else if (partes.length > 0) {
@@ -225,7 +225,7 @@ export default function HanseiVisualizarDialog({
           {/* Comentário do gestor */}
           {envio.comentario_gestor && (
             <Card className="border-0 bg-blue-50 border border-blue-200">
-              <CardHeader className="pb-2"><CardTitle className="text-sm text-blue-900">💬 Comentário do Gestor</CardTitle></CardHeader>
+              <CardHeader className="pb-2"><CardTitle className="text-sm text-blue-900">Comentário do Gestor</CardTitle></CardHeader>
               <CardContent><p className="text-sm text-slate-700 whitespace-pre-wrap">{envio.comentario_gestor}</p></CardContent>
             </Card>
           )}
@@ -246,7 +246,7 @@ export default function HanseiVisualizarDialog({
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
-                    <Label className="text-sm font-medium text-slate-700">✅ O que funcionou bem nesta semana?</Label>
+                    <Label className="text-sm font-medium text-slate-700">O que funcionou bem nesta semana?</Label>
                     <Textarea
                       rows={2}
                       className="mt-1 bg-white"
@@ -256,7 +256,7 @@ export default function HanseiVisualizarDialog({
                     />
                   </div>
                   <div>
-                    <Label className="text-sm font-medium text-slate-700">🔧 O que poderia ter sido melhor na execução dos atendimentos?</Label>
+                    <Label className="text-sm font-medium text-slate-700">O que poderia ter sido melhor na execução dos atendimentos?</Label>
                     <Textarea
                       rows={2}
                       className="mt-1 bg-white"
@@ -266,7 +266,7 @@ export default function HanseiVisualizarDialog({
                     />
                   </div>
                   <div>
-                    <Label className="text-sm font-medium text-slate-700">🎯 Qual ajuste ou melhoria você pretende aplicar na próxima semana?</Label>
+                    <Label className="text-sm font-medium text-slate-700">Qual ajuste ou melhoria você pretende aplicar na próxima semana?</Label>
                     <Textarea
                       rows={2}
                       className="mt-1 bg-white"
@@ -331,9 +331,9 @@ export default function HanseiVisualizarDialog({
                   <Select value={feedbackForm.sentimento} onValueChange={v => setFeedbackForm(f => ({ ...f, sentimento: v }))}>
                     <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="positivo">😊 Positivo — estou bem com os resultados</SelectItem>
-                      <SelectItem value="neutro">😐 Neutro — posso melhorar</SelectItem>
-                      <SelectItem value="negativo">😞 Negativo — preciso melhorar muito</SelectItem>
+                      <SelectItem value="positivo">Positivo — estou bem com os resultados</SelectItem>
+                      <SelectItem value="neutro">Neutro — posso melhorar</SelectItem>
+                      <SelectItem value="negativo">Negativo — preciso melhorar muito</SelectItem>
                     </SelectContent>
                   </Select>
                   <Textarea
@@ -358,7 +358,7 @@ export default function HanseiVisualizarDialog({
           {/* Comentários para gestor (somente leitura) */}
           {isGestor && envioComentarios.length > 0 && (
             <div>
-              <p className="text-sm font-semibold text-slate-700 mb-2">💬 Reflexões do Colaborador</p>
+              <p className="text-sm font-semibold text-slate-700 mb-2">Reflexões do Colaborador</p>
               <div className="space-y-2">
                 {envioComentarios.map(c => (
                   <div key={c.id} className="p-3 bg-slate-50 border rounded-lg text-sm">

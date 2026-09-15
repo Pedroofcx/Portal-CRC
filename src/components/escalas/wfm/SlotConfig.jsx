@@ -7,7 +7,7 @@ export const SLOT_CONFIG = {
   manha_atendimento: {
     label: 'M-ATEND',
     labelLong: 'Manhã · Atendimento',
-    emoji: '📞',
+    emoji: '',
     // Tailwind literal classes (não dinâmicas)
     bg: 'bg-green-50',
     border: 'border-green-400',
@@ -21,7 +21,7 @@ export const SLOT_CONFIG = {
   manha_analise: {
     label: 'M-ANÁL',
     labelLong: 'Manhã · Análise',
-    emoji: '🔍',
+    emoji: '',
     bg: 'bg-blue-50',
     border: 'border-blue-400',
     badgeBg: 'bg-blue-600',
@@ -34,7 +34,7 @@ export const SLOT_CONFIG = {
   tarde_atendimento: {
     label: 'T-ATEND',
     labelLong: 'Tarde · Atendimento',
-    emoji: '📞',
+    emoji: '',
     bg: 'bg-orange-50',
     border: 'border-orange-400',
     badgeBg: 'bg-orange-600',
@@ -47,7 +47,7 @@ export const SLOT_CONFIG = {
   tarde_analise: {
     label: 'T-ANÁL',
     labelLong: 'Tarde · Análise',
-    emoji: '🔍',
+    emoji: '',
     bg: 'bg-purple-50',
     border: 'border-purple-400',
     badgeBg: 'bg-purple-600',

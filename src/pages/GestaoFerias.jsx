@@ -447,7 +447,7 @@ export default function GestaoFerias() {
 
         <TabsContent value="planejamento" className="space-y-6 mt-4">
           <div>
-            <h3 className="font-semibold text-slate-700 mb-3">📅 Próximas Férias Agendadas</h3>
+            <h3 className="font-semibold text-slate-700 mb-3">Próximas Férias Agendadas</h3>
             {agendados.length === 0 ? (
               <p className="text-slate-400 text-sm">Nenhuma férias agendada</p>
             ) : (
@@ -467,7 +467,7 @@ export default function GestaoFerias() {
           </div>
 
           <div>
-            <h3 className="font-semibold text-slate-700 mb-3">🏖️ De Férias Hoje</h3>
+            <h3 className="font-semibold text-slate-700 mb-3">De Férias Hoje</h3>
             {(() => {
               const hoje = new Date();
               const emFerias = ciclos
@@ -489,7 +489,7 @@ export default function GestaoFerias() {
           </div>
 
           <div>
-            <h3 className="font-semibold text-slate-700 mb-3">⚠️ Férias Vencendo (próximos 90 dias)</h3>
+            <h3 className="font-semibold text-slate-700 mb-3">Férias Vencendo (próximos 90 dias)</h3>
             {alertasVencimento.length === 0 ? (
               <p className="text-slate-400 text-sm">Nenhum alerta de vencimento</p>
             ) : (

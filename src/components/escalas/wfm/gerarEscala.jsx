@@ -95,7 +95,7 @@ export function gerarEscalaAutomatica(agentes, historicoMes, semanaRef, dataInic
       }
 
       if (candidatos.length === 0) {
-        alertas.push({ dia: diaObj.dia, slot: `${periodo}-${slot}`, mensagem: '⚠️ Slot vazio: agentes insuficientes' });
+        alertas.push({ dia: diaObj.dia, slot: `${periodo}-${slot}`, mensagem: 'Slot vazio: agentes insuficientes' });
         continue;
       }
 

@@ -156,7 +156,7 @@ export default function DialogNovaAtribuicao({ open, onClose, onSalvar, agentes,
 
           {ehOverride && overrideConfirmado && (
             <div className="p-2 bg-amber-50 border border-amber-200 rounded text-xs text-amber-700">
-              ⚠️ Override confirmado — será registrado no histórico do rodízio.
+              Override confirmado — será registrado no histórico do rodízio.
             </div>
           )}
 

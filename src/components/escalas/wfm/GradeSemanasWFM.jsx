@@ -81,7 +81,7 @@ export default function GradeSemanasWFM({
                   'flex items-center px-2 py-1 rounded text-xs font-bold text-white',
                   periodo === 'manha' ? 'bg-amber-500' : 'bg-indigo-500'
                 )}>
-                  {periodo === 'manha' ? '☀️ Manhã' : '🌙 Tarde'}
+                  {periodo === 'manha' ? 'Manhã' : 'Tarde'}
                 </div>
                 {DIAS.map(dia => <div key={dia} />)}
               </div>

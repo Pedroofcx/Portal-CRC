@@ -73,7 +73,7 @@ export default function CancelarDiaDialog({ open, onClose, turno, diaIndex, esca
           ) : (
             <>
               <div className="bg-red-50 border border-red-200 rounded-xl p-3">
-                <p className="text-sm text-red-800 font-medium">⚠️ Atenção</p>
+                <p className="text-sm text-red-800 font-medium">Atenção</p>
                 <p className="text-xs text-red-600 mt-1">
                   Os turnos deste dia serão marcados como <strong>CANCELADOS</strong> e todos os colaboradores verão essa informação.
                 </p>
@@ -103,7 +103,7 @@ export default function CancelarDiaDialog({ open, onClose, turno, diaIndex, esca
               onClick={handleConfirmar}
               disabled={salvando}
             >
-              {salvando ? 'Salvando...' : jaCancelado ? '✓ Reativar Turnos' : '✕ Confirmar Cancelamento'}
+              {salvando ? 'Salvando...' : jaCancelado ? '✓ Reativar Turnos' : 'Confirmar Cancelamento'}
             </Button>
           </div>
         </div>

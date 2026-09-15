@@ -90,7 +90,7 @@ export default function DiagnosticoEscala({ escala, agentes, historicoMes = [] }
             <div>
               <p className="text-xs text-slate-500">Equilíbrio</p>
               <p className="text-sm font-bold text-slate-800">
-                {maxDesvio.diff <= 1 ? '✅ OK' : `⚠️ ${maxDesvio.nome} +${maxDesvio.diff}`}
+                {maxDesvio.diff <= 1 ? 'OK' : `${maxDesvio.nome} +${maxDesvio.diff}`}
               </p>
             </div>
           </div>

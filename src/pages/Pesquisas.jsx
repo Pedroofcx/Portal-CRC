@@ -156,7 +156,7 @@ export default function Pesquisas() {
       const jaResponderam = minhasRespostas.filter(r => r.pesquisa_id === pesquisaId).length;
       const precisamResponder = totalColaboradores - jaResponderam;
       
-      toast.success(`✅ Pesquisa reenviada! ${precisamResponder} usuário(s) receberão o popup (${jaResponderam} já responderam)`);
+      toast.success(`Pesquisa reenviada! ${precisamResponder} usuário(s) receberão o popup (${jaResponderam} já responderam)`);
     },
     onError: () => {
       toast.error('Erro ao reenviar pesquisa');
@@ -860,9 +860,9 @@ export default function Pesquisas() {
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              {selectedPesquisa?.tipo === 'csat' && '📊 CSAT - '}
-              {selectedPesquisa?.tipo === 'nps' && '📈 NPS - '}
-              {selectedPesquisa?.tipo === 'clima_organizacional' && '💜 Clima - '}
+              {selectedPesquisa?.tipo === 'csat' && 'CSAT - '}
+              {selectedPesquisa?.tipo === 'nps' && 'NPS - '}
+              {selectedPesquisa?.tipo === 'clima_organizacional' && 'Clima - '}
               {selectedPesquisa?.titulo}
             </DialogTitle>
           </DialogHeader>

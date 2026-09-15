@@ -18,8 +18,8 @@ const STATUS_CONFIG = {
   disponivel: { label: 'Disponível', cls: 'bg-green-100 text-green-700' },
   parcialmente_utilizado: { label: 'Parcial', cls: 'bg-blue-100 text-blue-700' },
   utilizado: { label: 'Utilizado', cls: 'bg-slate-200 text-slate-600' },
-  vencendo: { label: 'Vencendo ⚠️', cls: 'bg-amber-100 text-amber-700' },
-  vencido: { label: 'Vencido 🔴', cls: 'bg-red-100 text-red-700' },
+  vencendo: { label: 'Vencendo ', cls: 'bg-amber-100 text-amber-700' },
+  vencido: { label: 'Vencido ', cls: 'bg-red-100 text-red-700' },
 };
 
 // ── Dialog: Registrar Férias ─────────────────────────────────────────────────
@@ -131,7 +131,7 @@ function RegistrarFeriasDialog({ open, onOpenChange, ciclos, onSalvar, loading }
             </div>
             {form.abono_dias === 10 && (
               <p className="text-xs text-amber-700 bg-amber-100 rounded-lg p-2">
-                ✅ O colaborador receberá o valor de 10 dias adicionais na remuneração de férias.
+                O colaborador receberá o valor de 10 dias adicionais na remuneração de férias.
               </p>
             )}
           </div>
@@ -143,9 +143,9 @@ function RegistrarFeriasDialog({ open, onOpenChange, ciclos, onSalvar, loading }
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="agendado">📅 Agendado</SelectItem>
-                <SelectItem value="em_execucao">▶️ Em execução</SelectItem>
-                <SelectItem value="pendente_validacao">⏳ Pendente de validação</SelectItem>
+                <SelectItem value="agendado">Agendado</SelectItem>
+                <SelectItem value="em_execucao">Em execução</SelectItem>
+                <SelectItem value="pendente_validacao">Pendente de validação</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -310,7 +310,7 @@ export default function DetalheColaboradorFerias({ colaborador, ciclos, onBack, 
                             <Badge className="ml-2 bg-green-100 text-green-700 text-xs">{frag.dias} dias</Badge>
                             {frag.status && frag.status !== 'agendado' && (
                               <Badge className={`ml-2 text-xs ${frag.status === 'em_execucao' ? 'bg-blue-100 text-blue-700' : 'bg-amber-100 text-amber-700'}`}>
-                                {frag.status === 'em_execucao' ? '▶️ Em execução' : '⏳ Pendente'}
+                                {frag.status === 'em_execucao' ? 'Em execução' : 'Pendente'}
                               </Badge>
                             )}
                             {frag.observacao && <span className="ml-2 text-slate-500 italic text-xs">{frag.observacao}</span>}

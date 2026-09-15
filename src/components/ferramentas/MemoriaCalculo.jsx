@@ -14,7 +14,7 @@ export default function MemoriaCalculo({ resultado, config, valorNota, aplicarMu
 
   return (
     <div className="bg-slate-900 rounded-xl p-4 font-mono text-xs text-slate-300 space-y-1">
-      <p className="text-slate-500 text-[10px] uppercase tracking-widest mb-2">📋 Memória de Cálculo Completa</p>
+      <p className="text-slate-500 text-[10px] uppercase tracking-widest mb-2">Memória de Cálculo Completa</p>
 
       {/* Valor base */}
       <div className="flex justify-between">
@@ -45,7 +45,7 @@ export default function MemoriaCalculo({ resultado, config, valorNota, aplicarMu
         <span className="text-red-400 font-semibold">− {fmtBRL(resultado.total_impostos_valor)}</span>
       </div>
       {divergenciaImpostos && (
-        <div className="text-amber-400 text-[10px]">⚠️ Divergência de arredondamento nos impostos detectada.</div>
+        <div className="text-amber-400 text-[10px]">Divergência de arredondamento nos impostos detectada.</div>
       )}
 
       <div className="border-t border-slate-700 my-1.5" />
@@ -98,7 +98,7 @@ export default function MemoriaCalculo({ resultado, config, valorNota, aplicarMu
 
           {uso.excedeuContrato && (
             <div className="text-amber-400 text-[10px] mt-0.5">
-              ⚠️ Tempo utilizado excede o contrato — custo limitado ao valor da NF.
+              Tempo utilizado excede o contrato — custo limitado ao valor da NF.
             </div>
           )}
         </>
@@ -137,7 +137,7 @@ export default function MemoriaCalculo({ resultado, config, valorNota, aplicarMu
       {/* Resultado final selecionado */}
       <div className="flex justify-between font-bold text-sm">
         <span className={aplicarMulta ? 'text-red-300' : 'text-emerald-300'}>
-          💰 Valor final ({aplicarMulta ? 'com multa' : 'sem multa'}):
+          Valor final ({aplicarMulta ? 'com multa' : 'sem multa'}):
         </span>
         <span className={aplicarMulta ? 'text-red-300' : 'text-emerald-400'}>
           {fmtBRL(aplicarMulta ? resultado.valor_final_devolucao : resultado.valor_final_sem_multa)}

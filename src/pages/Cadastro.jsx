@@ -509,7 +509,7 @@ export default function Cadastro() {
                           </div>
                         )}
                         <p className="text-xs text-slate-500">
-                          💡 Google Drive: Compartilhe como "Qualquer pessoa com o link"
+                          Google Drive: Compartilhe como "Qualquer pessoa com o link"
                         </p>
                       </div>
                     </div>
@@ -885,7 +885,7 @@ export default function Cadastro() {
                       </div>
                     )}
                     <p className="text-xs text-slate-500">
-                      💡 Google Drive: Compartilhe como "Qualquer pessoa com o link"
+                      Google Drive: Compartilhe como "Qualquer pessoa com o link"
                     </p>
                   </div>
                 </div>

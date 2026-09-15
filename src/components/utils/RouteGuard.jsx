@@ -29,7 +29,7 @@ export function RouteGuard({
   // Verificação 1: Usuário necessário
   if (requireUser && !user) {
     if (!redirecting) {
-      console.warn('❌ RouteGuard: Usuário não encontrado, redirecionando...');
+      console.warn('RouteGuard: Usuário não encontrado, redirecionando...');
       setRedirecting(true);
       setTimeout(() => {
         window.location.href = '/';

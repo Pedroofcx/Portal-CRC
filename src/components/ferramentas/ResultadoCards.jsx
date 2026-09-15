@@ -102,7 +102,7 @@ export default function ResultadoCards({ resultado, valorNota, aplicarMulta, onT
         <div className="flex items-center justify-between">
           <div>
             <p className="text-xs font-semibold uppercase tracking-wide opacity-70">
-              💰 Valor Final de Devolução {aplicarMulta ? '(com multa)' : '(sem multa)'}
+              Valor Final de Devolução {aplicarMulta ? '(com multa)' : '(sem multa)'}
             </p>
             <p className={`font-bold text-2xl mt-1 ${aplicarMulta ? 'text-red-800' : 'text-emerald-800'}`}>
               {fmtBRL(aplicarMulta ? resultado.valor_final_devolucao : resultado.valor_final_sem_multa)}

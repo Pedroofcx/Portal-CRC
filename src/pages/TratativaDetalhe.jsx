@@ -624,7 +624,7 @@ export default function TratativaDetalhe() {
                   </div>
                 )}
                 <p className="text-xs text-red-600 mt-3">
-                  ⚠️ Tratativas excluídas não podem ser editadas e não aparecem em indicadores operacionais
+                  Tratativas excluídas não podem ser editadas e não aparecem em indicadores operacionais
                 </p>
               </div>
             </div>
@@ -747,7 +747,7 @@ export default function TratativaDetalhe() {
                     <Label className="text-slate-500 text-xs">Devolução Financeira</Label>
                     {tratativa.houve_devolucao_financeira ? (
                       <div className="mt-1 p-3 bg-orange-50 border border-orange-200 rounded-lg flex items-center gap-3">
-                        <span className="text-orange-700 text-sm">💰 Houve devolução:</span>
+                        <span className="text-orange-700 text-sm">Houve devolução:</span>
                         <span className="font-bold text-orange-900 text-lg">
                           {formatBRL(tratativa.valor_devolvido_cliente)}
                         </span>
@@ -839,13 +839,13 @@ export default function TratativaDetalhe() {
                   </p>
                   <div className="grid grid-cols-2 gap-2 text-xs">
                     <div>
-                      <span className="text-slate-500">⏱ Tempo ativo antes do congelamento</span>
+                      <span className="text-slate-500">Tempo ativo antes do congelamento</span>
                       <p className="font-medium">
                         {(() => { const m = tratativa.congelamento_sla.tempo_ativo_antes_minutos || 0; return `${Math.floor(m/60)}h ${m%60}min`; })()}
                       </p>
                     </div>
                     <div>
-                      <span className="text-slate-500">🧊 Tempo congelado</span>
+                      <span className="text-slate-500">Tempo congelado</span>
                       <p className="font-medium text-sky-700">
                         {(() => {
                           const m = tratativa.congelamento_sla.tempo_total_congelado_minutos ||
@@ -957,7 +957,7 @@ export default function TratativaDetalhe() {
                           <div className="flex-1">
                             <Label className="font-medium">Solução Replicável Documentada (+0,5 pts)</Label>
                             <p className="text-xs text-blue-700 mt-1">
-                              ℹ️ Marque se a solução pode ser replicada em outras tratativas E foi corretamente documentada, incluindo processos, fluxos e solução aplicada. Este item pode ser auditado pelo gestor.
+                              Marque se a solução pode ser replicada em outras tratativas E foi corretamente documentada, incluindo processos, fluxos e solução aplicada. Este item pode ser auditado pelo gestor.
                             </p>
                           </div>
                         </div>
@@ -967,7 +967,7 @@ export default function TratativaDetalhe() {
                       {['reclamacao_interna', 'reclame_aqui', 'google_meu_negocio'].includes(tratativa.tipo_tratativa) && (
                         <div className={`p-4 border rounded-lg space-y-3 ${solucaoForm.houve_devolucao_financeira === null ? 'bg-amber-50 border-amber-300' : 'bg-orange-50 border-orange-200'}`}>
                           <h5 className="font-medium text-sm text-orange-900 flex items-center gap-2">
-                            💰 Devolução / Estorno ao Cliente
+                            Devolução / Estorno ao Cliente
                             <Badge className="bg-red-100 text-red-700 text-xs">Obrigatório</Badge>
                           </h5>
                           <p className="text-xs text-slate-600">Para encerrar a tratativa é necessário informar se houve devolução de valor ao cliente.</p>
@@ -979,7 +979,7 @@ export default function TratativaDetalhe() {
                               className={solucaoForm.houve_devolucao_financeira === true ? 'bg-orange-600 hover:bg-orange-700' : ''}
                               onClick={() => setSolucaoForm({ ...solucaoForm, houve_devolucao_financeira: true })}
                             >
-                              ✅ Sim
+                              Sim
                             </Button>
                             <Button
                               type="button"
@@ -988,7 +988,7 @@ export default function TratativaDetalhe() {
                               className={solucaoForm.houve_devolucao_financeira === false ? 'bg-slate-600 hover:bg-slate-700' : ''}
                               onClick={() => setSolucaoForm({ ...solucaoForm, houve_devolucao_financeira: false, valor_devolvido_cliente: '' })}
                             >
-                              ❌ Não
+                              Não
                             </Button>
                           </div>
                           {solucaoForm.houve_devolucao_financeira === true && (
@@ -1044,7 +1044,7 @@ export default function TratativaDetalhe() {
 
                       {tratativa.tipo_tratativa === 'contestacao' && (
                         <div className="p-4 bg-purple-50 border border-purple-200 rounded-lg space-y-4">
-                          <h5 className="font-medium text-sm text-purple-900">📋 Encerramento Contestação de Compra</h5>
+                          <h5 className="font-medium text-sm text-purple-900">Encerramento Contestação de Compra</h5>
                           
                           <div>
                             <Label>Status da Resolução *</Label>
@@ -1209,7 +1209,7 @@ export default function TratativaDetalhe() {
                         </div>
                         {!solucaoForm.manter_motivo && (
                           <p className="text-xs text-amber-700">
-                            ℹ️ Após encerrar, você poderá editar motivo e submotivos
+                            Após encerrar, você poderá editar motivo e submotivos
                           </p>
                         )}
                       </div>

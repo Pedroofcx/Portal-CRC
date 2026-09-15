@@ -73,7 +73,7 @@ export default function PainelSaldoApoio({ utilizadoMinutos, totalSolicitacoesMe
         <div className="p-4 bg-red-50 border-2 border-red-200 rounded-xl flex items-start gap-3">
           <Ban className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" />
           <div>
-            <p className="font-bold text-red-700">🔴 Horas disponíveis esgotadas</p>
+            <p className="font-bold text-red-700">Horas disponíveis esgotadas</p>
             <p className="text-sm text-red-600 mt-1">
               A liberalidade mensal de 3 horas para apoio especializado já foi totalmente utilizada neste mês.
               Novas solicitações poderão ser realizadas a partir da renovação do limite no próximo mês.
@@ -84,7 +84,7 @@ export default function PainelSaldoApoio({ utilizadoMinutos, totalSolicitacoesMe
         <div className="p-4 bg-amber-50 border-2 border-amber-200 rounded-xl flex items-start gap-3">
           <AlertTriangle className="w-5 h-5 text-amber-600 mt-0.5 flex-shrink-0" />
           <div>
-            <p className="font-bold text-amber-700">⚠️ Saldo baixo</p>
+            <p className="font-bold text-amber-700">Saldo baixo</p>
             <p className="text-sm text-amber-600 mt-1">
               Restam apenas {formatMinutos(disponivelMinutos)} para apoio especializado neste mês. Utilize com planejamento.
             </p>
@@ -93,7 +93,7 @@ export default function PainelSaldoApoio({ utilizadoMinutos, totalSolicitacoesMe
       ) : (
         <div className="p-4 bg-emerald-50 border-2 border-emerald-200 rounded-xl flex items-center gap-3">
           <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
-          <p className="font-semibold text-emerald-700">🟢 Disponível: {formatMinutos(disponivelMinutos)}</p>
+          <p className="font-semibold text-emerald-700">Disponível: {formatMinutos(disponivelMinutos)}</p>
         </div>
       )}
 

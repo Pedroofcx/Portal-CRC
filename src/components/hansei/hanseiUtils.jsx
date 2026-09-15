@@ -123,11 +123,11 @@ export function gerarInsights(dados) {
   const slaPct = slaTotal > 0 ? Math.round(((dados.slas_cumpridos || 0) / slaTotal) * 100) : null;
 
   if (slaPct !== null && slaPct < 70) {
-    insights.push({ tipo: 'danger', titulo: '⚠️ SLA Crítico', desc: `Apenas ${slaPct}% das tratativas foram encerradas no prazo. Meta: 80%+. Revise a gestão de prazos e priorize os atendimentos em aberto.` });
+    insights.push({ tipo: 'danger', titulo: 'SLA Crítico', desc: `Apenas ${slaPct}% das tratativas foram encerradas no prazo. Meta: 80%+. Revise a gestão de prazos e priorize os atendimentos em aberto.` });
   } else if (slaPct !== null && slaPct < 80) {
     insights.push({ tipo: 'warning', titulo: 'SLA abaixo da meta', desc: `${dados.slas_estourados} tratativa(s) fora do prazo. Meta de 80% ainda não atingida. Fique atento aos vencimentos.` });
   } else if (slaPct === 100 && slaTotal > 0) {
-    insights.push({ tipo: 'success', titulo: '🏆 SLA 100%!', desc: `Todas as tratativas foram encerradas dentro do prazo. Continue mantendo essa disciplina de acompanhamento!` });
+    insights.push({ tipo: 'success', titulo: 'SLA 100%!', desc: `Todas as tratativas foram encerradas dentro do prazo. Continue mantendo essa disciplina de acompanhamento!` });
   }
 
   if ((dados.reaberturas || 0) > 0) {
@@ -140,24 +140,24 @@ export function gerarInsights(dados) {
 
   const perf = dados.performance_percentual || 0;
   if (perf > 0 && perf < 70) {
-    insights.push({ tipo: 'danger', titulo: '📉 Performance abaixo da meta', desc: `${perf}% está abaixo dos 70% esperados. Revise a qualidade da investigação do problema do cliente, o uso dos POPs e a clareza na comunicação da solução.` });
+    insights.push({ tipo: 'danger', titulo: 'Performance abaixo da meta', desc: `${perf}% está abaixo dos 70% esperados. Revise a qualidade da investigação do problema do cliente, o uso dos POPs e a clareza na comunicação da solução.` });
   } else if (perf >= 70 && perf < 85) {
     insights.push({ tipo: 'warning', titulo: 'Performance dentro do básico', desc: `${perf}% de performance — está dentro do mínimo, mas há espaço para evoluir. Identifique os atendimentos com avaliação negativa.` });
   } else if (perf >= 85) {
-    insights.push({ tipo: 'success', titulo: '🌟 Performance acima da meta', desc: `${perf}% de performance. Parabéns! Continue assim. Identifique quais práticas contribuíram para esse resultado e replique para manter este patamar.` });
+    insights.push({ tipo: 'success', titulo: 'Performance acima da meta', desc: `${perf}% de performance. Parabéns! Continue assim. Identifique quais práticas contribuíram para esse resultado e replique para manter este patamar.` });
   }
 
   const csat = dados.csat_individual || 0;
   if (csat > 0 && csat < 75) {
-    insights.push({ tipo: 'danger', titulo: '📉 CSAT abaixo da meta', desc: `CSAT de ${csat}% abaixo do esperado. Reflita sobre a qualidade da investigação do problema do cliente, uso dos POPs, solicitação de avaliação e a clareza da solução apresentada.` });
+    insights.push({ tipo: 'danger', titulo: 'CSAT abaixo da meta', desc: `CSAT de ${csat}% abaixo do esperado. Reflita sobre a qualidade da investigação do problema do cliente, uso dos POPs, solicitação de avaliação e a clareza da solução apresentada.` });
   } else if (csat >= 75 && csat < 88) {
     insights.push({ tipo: 'warning', titulo: 'CSAT a melhorar', desc: `CSAT de ${csat}%. Foque em confirmar se o cliente realmente teve seu problema resolvido antes de encerrar o atendimento.` });
   } else if (csat >= 88) {
-    insights.push({ tipo: 'success', titulo: '😊 CSAT excelente', desc: `CSAT de ${csat}% demonstra alta satisfação dos clientes. Parabéns! Mantenha essa atenção à qualidade no próximo período.` });
+    insights.push({ tipo: 'success', titulo: 'CSAT excelente', desc: `CSAT de ${csat}% demonstra alta satisfação dos clientes. Parabéns! Mantenha essa atenção à qualidade no próximo período.` });
   }
 
   if ((dados.solucoes_replicaveis || 0) > 0) {
-    insights.push({ tipo: 'info', titulo: '📚 Soluções documentadas', desc: `${dados.solucoes_replicaveis} solução(ões) replicável(is) registrada(s). Isso contribui diretamente para o conhecimento de toda a equipe.` });
+    insights.push({ tipo: 'info', titulo: 'Soluções documentadas', desc: `${dados.solucoes_replicaveis} solução(ões) replicável(is) registrada(s). Isso contribui diretamente para o conhecimento de toda a equipe.` });
   }
 
   if ((dados.contestacoes_total || 0) > 0 && dados.valor_recuperado_total > 0) {

@@ -93,7 +93,7 @@ export default function TimerReobertura({ tratativa, onConfirmar, isLoading }) {
                 Prazo até {formatDateSP(timer.dataLimite, 'DD/MM/YYYY HH:mm')}
               </p>
               {urgente && (
-                <Badge className="mt-2 bg-red-100 text-red-700">⚠️ Urgente</Badge>
+                <Badge className="mt-2 bg-red-100 text-red-700">Urgente</Badge>
               )}
             </>
           )}

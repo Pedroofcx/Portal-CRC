@@ -53,7 +53,7 @@ export default function DocumentacaoTecnica() {
     md += `---\n\n`;
 
     // Sumário
-    md += `## 📑 Sumário\n\n`;
+    md += `## Sumário\n\n`;
     CATEGORIAS.forEach((cat) => {
       const mods = TODOS_MODULOS.filter((m) => m.categoria === cat);
       if (mods.length === 0) return;
@@ -65,7 +65,7 @@ export default function DocumentacaoTecnica() {
     });
 
     // Índice de Entidades
-    md += `---\n\n## 🗂️ Índice de Entidades\n\n`;
+    md += `---\n\n## Índice de Entidades\n\n`;
     md += `| Entidade | Módulos que utilizam |\n|---|---|\n`;
     todasEntidades.forEach((ent) => {
       const modsUsam = TODOS_MODULOS.filter((m) => (m.entidades || []).includes(ent)).map((m) => m.nome);
@@ -74,7 +74,7 @@ export default function DocumentacaoTecnica() {
     md += `\n`;
 
     // Visão Geral da Arquitetura
-    md += `---\n\n## 🏗️ Visão Geral da Arquitetura\n\n`;
+    md += `---\n\n## Visão Geral da Arquitetura\n\n`;
     md += `### Stack Tecnológico\n\n`;
     md += `- **Frontend:** React 18 + Vite + Tailwind CSS + shadcn/ui (Radix UI)\n`;
     md += `- **Roteamento:** React Router DOM v6\n`;
@@ -101,7 +101,7 @@ export default function DocumentacaoTecnica() {
     CATEGORIAS.forEach((cat) => {
       const mods = TODOS_MODULOS.filter((m) => m.categoria === cat);
       if (mods.length === 0) return;
-      md += `---\n\n## 📦 ${cat}\n\n`;
+      md += `---\n\n## ${cat}\n\n`;
       mods.forEach((m) => {
         md += `### ${m.nome}\n\n`;
         md += `**ID:** \`${m.id}\`\n\n`;
@@ -139,7 +139,7 @@ export default function DocumentacaoTecnica() {
     });
 
     // Entidades e schemas
-    md += `---\n\n## 📊 Entidades e Schemas de Dados\n\n`;
+    md += `---\n\n## Entidades e Schemas de Dados\n\n`;
     md += `> As entidades são definidas como JSON schemas em \`base44/entities/<Nome>.jsonc\`. Campos built-in em todo registro: \`id\`, \`created_date\`, \`updated_date\`, \`created_by_id\`.\n\n`;
     md += `Lista completa de entidades do sistema:\n\n`;
     todasEntidades.forEach((ent) => {
@@ -148,7 +148,7 @@ export default function DocumentacaoTecnica() {
     md += `\n`;
 
     // Integrações Base44
-    md += `---\n\n## 🔌 Integrações Base44 (Core)\n\n`;
+    md += `---\n\n## Integrações Base44 (Core)\n\n`;
     md += `- **InvokeLLM:** Geração de respostas com LLM (usado em Observações, ORÁCULO, Jornada do Cliente, Relatório Diretoria). Suporta \`add_context_from_internet\` (apenas modelos gemini_3_flash/gemini_3_1_pro), \`file_urls\` e \`response_json_schema\`.\n`;
     md += `- **UploadFile:** Upload de arquivos (retorna \`{file_url}\`).\n`;
     md += `- **UploadPrivateFile / CreateFileSignedUrl:** Armazenamento privado com URL assinada temporária.\n`;
@@ -159,7 +159,7 @@ export default function DocumentacaoTecnica() {
     md += `- **ExtractDataFromUploadedFile:** Extração estruturada de CSV/Excel/JSON/PDF/imagens para um JSON schema alvo.\n\n`;
 
     // Convenções de código
-    md += `---\n\n## 💻 Convenções de Código\n\n`;
+    md += `---\n\n## Convenções de Código\n\n`;
     md += `- **Imports:** alias \`@/\` (ex: \`@/components/ui/button\`), nunca paths relativos \`src/\`.\n`;
     md += `- **cn (class merge):** import de \`@/lib/utils\`.\n`;
     md += `- **createPageUrl:** import de \`@/utils\`.\n`;

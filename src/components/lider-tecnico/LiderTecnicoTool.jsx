@@ -245,7 +245,7 @@ export default function LiderTecnicoTool() {
                   </div>
                   {tratativaSelecionada.lider_tecnico_nome && (
                     <div className="pt-2 mt-2 border-t border-slate-200">
-                      <p className="text-xs text-amber-600">⚠️ Esta tratativa já possui Líder Técnico vinculado: <strong>{tratativaSelecionada.lider_tecnico_nome}</strong> ({TIPO_ACIONAMENTO_LABELS[tratativaSelecionada.tipo_acionamento_lider]?.label || '—'}). Um novo acionamento irá substituir.</p>
+                      <p className="text-xs text-amber-600">Esta tratativa já possui Líder Técnico vinculado: <strong>{tratativaSelecionada.lider_tecnico_nome}</strong> ({TIPO_ACIONAMENTO_LABELS[tratativaSelecionada.tipo_acionamento_lider]?.label || '—'}). Um novo acionamento irá substituir.</p>
                     </div>
                   )}
                 </div>
@@ -286,7 +286,7 @@ export default function LiderTecnicoTool() {
                       <span className="font-semibold text-sm text-slate-800">Supervisor realizou a escolha</span>
                     </div>
                     <p className="text-xs text-slate-500 ml-6">Permite selecionar qualquer líder, inclusive bloqueado ou em férias.</p>
-                    {!isGestor && <p className="text-xs text-red-500 ml-6 mt-1">🔒 Exige perfil de supervisor/gestor.</p>}
+                    {!isGestor && <p className="text-xs text-red-500 ml-6 mt-1">Exige perfil de supervisor/gestor.</p>}
                   </button>
                 </div>
 
@@ -328,7 +328,7 @@ export default function LiderTecnicoTool() {
                         ))}
                       </SelectContent>
                     </Select>
-                    <p className="text-xs text-purple-600">⚠️ Esta ação será registrada como exceção de supervisor. O rodízio normal não será alterado.</p>
+                    <p className="text-xs text-purple-600">Esta ação será registrada como exceção de supervisor. O rodízio normal não será alterado.</p>
                   </div>
                 )}
 

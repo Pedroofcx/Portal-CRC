@@ -379,7 +379,7 @@ export default function RelatoriosTratativas() {
       {/* Tabs por Tipo */}
       <Tabs defaultValue="reclamacao">
         <TabsList>
-          <TabsTrigger value="financeiro">💰 Financeiro</TabsTrigger>
+          <TabsTrigger value="financeiro">Financeiro</TabsTrigger>
           <TabsTrigger value="reclamacao">Reclamações Internas</TabsTrigger>
           <TabsTrigger value="reclameaqui">Reclame Aqui</TabsTrigger>
           <TabsTrigger value="google">Google</TabsTrigger>
@@ -429,11 +429,11 @@ export default function RelatoriosTratativas() {
                   <span className="font-bold text-lg text-purple-600">{ri.solucoesReplicaveis}</span>
                 </div>
                 <div className="flex justify-between items-center p-3 bg-orange-50 border border-orange-200 rounded-lg">
-                  <span className="text-sm text-slate-700">💰 Casos com Devolução</span>
+                  <span className="text-sm text-slate-700">Casos com Devolução</span>
                   <span className="font-bold text-lg text-orange-600">{ri.totalDevolucoes || 0}</span>
                 </div>
                 <div className="flex justify-between items-center p-3 bg-red-50 border border-red-100 rounded-lg">
-                  <span className="text-sm text-slate-700">💸 Valor Total Devolvido</span>
+                  <span className="text-sm text-slate-700">Valor Total Devolvido</span>
                   <span className="font-bold text-lg text-red-600">
                     R$ {(ri.valorTotalDevolvido || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                   </span>
@@ -484,19 +484,19 @@ export default function RelatoriosTratativas() {
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="p-4 bg-slate-50 border border-slate-200 rounded-lg text-center">
               <p className="text-2xl font-bold text-blue-600">{ra.encerradas > 0 ? Math.round((ra.dentraSLA / ra.encerradas) * 100) : 0}%</p>
-              <p className="text-xs text-slate-600 mt-1">✅ SLA Cumprido</p>
+              <p className="text-xs text-slate-600 mt-1">SLA Cumprido</p>
             </div>
             <div className="p-4 bg-slate-50 border border-slate-200 rounded-lg text-center">
               <p className="text-2xl font-bold text-slate-700">{ra.tempoMedio > 0 ? `${Math.round(ra.tempoMedio / 60)}h ${Math.round(ra.tempoMedio % 60)}m` : '-'}</p>
-              <p className="text-xs text-slate-600 mt-1">⏱ Tempo Médio</p>
+              <p className="text-xs text-slate-600 mt-1">Tempo Médio</p>
             </div>
             <div className="p-4 bg-orange-50 border border-orange-200 rounded-lg text-center">
               <p className="text-2xl font-bold text-orange-600">{ra.totalDevolucoes || 0}</p>
-              <p className="text-xs text-slate-600 mt-1">💰 Casos com Devolução</p>
+              <p className="text-xs text-slate-600 mt-1">Casos com Devolução</p>
             </div>
             <div className="p-4 bg-red-50 border border-red-100 rounded-lg text-center">
               <p className="text-xl font-bold text-red-600">R$ {(ra.valorTotalDevolvido || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
-              <p className="text-xs text-slate-600 mt-1">💸 Valor Devolvido</p>
+              <p className="text-xs text-slate-600 mt-1">Valor Devolvido</p>
             </div>
           </div>
 
@@ -546,7 +546,7 @@ export default function RelatoriosTratativas() {
               </CardHeader>
               <CardContent className="space-y-3">
                 <div className="p-3 bg-blue-50 rounded-lg">
-                  <p className="text-xs font-medium text-blue-900 mb-1">💡 Recomendação</p>
+                  <p className="text-xs font-medium text-blue-900 mb-1">Recomendação</p>
                   <p className="text-xs text-blue-700">{ra.notaMedia >= 9 ? 'Excelente! Continue o padrão.' : ra.notaMedia >= 8 ? 'Bom. Busque nota 9+.' : 'Plano de ação necessário.'}</p>
                 </div>
                 <div className="p-3 bg-slate-50 rounded-lg space-y-1 text-xs">
@@ -571,19 +571,19 @@ export default function RelatoriosTratativas() {
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="p-4 bg-slate-50 rounded-lg text-center">
               <p className="text-2xl font-bold text-blue-600">{gmn.encerradas > 0 ? Math.round((gmn.dentraSLA / gmn.encerradas) * 100) : 0}%</p>
-              <p className="text-xs text-slate-600 mt-1">✅ SLA Cumprido</p>
+              <p className="text-xs text-slate-600 mt-1">SLA Cumprido</p>
             </div>
             <div className="p-4 bg-slate-50 rounded-lg text-center">
               <p className="text-2xl font-bold text-slate-700">{gmn.tempoMedio > 0 ? `${Math.round(gmn.tempoMedio / 60)}h ${Math.round(gmn.tempoMedio % 60)}m` : '-'}</p>
-              <p className="text-xs text-slate-600 mt-1">⏱ Tempo Médio</p>
+              <p className="text-xs text-slate-600 mt-1">Tempo Médio</p>
             </div>
             <div className="p-4 bg-orange-50 border border-orange-200 rounded-lg text-center">
               <p className="text-2xl font-bold text-orange-600">{gmn.totalDevolucoes || 0}</p>
-              <p className="text-xs text-slate-600 mt-1">💰 Casos com Devolução</p>
+              <p className="text-xs text-slate-600 mt-1">Casos com Devolução</p>
             </div>
             <div className="p-4 bg-red-50 rounded-lg text-center">
               <p className="text-xl font-bold text-red-600">R$ {(gmn.valorTotalDevolvido || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
-              <p className="text-xs text-slate-600 mt-1">💸 Valor Devolvido</p>
+              <p className="text-xs text-slate-600 mt-1">Valor Devolvido</p>
             </div>
           </div>
 
@@ -647,19 +647,19 @@ export default function RelatoriosTratativas() {
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="p-4 bg-slate-50 rounded-lg text-center">
               <p className="text-2xl font-bold text-blue-600">{cont.encerradas > 0 ? Math.round((cont.dentraSLA / cont.encerradas) * 100) : 0}%</p>
-              <p className="text-xs text-slate-600 mt-1">✅ SLA Cumprido</p>
+              <p className="text-xs text-slate-600 mt-1">SLA Cumprido</p>
             </div>
             <div className="p-4 bg-slate-50 rounded-lg text-center">
               <p className="text-2xl font-bold text-slate-700">{cont.tempoMedio > 0 ? `${Math.round(cont.tempoMedio / 60)}h ${Math.round(cont.tempoMedio % 60)}m` : '-'}</p>
-              <p className="text-xs text-slate-600 mt-1">⏱ Tempo Médio</p>
+              <p className="text-xs text-slate-600 mt-1">Tempo Médio</p>
             </div>
             <div className="p-4 bg-red-50 rounded-lg text-center">
               <p className="text-2xl font-bold text-red-600">{cont.encerradas - cont.dentraSLA}</p>
-              <p className="text-xs text-slate-600 mt-1">⚠️ SLA Estourado</p>
+              <p className="text-xs text-slate-600 mt-1">SLA Estourado</p>
             </div>
             <div className="p-4 bg-amber-50 rounded-lg text-center">
               <p className="text-2xl font-bold text-amber-600">{cont.total - cont.encerradas}</p>
-              <p className="text-xs text-slate-600 mt-1">📂 Em Aberto</p>
+              <p className="text-xs text-slate-600 mt-1">Em Aberto</p>
             </div>
           </div>
 

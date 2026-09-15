@@ -73,7 +73,7 @@ export default function ModalAtribuicaoSlot({
 
         <p className="text-xs text-slate-500 -mt-2 mb-3">
           Selecione um ou mais colaboradores para este slot.
-          {travados.length > 0 && <span className="text-amber-600"> Slots com 🔒 são fixos.</span>}
+          {travados.length > 0 && <span className="text-amber-600"> Slots com são fixos.</span>}
         </p>
 
         <div className="space-y-1.5 max-h-72 overflow-y-auto pr-1">

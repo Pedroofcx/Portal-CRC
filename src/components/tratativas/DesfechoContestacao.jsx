@@ -9,10 +9,10 @@ import { CheckCircle, Flag } from 'lucide-react';
 import { formatDateSP } from '@/components/utils/helpers';
 
 const DESFECHOS = [
-  { value: 'favor_emissor', label: '🏦 A favor do emissor (cliente ganhou)', color: 'bg-red-100 text-red-700' },
-  { value: 'favor_estabelecimento', label: '🏢 A favor do estabelecimento (empresa ganhou)', color: 'bg-green-100 text-green-700' },
-  { value: 'protesto_recusado', label: '🚫 Protesto recusado pelo cliente', color: 'bg-amber-100 text-amber-700' },
-  { value: 'outros', label: '📝 Outros desfechos', color: 'bg-slate-100 text-slate-700' },
+  { value: 'favor_emissor', label: 'A favor do emissor (cliente ganhou)', color: 'bg-red-100 text-red-700' },
+  { value: 'favor_estabelecimento', label: 'A favor do estabelecimento (empresa ganhou)', color: 'bg-green-100 text-green-700' },
+  { value: 'protesto_recusado', label: 'Protesto recusado pelo cliente', color: 'bg-amber-100 text-amber-700' },
+  { value: 'outros', label: 'Outros desfechos', color: 'bg-slate-100 text-slate-700' },
 ];
 
 export default function DesfechoContestacao({ tratativa, onSalvar, isLoading }) {

@@ -100,7 +100,7 @@ export default function DadosComerciaisForm({ formData, setFormData }) {
             className="mt-1"
           />
           <p className="text-xs text-emerald-700 mt-1">
-            ℹ️ Início do relacionamento comercial do cliente com a empresa.
+            Início do relacionamento comercial do cliente com a empresa.
           </p>
         </div>
         <div>
@@ -112,13 +112,13 @@ export default function DadosComerciaisForm({ formData, setFormData }) {
             className="mt-1"
           />
           <p className="text-xs text-emerald-700 mt-1">
-            ℹ️ Aderiu ao plano atual (permite identificar upgrades/downgrades).
+            Aderiu ao plano atual (permite identificar upgrades/downgrades).
           </p>
         </div>
       </div>
 
       <p className="text-xs text-emerald-700">
-        ℹ️ O Tempo de Relacionamento (em meses) é calculado automaticamente a partir da Data da Primeira Contratação.
+        O Tempo de Relacionamento (em meses) é calculado automaticamente a partir da Data da Primeira Contratação.
         Receitas mensal e anual equivalentes são derivadas da modalidade e do valor da contratação do plano atual.
       </p>
     </div>

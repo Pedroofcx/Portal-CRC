@@ -395,7 +395,7 @@ export default function Configuracoes() {
                   />
                 </div>
                 <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-100 text-xs text-blue-700">
-                  💡 O gestor sempre vê o ranking completo, independente desta configuração.
+                  O gestor sempre vê o ranking completo, independente desta configuração.
                 </div>
               </CardContent>
             </Card>
@@ -467,7 +467,7 @@ export default function Configuracoes() {
 
               <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
                 <p className="text-sm text-blue-800">
-                  💡 <strong>Dica:</strong> Essas metas são usadas como referência nos relatórios e análises de performance.
+                  <strong>Dica:</strong> Essas metas são usadas como referência nos relatórios e análises de performance.
                 </p>
               </div>
             </CardContent>
@@ -483,7 +483,7 @@ export default function Configuracoes() {
                 Exclusão de Dados do Sistema
               </CardTitle>
               <p className="text-sm text-slate-600 mt-2">
-                ⚠️ <strong>ATENÇÃO:</strong> Esta ação é irreversível. Recomenda-se fazer backup antes de excluir dados.
+                <strong>ATENÇÃO:</strong> Esta ação é irreversível. Recomenda-se fazer backup antes de excluir dados.
               </p>
             </CardHeader>
             <CardContent className="space-y-3">

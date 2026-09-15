@@ -829,7 +829,7 @@ export default function Tratativas() {
                   {formData.tipo_tratativa === 'contestacao' && (
                   <div className="p-4 bg-purple-50 border-2 border-purple-300 rounded-lg space-y-4">
                   <h4 className="font-semibold text-purple-900 flex items-center gap-2">
-                  📋 Dados da Contestação de Compra
+                  Dados da Contestação de Compra
                   </h4>
 
                   <div>
@@ -888,7 +888,7 @@ export default function Tratativas() {
                    className="mt-1"
                   />
                   <p className="text-xs text-purple-700 mt-1">
-                   ℹ️ Este valor pode ser alterado durante o encerramento
+                   Este valor pode ser alterado durante o encerramento
                   </p>
                   </div>
 
@@ -912,7 +912,7 @@ export default function Tratativas() {
                   </Select>
                   {formData.prazo_sla_dias && (
                    <p className="text-xs text-purple-700 mt-1">
-                     ⏱️ SLA: {formData.prazo_sla_dias * 24} horas
+                     SLA: {formData.prazo_sla_dias * 24} horas
                    </p>
                   )}
                   </div>

@@ -62,9 +62,9 @@ export function calcularConcentracao(distribuicoes) {
  * Status operacional do agente
  */
 export function getStatusOperacional(saturacao) {
-  if (saturacao >= LIMIAR_CRITICO) return { label: 'Sobrecarga', icon: '🔴', class: 'text-red-600',   bg: 'bg-red-50 border-red-200' };
-  if (saturacao >= LIMIAR_ATENCAO) return { label: 'Atenção',    icon: '🟡', class: 'text-amber-600', bg: 'bg-amber-50 border-amber-200' };
-  return                                  { label: 'Saudável',   icon: '🟢', class: 'text-green-600', bg: 'bg-green-50 border-green-200' };
+  if (saturacao >= LIMIAR_CRITICO) return { label: 'Sobrecarga', icon: '', class: 'text-red-600',   bg: 'bg-red-50 border-red-200' };
+  if (saturacao >= LIMIAR_ATENCAO) return { label: 'Atenção',    icon: '', class: 'text-amber-600', bg: 'bg-amber-50 border-amber-200' };
+  return                                  { label: 'Saudável',   icon: '', class: 'text-green-600', bg: 'bg-green-50 border-green-200' };
 }
 
 /**

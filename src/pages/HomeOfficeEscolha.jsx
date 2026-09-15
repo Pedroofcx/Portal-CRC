@@ -245,7 +245,7 @@ export default function HomeOfficeEscolha() {
           {solicitacao.validacoes?.alertas && solicitacao.validacoes.alertas.length > 0 && (
             <div className="text-xs text-amber-600 space-y-1">
               {solicitacao.validacoes.alertas.map((alerta, idx) => (
-                <p key={idx}>⚠️ {alerta}</p>
+                <p key={idx}>{alerta}</p>
               ))}
             </div>
           )}

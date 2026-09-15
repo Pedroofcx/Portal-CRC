@@ -742,7 +742,7 @@ export default function Apuracao() {
             {/* Alertas de consistência */}
             {tipoApuracao === 'telefone' && Object.keys(resultados).some(a => !resultados[a].validacao?.ok) && (
               <div className="p-4 bg-red-50 border border-red-200 rounded-lg space-y-2">
-                <p className="text-sm font-bold text-red-800">⚠️ Alertas de Inconsistência</p>
+                <p className="text-sm font-bold text-red-800">Alertas de Inconsistência</p>
                 {Object.keys(resultados).map(agente => {
                   const v = resultados[agente].validacao;
                   if (!v || v.ok) return null;
@@ -933,7 +933,7 @@ export default function Apuracao() {
                               </tr>
                             ))}
                             <tr className="border-t-2 border-slate-400 bg-slate-50 font-bold">
-                              <td className="p-3 text-slate-800">📊 Média Mensal</td>
+                              <td className="p-3 text-slate-800">Média Mensal</td>
                               <td className="text-center p-3 text-slate-500">{r.totalLigacoes}</td>
                               <td className="text-center p-3 text-slate-500">{r.totalAtendidas}</td>
                               <td className="text-center p-3 text-slate-500">{r.totalAvaliadas}</td>
@@ -1029,7 +1029,7 @@ export default function Apuracao() {
                           ))}
                           {/* Linha de consolidação mensal */}
                           <tr className="border-t-2 border-slate-400 bg-slate-50 font-bold">
-                            <td className="p-3 text-slate-800">📊 Média Mensal</td>
+                            <td className="p-3 text-slate-800">Média Mensal</td>
                             <td className="text-center p-3 text-slate-500">—</td>
                             <td className="text-center p-3 text-slate-500">—</td>
                             <td className="text-center p-3 text-slate-500">—</td>

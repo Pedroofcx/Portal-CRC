@@ -365,7 +365,7 @@ export default function AnalyticsPreditivo() {
               }`} />
               <AlertDescription>
                 <p className="font-semibold">{alerta.mensagem}</p>
-                <p className="text-sm mt-1">💡 {alerta.recomendacao}</p>
+                <p className="text-sm mt-1">{alerta.recomendacao}</p>
               </AlertDescription>
             </Alert>
           ))}
@@ -584,9 +584,9 @@ export default function AnalyticsPreditivo() {
                   />
                 </div>
                 <p className="text-xs text-slate-600 mt-3">
-                  {capacidade.status === 'SOBRECARGA' && '⚠️ Operação em sobrecarga crítica'}
-                  {capacidade.status === 'ALERTA' && '⚡ Aproximando-se da capacidade máxima'}
-                  {capacidade.status === 'SAUDÁVEL' && '✅ Operação dentro da normalidade'}
+                  {capacidade.status === 'SOBRECARGA' && 'Operação em sobrecarga crítica'}
+                  {capacidade.status === 'ALERTA' && 'Aproximando-se da capacidade máxima'}
+                  {capacidade.status === 'SAUDÁVEL' && 'Operação dentro da normalidade'}
                 </p>
               </CardContent>
             </Card>
@@ -705,11 +705,11 @@ export default function AnalyticsPreditivo() {
                     <AlertDescription>
                       {parseFloat(previsao.taxaEntradaDiaria) > parseFloat(previsao.taxaSaidaDiaria) ? (
                         <p className="text-sm text-red-900">
-                          ⚠️ Entrada maior que saída: backlog crescendo
+                          Entrada maior que saída: backlog crescendo
                         </p>
                       ) : (
                         <p className="text-sm text-green-900">
-                          ✅ Saída maior que entrada: backlog reduzindo
+                          Saída maior que entrada: backlog reduzindo
                         </p>
                       )}
                     </AlertDescription>

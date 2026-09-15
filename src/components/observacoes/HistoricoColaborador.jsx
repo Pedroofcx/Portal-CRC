@@ -80,7 +80,7 @@ function ObservacaoCard({ obs, onView, onDelete, podeExcluir }) {
               {formatDateSP(obs.data_registro || obs.created_date, 'DD/MM/YYYY')}
             </span>
             {(obs.soft_skills_avaliadas && Object.keys(obs.soft_skills_avaliadas).length > 0) && (
-              <span className="text-purple-500">📊 Skills avaliadas</span>
+              <span className="text-purple-500">Skills avaliadas</span>
             )}
           </div>
         </div>
@@ -159,16 +159,16 @@ export default function HistoricoColaborador({
             <p className="text-slate-500 text-sm">{colaborador.cargo_atual}</p>
             <div className="flex flex-wrap gap-3 mt-3">
               <span className="text-xs bg-slate-100 text-slate-600 px-3 py-1 rounded-full">
-                📝 {obsDoColab.length} registro{obsDoColab.length !== 1 ? 's' : ''}
+                {obsDoColab.length} registro{obsDoColab.length !== 1 ? 's' : ''}
               </span>
               <span className="text-xs bg-green-100 text-green-700 px-3 py-1 rounded-full">
-                👍 {positivos} positivo{positivos !== 1 ? 's' : ''}
+                {positivos} positivo{positivos !== 1 ? 's' : ''}
               </span>
               <span className="text-xs bg-red-100 text-red-600 px-3 py-1 rounded-full">
-                👎 {negativos} negativo{negativos !== 1 ? 's' : ''}
+                {negativos} negativo{negativos !== 1 ? 's' : ''}
               </span>
               <span className="text-xs bg-purple-100 text-purple-700 px-3 py-1 rounded-full">
-                📋 {pdisAtivos} PDI{pdisAtivos !== 1 ? 's' : ''} ativo{pdisAtivos !== 1 ? 's' : ''}
+                {pdisAtivos} PDI{pdisAtivos !== 1 ? 's' : ''} ativo{pdisAtivos !== 1 ? 's' : ''}
               </span>
             </div>
           </div>

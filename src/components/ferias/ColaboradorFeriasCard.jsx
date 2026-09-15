@@ -21,8 +21,8 @@ const STATUS_CONFIG = {
   disponivel: { label: 'Disponível', cls: 'bg-green-100 text-green-700' },
   parcialmente_utilizado: { label: 'Parcialmente Utilizado', cls: 'bg-blue-100 text-blue-700' },
   utilizado: { label: 'Utilizado', cls: 'bg-slate-200 text-slate-600' },
-  vencendo: { label: '⚠️ Vencendo', cls: 'bg-amber-100 text-amber-700' },
-  vencido: { label: '🔴 Vencido', cls: 'bg-red-100 text-red-700' },
+  vencendo: { label: 'Vencendo', cls: 'bg-amber-100 text-amber-700' },
+  vencido: { label: 'Vencido', cls: 'bg-red-100 text-red-700' },
 };
 
 export default function ColaboradorFeriasCard({ colaborador, cicloAtivo, onClick }) {
@@ -87,7 +87,7 @@ export default function ColaboradorFeriasCard({ colaborador, cicloAtivo, onClick
             </div>
             {abono > 0 && (
               <div className="flex items-center gap-1.5 mb-2 px-2 py-1.5 bg-amber-50 border border-amber-200 rounded-lg">
-                <span className="text-amber-600 text-xs">💰</span>
+                <span className="text-amber-600 text-xs"></span>
                 <span className="text-xs text-amber-800 font-medium">{abono} dias vendidos (abono pecuniário)</span>
               </div>
             )}

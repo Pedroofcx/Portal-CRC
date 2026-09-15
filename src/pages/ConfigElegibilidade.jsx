@@ -43,15 +43,15 @@ const TIPOS_VALIDACAO = {
 };
 
 const TIPO_ICONS = {
-  csat_minimo: '⭐',
-  performance_minima: '📊',
-  presenca_minima: '📅',
-  tratativas_minimas: '📋',
-  cursos_obrigatorios: '🎓',
-  avaliacoes_cx: '💬',
-  execucao_tratativas_categoria: '🏷️',
-  volume_minimo_canal: '📉',
-  personalizado: '⚙️',
+  csat_minimo: '',
+  performance_minima: '',
+  presenca_minima: '',
+  tratativas_minimas: '',
+  cursos_obrigatorios: '',
+  avaliacoes_cx: '',
+  execucao_tratativas_categoria: '',
+  volume_minimo_canal: '',
+  personalizado: '',
 };
 
 const CATEGORIAS_TRATATIVA = [
@@ -205,7 +205,7 @@ export default function ConfigElegibilidade() {
                     <div key={elegib.id} className="flex items-start justify-between p-3 bg-slate-50 rounded-lg gap-3">
                       <div className="flex-1">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <span className="text-base">{TIPO_ICONS[elegib.tipo_validacao] || '⚙️'}</span>
+                          <span className="text-base">{TIPO_ICONS[elegib.tipo_validacao] || ''}</span>
                           <p className="font-medium text-sm">{elegib.nome_exigencia}</p>
                           {elegib.obrigatoria && (
                             <Badge className="bg-red-100 text-red-700 text-xs">Obrigatória</Badge>

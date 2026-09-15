@@ -53,7 +53,7 @@ export default function ApoioEspecializado() {
       queryClient.invalidateQueries({ queryKey: ['solicitacoes-apoio'] });
       queryClient.invalidateQueries({ queryKey: ['solicitacoes-apoio-dashboard'] });
       setDialogOpen(false);
-      toast({ title: '✅ Solicitação criada com sucesso!', description: 'A solicitação foi registrada e o consumo de horas foi atualizado.' });
+      toast({ title: 'Solicitação criada com sucesso!', description: 'A solicitação foi registrada e o consumo de horas foi atualizado.' });
     },
     onError: () => {
       toast({ title: 'Erro ao criar solicitação', description: 'Tente novamente.', variant: 'destructive' });

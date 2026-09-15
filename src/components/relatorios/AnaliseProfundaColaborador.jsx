@@ -755,7 +755,7 @@ export default function AnaliseProfundaColaborador({
                     <p className="text-sm text-slate-700 mb-2">{insight.descricao}</p>
                     <div className="p-2 bg-indigo-50 rounded border border-indigo-200">
                       <p className="text-xs font-medium text-indigo-900">
-                        💡 Recomendação: {insight.recomendacao}
+                        Recomendação: {insight.recomendacao}
                       </p>
                     </div>
                   </div>

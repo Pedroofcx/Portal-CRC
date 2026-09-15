@@ -94,7 +94,7 @@ export default function FerramentasOperacionais() {
     mutationFn: (dados) => db.entities.EstornoParcial.create(dados),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['estornos-historico'] });
-      toast({ title: '✅ Cálculo salvo!', description: 'Registrado no histórico com sucesso.' });
+      toast({ title: 'Cálculo salvo!', description: 'Registrado no histórico com sucesso.' });
     },
   });
 
@@ -338,7 +338,7 @@ export default function FerramentasOperacionais() {
                     </div>
                     {form.valor_nota_fiscal && (
                       <p className="text-xs text-emerald-600 font-medium">
-                        💰 {fmtBRL(parseBRL(form.valor_nota_fiscal))}
+                        {fmtBRL(parseBRL(form.valor_nota_fiscal))}
                       </p>
                     )}
                   </div>
@@ -408,7 +408,7 @@ export default function FerramentasOperacionais() {
                     {(mesesUsados > 0 || diasAdicionais > 0) && (
                       <p className={`text-xs mt-1 ${tempoExcedido ? 'text-red-600 font-semibold' : 'text-blue-600'}`}>
                         {tempoExcedido
-                          ? `⚠️ ${diasTotaisUsados} dias excedem o contrato (${diasContrato} dias)`
+                          ? `${diasTotaisUsados} dias excedem o contrato (${diasContrato} dias)`
                           : `≡ ${diasTotaisUsados} dias totais de uso (contrato: ${diasContrato} dias)`}
                       </p>
                     )}
@@ -417,7 +417,7 @@ export default function FerramentasOperacionais() {
                   {/* Preview proporcional — base única em dias */}
                   {resultado?.uso_proporcional_detalhe?.valor > 0 && (
                     <div className="p-3 bg-purple-50 border border-purple-200 rounded-lg space-y-1">
-                      <p className="text-xs font-semibold text-purple-700">📐 Cálculo Proporcional — Plano {planoAtual?.label} ({resultado.uso_proporcional_detalhe.mesesContrato} meses)</p>
+                      <p className="text-xs font-semibold text-purple-700">Cálculo Proporcional — Plano {planoAtual?.label} ({resultado.uso_proporcional_detalhe.mesesContrato} meses)</p>
                       <p className="text-xs text-purple-600">
                         Valor mensal: {fmtBRL(resultado.uso_proporcional_detalhe.valorMensal)}/mês
                         {' '}= {fmtBRL(parseBRL(form.valor_nota_fiscal))} ÷ {resultado.uso_proporcional_detalhe.mesesContrato}

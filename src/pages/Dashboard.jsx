@@ -1212,9 +1212,9 @@ export default function Dashboard() {
                       </p>
                       {frags.map((frag, idx) => {
                         const statusConfig = {
-                          agendado: { label: '📅 Agendado', cls: 'bg-slate-100 text-slate-600' },
-                          em_execucao: { label: '▶️ Em execução', cls: 'bg-blue-100 text-blue-700' },
-                          pendente_validacao: { label: '⏳ Pendente de validação', cls: 'bg-amber-100 text-amber-700' },
+                          agendado: { label: 'Agendado', cls: 'bg-slate-100 text-slate-600' },
+                          em_execucao: { label: 'Em execução', cls: 'bg-blue-100 text-blue-700' },
+                          pendente_validacao: { label: 'Pendente de validação', cls: 'bg-amber-100 text-amber-700' },
                         };
                         const sc = statusConfig[frag.status] || statusConfig.agendado;
                         return (
@@ -1316,7 +1316,7 @@ export default function Dashboard() {
             <div className="space-y-4 mt-4" id="hansei-description">
               <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
                 <p className="text-sm text-blue-900 font-medium mb-2">
-                  📊 Você tem {hanseiNaoVisualizados.length} resultado(s) de desempenho para visualizar
+                  Você tem {hanseiNaoVisualizados.length} resultado(s) de desempenho para visualizar
                 </p>
                 <p className="text-xs text-blue-700">
                   Acesse o módulo Hansei para ver suas métricas consolidadas e feedback do gestor.
@@ -1379,7 +1379,7 @@ export default function Dashboard() {
               {pesquisaAtual.reenviar_timestamp && (
                 <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
                   <p className="text-sm text-blue-800 font-medium">
-                    📢 Pesquisa importante - Por favor, responda
+                    Pesquisa importante - Por favor, responda
                   </p>
                 </div>
               )}
@@ -1448,8 +1448,8 @@ export default function Dashboard() {
                           ))}
                         </div>
                         <div className="flex justify-between text-xs text-slate-500 px-1">
-                          <span>😞 Muito insatisfeito</span>
-                          <span>😊 Muito satisfeito</span>
+                          <span>Muito insatisfeito</span>
+                          <span>Muito satisfeito</span>
                         </div>
                       </div>
                     )}

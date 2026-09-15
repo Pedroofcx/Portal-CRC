@@ -53,7 +53,7 @@ export default function EquilibrioAgentes({ escala, colaboradores, historicoMes 
                   'text-[11px] font-semibold w-20 text-right flex-shrink-0',
                   desequilibrado ? 'text-amber-600' : 'text-slate-500'
                 )}>
-                  M:{manhas} T:{tardes} {desequilibrado && '⚠️'}
+                  M:{manhas} T:{tardes} {desequilibrado && ''}
                 </span>
               </div>
             );

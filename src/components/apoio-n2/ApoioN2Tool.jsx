@@ -269,7 +269,7 @@ export default function ApoioN2Tool() {
                   </div>
                   {tratativaSelecionada.n2_nome && (
                     <div className="pt-2 mt-2 border-t border-slate-200">
-                      <p className="text-xs text-amber-600">⚠️ Esta tratativa já possui N2 vinculado: <strong>{tratativaSelecionada.n2_nome}</strong> ({TIPO_N2_LABELS[tratativaSelecionada.tipo_acionamento_n2]?.label || '—'}). Um novo acionamento irá substituir.</p>
+                      <p className="text-xs text-amber-600">Esta tratativa já possui N2 vinculado: <strong>{tratativaSelecionada.n2_nome}</strong> ({TIPO_N2_LABELS[tratativaSelecionada.tipo_acionamento_n2]?.label || '—'}). Um novo acionamento irá substituir.</p>
                     </div>
                   )}
                 </div>
@@ -309,7 +309,7 @@ export default function ApoioN2Tool() {
                       <span className="font-semibold text-sm text-slate-800">Supervisor realizou a escolha</span>
                     </div>
                     <p className="text-xs text-slate-500 ml-6">Permite selecionar qualquer N2, inclusive bloqueado ou em férias.</p>
-                    {!isGestor && <p className="text-xs text-red-500 ml-6 mt-1">🔒 Exige perfil de supervisor/gestor.</p>}
+                    {!isGestor && <p className="text-xs text-red-500 ml-6 mt-1">Exige perfil de supervisor/gestor.</p>}
                   </button>
                 </div>
 
@@ -349,7 +349,7 @@ export default function ApoioN2Tool() {
                         ))}
                       </SelectContent>
                     </Select>
-                    <p className="text-xs text-purple-600">⚠️ Esta ação será registrada como exceção de supervisor. O rodízio normal não será alterado.</p>
+                    <p className="text-xs text-purple-600">Esta ação será registrada como exceção de supervisor. O rodízio normal não será alterado.</p>
                   </div>
                 )}
 
