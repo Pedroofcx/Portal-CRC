@@ -1,7 +1,18 @@
-import db from '@/api/db';
-import React, { createContext, useState, useContext, useEffect } from 'react';
+/**
+ * Contexto de autenticação — Supabase.
+ *
+ * Substitui a versão do Base44, que falava com /api/apps/public/... e usava um
+ * createAxiosClient que o exportador removeu. Sem isso, isLoadingPublicSettings
+ * nunca virava false e o app ficava preso em "Carregando...".
+ *
+ * O contrato exposto é o mesmo de antes, campo por campo, para App.jsx,
+ * ProtectedRoute.jsx e NavigationTracker.jsx continuarem funcionando sem
+ * alteração. Os campos que só existiam no Base44 (appPublicSettings) ficam
+ * como valores fixos.
+ */
 
-import { appParams } from '@/lib/app-params';
+import React, { createContext, useState, useContext, useEffect, useCallback } from 'react';
+import { supabase } from '@/api/db';
 
 const AuthContext = createContext();
 
@@ -9,136 +20,74 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoadingAuth, setIsLoadingAuth] = useState(true);
-  const [isLoadingPublicSettings, setIsLoadingPublicSettings] = useState(true);
+  const [authChecked, setAuthChecked] = useState(false);
   const [authError, setAuthError] = useState(null);
-  const [appPublicSettings, setAppPublicSettings] = useState(null); // Contains only { id, public_settings }
 
-  useEffect(() => {
-    checkAppState();
+  /** Converte o usuário do Supabase para o formato que o app já esperava. */
+  const formatar = (u) => {
+    if (!u) return null;
+    const meta = u.user_metadata || {};
+    return {
+      id: u.id,
+      email: u.email,
+      full_name: meta.full_name || meta.nome_completo || u.email,
+      role: u.app_metadata?.role || meta.role || 'user',
+    };
+  };
+
+  const aplicarSessao = useCallback((sessao) => {
+    if (sessao?.user) {
+      setUser(formatar(sessao.user));
+      setIsAuthenticated(true);
+      setAuthError(null);
+    } else {
+      setUser(null);
+      setIsAuthenticated(false);
+      setAuthError({ type: 'auth_required', message: 'É preciso entrar para usar o Portal CRC.' });
+    }
+    setIsLoadingAuth(false);
+    setAuthChecked(true);
   }, []);
 
-  const checkAppState = async () => {
-    try {
-      setIsLoadingPublicSettings(true);
-      setAuthError(null);
-      
-      // First, check app public settings (with token if available)
-      // This will tell us if auth is required, user not registered, etc.
-      const appClient = createAxiosClient({
-        baseURL: `/api/apps/public`,
-        headers: {
-          'X-App-Id': appParams.appId
-        },
-        token: appParams.token, // Include token if available
-        interceptResponses: true
-      });
-      
-      try {
-        const publicSettings = await appClient.get(`/prod/public-settings/by-id/${appParams.appId}`);
-        setAppPublicSettings(publicSettings);
-        
-        // If we got the app public settings successfully, check if user is authenticated
-        if (appParams.token) {
-          await checkUserAuth();
-        } else {
-          setIsLoadingAuth(false);
-          setIsAuthenticated(false);
-        }
-        setIsLoadingPublicSettings(false);
-      } catch (appError) {
-        console.error('App state check failed:', appError);
-        
-        // Handle app-level errors
-        if (appError.status === 403 && appError.data?.extra_data?.reason) {
-          const reason = appError.data.extra_data.reason;
-          if (reason === 'auth_required') {
-            setAuthError({
-              type: 'auth_required',
-              message: 'Authentication required'
-            });
-          } else if (reason === 'user_not_registered') {
-            setAuthError({
-              type: 'user_not_registered',
-              message: 'User not registered for this app'
-            });
-          } else {
-            setAuthError({
-              type: reason,
-              message: appError.message
-            });
-          }
-        } else {
-          setAuthError({
-            type: 'unknown',
-            message: appError.message || 'Failed to load app'
-          });
-        }
-        setIsLoadingPublicSettings(false);
-        setIsLoadingAuth(false);
-      }
-    } catch (error) {
-      console.error('Unexpected error:', error);
-      setAuthError({
-        type: 'unknown',
-        message: error.message || 'An unexpected error occurred'
-      });
-      setIsLoadingPublicSettings(false);
-      setIsLoadingAuth(false);
-    }
-  };
+  const checkUserAuth = useCallback(async () => {
+    setIsLoadingAuth(true);
+    const { data: { session } } = await supabase.auth.getSession();
+    aplicarSessao(session);
+    return session;
+  }, [aplicarSessao]);
 
-  const checkUserAuth = async () => {
-    try {
-      // Now check if the user is authenticated
-      setIsLoadingAuth(true);
-      const currentUser = await db.auth.me();
-      setUser(currentUser);
-      setIsAuthenticated(true);
-      setIsLoadingAuth(false);
-    } catch (error) {
-      console.error('User auth check failed:', error);
-      setIsLoadingAuth(false);
-      setIsAuthenticated(false);
-      
-      // If user auth fails, it might be an expired token
-      if (error.status === 401 || error.status === 403) {
-        setAuthError({
-          type: 'auth_required',
-          message: 'Authentication required'
-        });
-      }
-    }
-  };
+  useEffect(() => {
+    checkUserAuth();
 
-  const logout = (shouldRedirect = true) => {
-    setUser(null);
-    setIsAuthenticated(false);
-    
-    if (shouldRedirect) {
-      // Use the SDK's logout method which handles token cleanup and redirect
-      db.auth.logout(window.location.href);
-    } else {
-      // Just remove the token without redirect
-      db.auth.logout();
-    }
+    // Mantém o app em dia com login, logout e renovação de token em outra aba.
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_evento, sessao) => {
+      aplicarSessao(sessao);
+    });
+    return () => subscription?.unsubscribe();
+  }, [checkUserAuth, aplicarSessao]);
+
+  const logout = async () => {
+    await supabase.auth.signOut();
+    // onAuthStateChange devolve o app para a tela de login sozinho.
   };
 
   const navigateToLogin = () => {
-    // Use the SDK's redirectToLogin method
-    db.auth.redirectToLogin(window.location.href);
+    setAuthError({ type: 'auth_required', message: 'É preciso entrar para usar o Portal CRC.' });
   };
 
   return (
-    <AuthContext.Provider value={{ 
-      user, 
-      isAuthenticated, 
+    <AuthContext.Provider value={{
+      user,
+      isAuthenticated,
       isLoadingAuth,
-      isLoadingPublicSettings,
+      isLoadingPublicSettings: false,  // não existe mais: era conceito do Base44
+      appPublicSettings: null,         // idem
+      authChecked,
       authError,
-      appPublicSettings,
       logout,
       navigateToLogin,
-      checkAppState
+      checkUserAuth,
+      checkAppState: checkUserAuth,    // nome antigo, mesmo comportamento
     }}>
       {children}
     </AuthContext.Provider>
@@ -148,7 +97,7 @@ export const AuthProvider = ({ children }) => {
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error('useAuth precisa estar dentro de um AuthProvider');
   }
   return context;
 };
