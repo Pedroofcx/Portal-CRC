@@ -8,6 +8,9 @@ import { formatDateSP, tipoTratativaLabels, prioridadeLabels, statusLabels, getS
 import PageHeader from '@/components/ui/PageHeader';
 import DataTable from '@/components/ui/DataTable';
 import ListaTratativas from '@/components/tratativas/ListaTratativas';
+import CampoFormulario from '@/components/ui/CampoFormulario';
+import { useValidacao } from '@/hooks/useValidacao';
+import { obrigatorio, url, cnpj as validarCnpj, numeroPositivo, dataNaoFutura } from '@/lib/validacao';
 import TratativaDetalhe from '@/pages/TratativaDetalhe';
 import StatusBadge from '@/components/ui/StatusBadge';
 import { Button } from '@/components/ui/button';
@@ -69,8 +72,39 @@ export default function Tratativas() {
     data_contratacao_plano_atual: '',
     segmento_cliente: ''
   });
+  /*
+   * Regras do formulário de nova tratativa.
+   *
+   * Fora do componente de render a cada teclada seria o ideal, mas elas
+   * dependem só de constantes — o useValidacao guarda o resultado, então
+   * recriar o objeto não custa revalidação.
+   */
+  const regrasTratativa = React.useMemo(() => ({
+    link_zendesk:    [obrigatorio('O link do Zendesk'), url('O link do Zendesk')],
+    link_intranet:   [obrigatorio('O link da Intranet'), url('O link da Intranet')],
+    id_base_cliente: [obrigatorio('O ID da base do cliente')],
+    nome_cliente:    [obrigatorio('O nome do cliente')],
+    cnpj_cliente:    [validarCnpj],
+    tipo_tratativa:  [obrigatorio('O tipo de tratativa')],
+    prioridade:      [obrigatorio('A prioridade')],
+    motivo_id:       [obrigatorio('O motivo')],
+    submotivos:      [obrigatorio('Ao menos um submotivo')],
+
+    // Dados comerciais do cliente — obrigatórios em toda tratativa
+    plano_cliente:                 [obrigatorio('O plano do cliente')],
+    modalidade_plano:              [obrigatorio('A modalidade do plano')],
+    valor_contratacao_plano_atual: [obrigatorio('O valor da contratação'),
+                                    numeroPositivo('O valor da contratação')],
+    data_primeira_contratacao:     [obrigatorio('A data da primeira contratação'),
+                                    dataNaoFutura('A data da primeira contratação')],
+    data_contratacao_plano_atual:  [obrigatorio('A data de contratação do plano atual'),
+                                    dataNaoFutura('A data de contratação do plano atual')],
+  }), []);
+
   const [clienteRecorrente, setClienteRecorrente] = useState(false);
   const [numeroOcorrencias, setNumeroOcorrencias] = useState(0);
+
+  const validacao = useValidacao(formData, regrasTratativa);
 
   const queryClient = useQueryClient();
 
@@ -321,60 +355,17 @@ export default function Tratativas() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    
-    // Validações específicas com mensagens claras
-    if (!formData.link_zendesk?.trim()) {
-      toast.error('Link do Zendesk é obrigatório');
-      return;
-    }
-    if (!formData.link_intranet?.trim()) {
-      toast.error('Link da Intranet é obrigatório');
-      return;
-    }
-    if (!formData.id_base_cliente?.trim()) {
-      toast.error('ID da Base do Cliente é obrigatório');
-      return;
-    }
-    if (!formData.nome_cliente?.trim()) {
-      toast.error('Nome do Cliente é obrigatório');
-      return;
-    }
-    if (!formData.tipo_tratativa) {
-      toast.error('Selecione o Tipo de Tratativa');
-      return;
-    }
-    if (!formData.prioridade) {
-      toast.error('Selecione a Prioridade');
-      return;
-    }
-    if (!formData.motivo_id) {
-      toast.error('Selecione o Motivo Principal');
-      return;
-    }
-    if (formData.submotivos.length === 0) {
-      toast.error('Selecione pelo menos 1 submotivo');
-      return;
-    }
 
-    // Validações obrigatórias — Dados Comerciais do Cliente
-    if (!formData.plano_cliente) {
-      toast.error('Selecione o Plano do Cliente');
-      return;
-    }
-    if (!formData.modalidade_plano) {
-      toast.error('Selecione a Modalidade do Plano');
-      return;
-    }
-    if (!formData.valor_contratacao_plano_atual || parseFloat(formData.valor_contratacao_plano_atual) <= 0) {
-      toast.error('Valor da Contratação do Plano Atual é obrigatório e deve ser maior que zero');
-      return;
-    }
-    if (!formData.data_primeira_contratacao) {
-      toast.error('Data da Primeira Contratação é obrigatória');
-      return;
-    }
-    if (!formData.data_contratacao_plano_atual) {
-      toast.error('Data da Contratação do Plano Atual é obrigatória');
+    /*
+     * Valida o formulário INTEIRO antes de enviar.
+     *
+     * A versão anterior checava campo a campo e retornava no primeiro erro,
+     * com a mensagem num toast no canto da tela. Preencher errado virava uma
+     * sequência de tentativas: corrige um, envia, descobre o próximo. Agora
+     * todos os erros aparecem de uma vez, cada um junto do seu campo.
+     */
+    if (!validacao.validarTudo()) {
+      toast.error('Confira os campos destacados antes de salvar.');
       return;
     }
 
@@ -743,47 +734,90 @@ export default function Tratativas() {
           </DialogHeader>
           <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto px-1">
             <div className="space-y-4 pb-4">
-            <div>
-              <Label>Link do Zendesk *</Label>
+            <CampoFormulario
+              id="link_zendesk"
+              rotulo="Link do Zendesk"
+              obrigatorio
+              erro={validacao.erro('link_zendesk')}
+            >
               <Input
+                id="link_zendesk"
                 value={formData.link_zendesk}
-                onChange={(e) => setFormData({ ...formData, link_zendesk: e.target.value })}
+                onChange={(e) => {
+                  setFormData({ ...formData, link_zendesk: e.target.value });
+                  validacao.aoMudar('link_zendesk', e.target.value);
+                }}
+                {...validacao.campo('link_zendesk')}
                 placeholder="https://zendesk.com/ticket/..."
               />
-            </div>
-            <div>
-              <Label>Link da Intranet *</Label>
+            </CampoFormulario>
+            <CampoFormulario
+              id="link_intranet"
+              rotulo="Link da Intranet"
+              obrigatorio
+              erro={validacao.erro('link_intranet')}
+            >
               <Input
+                id="link_intranet"
                 value={formData.link_intranet}
-                onChange={(e) => setFormData({ ...formData, link_intranet: e.target.value })}
+                onChange={(e) => {
+                  setFormData({ ...formData, link_intranet: e.target.value });
+                  validacao.aoMudar('link_intranet', e.target.value);
+                }}
+                {...validacao.campo('link_intranet')}
                 placeholder="https://intranet.com/..."
               />
-            </div>
-            <div>
-              <Label>ID da Base do Cliente *</Label>
+            </CampoFormulario>
+            <CampoFormulario
+              id="id_base_cliente"
+              rotulo="ID da Base do Cliente"
+              obrigatorio
+              erro={validacao.erro('id_base_cliente')}
+            >
               <Input
+                id="id_base_cliente"
                 value={formData.id_base_cliente}
-                onChange={(e) => setFormData({ ...formData, id_base_cliente: e.target.value })}
+                onChange={(e) => {
+                  setFormData({ ...formData, id_base_cliente: e.target.value });
+                  validacao.aoMudar('id_base_cliente', e.target.value);
+                }}
+                {...validacao.campo('id_base_cliente')}
                 placeholder="Ex: CLI-12345"
               />
-            </div>
-            <div>
-              <Label>Nome do Cliente *</Label>
+            </CampoFormulario>
+            <CampoFormulario
+              id="nome_cliente"
+              rotulo="Nome do Cliente"
+              obrigatorio
+              erro={validacao.erro('nome_cliente')}
+            >
               <Input
+                id="nome_cliente"
                 value={formData.nome_cliente}
                 onChange={(e) => {
                   const valor = e.target.value;
                   setFormData({ ...formData, nome_cliente: valor });
                   verificarRecorrencia(valor);
+                  validacao.aoMudar('nome_cliente', valor);
                 }}
+                {...validacao.campo('nome_cliente')}
                 placeholder="Nome completo do cliente"
               />
-            </div>
-            <div>
-              <Label>CNPJ do Cliente</Label>
+            </CampoFormulario>
+            <CampoFormulario
+              id="cnpj_cliente"
+              rotulo="CNPJ do Cliente"
+              erro={validacao.erro('cnpj_cliente')}
+              ajuda="Opcional. Se preenchido, é conferido ao sair do campo."
+            >
               <Input
+                id="cnpj_cliente"
                 value={formData.cnpj_cliente}
-                onChange={(e) => setFormData({ ...formData, cnpj_cliente: e.target.value })}
+                onChange={(e) => {
+                  setFormData({ ...formData, cnpj_cliente: e.target.value });
+                  validacao.aoMudar('cnpj_cliente', e.target.value);
+                }}
+                {...validacao.campo('cnpj_cliente')}
                 placeholder="00.000.000/0000-00"
               />
               {clienteRecorrente && (
@@ -794,7 +828,7 @@ export default function Tratativas() {
                   </p>
                 </div>
               )}
-            </div>
+            </CampoFormulario>
 
             {/* Dados Comerciais do Cliente */}
             <DadosComerciaisForm formData={formData} setFormData={setFormData} />
