@@ -349,7 +349,7 @@ create table if not exists public."configuracao" (
   "categoria" text,
   "descricao" text,
   CHECK ("tipo" IS NULL OR "tipo" IN ('texto', 'numero', 'boolean', 'json', 'lista')),
-  CHECK ("categoria" IS NULL OR "categoria" IN ('geral', 'metas', 'categorias', 'sla', 'governanca'))
+  CHECK ("categoria" IS NULL OR "categoria" IN ('geral', 'metas', 'categorias', 'sla', 'governanca', 'ranking'))
 );
 
 create index if not exists "ix_configuracao_base44_id" on public."configuracao" ("base44_id");
@@ -1352,7 +1352,7 @@ create table if not exists public."tratativa" (
   "data_acionamento_n2" timestamptz,
   "usuario_acionamento_n2" text,
   CHECK ("causa_primaria" IS NULL OR "causa_primaria" IN ('processo', 'produto_sistema', 'comunicacao', 'expectativa_cliente', 'operacao_interna', 'terceiro')),
-  CHECK ("tipo_tratativa" IS NULL OR "tipo_tratativa" IN ('reclamacao_interna', 'reclame_aqui', 'google_meu_negocio', 'contestacao')),
+  CHECK ("tipo_tratativa" IS NULL OR "tipo_tratativa" IN ('reclamacao_interna', 'reclame_aqui', 'google_meu_negocio', 'contestacao', 'administrativas', 'procon')),
   CHECK ("prioridade" IS NULL OR "prioridade" IN ('baixa', 'media', 'alta', 'critica')),
   CHECK ("status" IS NULL OR "status" IN ('registrada', 'tratativa_iniciada', 'em_andamento', 'dependencia_externa', 'aguardando_financeiro', 'encerrada', 'aguardando_confirmacao_reabertura', 'excluida')),
   CHECK ("status_reabertura" IS NULL OR "status_reabertura" IN ('aguardando', 'nao_houve', 'cliente_reabriu')),
@@ -1362,7 +1362,7 @@ create table if not exists public."tratativa" (
   CHECK ("status_resolucao_contestacao" IS NULL OR "status_resolucao_contestacao" IN ('acordo', 'cancelou_contestacao', 'contestou_prazo_cancelamento', 'contestou_pagamento_duplicidade', 'pagou', 'sem_acordo', 'sem_contato')),
   CHECK ("status_final_contestacao" IS NULL OR "status_final_contestacao" IN ('finalizada', 'cancelada', 'defesa_enviada')),
   CHECK ("motivo_reducao_acordo" IS NULL OR char_length("motivo_reducao_acordo") <= 50),
-  CHECK ("plano_cliente" IS NULL OR "plano_cliente" IN ('Bronze', 'Prata', 'Ouro', 'Platina', 'ClickNotas', 'Outros')),
+  CHECK ("plano_cliente" IS NULL OR "plano_cliente" IN ('Bronze', 'Prata', 'Ouro', 'Platina', 'ClickNotas', 'Outros', 'Essencial')),
   CHECK ("modalidade_plano" IS NULL OR "modalidade_plano" IN ('Mensal', 'Trimestral', 'Semestral', 'Anual')),
   CHECK ("tipo_acionamento_lider" IS NULL OR "tipo_acionamento_lider" IN ('rodizio', 'supervisor')),
   CHECK ("tipo_acionamento_n2" IS NULL OR "tipo_acionamento_n2" IN ('rodizio', 'supervisor'))

@@ -4,11 +4,11 @@
   "properties": {
     "chave": {
       "type": "string",
-      "description": "Chave \u00fanica da configura\u00e7\u00e3o"
+      "description": "Chave única da configuração"
     },
     "valor": {
       "type": "string",
-      "description": "Valor da configura\u00e7\u00e3o (JSON stringified para objetos)"
+      "description": "Valor da configuração (JSON stringified para objetos)"
     },
     "tipo": {
       "type": "string",
@@ -28,13 +28,14 @@
         "metas",
         "categorias",
         "sla",
-        "governanca"
+        "governanca",
+        "ranking"
       ],
-      "description": "Categoria da configura\u00e7\u00e3o"
+      "description": "Categoria da configuração"
     },
     "descricao": {
       "type": "string",
-      "description": "Descri\u00e7\u00e3o da configura\u00e7\u00e3o"
+      "description": "Descrição da configuração"
     }
   },
   "required": [

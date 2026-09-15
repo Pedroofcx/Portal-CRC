@@ -25,12 +25,12 @@
     "cliente_recorrente": {
       "type": "boolean",
       "default": false,
-      "description": "Se o cliente j\u00e1 possui outras tratativas"
+      "description": "Se o cliente já possui outras tratativas"
     },
     "numero_ocorrencias": {
       "type": "number",
       "default": 0,
-      "description": "N\u00famero de tratativas anteriores deste cliente"
+      "description": "Número de tratativas anteriores deste cliente"
     },
     "motivo_id": {
       "type": "string",
@@ -42,7 +42,7 @@
     },
     "submotivos": {
       "type": "array",
-      "description": "At\u00e9 3 submotivos selecionados",
+      "description": "Até 3 submotivos selecionados",
       "items": {
         "type": "string"
       },
@@ -79,7 +79,9 @@
         "reclamacao_interna",
         "reclame_aqui",
         "google_meu_negocio",
-        "contestacao"
+        "contestacao",
+        "administrativas",
+        "procon"
       ],
       "description": "Tipo de tratativa"
     },
@@ -91,7 +93,7 @@
         "alta",
         "critica"
       ],
-      "description": "N\u00edvel de prioridade"
+      "description": "Nível de prioridade"
     },
     "status": {
       "type": "string",
@@ -168,7 +170,7 @@
     "houve_devolucao_financeira": {
       "type": "boolean",
       "default": false,
-      "description": "Se houve devolu\u00e7\u00e3o de valor ao cliente"
+      "description": "Se houve devolução de valor ao cliente"
     },
     "valor_devolvido_cliente": {
       "type": "number",
@@ -204,11 +206,11 @@
     },
     "voltaria_fazer_negocio": {
       "type": "boolean",
-      "description": "Cliente voltaria a fazer neg\u00f3cio"
+      "description": "Cliente voltaria a fazer negócio"
     },
     "categoria_reclame_aqui": {
       "type": "string",
-      "description": "Categoria da reclama\u00e7\u00e3o no Reclame Aqui"
+      "description": "Categoria da reclamação no Reclame Aqui"
     },
     "situacao_comentario_google": {
       "type": "string",
@@ -217,7 +219,7 @@
         "comentario_editado",
         "comentario_excluido"
       ],
-      "description": "Situa\u00e7\u00e3o do coment\u00e1rio no Google ap\u00f3s encerramento"
+      "description": "Situação do comentário no Google após encerramento"
     },
     "reavaliacao_positiva_google": {
       "type": "boolean"
@@ -234,7 +236,7 @@
         "erro_operacional",
         "outros"
       ],
-      "description": "Categoria do motivo da contesta\u00e7\u00e3o"
+      "description": "Categoria do motivo da contestação"
     },
     "tipo_resolucao_contestacao": {
       "type": "string",
@@ -272,7 +274,7 @@
     },
     "motivo_contestacao": {
       "type": "string",
-      "description": "Motivo da contesta\u00e7\u00e3o (at\u00e9 150 caracteres)"
+      "description": "Motivo da contestação (até 150 caracteres)"
     },
     "valor_contestado_inicial": {
       "type": "number"
@@ -312,11 +314,11 @@
     "motivo_reducao_acordo": {
       "type": "string",
       "maxLength": 50,
-      "description": "Motivo da redu\u00e7\u00e3o aplicada em acordo de contesta\u00e7\u00e3o (obrigat\u00f3rio quando status_resolucao_contestacao = acordo, m\u00e1x. 50 caracteres)"
+      "description": "Motivo da redução aplicada em acordo de contestação (obrigatório quando status_resolucao_contestacao = acordo, máx. 50 caracteres)"
     },
     "congelamento_sla": {
       "type": "object",
-      "description": "Dados de congelamento de SLA (apenas contesta\u00e7\u00f5es)",
+      "description": "Dados de congelamento de SLA (apenas contestações)",
       "properties": {
         "ativo": {
           "type": "boolean",
@@ -350,7 +352,7 @@
     },
     "desfecho_contestacao": {
       "type": "object",
-      "description": "Desfecho final ap\u00f3s retorno do financeiro",
+      "description": "Desfecho final após retorno do financeiro",
       "properties": {
         "resultado": {
           "type": "string",
@@ -360,11 +362,11 @@
             "protesto_recusado",
             "outros"
           ],
-          "description": "Resultado da contesta\u00e7\u00e3o"
+          "description": "Resultado da contestação"
         },
         "descricao_outros": {
           "type": "string",
-          "description": "Descri\u00e7\u00e3o quando resultado = outros"
+          "description": "Descrição quando resultado = outros"
         },
         "data_desfecho": {
           "type": "string",
@@ -378,12 +380,12 @@
     "pontuacao_calculada": {
       "type": "boolean",
       "default": false,
-      "description": "Se a pontua\u00e7\u00e3o j\u00e1 foi calculada/atribu\u00edda"
+      "description": "Se a pontuação já foi calculada/atribuída"
     },
     "teve_churn": {
       "type": "boolean",
       "default": false,
-      "description": "Se o cliente cancelou/evadiu em decorr\u00eancia desta tratativa"
+      "description": "Se o cliente cancelou/evadiu em decorrência desta tratativa"
     },
     "valor_perda_receita": {
       "type": "number",
@@ -393,7 +395,7 @@
     "custo_operacional_reais": {
       "type": "number",
       "default": 0,
-      "description": "Custo operacional calculado automaticamente ao encerrar (tempo efetivo trabalhado x custo/minuto do agente). Campo restrito: n\u00e3o deve ser exibido para usu\u00e1rios com papel 'agente'."
+      "description": "Custo operacional calculado automaticamente ao encerrar (tempo efetivo trabalhado x custo/minuto do agente). Campo restrito: não deve ser exibido para usuários com papel 'agente'."
     },
     "plano_cliente": {
       "type": "string",
@@ -403,7 +405,8 @@
         "Ouro",
         "Platina",
         "ClickNotas",
-        "Outros"
+        "Outros",
+        "Essencial"
       ],
       "description": "Plano contratado pelo cliente (lista fixa padronizada)"
     },
@@ -415,11 +418,11 @@
         "Semestral",
         "Anual"
       ],
-      "description": "Modalidade de cobran\u00e7a do plano contratado"
+      "description": "Modalidade de cobrança do plano contratado"
     },
     "valor_contratacao_plano_atual": {
       "type": "number",
-      "description": "Valor da contrata\u00e7\u00e3o do plano atual em R$ (respeita a modalidade de cobran\u00e7a; nunca derivar mensal/anual deste campo)"
+      "description": "Valor da contratação do plano atual em R$ (respeita a modalidade de cobrança; nunca derivar mensal/anual deste campo)"
     },
     "data_primeira_contratacao": {
       "type": "string",
@@ -433,19 +436,19 @@
     },
     "tempo_contrato_meses": {
       "type": "number",
-      "description": "Tempo total de relacionamento em meses (calculado automaticamente a partir da data_primeira_contratacao; n\u00e3o deve ser preenchido manualmente)"
+      "description": "Tempo total de relacionamento em meses (calculado automaticamente a partir da data_primeira_contratacao; não deve ser preenchido manualmente)"
     },
     "segmento_cliente": {
       "type": "string",
-      "description": "Segmento de mercado do cliente (ex: Varejo, Finan\u00e7as, Sa\u00fade)"
+      "description": "Segmento de mercado do cliente (ex: Varejo, Finanças, Saúde)"
     },
     "lider_tecnico_id": {
       "type": "string",
-      "description": "ID do L\u00edder T\u00e9cnico vinculado"
+      "description": "ID do Líder Técnico vinculado"
     },
     "lider_tecnico_nome": {
       "type": "string",
-      "description": "Nome do L\u00edder T\u00e9cnico vinculado"
+      "description": "Nome do Líder Técnico vinculado"
     },
     "tipo_acionamento_lider": {
       "type": "string",
@@ -453,16 +456,16 @@
         "rodizio",
         "supervisor"
       ],
-      "description": "Tipo de acionamento do l\u00edder t\u00e9cnico"
+      "description": "Tipo de acionamento do líder técnico"
     },
     "data_acionamento_lider": {
       "type": "string",
       "format": "date-time",
-      "description": "Data/hora do acionamento do l\u00edder t\u00e9cnico"
+      "description": "Data/hora do acionamento do líder técnico"
     },
     "usuario_acionamento_lider": {
       "type": "string",
-      "description": "Usu\u00e1rio que realizou o acionamento do l\u00edder t\u00e9cnico"
+      "description": "Usuário que realizou o acionamento do líder técnico"
     },
     "n2_id": {
       "type": "string",
@@ -487,7 +490,7 @@
     },
     "usuario_acionamento_n2": {
       "type": "string",
-      "description": "Usu\u00e1rio que realizou o acionamento do N2"
+      "description": "Usuário que realizou o acionamento do N2"
     }
   },
   "required": [
