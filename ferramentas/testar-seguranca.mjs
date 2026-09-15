@@ -16,6 +16,7 @@ import { createClient } from '@supabase/supabase-js';
 import { readFileSync } from 'node:fs';
 
 const SALARIO_ALVO = 12345.67;   // o que preparar-teste-seguranca.sql gravou
+const CUSTO_ALVO   = 987.65;     // idem, na tratativa de teste
 
 const env = readFileSync(new URL('../.env.local', import.meta.url), 'utf8');
 const ler = (n) => env.match(new RegExp(`^${n}\\s*=\\s*(.+)$`, 'm'))?.[1].trim().replace(/^["']|["']$/g, '');
@@ -28,6 +29,21 @@ if (!email || !senha) {
   console.error('Uso: node ferramentas/testar-seguranca.mjs <email-do-agente> <senha>');
   process.exit(1);
 }
+
+/**
+ * Um INSERT pode falhar por muitos motivos: coluna inexistente, tipo errado,
+ * campo obrigatório em branco. Só um deles é segurança. Tratar qualquer erro
+ * como "bloqueado" transforma um teste de invasão em teatro: ele passaria
+ * igual com a segurança desligada.
+ */
+const ehBloqueioDeSeguranca = (error) => {
+  if (!error) return false;
+  const m = `${error.code || ''} ${error.message || ''}`.toLowerCase();
+  return m.includes('42501')
+      || m.includes('row-level security')
+      || m.includes('permission denied')
+      || m.includes('violates row-level');
+};
 
 const resultados = [];
 const registrar = (nome, passou, detalhe) => {
@@ -94,15 +110,33 @@ console.log('\n3) Tentando LER o que não pode:');
 {
   const { data } = await agente.from('tratativa').select('id, custo_operacional_reais');
   const comCusto = (data || []).filter(t => t.custo_operacional_reais !== null);
-  registrar('Agente não vê custo operacional', comCusto.length === 0,
-    comCusto.length ? `VIU ${comCusto.length} tratativa(s) com custo` : `leu ${data?.length ?? 0} tratativa(s), custo sempre null`);
+  if (!data || data.length === 0) {
+    registrar('Agente não vê custo operacional', false,
+      'INCONCLUSIVO: nenhuma tratativa no banco. Rode o preparar-teste-seguranca.sql atualizado.');
+  } else {
+    registrar('Agente não vê custo operacional', comCusto.length === 0,
+      comCusto.length ? `VIU ${comCusto.length} com custo (alvo era ${CUSTO_ALVO})`
+                      : `leu ${data.length} tratativa(s), custo sempre null`);
+  }
 }
 
 // ------------------------------------------------- 4. escrever o proibido
 console.log('\n4) Tentando ESCREVER o que não pode:');
 {
-  const { error } = await agente.from('pontuacao').insert({ colaborador_nome: 'INVASAO', pontos: 9999 });
-  registrar('Agente não cria pontuação para si', Boolean(error), error ? error.message.slice(0, 80) : 'INSERIU 9999 PONTOS!');
+  const { error } = await agente.from('pontuacao').insert({
+    colaborador_id: 'teste-invasao',
+    periodo_trimestre: '2026-Q3',
+    colaborador_nome: 'INVASAO',
+    total_pontos: 9999,
+  });
+  const bloqueado = ehBloqueioDeSeguranca(error);
+  registrar(
+    'Agente não cria pontuação para si',
+    bloqueado,
+    bloqueado ? 'bloqueado pelo RLS'
+      : error ? `falhou pelo MOTIVO ERRADO (${error.code}: ${error.message.slice(0, 60)}) — não prova nada`
+      : 'INSERIU 9999 PONTOS!'
+  );
 }
 {
   const { data: eu } = await agente.from('colaborador').select('id').eq('email', email).maybeSingle();
@@ -121,9 +155,13 @@ console.log('\n4) Tentando ESCREVER o que não pode:');
   const { data: linhas } = await agente.from('log_auditoria').select('id').limit(1);
   if (linhas?.length) {
     const { error } = await agente.from('log_auditoria').delete().eq('id', linhas[0].id);
-    registrar('Agente não apaga trilha de auditoria', Boolean(error), error ? error.message.slice(0, 80) : 'APAGOU!');
+    const { data: aindaLa } = await agente.from('log_auditoria').select('id').eq('id', linhas[0].id);
+    const sobreviveu = (aindaLa?.length ?? 0) > 0;
+    registrar('Agente não apaga trilha de auditoria', sobreviveu,
+      sobreviveu ? (error ? 'bloqueado com erro' : 'exclusão ignorada, registro intacto') : 'APAGOU O REGISTRO!');
   } else {
-    console.log('  ⏭️  Sem registros em log_auditoria para testar exclusão');
+    registrar('Agente não apaga trilha de auditoria', false,
+      'INCONCLUSIVO: log_auditoria vazio. Rode o preparar-teste-seguranca.sql atualizado.');
   }
 }
 

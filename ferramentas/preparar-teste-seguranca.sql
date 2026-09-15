@@ -38,3 +38,39 @@ on conflict do nothing;
 select nome_completo, email, papel, salario
 from public.colaborador_base
 order by papel;
+
+-- ============================================================
+-- 3) DADOS PARA OS TESTES QUE ESTAVAM INCONCLUSIVOS
+--
+-- Sem uma tratativa no banco, o teste de custo operacional lia zero linhas
+-- e "passava" sem ter testado nada. Sem um registro de auditoria, o teste de
+-- exclusão era pulado. Passar por falta de alvo não é passar.
+-- ============================================================
+
+insert into public.tratativa_base (
+  id_interno, link_zendesk, link_intranet, id_base_cliente, nome_cliente,
+  tipo_tratativa, prioridade, status, custo_operacional_reais
+)
+values (
+  'TRT-TESTE-0001',
+  'https://exemplo.zendesk.com/tickets/1',
+  'https://intranet.exemplo/1',
+  'CLI-TESTE',
+  'Cliente de Teste',
+  'reclamacao_interna',
+  'media',
+  'encerrada',
+  987.65                      -- valor-alvo: o agente NÃO pode enxergar
+)
+on conflict do nothing;
+
+insert into public.log_auditoria (acao, modulo, usuario_id, usuario_nome)
+values ('login', 'Teste', 'sistema', 'Preparacao do teste')
+on conflict do nothing;
+
+-- Confere os alvos do teste.
+select 'tratativa' as onde, count(*) as registros,
+       count(*) filter (where custo_operacional_reais is not null) as com_custo
+from public.tratativa_base
+union all
+select 'log_auditoria', count(*), count(*) from public.log_auditoria;
