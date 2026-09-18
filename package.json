@@ -15,7 +15,8 @@
     "testar-fsm": "node ferramentas/testar-fsm.mjs",
     "analisar-sla": "node ferramentas/analisar-regras-sla.mjs",
     "analisar-carga": "node ferramentas/analisar-carga-simultanea.mjs",
-    "testar-pontuacao": "node ferramentas/testar-pontuacao.mjs"
+    "testar-pontuacao": "node ferramentas/testar-pontuacao.mjs",
+    "testar-ia": "node ferramentas/testar-ia.mjs"
   },
   "dependencies": {
     "@hello-pangea/dnd": "^17.0.0",

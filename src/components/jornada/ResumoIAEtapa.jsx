@@ -43,6 +43,11 @@ export default function ResumoIAEtapa({ etapa, tratativas }) {
         }
       });
       setResultado(res);
+    } catch (e) {
+      // A IA agora roda no servidor e pode recusar (cota do dia, sessão
+      // expirada). Sem este aviso o botão apenas voltava ao normal, sem dizer
+      // o que houve.
+      toast.error(e?.message || 'Não consegui gerar o resumo agora.');
     } finally {
       setLoading(false);
     }

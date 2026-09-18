@@ -245,19 +245,36 @@ export const integrations = {
     },
 
     /**
-     * Ainda não implementado — e de propósito.
+     * Chama o modelo pela Edge Function `invocar-llm`.
      *
-     * Chamar um modelo pelo navegador exigiria a chave da API no frontend,
-     * onde qualquer usuário a leria e poderia gastar na sua conta. Isso passa
-     * a rodar numa Edge Function na Fase 04. Até lá, falha alto em vez de
-     * falhar em silêncio: são só 2 pontos de uso no sistema inteiro
-     * (ResumoIAEtapa e RelatorioJornadaDiretoria).
+     * A chave da API fica como segredo do projeto no Supabase e nunca chega ao
+     * navegador — se chegasse, qualquer usuário com o Portal aberto poderia
+     * lê-la e gastar na conta da empresa.
+     *
+     * Devolve a mesma forma que o Base44 devolvia, para as telas não mudarem:
+     * objeto quando há `response_json_schema`, texto quando não há.
      */
-    async InvokeLLM() {
-      throw new Error(
-        'InvokeLLM ainda não foi migrado. Ele passa a rodar no servidor na Fase 04, ' +
-        'porque a chave da API não pode ficar no navegador.'
-      );
+    async InvokeLLM({ prompt, response_json_schema } = {}) {
+      const { data, error } = await supabase.functions.invoke('invocar-llm', {
+        body: { prompt, response_json_schema },
+      });
+
+      /*
+       * Erro de Edge Function vem com a mensagem útil dentro do corpo da
+       * resposta, não em error.message (que diz apenas "non-2xx status code").
+       * Sem isto, "cota esgotada" chegaria ao usuário como erro genérico.
+       */
+      if (error) {
+        let detalhe = error.message;
+        try {
+          const corpo = await error.context?.json();
+          if (corpo?.error) detalhe = corpo.error;
+        } catch { /* resposta sem JSON: fica a mensagem original */ }
+        throw new Error(detalhe);
+      }
+
+      if (data?.error) throw new Error(data.error);
+      return data?.resultado;
     },
   },
 };

@@ -95,8 +95,25 @@ node ferramentas/testar-seguranca.mjs <email-do-agente> <senha>
 
 Preparação em `ferramentas/preparar-teste-seguranca.sql`.
 
+## A IA (Edge Function `invocar-llm`)
+
+O `InvokeLLM` do Base44 virou a Edge Function `supabase/functions/invocar-llm`.
+A chave da API é segredo do projeto no Supabase e nunca chega ao navegador.
+Dois pontos de uso: `ResumoIAEtapa` e `RelatorioJornadaDiretoria`.
+
+Provedor: **Google Gemini**, plano gratuito (`gemini-2.5-flash`). É o mesmo
+provedor que o Base44 usava por baixo, e o plano gratuito cobre com folga o uso
+do Portal — são duas telas, acionadas sob demanda.
+
+Para publicar e configurar, veja `documentacao/publicar-a-ia.md`.
+
+Conferência, depois de publicada:
+
+```bash
+node ferramentas/testar-ia.mjs <email> <senha>
+```
+
 ## Pendências conhecidas
 
-- **`InvokeLLM`** — falha com mensagem explícita. Passa a rodar numa Edge
-  Function na Fase 04, porque a chave da API não pode ficar no navegador.
-  Dois pontos de uso: `ResumoIAEtapa` e `RelatorioJornadaDiretoria`.
+- **Backup automático e publicação do sistema** — Fase 06. Hoje o Portal roda
+  só na máquina do Pedro e não há cópia de segurança do banco.
