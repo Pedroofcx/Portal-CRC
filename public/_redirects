@@ -1,5 +1,0 @@
-# O Portal é uma aplicação de página única: o navegador troca de tela sem
-# pedir nada ao servidor. Sem esta linha, quem abrisse /Tratativas direto —
-# por link, favorito ou F5 — receberia 404, porque esse arquivo não existe.
-# Aqui toda rota devolve o index.html e o roteador do app resolve o resto.
-/*    /index.html   200

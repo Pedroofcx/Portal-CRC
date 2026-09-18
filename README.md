@@ -120,8 +120,11 @@ migration 13 e o desligamento do cadastro aberto vêm **antes** de o endereço
 existir.
 
 Hospedagem: **Cloudflare Pages**, gratuito, republicando a cada `git push`.
-`public/_redirects` é o que faz F5 funcionar em qualquer tela — sem ele, abrir
-`/Tratativas` direto dá 404.
+
+F5 em qualquer tela funciona sem configuração: quando o site não tem um
+`404.html` na raiz, a Cloudflare o trata como aplicação de página única e
+responde toda rota com o `index.html`. **Não crie um `404.html` em `public/`**
+— isso desligaria esse comportamento, e abrir `/Tratativas` direto daria 404.
 
 ## Pendências conhecidas
 

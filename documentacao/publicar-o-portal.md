@@ -165,7 +165,8 @@ Abra o endereço publicado e:
 
 1. **Entre com a sua conta.** Deve funcionar igual ao `npm run dev`.
 2. **Navegue até uma tela qualquer e aperte F5.** Tem que recarregar naquela
-   tela, não dar erro 404. É o que o arquivo `public/_redirects` garante.
+   tela, não dar erro 404. A Cloudflare faz isso sozinha porque o site não
+   tem um `404.html` na raiz — não crie um.
 3. **Abra numa janela anônima, sem entrar.** Tem que parar no login e não
    mostrar dado nenhum.
 
