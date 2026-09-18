@@ -18,7 +18,8 @@
     "testar-pontuacao": "node ferramentas/testar-pontuacao.mjs",
     "testar-ia": "node ferramentas/testar-ia.mjs",
     "conferir-contas": "node ferramentas/conferir-contas.mjs",
-    "criar-contas": "node ferramentas/criar-contas.mjs"
+    "criar-contas": "node ferramentas/criar-contas.mjs",
+    "exigir-troca-de-senha": "node ferramentas/exigir-troca-de-senha.mjs"
   },
   "dependencies": {
     "@hello-pangea/dnd": "^17.0.0",

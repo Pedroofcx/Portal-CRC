@@ -8,6 +8,7 @@ import WelcomeScreen from '@/components/ui/WelcomeScreen';
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
 import BuscaGlobal from '@/components/ui/BuscaGlobal';
 import MenuUsuario from '@/components/ui/MenuUsuario';
+import TrocarSenhaDialog from '@/components/conta/TrocarSenhaDialog';
 import {
   LayoutDashboard as Home,
   Users,
@@ -398,6 +399,17 @@ export default function Layout({ children, currentPageName }) {
             <ErrorBoundary>
               {children}
             </ErrorBoundary>
+
+            {/*
+              * Primeiro acesso com senha provisória. Fica no Layout, e não no
+              * MenuUsuario, porque o menu existe em duas cópias (celular e
+              * computador) e o diálogo obrigatório tem que aparecer uma vez só.
+              */}
+            <TrocarSenhaDialog
+              aberto={Boolean(user?.trocar_senha)}
+              obrigatoria
+              aoConcluir={() => queryClient.invalidateQueries({ queryKey: ['currentUser'] })}
+            />
           </div>
         </div>
       </main>

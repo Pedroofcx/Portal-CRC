@@ -197,6 +197,9 @@ export const auth = {
       email: user.email,
       full_name: meta.full_name || meta.nome_completo || user.email,
       role: user.app_metadata?.role || meta.role || 'user',
+      // Marcado pelo criar-contas: a pessoa está com a senha provisória, que
+      // passou pela mão de outra pessoa. O Layout exige a troca antes de seguir.
+      trocar_senha: meta.trocar_senha === true,
     };
   },
 
@@ -219,6 +222,55 @@ export const auth = {
     const { data, error } = await supabase.auth.signInWithPassword({ email, password: senha });
     if (error) throw new Error(error.message);
     return data;
+  },
+
+  /**
+   * Troca a senha de quem está logado.
+   *
+   * Confere a senha ATUAL antes. O Supabase aceitaria trocar só com a sessão
+   * aberta — o que quer dizer que qualquer pessoa diante de um computador
+   * desbloqueado trocaria a senha de quem saiu para o café, e o dono ficaria
+   * trancado para fora da própria conta.
+   *
+   * Limite honesto: a conferência roda no navegador. Ela barra quem usa a
+   * tela, que é o caso real; alguém com a sessão aberta e conhecimento técnico
+   * chamaria o Supabase direto pelo console. Mas essa mesma pessoa já leria
+   * todos os dados daquela sessão — trocar a senha seria o menor dos males.
+   *
+   * Os erros saem com `campo`, para o formulário mostrar a mensagem junto do
+   * campo certo em vez de num aviso solto (regras-ui-ux.md).
+   */
+  async trocarSenha(senhaAtual, novaSenha) {
+    const erroNoCampo = (campo, mensagem) => Object.assign(new Error(mensagem), { campo });
+
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('Sua sessão expirou. Entre de novo para trocar a senha.');
+
+    const { error: erroAtual } = await supabase.auth.signInWithPassword({
+      email: user.email,
+      password: senhaAtual,
+    });
+    if (erroAtual) {
+      throw erroAtual.status === 429
+        ? new Error('Muitas tentativas seguidas. Espere alguns minutos e tente de novo.')
+        : erroNoCampo('senha_atual', 'A senha atual não confere. Confira e digite de novo.');
+    }
+
+    const { error } = await supabase.auth.updateUser({
+      password: novaSenha,
+      data: { trocar_senha: false },
+    });
+
+    if (error) {
+      if (error.code === 'same_password') {
+        throw erroNoCampo('nova_senha', 'A nova senha precisa ser diferente da atual.');
+      }
+      if (error.code === 'weak_password') {
+        throw erroNoCampo('nova_senha',
+          'Essa senha é fácil de adivinhar. Misture letras, números e símbolos, ou use uma frase.');
+      }
+      throw new Error(`Não consegui trocar a senha: ${error.message}`);
+    }
   },
 };
 

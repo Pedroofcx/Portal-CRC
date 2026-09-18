@@ -59,28 +59,51 @@ alguém pode religar um dia sem perceber. As duas proteções se somam.
 
 ## Passo 3 — Criar as contas dos colegas
 
-Para cada pessoa da equipe:
+Um comando cria todas as que faltam:
 
-1. Confira que ela existe em `colaborador` **com o mesmo e-mail** e com
-   `ativo = true`. O e-mail é o que liga a conta de login ao cadastro — se
-   estiverem diferentes, a pessoa entra e não vê nada.
-2. Painel → **Authentication** → **Users** → **Add user** → **Create new user**.
-3. Preencha o e-mail, defina uma senha provisória e marque
-   **Auto Confirm User** (senão a pessoa precisa confirmar por e-mail, e o
-   projeto ainda não tem serviço de e-mail próprio configurado).
-4. Passe a senha provisória para a pessoa por um canal privado e peça que ela
-   troque no primeiro acesso.
+```bash
+npm run criar-contas              # só mostra quem seria criado
+npm run criar-contas -- --criar   # cria de verdade
+```
 
-Para saber a qualquer momento quem falta, e para conferir depois que terminar:
+Ele cria conta só para colaborador **ativo** sem login, com o e-mail já
+confirmado e uma senha provisória aleatória. As senhas **não aparecem na tela**:
+vão para um arquivo em `senhas-provisorias/`, que o git ignora. Entregue cada
+uma por um canal privado e apague o arquivo depois.
+
+Por que não é SQL: as contas ficam em `auth.users`, que é do Supabase. Inserir
+ali à mão exige hash de senha, uma linha em `auth.identities` e campos internos
+com texto vazio em vez de nulo — e errar não falha na criação, falha quando a
+pessoa tenta entrar.
+
+### A troca da senha provisória é obrigatória
+
+Toda conta criada pelo script nasce marcada. No primeiro acesso, o Portal
+mostra um diálogo que não fecha — sem X, sem Esc, sem clique fora — até a
+pessoa definir uma senha dela. O botão "Sair" continua ali, para ninguém ficar
+preso.
+
+Depois disso, qualquer um troca a própria senha pelo menu da conta, no canto
+superior direito → **Trocar senha**. A tela pede a senha atual antes de aceitar
+a nova.
+
+Para obrigar alguém a trocar de novo (quem acha que a senha vazou, por
+exemplo):
+
+```bash
+npm run exigir-troca-de-senha -- email@clickdigital.com.br
+```
+
+### Conferir
 
 ```bash
 npm run conferir-contas
 ```
 
-Ele lista quem está pronto, quem falta criar, quem ficou com e-mail não
-confirmado, e quem tem conta sem cadastro ativo (essas entram e não enxergam
-nada). Também aponta e-mails quase iguais, que é a armadilha silenciosa:
-uma letra trocada faz a pessoa entrar num sistema vazio, sem mensagem de erro.
+Lista quem está pronto, quem falta criar, quem ficou com e-mail não confirmado
+e quem tem conta sem cadastro ativo (essas entram e não enxergam nada). Também
+aponta e-mails quase iguais, que é a armadilha silenciosa: uma letra trocada
+faz a pessoa entrar num sistema vazio, sem mensagem de erro.
 
 ---
 

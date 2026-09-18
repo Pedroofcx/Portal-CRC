@@ -105,6 +105,9 @@ for (const c of aCriar) {
     // Sem isto a pessoa precisaria confirmar por e-mail — e o projeto ainda
     // não tem serviço de e-mail próprio. A conta nasceria inutilizável.
     email_confirm: true,
+    // O Portal lê isto no login e exige a troca antes de liberar o sistema:
+    // a senha provisória passou pela mão de outra pessoa.
+    user_metadata: { trocar_senha: true },
   });
   if (error) falhas.push([c, error.message]);
   else criadas.push([c, senha]);
