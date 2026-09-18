@@ -80,6 +80,20 @@ console.log(`  Entrou como ${sessao.user.email}`);
 
 const { data: papel } = await agente.rpc('papel_atual');
 registrar('O sistema reconhece o papel como agente', papel === 'agente', `papel_atual() = ${papel ?? 'null'}`);
+
+/*
+ * Desde a migration 13, ler qualquer coisa depende de ter cadastro ATIVO em
+ * colaborador — estar logado deixou de bastar. Esta conferência é o aviso
+ * antecipado: se ela falhar, o usuário vai encontrar um sistema vazio, e é
+ * melhor descobrir aqui.
+ */
+{
+  const { data: daCasa } = await agente.rpc('eh_colaborador');
+  registrar('O agente é reconhecido como colaborador ativo', daCasa === true,
+    daCasa === true
+      ? 'eh_colaborador() = true'
+      : `eh_colaborador() = ${daCasa} — este usuário não vai enxergar nada`);
+}
 if (papel !== 'agente') {
   console.error('\n  O teste não faz sentido se o usuário não for agente. Rode o preparar-teste-seguranca.sql.\n');
   process.exit(1);
@@ -90,7 +104,18 @@ console.log('\n3) Tentando LER o que não pode:');
 {
   const { data } = await agente.from('colaborador').select('nome_completo, email, salario');
   const comSalario = (data || []).filter(c => c.salario !== null);
-  registrar(
+
+  /*
+   * Guarda contra falso positivo: "nenhum salário visível" também seria
+   * verdade se o agente tivesse perdido o acesso e lido zero linha. As duas
+   * situações são opostas — uma é a máscara funcionando, a outra é o sistema
+   * inutilizado — e sem esta checagem apareceriam iguais no placar.
+   */
+  if (!data || data.length === 0) {
+    registrar('Agente não vê salário de ninguém', false,
+      'INCONCLUSIVO: o agente não leu NENHUM colaborador. Ou não há cadastro, ' +
+      'ou ele perdeu o acesso de leitura (ver migration 13).');
+  } else registrar(
     'Agente não vê salário de ninguém',
     comSalario.length === 0,
     comSalario.length
@@ -104,8 +129,13 @@ console.log('\n3) Tentando LER o que não pode:');
 
   const { data: promo } = await agente.from('colaborador').select('promocoes');
   const comPromo = (promo || []).filter(c => c.promocoes !== null);
-  registrar('Agente não vê histórico de promoções', comPromo.length === 0,
-    comPromo.length ? `VIU ${comPromo.length} registro(s)` : 'todos null');
+  if (!promo || promo.length === 0) {
+    registrar('Agente não vê histórico de promoções', false,
+      'INCONCLUSIVO: nenhuma linha lida — mesmo motivo do teste anterior.');
+  } else {
+    registrar('Agente não vê histórico de promoções', comPromo.length === 0,
+      comPromo.length ? `VIU ${comPromo.length} registro(s)` : `todos null em ${promo.length} cadastro(s)`);
+  }
 }
 {
   const { data } = await agente.from('tratativa').select('id, custo_operacional_reais');
