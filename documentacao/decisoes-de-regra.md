@@ -126,3 +126,35 @@ de quem é o cadastro incompleto, para o total menor não passar despercebido.
 
 **Onde vive:** `src/components/utils/helpers.js` e
 `src/components/jornada/AvisoSalarioAusente.jsx`.
+
+---
+
+## Pontuação — proteger as entradas em vez de mover o cálculo (18/09/2026)
+
+**Decisão:** a pontuação continua sendo calculada no navegador; o que muda é
+que os campos de onde ela sai passam a ser imutáveis.
+
+**Por que.** O cálculo é determinístico — mesmas entradas, mesmo resultado. Se
+as entradas forem confiáveis, o resultado é confiável mesmo calculado no
+cliente, e a tela continua respondendo na hora sem ida ao servidor.
+
+O buraco não estava no cálculo, estava nas entradas. A Fase 03 travou a tabela
+`pontuacao` para escrita de gestor, mas `tratativa` continuou gravável por
+qualquer usuário logado — e a pontuação sai de campos DA TRATATIVA. Pelo
+console, um agente aumentava a própria nota do trimestre. Como a pontuação
+define premiação, era o caminho de fraude mais direto que restava.
+
+**Duas camadas de proteção:**
+
+1. **Campos calculados pelo servidor** — `encerrado_no_sla`,
+   `tempo_total_minutos`, `sla_atribuido`, `custo_operacional_reais` — nunca
+   aceitam valor vindo do cliente. O valor enviado é descartado em silêncio,
+   não rejeitado com erro: o frontend costuma devolver o objeto inteiro num
+   update, e isso não é tentativa de fraude, é ruído normal.
+
+2. **Campos que geram ponto** congelam quando a tratativa encerra. Gestor
+   ainda corrige, porque auditar é função dele — o campo
+   `solucao_replicavel_auditada` existe exatamente para isso.
+
+**Onde vive:** `supabase/migrations/12_pontuacao_confiavel.sql`.
+`npm run testar-pontuacao <email> <senha>` tenta a fraude como agente comum.
