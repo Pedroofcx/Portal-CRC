@@ -1,0 +1,10 @@
+# Cabeçalhos aplicados a todas as páginas publicadas.
+/*
+  # Impede que o Portal seja embutido dentro de outro site (clickjacking):
+  # alguém poderia sobrepor botões invisíveis sobre a tela real.
+  X-Frame-Options: DENY
+  # Não vaza o endereço interno que o usuário estava vendo ao clicar num link
+  # que leve para fora.
+  Referrer-Policy: strict-origin-when-cross-origin
+  # Impede o navegador de "adivinhar" o tipo de um arquivo servido.
+  X-Content-Type-Options: nosniff

@@ -94,6 +94,7 @@ as $$
   select c.papel
   from public.colaborador c
   where lower(c.email) = lower(auth.jwt() ->> 'email')
+    and coalesce(c.ativo, true)
   limit 1
 $$;
 
@@ -107,16 +108,44 @@ as $$
   select coalesce(public.papel_atual() = 'gestor', false)
 $$;
 
-revoke execute on function public.papel_atual() from anon;
-revoke execute on function public.eh_gestor()   from anon;
-grant  execute on function public.papel_atual() to authenticated;
-grant  execute on function public.eh_gestor()   to authenticated;
+-- Estar logado NÃO é o mesmo que ser da empresa.
+--
+-- O Supabase permite que qualquer pessoa crie uma conta de login. Se as
+-- políticas dissessem apenas "quem está logado lê", bastaria alguém se
+-- cadastrar sozinho para ler a base inteira de clientes — e isso vale ainda
+-- mais depois que o sistema ganha um endereço público na internet.
+--
+-- Esta função é o que separa "tem conta" de "trabalha aqui": só passa quem
+-- tem cadastro ATIVO em colaborador. Desligar alguém da empresa é, por
+-- consequência, tirar o acesso.
+create or replace function public.eh_colaborador()
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select exists (
+    select 1
+    from public.colaborador c
+    where lower(c.email) = lower(auth.jwt() ->> 'email')
+      and coalesce(c.ativo, true)
+  )
+$$;
+
+revoke execute on function public.papel_atual()    from anon;
+revoke execute on function public.eh_gestor()      from anon;
+revoke execute on function public.eh_colaborador() from anon;
+grant  execute on function public.papel_atual()    to authenticated;
+grant  execute on function public.eh_gestor()      to authenticated;
+grant  execute on function public.eh_colaborador() to authenticated;
 
 -- ------------------------------------------------------------------
 -- POLÍTICAS POR TABELA
 -- ------------------------------------------------------------------
--- Regra geral: quem está logado lê. Escrita depende da tabela.
--- O anon (visitante sem login) não recebe nada em lugar nenhum.
+-- Regra geral: quem é colaborador ativo lê. Escrita depende da tabela.
+-- O anon (visitante sem login) não recebe nada em lugar nenhum, e quem
+-- criou conta sozinho sem estar no cadastro também não.
 """]
 
     for tabela in sorted(tabelas):
@@ -128,13 +157,13 @@ grant  execute on function public.eh_gestor()   to authenticated;
 
         p.append(
             f'create policy "{tabela}_ler" on public."{tabela}" '
-            f"for select to authenticated using (true);"
+            f"for select to authenticated using (public.eh_colaborador());"
         )
 
         if tabela in SO_INSERE:
             p.append(
                 f'create policy "{tabela}_inserir" on public."{tabela}" '
-                f"for insert to authenticated with check (true);"
+                f"for insert to authenticated with check (public.eh_colaborador());"
             )
             p.append(f"-- {tabela}: sem política de update/delete — a trilha de auditoria não se apaga.")
             continue
@@ -143,8 +172,8 @@ grant  execute on function public.eh_gestor()   to authenticated;
             cond = "public.eh_gestor()"
             nota = "só gestor grava"
         else:
-            cond = "true"
-            nota = "qualquer usuário logado grava"
+            cond = "public.eh_colaborador()"
+            nota = "qualquer colaborador ativo grava"
 
         p.append(f"-- {tabela}: {nota}")
         p.append(

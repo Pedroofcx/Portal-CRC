@@ -1,0 +1,3 @@
+# Sistema interno. Não deve aparecer em buscador nenhum.
+User-agent: *
+Disallow: /

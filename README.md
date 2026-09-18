@@ -16,7 +16,7 @@ está no documento de migração compartilhado com o responsável pelo projeto.
 | 03 | Segurança (RLS) | **Concluída** — 9 testes de invasão passando |
 | 04 | Regras de negócio no servidor | **Concluída** — FSM, SLA, custo, pontuação e IA no servidor |
 | 05 | Frontend e design | **Concluída** — 6 itens, lint zerado |
-| 06 | Publicação e backup automático | Não iniciada |
+| 06 | Publicação e backup automático | **Em andamento** — publicação preparada; backup adiado por decisão |
 
 ## Estrutura
 
@@ -113,7 +113,18 @@ Conferência, depois de publicada:
 node ferramentas/testar-ia.mjs <email> <senha>
 ```
 
+## Publicação
+
+Passo a passo em `documentacao/publicar-o-portal.md`. A ordem importa: a
+migration 13 e o desligamento do cadastro aberto vêm **antes** de o endereço
+existir.
+
+Hospedagem: **Cloudflare Pages**, gratuito, republicando a cada `git push`.
+`public/_redirects` é o que faz F5 funcionar em qualquer tela — sem ele, abrir
+`/Tratativas` direto dá 404.
+
 ## Pendências conhecidas
 
-- **Backup automático e publicação do sistema** — Fase 06. Hoje o Portal roda
-  só na máquina do Pedro e não há cópia de segurança do banco.
+- **Backup automático do banco** — não existe. Decisão consciente de adiar,
+  tomada ao escolher publicar primeiro. Enquanto isso, um apagamento acidental
+  ou a perda do projeto Supabase não têm de onde ser restaurados.
