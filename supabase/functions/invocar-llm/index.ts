@@ -31,7 +31,13 @@
  * função e devolve exatamente a forma que o código já esperava.
  */
 
-const MODELO = Deno.env.get('GEMINI_MODELO') ?? 'gemini-2.5-flash';
+/*
+ * O modelo tem data de validade. Em setembro de 2026 o Google passou a recusar
+ * `gemini-2.5-flash` para contas novas, apontando o substituto na própria
+ * mensagem de erro. Quando isso acontecer de novo, dá para trocar sem
+ * republicar a função: basta criar o segredo GEMINI_MODELO no Supabase.
+ */
+const MODELO = Deno.env.get('GEMINI_MODELO') ?? 'gemini-3.6-flash';
 const CHAVE = Deno.env.get('GEMINI_API_KEY');
 
 const URL_SUPABASE = Deno.env.get('SUPABASE_URL')!;

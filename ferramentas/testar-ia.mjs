@@ -60,7 +60,7 @@ const semLogin = await chamar({ prompt: 'oi' });
 registrar(
   'a chamada é recusada',
   semLogin.status === 401 || semLogin.status === 403,
-  `HTTP ${semLogin.status} — ${semLogin.dados?.error ?? semLogin.dados?.msg ?? 'sem mensagem'}`,
+  `HTTP ${semLogin.status} — ${semLogin.dados?.error ?? semLogin.dados?.message ?? semLogin.dados?.msg ?? 'sem mensagem'}`,
 );
 
 // --- login ------------------------------------------------------------------
