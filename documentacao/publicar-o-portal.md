@@ -71,7 +71,16 @@ Para cada pessoa da equipe:
 4. Passe a senha provisória para a pessoa por um canal privado e peça que ela
    troque no primeiro acesso.
 
-São 10 colaboradores cadastrados e, hoje, 2 contas de login. Faltam 8.
+Para saber a qualquer momento quem falta, e para conferir depois que terminar:
+
+```bash
+npm run conferir-contas
+```
+
+Ele lista quem está pronto, quem falta criar, quem ficou com e-mail não
+confirmado, e quem tem conta sem cadastro ativo (essas entram e não enxergam
+nada). Também aponta e-mails quase iguais, que é a armadilha silenciosa:
+uma letra trocada faz a pessoa entrar num sistema vazio, sem mensagem de erro.
 
 ---
 
