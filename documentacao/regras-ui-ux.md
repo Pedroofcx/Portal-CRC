@@ -127,8 +127,13 @@ isso — sem elas, a exceção não vale.
   o lema da empresa e uma frase de autor clássico. As fotos **nunca são
   cortadas**: o retrato fica inteiro na altura do painel, e o resto é
   preenchido pela mesma foto, ampliada e desfocada.
-* **Só entram frases com autoria confirmada** na obra de origem. Frase famosa
-  com autor errado, na primeira tela do sistema, desmente o tema da sabedoria.
+* **Slides de destaque** (imagens horizontais, como o emblema M.E.T.E.O.R.O.)
+  ocupam a largura do painel, inteiros, com as bordas dissolvidas no próprio
+  fundo desfocado. Enquanto um destaque está na tela, o lema e a frase saem de
+  cena para a imagem falar sozinha.
+* **Frases em dois grupos, misturados:** clássicas, só com autoria confirmada
+  na obra de origem (frase famosa com autor errado, na primeira tela do
+  sistema, desmente o tema da sabedoria), e os bordões da própria equipe.
 * **O painel é escondido da leitura de tela** (`aria-hidden`), porque não
   carrega informação necessária para entrar.
 * **Gradiente, desfoque, zoom lento na foto e profundidade com o mouse** ficam

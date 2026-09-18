@@ -209,16 +209,17 @@
     transition: transform 700ms cubic-bezier(.2, .7, .2, 1);
   }
 
-  /* Dois véus: o da direita, para o lema e a frase lerem bem sobre qualquer
-     foto; o do alto, para a marca não sumir quando a foto tem janela clara
-     atrás da pessoa. */
+  /* Dois véus. O da direita deixa o lema e a frase legíveis sobre qualquer
+     foto, e sai de cena nos slides de destaque. O do alto fica sempre: é o
+     que impede a marca de sumir quando a foto tem janela clara atrás. */
   .entrada-veu {
-    background:
-      linear-gradient(180deg, hsl(var(--marca-marinho) / .7) 0%, transparent 22%),
-      linear-gradient(90deg,
-        transparent 32%,
-        hsl(var(--marca-marinho) / .75) 58%,
-        hsl(var(--marca-marinho) / .95) 78%);
+    background: linear-gradient(90deg,
+      transparent 32%,
+      hsl(var(--marca-marinho) / .75) 58%,
+      hsl(var(--marca-marinho) / .95) 78%);
+  }
+  .entrada-veu-topo {
+    background: linear-gradient(180deg, hsl(var(--marca-marinho) / .7), transparent);
   }
 
   /* Entrada e zoom lento numa animação só. Se fossem duas, a troca de uma
@@ -226,6 +227,22 @@
   .entrada-foto {
     transform-origin: 40% 30%;
     animation: entrada-foto 9.6s cubic-bezier(.25, .6, .3, 1) both;
+  }
+
+  /* Fundo do slide de destaque: aparece junto com a imagem, sem o foco. */
+  .entrada-dissolver { animation: entrada-dissolver 1.6s ease-out both; }
+
+  /* Imagem horizontal sobre o próprio fundo desfocado: as bordas se
+     dissolvem em vez de formar uma caixa recortada. */
+  .entrada-bordas-suaves {
+    -webkit-mask-image:
+      linear-gradient(to bottom, transparent, #000 14%, #000 86%, transparent),
+      linear-gradient(to right, transparent, #000 10%, #000 90%, transparent);
+    -webkit-mask-composite: source-in;
+    mask-image:
+      linear-gradient(to bottom, transparent, #000 14%, #000 86%, transparent),
+      linear-gradient(to right, transparent, #000 10%, #000 90%, transparent);
+    mask-composite: intersect;
   }
 
   .entrada-linha { animation: entrada-linha 800ms cubic-bezier(.2, .7, .2, 1) both; }
@@ -244,6 +261,10 @@
   17%  { opacity: 1; filter: blur(0);    transform: scale(1); }
   /* Depois: aproximação lenta até a próxima troca. */
   100% { opacity: 1; filter: blur(0);    transform: scale(1.06); }
+}
+@keyframes entrada-dissolver {
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }
 @keyframes entrada-linha {
   from { transform: translateY(110%); }
@@ -276,6 +297,7 @@
   /* Na tela de entrada, sem movimento: sem zoom, sem foco, sem
      profundidade — e a frase fica visível, em vez de terminar apagada. */
   .entrada-foto,
+  .entrada-dissolver,
   .entrada-frase { animation: none !important; }
   .entrada-profundidade-fundo,
   .entrada-profundidade-frente { transform: none !important; }

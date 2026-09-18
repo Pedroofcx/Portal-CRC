@@ -99,13 +99,11 @@ export default function Login() {
       <main className="flex flex-1 items-center justify-center px-6 py-12 sm:px-12">
         <div className="w-full max-w-sm">
 
-          {/* Marca, só quando o painel da esquerda está escondido (tela estreita). */}
-          <div className="mb-10 flex items-center gap-3 lg:hidden">
-            <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-lg font-bold text-primary-foreground">
-              C
-            </span>
-            <span className="text-lg font-semibold text-foreground">Portal CRC</span>
-          </div>
+          {/* Marca, só quando o painel da esquerda está escondido (tela estreita).
+              Só o nome, como no painel. */}
+          <p className="mb-10 text-lg font-semibold tracking-tight text-foreground lg:hidden">
+            Portal CRC
+          </p>
 
           <div className="entrada-surgir mb-8 space-y-2">
             <p className="text-sm font-medium text-primary">{ola}!</p>
