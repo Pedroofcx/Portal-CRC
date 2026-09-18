@@ -36,3 +36,6 @@ portalcrc-dados-*.json
 
 # Chave service_role - ignora toda a seguranca, so para importacao local
 .env.import
+
+# Senhas provisorias geradas pelo criar-contas - nunca versionar
+senhas-provisorias/
