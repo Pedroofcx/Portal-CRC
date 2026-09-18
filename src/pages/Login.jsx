@@ -1,23 +1,39 @@
 /**
- * Tela de login.
+ * Tela de entrada.
  *
  * O Portal CRC nunca teve uma: no Base44 o login era uma página da plataforma,
  * fora do sistema. Com a migração, ele passa a ser nosso.
+ *
+ * Duas metades, com papéis opostos:
+ *   - à esquerda, o painel de boas-vindas, que é o ÚNICO lugar do sistema com
+ *     animação contínua (regras-ui-ux.md, seção 8);
+ *   - à direita, o formulário, que segue as regras de sempre e pode ser usado
+ *     no instante em que a tela abre — ninguém espera animação para entrar.
+ *
+ * O que ficou de fora da referência, de propósito:
+ *   - "Criar conta": o cadastro aberto está desligado; conta só nasce pelo
+ *     administrador (npm run criar-contas).
+ *   - "Manter conectado": o Supabase já mantém a sessão. Uma caixinha que não
+ *     muda nada seria mentira na interface.
+ *   - "Esqueci a senha" como link: o projeto ainda não tem serviço de e-mail
+ *     próprio. O texto diz a verdade: quem redefine é o administrador.
  */
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { supabase } from '@/api/db';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent } from '@/components/ui/card';
-import { AlertCircle, Loader2 } from 'lucide-react';
+import CampoFormulario from '@/components/ui/CampoFormulario';
+import PainelBoasVindas from '@/components/login/PainelBoasVindas';
+import { useValidacao } from '@/hooks/useValidacao';
+import { email as emailValido } from '@/lib/validacao';
+import { AlertCircle, Eye, EyeOff, Loader2 } from 'lucide-react';
 
 /** Traduz os erros do Supabase, que vêm em inglês e sem contexto. */
 function mensagemDoErro(bruto) {
   const m = (bruto || '').toLowerCase();
-  if (m.includes('invalid login credentials')) return 'E-mail ou senha incorretos.';
-  if (m.includes('email not confirmed')) return 'Este e-mail ainda não foi confirmado.';
+  if (m.includes('invalid login credentials')) return 'E-mail ou senha incorretos. Confira os dois e tente de novo.';
+  if (m.includes('email not confirmed')) return 'Este e-mail ainda não foi confirmado. Fale com o administrador do Portal.';
   if (m.includes('too many requests') || m.includes('rate limit')) {
     return 'Muitas tentativas seguidas. Espere um minuto e tente de novo.';
   }
@@ -27,17 +43,48 @@ function mensagemDoErro(bruto) {
   return bruto || 'Não foi possível entrar. Tente novamente.';
 }
 
+/** Saudação pela hora de quem está abrindo a tela. */
+function saudacao(agora = new Date()) {
+  const h = agora.getHours();
+  if (h >= 5 && h < 12) return 'Bom dia';
+  if (h >= 12 && h < 18) return 'Boa tarde';
+  return 'Boa noite';
+}
+
 export default function Login() {
-  const [email, setEmail] = useState('');
-  const [senha, setSenha] = useState('');
+  const [valores, setValores] = useState({ email: '', senha: '' });
+  const [mostrarSenha, setMostrarSenha] = useState(false);
   const [erro, setErro] = useState(null);
   const [enviando, setEnviando] = useState(false);
+
+  const regras = useMemo(() => ({
+    email: [
+      (v) => (String(v || '').trim() ? null : 'Digite o seu e-mail corporativo.'),
+      emailValido,
+    ],
+    senha: [(v) => (v ? null : 'Digite a sua senha.')],
+  }), []);
+
+  const f = useValidacao(valores, regras);
+  const ola = useMemo(() => saudacao(), []);
+
+  const alterar = (nome) => (e) => {
+    const valor = e.target.value;
+    setValores((atual) => ({ ...atual, [nome]: valor }));
+    setErro(null);
+    f.aoMudar(nome, valor);
+  };
 
   const entrar = async (e) => {
     e.preventDefault();
     setErro(null);
+    if (!f.validarTudo()) return;
+
     setEnviando(true);
-    const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password: senha });
+    const { error } = await supabase.auth.signInWithPassword({
+      email: valores.email.trim(),
+      password: valores.senha,
+    });
     if (error) {
       setErro(mensagemDoErro(error.message));
       setEnviando(false);
@@ -46,71 +93,92 @@ export default function Login() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-muted superficie-escura p-4">
-      <div className="w-full max-w-sm space-y-6">
+    <div className="flex min-h-screen bg-card">
+      <PainelBoasVindas />
 
-        <div className="space-y-1 text-center">
-          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-lg bg-primary text-xl font-bold text-white">
-            C
+      <main className="flex flex-1 items-center justify-center px-6 py-12 sm:px-12">
+        <div className="w-full max-w-sm">
+
+          {/* Marca, só quando o painel da esquerda está escondido (tela estreita). */}
+          <div className="mb-10 flex items-center gap-3 lg:hidden">
+            <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-lg font-bold text-primary-foreground">
+              C
+            </span>
+            <span className="text-lg font-semibold text-foreground">Portal CRC</span>
           </div>
-          <h1 className="pt-3 text-xl font-semibold text-white">Portal CRC</h1>
-          <p className="text-sm text-muted-foreground">Central de Relacionamento</p>
-        </div>
 
-        <Card>
-          <CardContent className="pt-6">
-            <form onSubmit={entrar} className="space-y-4">
+          <div className="entrada-surgir mb-8 space-y-2">
+            <p className="text-sm font-medium text-primary">{ola}!</p>
+            <h1 className="text-3xl font-semibold tracking-tight text-foreground">
+              Boas-vindas ao Portal CRC
+            </h1>
+            <p className="text-sm text-muted-foreground">
+              Central de Relacionamento com o Cliente. Entre com o seu e-mail corporativo
+              para continuar.
+            </p>
+          </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="email">E-mail corporativo</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  autoComplete="username"
-                  autoFocus
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="nome@empresa.com.br"
-                />
-              </div>
+          <form onSubmit={entrar} className="space-y-5" noValidate>
+            <CampoFormulario id="email" rotulo="E-mail corporativo" erro={f.erro('email')}>
+              <Input
+                id="email"
+                type="email"
+                autoComplete="username"
+                autoFocus
+                placeholder="nome@clickdigital.com.br"
+                className="h-11"
+                value={valores.email}
+                onChange={alterar('email')}
+                {...f.campo('email')}
+              />
+            </CampoFormulario>
 
-              <div className="space-y-2">
-                <Label htmlFor="senha">Senha</Label>
+            <CampoFormulario id="senha" rotulo="Senha" erro={f.erro('senha')}>
+              <div className="relative">
                 <Input
                   id="senha"
-                  type="password"
+                  type={mostrarSenha ? 'text' : 'password'}
                   autoComplete="current-password"
-                  required
-                  value={senha}
-                  onChange={(e) => setSenha(e.target.value)}
+                  className="h-11 pr-11"
+                  value={valores.senha}
+                  onChange={alterar('senha')}
+                  {...f.campo('senha')}
                 />
-              </div>
-
-              {erro && (
-                <div
-                  role="alert"
-                  className="flex items-start gap-2 rounded-md bg-destructive/10 p-3 text-sm text-destructive"
+                <button
+                  type="button"
+                  onClick={() => setMostrarSenha((v) => !v)}
+                  className="absolute inset-y-0 right-0 flex w-11 items-center justify-center rounded-r-md text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  aria-label={mostrarSenha ? 'Esconder a senha' : 'Mostrar a senha'}
+                  aria-pressed={mostrarSenha}
                 >
-                  <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
-                  <span>{erro}</span>
-                </div>
-              )}
+                  {mostrarSenha
+                    ? <EyeOff className="h-4 w-4" aria-hidden="true" />
+                    : <Eye className="h-4 w-4" aria-hidden="true" />}
+                </button>
+              </div>
+            </CampoFormulario>
 
-              <Button type="submit" className="w-full" disabled={enviando}>
-                {enviando && <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />}
-                {enviando ? 'Entrando...' : 'Entrar'}
-              </Button>
+            {erro && (
+              <div
+                role="alert"
+                className="flex items-start gap-2 rounded-md bg-destructive/10 p-3 text-sm text-destructive"
+              >
+                <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+                <span>{erro}</span>
+              </div>
+            )}
 
-            </form>
-          </CardContent>
-        </Card>
+            <Button type="submit" className="h-11 w-full text-base" disabled={enviando}>
+              {enviando && <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />}
+              {enviando ? 'Entrando...' : 'Entrar'}
+            </Button>
+          </form>
 
-        <p className="text-center text-xs text-muted-foreground">
-          Esqueceu a senha? Fale com o administrador do Portal.
-        </p>
-
-      </div>
+          <p className="mt-8 text-sm text-muted-foreground">
+            Esqueceu a senha? Fale com o administrador do Portal.
+          </p>
+        </div>
+      </main>
     </div>
   );
 }

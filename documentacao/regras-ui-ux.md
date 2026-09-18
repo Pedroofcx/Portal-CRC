@@ -101,3 +101,45 @@ estética:
 * Sem emoji na interface.
 * Transições de no máximo 200ms; nenhuma animação decorativa.
 * Reaproveitar componente existente em vez de criar um novo equivalente.
+
+---
+
+## 8. Revisão de 18/09/2026 — A tela de entrada
+
+Decisão do responsável pelo produto: a tela de entrada ganha destaque e
+animação. Isso **abre uma exceção** à regra "zero animações decorativas" da
+seção 6, reafirmada na seção 7.
+
+### Por que a exceção não enfraquece a regra
+
+A regra existe porque, no trabalho diário, animação atrasa e irrita. A tela
+de entrada não é trabalho: é vista uma vez por sessão, e a animação não fica
+entre a pessoa e o que ela quer fazer. As condições abaixo são o que garante
+isso — sem elas, a exceção não vale.
+
+### Condições
+
+* **A animação fica só no painel de boas-vindas**, à esquerda. O formulário não
+  anima nada além das transições normais (até 200ms).
+* **O formulário pode ser usado no instante em que a tela abre.** O foco já
+  está no e-mail; ninguém espera animação terminar para entrar.
+* **Quem pediu para reduzir movimento vê o painel parado**, com cada cartão num
+  estado diferente, de modo que a imagem continua dizendo a mesma coisa.
+* **O painel mostra o que o sistema faz** (tratativas passando por Registrada,
+  Em andamento e Encerrada), e não uma ilustração genérica. Sem nome de
+  cliente, número ou valor: é ilustração e não pode ser confundida com dado.
+* **O painel é escondido da leitura de tela** (`aria-hidden`), porque não
+  carrega informação necessária para entrar.
+* **Gradiente e brilho** ficam permitidos neste painel, pelo mesmo motivo.
+
+### O que continua valendo na tela de entrada
+
+Rótulos permanentes, validação no `onBlur` com mensagem literal, envio pelo
+`Enter`, foco visível, sem emoji, e nada de controle que não faça nada — por
+isso ela não tem "Criar conta" (cadastro é só pelo administrador) nem "Manter
+conectado" (a sessão já é mantida).
+
+### Esta exceção não se estende
+
+Nenhuma outra tela ganha animação contínua por analogia. Uma nova exceção
+exige uma nova revisão neste documento.

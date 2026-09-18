@@ -173,6 +173,79 @@
   }
 }
 
+/* ============================================================
+   TELA DE ENTRADA — a única exceção à regra de animação
+   Ver documentacao/regras-ui-ux.md, seção 8.
+
+   O painel mostra tratativas passando por Registrada → Em andamento →
+   Encerrada, que é o ciclo central do sistema. A animação fica SÓ no
+   painel: o formulário ao lado pode ser usado no instante em que a tela
+   abre, e nada nele se move além das transições normais de 150ms.
+   ============================================================ */
+@layer components {
+  /* Ciclo de 9s dividido em três fases de 3s. Os cartões rodam o mesmo
+     ciclo defasados, então sempre há um em cada estado. */
+  .entrada-cartao { animation: entrada-flutuar 6s ease-in-out infinite; }
+
+  .entrada-fase { opacity: 0; }
+  .entrada-fase-1 { animation: entrada-fase-1 9s linear infinite; }
+  .entrada-fase-2 { animation: entrada-fase-2 9s linear infinite; }
+  .entrada-fase-3 { animation: entrada-fase-3 9s linear infinite; }
+
+  .entrada-progresso { animation: entrada-progresso 9s ease-in-out infinite; }
+
+  /* Pontilhado de fundo, deslizando devagar: dá vida sem chamar atenção. */
+  .entrada-grade {
+    background-image: radial-gradient(hsl(0 0% 100% / 0.07) 1px, transparent 1px);
+    background-size: 24px 24px;
+    animation: entrada-grade 40s linear infinite;
+  }
+
+  .entrada-brilho { animation: entrada-brilho 14s ease-in-out infinite; }
+
+  /* Saudação: aparece em 200ms, dentro do limite da regra. */
+  .entrada-surgir { animation: entrada-surgir 200ms ease-out both; }
+}
+
+@keyframes entrada-flutuar {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-6px); }
+}
+@keyframes entrada-fase-1 {
+  0%, 28%   { opacity: 1; }
+  33%, 100% { opacity: 0; }
+}
+@keyframes entrada-fase-2 {
+  0%, 28%   { opacity: 0; }
+  33%, 61%  { opacity: 1; }
+  66%, 100% { opacity: 0; }
+}
+@keyframes entrada-fase-3 {
+  0%, 61%  { opacity: 0; }
+  66%, 95% { opacity: 1; }
+  100%     { opacity: 0; }
+}
+@keyframes entrada-progresso {
+  0%   { width: 10%;  background-color: hsl(var(--info)); }
+  30%  { width: 34%;  background-color: hsl(var(--info)); }
+  36%  { width: 40%;  background-color: hsl(var(--warning)); }
+  62%  { width: 78%;  background-color: hsl(var(--warning)); }
+  68%  { width: 100%; background-color: hsl(var(--success)); }
+  100% { width: 100%; background-color: hsl(var(--success)); }
+}
+@keyframes entrada-grade {
+  from { background-position: 0 0; }
+  to   { background-position: 240px 240px; }
+}
+@keyframes entrada-brilho {
+  0%, 100% { transform: translate(0, 0) scale(1);        opacity: 0.55; }
+  50%      { transform: translate(40px, -30px) scale(1.1); opacity: 0.8; }
+}
+@keyframes entrada-surgir {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
 /* Nenhuma animação decorativa: quem pediu para reduzir movimento
    não recebe nenhum. */
 @media (prefers-reduced-motion: reduce) {
@@ -181,4 +254,10 @@
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
+
+  /* Na tela de entrada, sem movimento, cada cartão fica parado num estado
+     diferente — o painel continua contando a mesma história. */
+  .entrada-fase { animation: none !important; }
+  .entrada-fase-estatica { opacity: 1; }
+  .entrada-progresso { animation: none !important; }
 }

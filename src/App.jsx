@@ -3,7 +3,7 @@ import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
 import NavigationTracker from '@/lib/NavigationTracker'
 import { pagesConfig } from './pages.config'
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { BrowserRouter as Router, Navigate, Route, Routes } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
@@ -70,6 +70,11 @@ const AuthenticatedApp = () => {
           </LayoutWrapper>
         }
       />
+      {/* Quem já está logado e abre /login (por favorito, ou pelo "Sair" de
+          outra aba) vai para o início, e não para "Página não encontrada".
+          Sem sessão, este trecho nem é alcançado: a tela de entrada é
+          renderizada lá em cima, no lugar do app inteiro. */}
+      <Route path="/login" element={<Navigate to="/" replace />} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
