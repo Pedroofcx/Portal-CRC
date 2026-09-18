@@ -16,7 +16,7 @@ está no documento de migração compartilhado com o responsável pelo projeto.
 | 03 | Segurança (RLS) | **Concluída** — 9 testes de invasão passando |
 | 04 | Regras de negócio no servidor | **Concluída** — FSM, SLA, custo, pontuação e IA no servidor |
 | 05 | Frontend e design | **Concluída** — 6 itens, lint zerado |
-| 06 | Publicação e backup automático | **Em andamento** — publicação preparada; backup adiado por decisão |
+| 06 | Publicação e backup automático | **Publicação concluída** — no ar em `portal-crc.pedro-soares-11c.workers.dev`; backup adiado por decisão |
 
 ## Estrutura
 
