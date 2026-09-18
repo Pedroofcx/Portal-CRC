@@ -5,8 +5,10 @@ import { FRASES } from './frases';
  * Painel de boas-vindas da tela de entrada: a equipe, o lema e uma frase.
  *
  * O QUE ACONTECE AQUI
- *   - As fotos da equipe se revezam a cada 8s, com fade de 1,2s.
- *   - A foto ativa se aproxima devagar (efeito Ken Burns).
+ *   - As fotos da equipe se revezam a cada 8s, numa dissolução com foco: a
+ *     nova entra desfocada e levemente ampliada, e vai entrando em foco POR
+ *     CIMA da anterior — que fica parada, inteira, até ser coberta.
+ *   - A foto ativa continua se aproximando devagar (efeito Ken Burns).
  *   - Com o mouse, a pessoa e o fundo se movem alguns pixels em direções
  *     opostas: dá profundidade sem virar distração.
  *   - O lema entra linha por linha quando a tela abre.
@@ -52,15 +54,37 @@ export default function PainelBoasVindas() {
 
   useEffect(() => {
     if (semMovimento || FOTOS.length < 2) return undefined;
-    const t = setInterval(() => {
-      // Aba escondida não gira: ninguém está vendo, e a pessoa volta para a
-      // mesma foto em que estava.
-      if (!document.hidden) setPasso((p) => p + 1);
-    }, INTERVALO_MS);
+    // Sem pular o passo com a aba escondida: a frase e o traço de progresso
+    // são animações de 8s presas a este relógio, e pular deixaria a frase
+    // sumida até o próximo passo. O navegador já desacelera timers de abas
+    // escondidas por conta própria.
+    const t = setInterval(() => setPasso((p) => p + 1), INTERVALO_MS);
     return () => clearInterval(t);
   }, [semMovimento]);
 
   const fotoAtiva = FOTOS.length ? passo % FOTOS.length : 0;
+  const fotoAnterior = passo > 0 && FOTOS.length > 1
+    ? (passo - 1) % FOTOS.length
+    : -1;
+
+  /*
+   * Três estados por foto, e por que são três:
+   *   ativa    — por cima de todas, entrando em foco.
+   *   anterior — logo abaixo, INTEIRA e com a animação intacta. Se ela
+   *              perdesse o zoom ou a opacidade no momento da troca, daria um
+   *              salto visível: era isso que parecia um "corte".
+   *   oculta   — invisível; só aqui a animação é desligada, sem ninguém ver.
+   */
+  const estado = (i) => {
+    if (i === fotoAtiva) return 'ativa';
+    if (i === fotoAnterior) return 'anterior';
+    return 'oculta';
+  };
+  const CAMADA = {
+    ativa: 'z-20 opacity-100',
+    anterior: 'z-10 opacity-100',
+    oculta: 'z-0 opacity-0',
+  };
   const frase = FRASES[(inicioFrase + passo) % FRASES.length];
 
   /*
@@ -93,7 +117,9 @@ export default function PainelBoasVindas() {
       className="entrada-painel relative hidden overflow-hidden lg:block lg:w-[55%]"
       aria-hidden="true"
     >
-      {/* Fundo: a mesma foto, ampliada e desfocada. */}
+      {/* Fundo: a mesma foto, ampliada e desfocada. A nova surge por cima
+          da anterior, em vez de as duas ficarem meio transparentes ao mesmo
+          tempo — que deixava o marinho piscar no meio da troca. */}
       <div className="entrada-profundidade-fundo absolute -inset-[8%]">
         {FOTOS.map((src, i) => (
           <img
@@ -102,7 +128,7 @@ export default function PainelBoasVindas() {
             alt=""
             decoding="async"
             className={`absolute inset-0 h-full w-full object-cover blur-2xl brightness-[.45] saturate-[1.2]
-              transition-opacity duration-[1200ms] ${i === fotoAtiva ? 'opacity-100' : 'opacity-0'}`}
+              transition-opacity duration-[1600ms] ease-out ${CAMADA[estado(i)]}`}
           />
         ))}
       </div>
@@ -110,15 +136,15 @@ export default function PainelBoasVindas() {
       {/* A foto inteira, na altura do painel. */}
       <div className="entrada-profundidade-frente absolute inset-y-0 left-[3%] w-[62%]">
         {FOTOS.map((src, i) => (
-          <img
-            key={src}
-            src={src}
-            alt=""
-            decoding="async"
-            className={`absolute inset-y-0 left-0 h-full w-auto max-w-none object-contain
-              transition-opacity duration-[1200ms]
-              ${i === fotoAtiva ? 'entrada-kenburns opacity-100' : 'opacity-0'}`}
-          />
+          <div key={src} className={`absolute inset-0 ${CAMADA[estado(i)]}`}>
+            <img
+              src={src}
+              alt=""
+              decoding="async"
+              className={`absolute inset-y-0 left-0 h-full w-auto max-w-none object-contain
+                ${estado(i) === 'oculta' ? '' : 'entrada-foto'}`}
+            />
+          </div>
         ))}
       </div>
 
@@ -147,7 +173,10 @@ export default function PainelBoasVindas() {
       </p>
 
       {/* A frase: troca junto com a foto. */}
-      <figure key={passo} className="entrada-frase absolute bottom-16 right-12 max-w-sm text-right">
+      <figure
+        key={passo}
+        className={`${semMovimento ? '' : 'entrada-frase'} absolute bottom-16 right-12 max-w-sm text-right`}
+      >
         <blockquote className="text-base font-light leading-relaxed text-white/90 xl:text-lg">
           “{frase.texto}”
         </blockquote>

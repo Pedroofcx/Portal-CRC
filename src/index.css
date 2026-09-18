@@ -221,31 +221,39 @@
         hsl(var(--marca-marinho) / .95) 78%);
   }
 
-  .entrada-kenburns {
+  /* Entrada e zoom lento numa animação só. Se fossem duas, a troca de uma
+     para a outra reiniciaria a escala — e o salto aparece. */
+  .entrada-foto {
     transform-origin: 40% 30%;
-    animation: entrada-kenburns 9s ease-out both;
+    animation: entrada-foto 9.6s cubic-bezier(.25, .6, .3, 1) both;
   }
 
   .entrada-linha { animation: entrada-linha 800ms cubic-bezier(.2, .7, .2, 1) both; }
   .entrada-e-comercial { color: hsl(var(--marca-vermelho)); }
-  .entrada-frase { animation: entrada-frase 900ms ease-out both; }
+  /* A frase vive exatamente um passo (8s): entra, fica, sai. */
+  .entrada-frase { animation: entrada-frase 8s ease-in-out both; }
   .entrada-progresso-foto { animation: entrada-progresso-foto 8s linear both; }
 
   /* Saudação do formulário: aparece em 200ms, dentro do limite da regra. */
   .entrada-surgir { animation: entrada-surgir 200ms ease-out both; }
 }
 
-@keyframes entrada-kenburns {
-  from { transform: scale(1); }
-  to   { transform: scale(1.06); }
+@keyframes entrada-foto {
+  /* 0 a 1,6s: entra em foco, vindo levemente ampliada. */
+  0%   { opacity: 0; filter: blur(14px); transform: scale(1.08); }
+  17%  { opacity: 1; filter: blur(0);    transform: scale(1); }
+  /* Depois: aproximação lenta até a próxima troca. */
+  100% { opacity: 1; filter: blur(0);    transform: scale(1.06); }
 }
 @keyframes entrada-linha {
   from { transform: translateY(110%); }
   to   { transform: translateY(0); }
 }
 @keyframes entrada-frase {
-  from { opacity: 0; transform: translateY(6px); }
-  to   { opacity: 1; transform: translateY(0); }
+  0%   { opacity: 0; transform: translateY(8px); filter: blur(4px); }
+  12%  { opacity: 1; transform: translateY(0);   filter: blur(0); }
+  90%  { opacity: 1; transform: translateY(0);   filter: blur(0); }
+  100% { opacity: 0; transform: translateY(-4px); filter: blur(4px); }
 }
 @keyframes entrada-progresso-foto {
   from { transform: scaleX(0); }
@@ -265,8 +273,10 @@
     transition-duration: 0.01ms !important;
   }
 
-  /* Na tela de entrada, sem movimento: sem zoom e sem profundidade. */
-  .entrada-kenburns { animation: none !important; }
+  /* Na tela de entrada, sem movimento: sem zoom, sem foco, sem
+     profundidade — e a frase fica visível, em vez de terminar apagada. */
+  .entrada-foto,
+  .entrada-frase { animation: none !important; }
   .entrada-profundidade-fundo,
   .entrada-profundidade-frente { transform: none !important; }
 }
