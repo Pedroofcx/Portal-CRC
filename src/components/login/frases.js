@@ -71,7 +71,9 @@ const DA_EQUIPE = [
   { texto: 'Ai gente...', autor: 'Dayane' },
   { texto: 'Eu, como uma ex-secretária executiva...', autor: 'Sirlene' },
   { texto: 'Eu sinceramente espero o universo.', autor: 'Bárbara' },
-  { texto: 'Emote de rato.', autor: 'Julliano' },
+  // O bordão É o emoji. Única exceção à regra "sem emoji na interface"
+  // (regras-ui-ux.md, seção 8) — vale só para esta frase.
+  { texto: '\u{1F400}', autor: 'Julliano' },
   { texto: 'Attention, please.', autor: 'Pedrão' },
 ];
 

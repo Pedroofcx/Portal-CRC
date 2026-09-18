@@ -165,6 +165,12 @@ Rótulos permanentes, validação no `onBlur` com mensagem literal, envio pelo
 isso ela não tem "Criar conta" (cadastro é só pelo administrador) nem "Manter
 conectado" (a sessão já é mantida).
 
+### Um emoji, e só um
+
+O bordão do Julliano é o próprio emoji de rato (🐀), e aparece assim entre as
+frases da equipe na tela de entrada. É a **única** exceção à regra "sem emoji
+na interface": não se estende a outras frases nem a outras telas.
+
 ### A sequência de boas-vindas (depois do login)
 
 Uma vez por dia, depois do login, três atos antes do sistema: a saudação com

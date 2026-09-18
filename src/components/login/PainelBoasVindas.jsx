@@ -103,6 +103,9 @@ export default function PainelBoasVindas() {
 
   const emDestaque = SLIDES[ativo]?.tipo === 'destaque';
   const frase = frases[passo % frases.length];
+  // Frase que é só emoji (o bordão do Julliano) sai grande: no tamanho das
+  // outras, um desenho sozinho entre aspas some.
+  const soEmoji = /^[\p{Extended_Pictographic}\uFE0F\s]+$/u.test(frase.texto);
 
   /*
    * Profundidade: grava a posição do mouse em duas variáveis CSS, e o CSS
@@ -218,7 +221,11 @@ export default function PainelBoasVindas() {
           key={passo}
           className={`${semMovimento ? '' : 'entrada-frase'} absolute bottom-16 right-12 max-w-sm text-right`}
         >
-          <blockquote className="text-base font-light leading-relaxed text-white/90 xl:text-lg">
+          <blockquote
+            className={soEmoji
+              ? 'text-6xl leading-none'
+              : 'text-base font-light leading-relaxed text-white/90 xl:text-lg'}
+          >
             “{frase.texto}”
           </blockquote>
           <figcaption className="mt-3 text-xs font-medium uppercase tracking-[0.2em] text-white/50">
