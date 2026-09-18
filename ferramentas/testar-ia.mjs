@@ -128,7 +128,7 @@ if (sobrecarregado(estruturado)) {
     'voltou objeto com resumo e plano_de_acao',
     estruturado.status === 200 && typeof r?.resumo === 'string' && Array.isArray(r?.plano_de_acao),
     estruturado.status === 200
-      ? `${r?.plano_de_acao?.length ?? 0} ação(ões), resumo de ${String(r?.resumo ?? '').length} caracteres`
+      ? `${r?.plano_de_acao?.length ?? 0} ação(ões), resumo de ${String(r?.resumo ?? '').length} caracteres` + (estruturado.dados?.via === 'prompt' ? ' — pela segunda via (formato pedido no texto)' : '')
       : `HTTP ${estruturado.status} — ${estruturado.dados?.error ?? 'sem mensagem'}`,
   );
 }

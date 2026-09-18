@@ -141,75 +141,122 @@ Deno.serve(async (req) => {
 
   const schema = traduzirSchema(corpo?.response_json_schema);
 
-  const geracao: Record<string, unknown> = { temperature: 0.3 };
-  if (schema) {
-    geracao.responseMimeType = 'application/json';
-    geracao.responseSchema = schema;
-  }
-
   // --- a chamada ao modelo --------------------------------------------------
   /*
-   * Sobrecarga do provedor (503) é a falha mais comum e a mais boba: passa
-   * sozinha em segundos. Sem repetição, o gestor clicaria, veria erro e
-   * concluiria que a IA não funciona. Três tentativas, esperando 1s e depois
-   * 2s — dentro do tempo que alguém tolera olhando para um botão.
+   * Falha 5xx do provedor costuma passar sozinha em segundos. Sem repetir, o
+   * gestor clicaria, veria erro e concluiria que a IA não funciona. Três
+   * tentativas, esperando 1s e 2s — dentro do tempo que alguém tolera olhando
+   * para um botão. Só repete o que adianta repetir: 429 é cota esgotada e 4xx
+   * é pedido malformado, e insistir não muda nenhum dos dois.
    *
-   * Só repete o que adianta repetir. 429 é cota esgotada e 400 é pedido
-   * malformado: repetir não muda nada, só gasta tempo.
+   * Nota sobre a temperatura: não mexemos nela. Os modelos Gemini 3 são
+   * afinados para a temperatura padrão, e reduzi-la (o reflexo natural de quem
+   * quer resposta consistente) degrada o resultado em vez de melhorá-lo.
    */
-  const corpoModelo = JSON.stringify({
-    contents: [{ role: 'user', parts: [{ text: prompt }] }],
-    generationConfig: geracao,
-  });
-
-  let resposta!: Response;
-  let dados: any = null;
-
-  for (let tentativa = 1; tentativa <= 3; tentativa++) {
-    try {
-      resposta = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/${MODELO}:generateContent`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'x-goog-api-key': CHAVE },
-          body: corpoModelo,
-        },
-      );
-    } catch (e) {
-      if (tentativa === 3) {
-        return responder({ error: `Não consegui falar com o provedor de IA: ${String(e)}` }, 502);
-      }
-      await new Promise((r) => setTimeout(r, tentativa * 1000));
-      continue;
+  async function pedirAoModelo(comSchema: boolean) {
+    const geracao: Record<string, unknown> = {};
+    if (comSchema && schema) {
+      geracao.responseMimeType = 'application/json';
+      geracao.responseSchema = schema;
+    } else if (schema) {
+      // Sem o schema formal, o formato é pedido no próprio texto (ver adiante).
+      geracao.responseMimeType = 'application/json';
     }
 
-    dados = await resposta.json().catch(() => null);
+    const corpoModelo = JSON.stringify({
+      contents: [{
+        role: 'user',
+        parts: [{
+          text: comSchema || !schema
+            ? prompt
+            : `${prompt}
 
-    // 5xx é problema do lado deles; 4xx é do pedido, e repetir não conserta.
-    const vaiPassarSozinho = resposta.status >= 500;
-    if (resposta.ok || !vaiPassarSozinho || tentativa === 3) break;
+Responda SOMENTE com um JSON válido neste formato, sem texto ao redor e sem marcação de código:
+${JSON.stringify(corpo.response_json_schema)}`,
+        }],
+      }],
+      generationConfig: geracao,
+    });
 
-    await new Promise((r) => setTimeout(r, tentativa * 1000));
+    let resposta!: Response;
+    let dados: any = null;
+    let falhaRede: string | null = null;
+
+    for (let tentativa = 1; tentativa <= 3; tentativa++) {
+      try {
+        resposta = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/${MODELO}:generateContent`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'x-goog-api-key': CHAVE },
+            body: corpoModelo,
+          },
+        );
+        falhaRede = null;
+      } catch (e) {
+        falhaRede = String(e);
+        if (tentativa === 3) break;
+        await new Promise((r) => setTimeout(r, tentativa * 1000));
+        continue;
+      }
+
+      dados = await resposta.json().catch(() => null);
+
+      // 5xx é problema do lado deles; 4xx é do pedido, e repetir não conserta.
+      if (resposta.ok || resposta.status < 500 || tentativa === 3) break;
+      await new Promise((r) => setTimeout(r, tentativa * 1000));
+    }
+
+    return { resposta, dados, falhaRede };
+  }
+
+  let via = schema ? 'schema' : 'texto';
+  let { resposta, dados, falhaRede } = await pedirAoModelo(true);
+
+  /*
+   * SEGUNDA VIA, QUANDO O SCHEMA FORMAL É O PROBLEMA
+   *
+   * Nos testes, o pedido de texto simples passava e o pedido com
+   * `responseSchema` falhava com 5xx, de forma repetida. Congestionamento não
+   * escolhe requisição — então o suspeito é o schema formal, não a fila.
+   *
+   * Aqui o formato é pedido no próprio texto do prompt, mantendo
+   * `responseMimeType: application/json`. O resultado é o mesmo objeto para
+   * quem chamou; o que muda é quem garante o formato — o provedor ou a
+   * instrução. Menos garantido, mas funcionando é melhor que perfeito e fora
+   * do ar.
+   */
+  if (schema && !resposta?.ok && (falhaRede || resposta.status >= 500)) {
+    const alternativa = await pedirAoModelo(false);
+    if (alternativa.resposta?.ok) {
+      ({ resposta, dados, falhaRede } = alternativa);
+      via = 'prompt';
+    }
+  }
+
+  if (falhaRede) {
+    return responder({ error: `Não consegui falar com o provedor de IA: ${falhaRede}` }, 502);
   }
 
   if (!resposta.ok) {
+    const detalhe = dados?.error?.message ?? `HTTP ${resposta.status}`;
+
     /*
      * 429 é o caso esperado no plano gratuito. Vale uma mensagem própria:
      * "cota esgotada" é acionável, "erro 429" não é.
      */
-    const detalhe = dados?.error?.message ?? `HTTP ${resposta.status}`;
-
     if (resposta.status === 429) {
       return responder({ error: 'A cota gratuita de IA do dia acabou. Tente de novo mais tarde.' }, 429);
     }
 
     /*
      * Sobrecarga é do provedor, não do Portal, e some sozinha. Dizer isso
-     * evita que alguém vá caçar defeito onde não há.
+     * evita que alguém vá caçar defeito onde não há. O detalhe do provedor vai
+     * junto: se não for sobrecarga de verdade, é por ele que se descobre.
      */
-    if (resposta.status === 503) {
+    if (resposta.status >= 500) {
       return responder({
-        error: 'O modelo de IA está sobrecarregado neste momento. Isso costuma passar em alguns minutos — tente de novo.',
+        error: `O modelo de IA não conseguiu responder agora (${detalhe}). Costuma passar em alguns minutos — tente de novo.`,
         sobrecarga: true,
       }, 503);
     }
@@ -234,12 +281,14 @@ Deno.serve(async (req) => {
 
   // Com schema o contrato do Base44 é objeto; sem schema, é string.
   if (schema) {
+    // Pela segunda via o modelo às vezes embrulha o JSON em ```json ... ```.
+    const limpo = texto.trim().replace(/^```(?:json)?\s*/i, '').replace(/```$/, '').trim();
     try {
-      return responder({ resultado: JSON.parse(texto) });
+      return responder({ resultado: JSON.parse(limpo), via });
     } catch {
       return responder({ error: 'O modelo devolveu um JSON inválido.' }, 502);
     }
   }
 
-  return responder({ resultado: texto });
+  return responder({ resultado: texto, via });
 });
