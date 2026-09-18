@@ -119,12 +119,13 @@ Passo a passo em `documentacao/publicar-o-portal.md`. A ordem importa: a
 migration 13 e o desligamento do cadastro aberto vêm **antes** de o endereço
 existir.
 
-Hospedagem: **Cloudflare Pages**, gratuito, republicando a cada `git push`.
+Hospedagem: **Cloudflare Workers**, só servindo arquivos prontos (o servidor
+de verdade é o Supabase). Gratuito, republica a cada `git push`. A
+configuração está em `wrangler.jsonc`.
 
-F5 em qualquer tela funciona sem configuração: quando o site não tem um
-`404.html` na raiz, a Cloudflare o trata como aplicação de página única e
-responde toda rota com o `index.html`. **Não crie um `404.html` em `public/`**
-— isso desligaria esse comportamento, e abrir `/Tratativas` direto daria 404.
+F5 em qualquer tela funciona por causa de `not_found_handling:
+single-page-application` no `wrangler.jsonc`: todo endereço desconhecido recebe
+o `index.html`, e o roteador do app monta a tela certa.
 
 ## Pendências conhecidas
 

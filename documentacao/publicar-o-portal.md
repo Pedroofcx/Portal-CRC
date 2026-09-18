@@ -107,35 +107,38 @@ faz a pessoa entrar num sistema vazio, sem mensagem de erro.
 
 ---
 
-## Passo 4 — Publicar no Cloudflare Pages
+## Passo 4 — Publicar na Cloudflare
 
 Gratuito, sem cartão, e republica sozinho a cada `git push`.
 
-1. Crie conta em **https://dash.cloudflare.com** (ou entre na sua).
-2. Menu lateral: **Workers & Pages** → **Create** → aba **Pages** →
-   **Connect to Git**.
-3. Autorize o GitHub e escolha o repositório **`Pedroofcx/Portal-CRC`**.
-4. Nas configurações de build:
+**Pages ou Workers?** A Cloudflare está migrando os sites do produto Pages para
+o Workers, e o painel empurra para o Workers. O Portal usa **Workers**, só
+servindo arquivos prontos — a configuração está no `wrangler.jsonc`, na raiz
+do repositório. Acesso ao site é gratuito e ilimitado; o build tem 3.000
+minutos por mês, e o nosso leva cerca de 1.
 
-   | Campo | Valor |
-   |---|---|
-   | Framework preset | `Vite` |
-   | Build command | `npm run build` |
-   | Build output directory | `dist` |
-   | Branch | `main` |
-
-5. Ainda nessa tela, em **Environment variables**, adicione as duas:
+1. Em **https://dash.cloudflare.com**: **Workers & Pages** → **Create
+   application** → **Import a repository** → autorize o GitHub e escolha
+   **`Pedroofcx/Portal-CRC`**.
+2. Nome do projeto: `portal-crc` — **tem que ser igual** ao `name` do
+   `wrangler.jsonc`, senão cada deploy cria um projeto novo.
+3. Build command: `npm run build`. Deploy command: `npx wrangler deploy` (o
+   padrão).
+4. **As duas variáveis vão em Settings → Build → Build variables and
+   secrets** — e não em "Variables & Secrets", que é outra coisa:
 
    | Nome | Valor |
    |---|---|
    | `VITE_SUPABASE_URL` | o mesmo do seu `.env.local` |
    | `VITE_SUPABASE_ANON_KEY` | o mesmo do seu `.env.local` |
 
-   Sem elas o site sobe e mostra erro de configuração: o `.env.local` fica só
-   na sua máquina, de propósito.
+   A diferença importa. O Vite escreve esses valores dentro do site **na hora do
+   build**. "Variables & Secrets" só existem quando o Worker está rodando —
+   depois que o site já foi montado sem elas. Colocadas no lugar errado, o
+   build passa, o site sobe, e mostra erro de configuração.
 
-6. **Save and Deploy**. Em poucos minutos sai um endereço como
-   `portal-crc.pages.dev`.
+5. O endereço sai no formato `portal-crc.<sua-conta>.workers.dev`. O
+   `wrangler.jsonc` já liga esse endereço a cada deploy.
 
 ### Sobre a chave `anon` ir para o navegador
 
@@ -165,8 +168,8 @@ Abra o endereço publicado e:
 
 1. **Entre com a sua conta.** Deve funcionar igual ao `npm run dev`.
 2. **Navegue até uma tela qualquer e aperte F5.** Tem que recarregar naquela
-   tela, não dar erro 404. A Cloudflare faz isso sozinha porque o site não
-   tem um `404.html` na raiz — não crie um.
+   tela, não dar erro 404. Quem garante isso é o `not_found_handling` do
+   `wrangler.jsonc`.
 3. **Abra numa janela anônima, sem entrar.** Tem que parar no login e não
    mostrar dado nenhum.
 

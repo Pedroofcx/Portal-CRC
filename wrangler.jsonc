@@ -1,0 +1,29 @@
+/*
+ * PORTAL CRC — configuração de publicação na Cloudflare (Workers)
+ *
+ * O projeto na Cloudflare é um Worker que só serve arquivos prontos: não há
+ * código rodando no servidor dela. O servidor de verdade é o Supabase. Aqui a
+ * Cloudflare só entrega as telas, montadas pelo `npm run build`.
+ *
+ * O `name` tem que ser igual ao nome do projeto no painel da Cloudflare —
+ * senão o deploy cria um projeto novo em vez de atualizar este.
+ */
+{
+  "name": "portal-crc",
+  "compatibility_date": "2026-09-18",
+
+  "assets": {
+    // Pasta que o `npm run build` gera.
+    "directory": "./dist/",
+
+    // F5 em /Tratativas: esse arquivo não existe na pasta — quem cria a tela
+    // é o roteador do app, no navegador. Sem isto, a Cloudflare responderia
+    // 404. Com isto, qualquer endereço desconhecido recebe o index.html e o
+    // app resolve a tela certa.
+    "not_found_handling": "single-page-application"
+  },
+
+  // Liga o endereço gratuito portal-crc.<conta>.workers.dev a cada deploy.
+  // Sem isto o projeto publica mas fica sem endereço nenhum ("No URLs enabled").
+  "workers_dev": true
+}
