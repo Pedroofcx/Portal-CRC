@@ -22,6 +22,19 @@ export const email = (valor) => {
   return ok ? null : 'Digite um e-mail completo, no formato nome@empresa.com.br.';
 };
 
+/**
+ * E-mail do domínio da empresa. Compara o que vem DEPOIS do "@", e não o fim
+ * do texto: `x@falsoclickdigital.com.br` termina igual, mas é outro domínio.
+ * Maiúsculas e espaços nas pontas não contam — o navegador e o celular
+ * costumam inserir os dois sem a pessoa perceber.
+ */
+export const emailCorporativo = (dominio) => (valor) => {
+  if (!valor) return null;
+  const texto = String(valor).trim().toLowerCase();
+  const doDominio = texto.split('@').length === 2 && texto.split('@')[1] === dominio.toLowerCase();
+  return doDominio ? null : `Use o seu e-mail corporativo, terminado em @${dominio}.`;
+};
+
 export const url = (rotulo = 'O endereço') => (valor) => {
   if (!valor) return null;
   const texto = String(valor).trim();

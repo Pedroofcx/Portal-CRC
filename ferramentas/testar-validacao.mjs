@@ -1,6 +1,7 @@
 import {
   obrigatorio, email, url, cpf, cnpj,
   numeroPositivo, dataNaoFutura, maximoItens, minimoCaracteres,
+  emailCorporativo,
 } from '../src/lib/validacao.js';
 import { formatBRL, sanitizeSalario, temSalarioCadastrado } from '../src/components/utils/helpers.js';
 import { saudacao } from '../src/lib/saudacao.js';
@@ -99,6 +100,17 @@ checa('12:01 ja e boa tarde', saudacao(as(12, 1)), 'Boa tarde');
 checa('18:00 ainda e boa tarde', saudacao(as(18, 0)), 'Boa tarde');
 checa('18:01 ja e boa noite', saudacao(as(18, 1)), 'Boa noite');
 checa('23:59 e boa noite', saudacao(as(23, 59)), 'Boa noite');
+
+console.log('\n== emailCorporativo (tela de entrada) ==');
+const corp = emailCorporativo('clickdigital.com.br');
+checa('dominio certo passa', corp('pedro.soares@clickdigital.com.br'), null);
+checa('maiusculas passam', corp('Pedro.Soares@ClickDigital.com.BR'), null);
+checa('espacos nas pontas passam', corp('  pedro@clickdigital.com.br '), null);
+checa('vazio fica para o obrigatorio', corp(''), null);
+checa('outro dominio acusa', corp('pedro@gmail.com'), '@clickdigital.com.br');
+checa('dominio parecido acusa', corp('x@falsoclickdigital.com.br'), '@clickdigital.com.br');
+checa('subdominio de fora acusa', corp('x@clickdigital.com.br.golpe.com'), '@clickdigital.com.br');
+checa('dois arrobas acusa', corp('x@y@clickdigital.com.br'), '@clickdigital.com.br');
 
 console.log('\n' + passou + ' passaram, ' + falhou + ' falharam');
 process.exit(falhou ? 1 : 0);

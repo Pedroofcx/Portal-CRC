@@ -251,6 +251,26 @@
   .entrada-frase { animation: entrada-frase 8s ease-in-out both; }
   .entrada-progresso-foto { animation: entrada-progresso-foto 8s linear both; }
 
+  /*
+   * Textura do lado do formulário. O fundo continua branco: os pontos são
+   * quase invisíveis (6% de opacidade) e uma máscara radial os apaga no
+   * centro, onde fica o formulário — a textura vive só nas bordas, e nada
+   * disputa atenção com os campos. Parada: a regra de animação continua
+   * valendo deste lado.
+   */
+  .entrada-textura::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image:
+      radial-gradient(hsl(var(--primary) / .09) 1px, transparent 1.2px),
+      radial-gradient(circle at 100% 0%, hsl(var(--primary) / .06), transparent 45%);
+    background-size: 18px 18px, 100% 100%;
+    -webkit-mask-image: radial-gradient(ellipse 55% 60% at 50% 50%, transparent 35%, #000 100%);
+    mask-image: radial-gradient(ellipse 55% 60% at 50% 50%, transparent 35%, #000 100%);
+  }
+
   /* Saudação do formulário: aparece em 200ms, dentro do limite da regra. */
   .entrada-surgir { animation: entrada-surgir 200ms ease-out both; }
 }

@@ -26,9 +26,17 @@ import { Input } from '@/components/ui/input';
 import CampoFormulario from '@/components/ui/CampoFormulario';
 import PainelBoasVindas from '@/components/login/PainelBoasVindas';
 import { useValidacao } from '@/hooks/useValidacao';
-import { email as emailValido } from '@/lib/validacao';
+import { email as emailValido, emailCorporativo } from '@/lib/validacao';
 import { saudacao } from '@/lib/saudacao';
-import { AlertCircle, Eye, EyeOff, Loader2 } from 'lucide-react';
+import { AlertCircle, CheckCircle2, Eye, EyeOff, Loader2 } from 'lucide-react';
+
+/*
+ * Todas as contas do Portal são deste domínio. Endereço de fora é recusado
+ * antes de ir ao servidor, com uma mensagem que diz o que fazer — em vez do
+ * genérico "e-mail ou senha incorretos", que manda a pessoa desconfiar da
+ * própria senha.
+ */
+const DOMINIO = 'clickdigital.com.br';
 
 /** Traduz os erros do Supabase, que vêm em inglês e sem contexto. */
 function mensagemDoErro(bruto) {
@@ -54,6 +62,7 @@ export default function Login() {
     email: [
       (v) => (String(v || '').trim() ? null : 'Digite o seu e-mail corporativo.'),
       emailValido,
+      emailCorporativo(DOMINIO),
     ],
     senha: [(v) => (v ? null : 'Digite a sua senha.')],
   }), []);
@@ -67,6 +76,19 @@ export default function Login() {
     const t = setInterval(() => setOla(saudacao()), 60 * 1000);
     return () => clearInterval(t);
   }, []);
+
+  /*
+   * Borda do e-mail: verde assim que o endereço está certo, ainda digitando —
+   * confirmar o acerto na hora é bem-vindo. Vermelho só depois que a pessoa
+   * sai do campo (via useValidacao): acusar erro enquanto ela escreve seria
+   * pintar de vermelho desde a primeira letra (regras-ui-ux.md, seção 4).
+   */
+  const emailCerto = !regras.email.some((regra) => regra(valores.email));
+  const bordaEmail = f.erro('email')
+    ? 'border-destructive focus-visible:ring-destructive'
+    : emailCerto
+      ? 'border-success pr-11 focus-visible:ring-success'
+      : '';
 
   const alterar = (nome) => (e) => {
     const valor = e.target.value;
@@ -96,8 +118,8 @@ export default function Login() {
     <div className="flex min-h-screen bg-card">
       <PainelBoasVindas />
 
-      <main className="flex flex-1 items-center justify-center px-6 py-12 sm:px-12">
-        <div className="w-full max-w-sm">
+      <main className="entrada-textura relative flex flex-1 items-center justify-center px-6 py-12 sm:px-12">
+        <div className="relative w-full max-w-sm">
 
           {/* Marca, só quando o painel da esquerda está escondido (tela estreita).
               Só o nome, como no painel. */}
@@ -117,17 +139,27 @@ export default function Login() {
 
           <form onSubmit={entrar} className="space-y-5" noValidate>
             <CampoFormulario id="email" rotulo="E-mail corporativo" erro={f.erro('email')}>
-              <Input
-                id="email"
-                type="email"
-                autoComplete="username"
-                autoFocus
-                placeholder="nome@clickdigital.com.br"
-                className="h-11"
-                value={valores.email}
-                onChange={alterar('email')}
-                {...f.campo('email')}
-              />
+              <div className="relative">
+                <Input
+                  id="email"
+                  type="email"
+                  autoComplete="username"
+                  autoFocus
+                  placeholder={`nome@${DOMINIO}`}
+                  className={`h-11 ${bordaEmail}`}
+                  value={valores.email}
+                  onChange={alterar('email')}
+                  {...f.campo('email')}
+                />
+                {/* A cor sozinha não basta: quem não distingue verde de
+                    vermelho precisa de outro sinal. O ícone é esse sinal. */}
+                {emailCerto && !f.erro('email') && (
+                  <span className="pointer-events-none absolute inset-y-0 right-0 flex w-11 items-center justify-center text-success">
+                    <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
+                    <span className="sr-only">E-mail corporativo válido</span>
+                  </span>
+                )}
+              </div>
             </CampoFormulario>
 
             <CampoFormulario id="senha" rotulo="Senha" erro={f.erro('senha')}>
