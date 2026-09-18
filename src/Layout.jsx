@@ -4,7 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import WelcomeScreen from '@/components/ui/WelcomeScreen';
+import SequenciaBoasVindas from '@/components/boas-vindas/SequenciaBoasVindas';
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
 import BuscaGlobal from '@/components/ui/BuscaGlobal';
 import MenuUsuario from '@/components/ui/MenuUsuario';
@@ -229,6 +229,9 @@ export default function Layout({ children, currentPageName }) {
     });
   };
   const [showWelcome, setShowWelcome] = useState(false);
+  // Liga a entrada em cascata do conteúdo logo depois das boas-vindas, e só
+  // nesse momento: navegar entre telas continua sem animação.
+  const [cascata, setCascata] = useState(false);
   const _navigate = useNavigate();
   const queryClient = useQueryClient();
 
@@ -318,6 +321,8 @@ export default function Layout({ children, currentPageName }) {
 
   const handleWelcomeComplete = () => {
     setShowWelcome(false);
+    setCascata(true);
+    setTimeout(() => setCascata(false), 2500);
   };
 
   // Mostrar loading enquanto carrega dados essenciais
@@ -334,11 +339,9 @@ export default function Layout({ children, currentPageName }) {
 
   return (
     <ErrorBoundary>
-      {showWelcome && user && (
-        <WelcomeScreen 
-          userName={user.full_name?.split(' ')[0] || 'Usuário'} 
-          onComplete={handleWelcomeComplete}
-        />
+      {/* Espera o cadastro carregar: o nome e o resumo do dia vêm dele. */}
+      {showWelcome && user && colaborador && (
+        <SequenciaBoasVindas colaborador={colaborador} aoConcluir={handleWelcomeComplete} />
       )}
       
       <div className="min-h-screen bg-background">
@@ -391,11 +394,11 @@ export default function Layout({ children, currentPageName }) {
       {/* Main Content - Wrapped in nested ErrorBoundary for page isolation */}
       <main className={`transition-[padding] duration-150 ${menuRecolhido ? 'lg:pl-16' : 'lg:pl-64'}`}>
         <div className="min-h-screen pt-16 lg:pt-0">
-          <div className="hidden items-center justify-between gap-6 border-b border-border bg-card px-8 py-2.5 lg:flex">
+          <div className={`hidden items-center justify-between gap-6 border-b border-border bg-card px-8 py-2.5 lg:flex ${cascata ? 'entrada-cascata-topo' : ''}`}>
             <BuscaGlobal />
             <MenuUsuario user={user} colaborador={colaborador} />
           </div>
-          <div className="p-4 lg:p-8">
+          <div className={`p-4 lg:p-8 ${cascata ? 'entrada-cascata' : ''}`}>
             <ErrorBoundary>
               {children}
             </ErrorBoundary>

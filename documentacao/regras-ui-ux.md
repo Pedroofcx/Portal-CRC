@@ -165,6 +165,22 @@ Rótulos permanentes, validação no `onBlur` com mensagem literal, envio pelo
 isso ela não tem "Criar conta" (cadastro é só pelo administrador) nem "Manter
 conectado" (a sessão já é mantida).
 
+### A sequência de boas-vindas (depois do login)
+
+Uma vez por dia, depois do login, três atos antes do sistema: a saudação com
+o nome e a foto, o resumo do dia (tratativas abertas, que vencem o SLA hoje e
+já vencidas; o gestor vê as da equipe), e o emblema M.E.T.E.O.R.O. Depois, a
+tela sobe como uma cortina e o conteúdo da página entra de cima para baixo.
+
+É a segunda exceção desta seção, e tem as mesmas condições, mais três:
+
+* **Dá para pular** com um clique ou qualquer tecla, a qualquer momento. É o
+  que impede a sequência de virar espera obrigatória.
+* **O nome é sempre o primeiro nome do cadastro de colaborador**, nunca o
+  e-mail. Cadastro em caixa alta ("TEFÃO") vira "Tefão".
+* **A cascata acontece só nessa entrada.** Navegar entre telas continua sem
+  animação nenhuma.
+
 ### Esta exceção não se estende
 
 Nenhuma outra tela ganha animação contínua por analogia. Uma nova exceção

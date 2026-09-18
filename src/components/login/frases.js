@@ -13,7 +13,7 @@
  * Para acrescentar: um objeto novo no grupo certo, com `texto` e `autor`
  * (e `fonte`, nas clássicas, para quem quiser conferir).
  */
-const CLASSICAS = [
+export const CLASSICAS = [
   {
     texto: 'Aquele que vence os outros é forte; aquele que vence a si mesmo é poderoso.',
     autor: 'Lao-Tsé',

@@ -5,6 +5,8 @@ import {
 } from '../src/lib/validacao.js';
 import { formatBRL, sanitizeSalario, temSalarioCadastrado } from '../src/components/utils/helpers.js';
 import { saudacao } from '../src/lib/saudacao.js';
+import { primeiroNome } from '../src/lib/nomes.js';
+import { resumoDoDia } from '../src/lib/resumoDoDia.js';
 
 let passou = 0;
 let falhou = 0;
@@ -111,6 +113,33 @@ checa('outro dominio acusa', corp('pedro@gmail.com'), '@clickdigital.com.br');
 checa('dominio parecido acusa', corp('x@falsoclickdigital.com.br'), '@clickdigital.com.br');
 checa('subdominio de fora acusa', corp('x@clickdigital.com.br.golpe.com'), '@clickdigital.com.br');
 checa('dois arrobas acusa', corp('x@y@clickdigital.com.br'), '@clickdigital.com.br');
+
+console.log('\n== primeiroNome (boas-vindas) ==');
+checa('nome composto', primeiroNome('Ana Flávia Guelber Amarante'), 'Ana');
+checa('nome simples', primeiroNome('Julliano Vasconcelos Belisario'), 'Julliano');
+checa('acento preservado', primeiroNome('Bárbara Emanuella dos Santos'), 'Bárbara');
+checa('caixa alta vira normal', primeiroNome('TEFÃO FURACÃO'), 'Tefão');
+checa('espacos sobrando', primeiroNome('   Pedro   Henrique '), 'Pedro');
+checa('e-mail nunca vira nome', primeiroNome('sirlene.guedes@clickdigital.com.br'), 'Time');
+checa('vazio vira Time', primeiroNome(''), 'Time');
+checa('nulo vira Time', primeiroNome(null), 'Time');
+
+console.log('\n== resumoDoDia (boas-vindas) ==');
+// 18/09/2026 14:00. Prazo = data_registro + sla_atribuido horas.
+const agora = new Date(2026, 8, 18, 14, 0);
+const h = (horasAtras) => new Date(agora.getTime() - horasAtras * 3600e3).toISOString();
+const r = resumoDoDia([
+  { status: 'em_andamento', data_registro: h(20), sla_atribuido: 24 },   // vence 18:00 hoje
+  { status: 'registrada', data_registro: h(30), sla_atribuido: 24 },     // venceu 08:00 hoje
+  { status: 'em_andamento', data_registro: h(1), sla_atribuido: 72 },    // vence em 3 dias
+  { status: 'dependencia_externa', data_registro: h(2), sla_atribuido: null }, // sem prazo
+  { status: 'encerrada', data_registro: h(50), sla_atribuido: 24 },      // fechada: fora
+  { status: 'em_andamento', excluida: true, data_registro: h(50), sla_atribuido: 24 }, // excluida: fora
+], agora);
+checa('conta so as abertas', String(r.abertas), '4');
+checa('vence hoje, ainda no prazo', String(r.vencemHoje), '1');
+checa('ja vencida nao conta como hoje', String(r.vencidas), '1');
+checa('lista vazia nao quebra', JSON.stringify(resumoDoDia([], agora)), '{"abertas":0,"vencemHoje":0,"vencidas":0}');
 
 console.log('\n' + passou + ' passaram, ' + falhou + ' falharam');
 process.exit(falhou ? 1 : 0);

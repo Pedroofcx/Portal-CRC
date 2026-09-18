@@ -192,10 +192,29 @@ export const auth = {
     const { data: { user }, error } = await supabase.auth.getUser();
     if (error || !user) return null;
     const meta = user.user_metadata || {};
+
+    /*
+     * O NOME VEM DO CADASTRO DE COLABORADOR.
+     *
+     * As contas de login não têm nome: quem cria é o `criar-contas`, e o nome
+     * de verdade mora em `colaborador`. Antes disto, `full_name` caía no
+     * e-mail — e ele não é só exibido: é GRAVADO como autor no histórico de
+     * status, nos acionamentos de N2 e Líder Técnico, no Hansei e na exclusão
+     * de tratativa. O Apoio Especializado ainda filtra por ele. Cada uso de
+     * uma conta nova registraria "fulano@clickdigital.com.br" como pessoa.
+     */
+    const { data: cadastro } = await supabase
+      .from('colaborador')
+      .select('nome_completo')
+      // ilike para ignorar maiúsculas; "_" e "%" escapados, porque no LIKE
+      // eles são curingas e "a_b@x" casaria com "axb@x".
+      .ilike('email', user.email.replace(/[%_\\]/g, (c) => `\\${c}`))
+      .maybeSingle();
+
     return {
       id: user.id,
       email: user.email,
-      full_name: meta.full_name || meta.nome_completo || user.email,
+      full_name: cadastro?.nome_completo || meta.full_name || meta.nome_completo || user.email,
       role: user.app_metadata?.role || meta.role || 'user',
       // Marcado pelo criar-contas: a pessoa está com a senha provisória, que
       // passou pela mão de outra pessoa. O Layout exige a troca antes de seguir.
