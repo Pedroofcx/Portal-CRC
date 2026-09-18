@@ -95,3 +95,30 @@ modelo.
 O `RelatorioJornadaDiretoria` tem um resumo de reserva calculado dos próprios
 dados, então ele continua legível; o `ResumoIAEtapa` avisa que não conseguiu.
 Nenhuma outra tela do Portal depende disso.
+
+---
+
+## Uma coisa aprendida na primeira configuração
+
+O Gemini aceita um **contrato formal de formato** (`responseSchema`): você
+descreve os campos que quer e o provedor garante a resposta naquele molde. Era
+assim que a função começou.
+
+Na prática, nos testes de setembro de 2026, o `gemini-3.6-flash` recusou todo
+pedido que levava esse contrato — devolvendo erro de servidor, como se
+estivesse sobrecarregado. O mesmo pedido, sem o contrato, funcionava. Duas
+rodadas seguidas mostraram o padrão: sobrecarga não escolhe requisição.
+
+Por isso a função tem **duas vias**. Ela tenta primeiro com o contrato formal,
+que é o jeito mais garantido; se o provedor recusar, refaz o pedido descrevendo
+o formato dentro do próprio texto. Quem chamou recebe o mesmo objeto nos dois
+casos, e a resposta traz um campo `via` dizendo qual caminho respondeu.
+
+Isso tem duas consequências práticas:
+
+- **Se um dia o provedor voltar a aceitar o contrato formal**, a função passa a
+  usá-lo sozinha, sem ninguém mexer em nada. A primeira via é sempre tentada.
+- **Enquanto estiver pela segunda via**, o formato é garantido por instrução e
+  não por contrato. É mais frágil: um modelo pode, raramente, devolver algo
+  fora do molde. Nesse caso a tela avisa "o modelo devolveu um JSON inválido"
+  em vez de mostrar dado errado.

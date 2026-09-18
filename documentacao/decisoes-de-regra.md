@@ -158,3 +158,29 @@ define premiação, era o caminho de fraude mais direto que restava.
 
 **Onde vive:** `supabase/migrations/12_pontuacao_confiavel.sql`.
 `npm run testar-pontuacao <email> <senha>` tenta a fraude como agente comum.
+
+---
+
+## O formato da resposta da IA é pedido no texto, não por contrato
+
+**A decisão.** A Edge Function `invocar-llm` tenta primeiro o `responseSchema`
+do Gemini — o contrato formal em que o provedor garante o molde da resposta — e
+cai para uma instrução dentro do prompt quando ele é recusado.
+
+**Por que não é uma dedução.** Seria mais simples usar só o contrato formal, e
+foi assim que a função nasceu. O que mudou a decisão foi medição: em duas
+execuções seguidas do `npm run testar-ia`, todo pedido com `responseSchema`
+voltou com erro de servidor e todo pedido sem ele funcionou. Sobrecarga não
+escolhe requisição, então a causa é o contrato, não a fila.
+
+**O que se perde.** Pela segunda via, o formato passa a ser garantido por
+instrução. Um modelo pode, raramente, devolver algo fora do molde — e nesse
+caso a tela avisa "o modelo devolveu um JSON inválido" em vez de mostrar dado
+errado. A alternativa era a funcionalidade não existir.
+
+**O que reverte sozinho.** A primeira via continua sendo sempre tentada. No dia
+em que o provedor voltar a aceitar o contrato formal, a função volta a usá-lo
+sem ninguém mexer em nada. O campo `via` na resposta diz qual caminho
+respondeu.
+
+**Medido em:** 18 de setembro de 2026, modelo `gemini-3.6-flash`.

@@ -14,7 +14,7 @@ está no documento de migração compartilhado com o responsável pelo projeto.
 | 01 | Banco novo a partir dos schemas | **Concluída** — 48 tabelas aplicadas no Supabase |
 | 02 | Adaptador (`src/api/db.js`) | **Concluída** — app roda no Supabase, com login próprio |
 | 03 | Segurança (RLS) | **Concluída** — 9 testes de invasão passando |
-| 04 | Regras de negócio no servidor | **Em andamento** — FSM da tratativa no banco |
+| 04 | Regras de negócio no servidor | **Concluída** — FSM, SLA, custo, pontuação e IA no servidor |
 | 05 | Frontend e design | **Concluída** — 6 itens, lint zerado |
 | 06 | Publicação e backup automático | Não iniciada |
 
@@ -101,7 +101,7 @@ O `InvokeLLM` do Base44 virou a Edge Function `supabase/functions/invocar-llm`.
 A chave da API é segredo do projeto no Supabase e nunca chega ao navegador.
 Dois pontos de uso: `ResumoIAEtapa` e `RelatorioJornadaDiretoria`.
 
-Provedor: **Google Gemini**, plano gratuito (`gemini-2.5-flash`). É o mesmo
+Provedor: **Google Gemini**, plano gratuito (`gemini-3.6-flash`). É o mesmo
 provedor que o Base44 usava por baixo, e o plano gratuito cobre com folga o uso
 do Portal — são duas telas, acionadas sob demanda.
 
