@@ -123,14 +123,35 @@ isso — sem elas, a exceção não vale.
   anima nada além das transições normais (até 200ms).
 * **O formulário pode ser usado no instante em que a tela abre.** O foco já
   está no e-mail; ninguém espera animação terminar para entrar.
-* **Quem pediu para reduzir movimento vê o painel parado**, com cada cartão num
-  estado diferente, de modo que a imagem continua dizendo a mesma coisa.
-* **O painel mostra o que o sistema faz** (tratativas passando por Registrada,
-  Em andamento e Encerrada), e não uma ilustração genérica. Sem nome de
-  cliente, número ou valor: é ilustração e não pode ser confundida com dado.
+* **O painel mostra a equipe**, com as fotos se revezando a cada 8 segundos,
+  o lema da empresa e uma frase de autor clássico. As fotos **nunca são
+  cortadas**: o retrato fica inteiro na altura do painel, e o resto é
+  preenchido pela mesma foto, ampliada e desfocada.
+* **Só entram frases com autoria confirmada** na obra de origem. Frase famosa
+  com autor errado, na primeira tela do sistema, desmente o tema da sabedoria.
 * **O painel é escondido da leitura de tela** (`aria-hidden`), porque não
   carrega informação necessária para entrar.
-* **Gradiente e brilho** ficam permitidos neste painel, pelo mesmo motivo.
+* **Gradiente, desfoque, zoom lento na foto e profundidade com o mouse** ficam
+  permitidos neste painel, pelo mesmo motivo. Quem pediu para reduzir movimento
+  não recebe nenhum deles, e vê a primeira foto e a primeira frase paradas.
+* **A troca de fotos pausa com a aba escondida**, para não gastar processamento
+  com uma tela que ninguém está vendo.
+
+### Identidade da marca no painel
+
+O painel usa a identidade das camisetas da equipe: **fundo marinho** e o lema
+*"Simplificar & Transformar & Apoiar."*, com o **"&" em vermelho**. É a segunda
+exceção à restrição do vermelho da seção 1: vale **só para o "&" do lema, só
+neste painel**. Os dois tons ficam nos tokens `--marca-marinho` e
+`--marca-vermelho`, em `src/index.css`.
+
+### Fotos de pessoas
+
+Imagem de pessoa é dado pessoal (LGPD), e a tela de entrada fica num endereço
+que qualquer pessoa na internet consegue abrir. Cada foto precisa de
+autorização de quem aparece nela, e sai do sistema se a pessoa pedir ou deixar
+a equipe. As fotos ficam em `src/assets/equipe/`: para tirar alguém, apague o
+arquivo; para incluir, coloque a foto na pasta.
 
 ### O que continua valendo na tela de entrada
 

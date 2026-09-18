@@ -3,6 +3,7 @@ import {
   numeroPositivo, dataNaoFutura, maximoItens, minimoCaracteres,
 } from '../src/lib/validacao.js';
 import { formatBRL, sanitizeSalario, temSalarioCadastrado } from '../src/components/utils/helpers.js';
+import { saudacao } from '../src/lib/saudacao.js';
 
 let passou = 0;
 let falhou = 0;
@@ -86,6 +87,18 @@ checa('formato BR passa', String(sanitizeSalario('R$ 3.500,00')), '3500');
 console.log('\n== temSalarioCadastrado ==');
 checa('sem salario e falso', String(temSalarioCadastrado({ salario: null })), 'false');
 checa('com salario e verdadeiro', String(temSalarioCadastrado({ salario: 3500 })), 'true');
+
+console.log('\n== saudacao (tela de entrada) ==');
+// Limites definidos pelo Pedro: 00:00-12:00 dia, 12:01-18:00 tarde,
+// 18:01-23:59 noite. Os de borda sao os que quebram com um < no lugar de <=.
+const as = (h, m) => new Date(2026, 8, 18, h, m);
+checa('00:00 e bom dia', saudacao(as(0, 0)), 'Bom dia');
+checa('11:59 e bom dia', saudacao(as(11, 59)), 'Bom dia');
+checa('12:00 ainda e bom dia', saudacao(as(12, 0)), 'Bom dia');
+checa('12:01 ja e boa tarde', saudacao(as(12, 1)), 'Boa tarde');
+checa('18:00 ainda e boa tarde', saudacao(as(18, 0)), 'Boa tarde');
+checa('18:01 ja e boa noite', saudacao(as(18, 1)), 'Boa noite');
+checa('23:59 e boa noite', saudacao(as(23, 59)), 'Boa noite');
 
 console.log('\n' + passou + ' passaram, ' + falhou + ' falharam');
 process.exit(falhou ? 1 : 0);

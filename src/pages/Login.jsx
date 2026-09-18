@@ -5,8 +5,8 @@
  * fora do sistema. Com a migração, ele passa a ser nosso.
  *
  * Duas metades, com papéis opostos:
- *   - à esquerda, o painel de boas-vindas, que é o ÚNICO lugar do sistema com
- *     animação contínua (regras-ui-ux.md, seção 8);
+ *   - à esquerda, o painel com a equipe, o lema e uma frase — o ÚNICO lugar
+ *     do sistema com animação contínua (regras-ui-ux.md, seção 8);
  *   - à direita, o formulário, que segue as regras de sempre e pode ser usado
  *     no instante em que a tela abre — ninguém espera animação para entrar.
  *
@@ -19,7 +19,7 @@
  *     próprio. O texto diz a verdade: quem redefine é o administrador.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { supabase } from '@/api/db';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -27,6 +27,7 @@ import CampoFormulario from '@/components/ui/CampoFormulario';
 import PainelBoasVindas from '@/components/login/PainelBoasVindas';
 import { useValidacao } from '@/hooks/useValidacao';
 import { email as emailValido } from '@/lib/validacao';
+import { saudacao } from '@/lib/saudacao';
 import { AlertCircle, Eye, EyeOff, Loader2 } from 'lucide-react';
 
 /** Traduz os erros do Supabase, que vêm em inglês e sem contexto. */
@@ -41,14 +42,6 @@ function mensagemDoErro(bruto) {
     return 'Sem conexão com o servidor. Verifique sua internet.';
   }
   return bruto || 'Não foi possível entrar. Tente novamente.';
-}
-
-/** Saudação pela hora de quem está abrindo a tela. */
-function saudacao(agora = new Date()) {
-  const h = agora.getHours();
-  if (h >= 5 && h < 12) return 'Bom dia';
-  if (h >= 12 && h < 18) return 'Boa tarde';
-  return 'Boa noite';
 }
 
 export default function Login() {
@@ -66,7 +59,14 @@ export default function Login() {
   }), []);
 
   const f = useValidacao(valores, regras);
-  const ola = useMemo(() => saudacao(), []);
+
+  // Reconfere a cada minuto: quem deixa a tela aberta às 11:58 vê "Boa
+  // tarde" quando passar do meio-dia, sem precisar recarregar.
+  const [ola, setOla] = useState(() => saudacao());
+  useEffect(() => {
+    const t = setInterval(() => setOla(saudacao()), 60 * 1000);
+    return () => clearInterval(t);
+  }, []);
 
   const alterar = (nome) => (e) => {
     const valor = e.target.value;
@@ -109,12 +109,11 @@ export default function Login() {
 
           <div className="entrada-surgir mb-8 space-y-2">
             <p className="text-sm font-medium text-primary">{ola}!</p>
-            <h1 className="text-3xl font-semibold tracking-tight text-foreground">
-              Boas-vindas ao Portal CRC
+            <h1 className="text-4xl font-semibold tracking-tight text-foreground">
+              Olá, Time!
             </h1>
             <p className="text-sm text-muted-foreground">
-              Central de Relacionamento com o Cliente. Entre com o seu e-mail corporativo
-              para continuar.
+              Entre com o seu e-mail corporativo para acessar o Portal CRC.
             </p>
           </div>
 

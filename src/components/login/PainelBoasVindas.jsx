@@ -1,128 +1,173 @@
-import React from 'react';
-import { Building2, CheckCircle2, Clock, MessageSquareWarning, Star } from 'lucide-react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { FRASES } from './frases';
 
 /**
- * Painel de boas-vindas da tela de entrada.
+ * Painel de boas-vindas da tela de entrada: a equipe, o lema e uma frase.
  *
- * Mostra o ciclo central do sistema — tratativas passando por Registrada,
- * Em andamento e Encerrada — em vez de uma ilustração genérica. Quem entra
- * vê, antes de qualquer tela, o que o Portal faz.
+ * O QUE ACONTECE AQUI
+ *   - As fotos da equipe se revezam a cada 8s, com fade de 1,2s.
+ *   - A foto ativa se aproxima devagar (efeito Ken Burns).
+ *   - Com o mouse, a pessoa e o fundo se movem alguns pixels em direções
+ *     opostas: dá profundidade sem virar distração.
+ *   - O lema entra linha por linha quando a tela abre.
+ *   - A frase troca junto com a foto, como um slide.
  *
- * Os três cartões rodam o mesmo ciclo de 9s, defasados em 3s: a qualquer
- * momento há um em cada estado. Sem movimento (prefers-reduced-motion), cada
- * cartão fica parado num estado diferente e a história continua legível.
+ * AS FOTOS NÃO SÃO CORTADAS. São retratos em pé, e o painel é mais largo que
+ * alto — preencher sem cortar seria impossível. A foto fica inteira, na
+ * altura do painel, e o resto é preenchido pela MESMA foto, ampliada e
+ * desfocada. É isso que evita faixa vazia dos lados.
  *
- * Os tipos de tratativa são os do próprio sistema. Não há nome de cliente,
- * número nem valor: é ilustração, e não deve ser confundida com dado real.
+ * PARA ACRESCENTAR UMA PESSOA: coloque a foto em src/assets/equipe/ (webp,
+ * jpg ou png, de preferência em pé) e publique. Ela entra sozinha na
+ * sequência, na ordem do nome do arquivo. Nenhum código precisa mudar.
+ *
+ * Quem pediu para reduzir movimento vê a primeira foto e a primeira frase,
+ * paradas: sem revezamento, sem zoom, sem profundidade.
+ *
+ * Regras: documentacao/regras-ui-ux.md, seção 8.
  */
 
-/*
- * As classes de animação vão escritas por extenso, e não montadas com
- * `entrada-fase-${n}`: o Tailwind só mantém no site final as classes que
- * encontra literalmente no código. Montadas, elas eram descartadas no build
- * e os selos ficavam invisíveis.
- */
-const FASES = [
-  { rotulo: 'Registrada', classe: 'bg-info-soft text-info', animacao: 'entrada-fase-1', Icone: Clock },
-  { rotulo: 'Em andamento', classe: 'bg-warning-soft text-warning', animacao: 'entrada-fase-2', Icone: Clock },
-  { rotulo: 'Encerrada', classe: 'bg-success-soft text-success', animacao: 'entrada-fase-3', Icone: CheckCircle2 },
-];
+const FOTOS = Object.entries(
+  import.meta.glob('/src/assets/equipe/*.{webp,jpg,jpeg,png}', { eager: true, import: 'default' }),
+)
+  .sort(([a], [b]) => a.localeCompare(b))
+  .map(([, url]) => url);
 
-const CARTOES = [
-  { tipo: 'Reclame Aqui', Icone: MessageSquareWarning, atraso: '0s', estatica: 3, recuo: 'ml-0' },
-  { tipo: 'Google Meu Negócio', Icone: Star, atraso: '-3s', estatica: 2, recuo: 'ml-16' },
-  { tipo: 'Reclamação interna', Icone: Building2, atraso: '-6s', estatica: 1, recuo: 'ml-6' },
-];
+const INTERVALO_MS = 8000;
 
-function CartaoTratativa({ tipo, Icone, atraso, estatica, recuo }) {
-  return (
-    <div
-      className={`entrada-cartao ${recuo} w-[26rem] max-w-full rounded-xl border border-white/10 bg-white/[0.06] p-5`}
-      style={{ animationDelay: atraso }}
-    >
-      <div className="flex items-start gap-3">
-        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white/10">
-          <Icone className="h-4 w-4 text-white/80" aria-hidden="true" />
-        </span>
-
-        <div className="min-w-0 flex-1 space-y-2 pt-0.5">
-          <p className="truncate text-sm font-medium text-white">{tipo}</p>
-          {/* Linhas abstratas no lugar do texto: sugerem conteúdo sem inventar dado. */}
-          <span className="block h-1.5 w-40 rounded-full bg-white/15" />
-          <span className="block h-1.5 w-24 rounded-full bg-white/10" />
-        </div>
-
-        {/* Os três selos ocupam o mesmo lugar; a animação troca qual aparece. */}
-        <span className="relative h-6 w-[7.5rem] shrink-0">
-          {FASES.map(({ rotulo, classe, animacao, Icone: IconeFase }, i) => (
-            <span
-              key={rotulo}
-              className={`entrada-fase ${animacao} ${estatica === i + 1 ? 'entrada-fase-estatica' : ''}
-                absolute inset-y-0 right-0 inline-flex items-center gap-1 rounded-md px-2 text-xs font-medium ${classe}`}
-              style={{ animationDelay: atraso }}
-            >
-              <IconeFase className="h-3 w-3" aria-hidden="true" />
-              {rotulo}
-            </span>
-          ))}
-        </span>
-      </div>
-
-      <div className="mt-4 flex items-center gap-2">
-        <span className="text-[10px] font-medium uppercase tracking-wider text-white/50">SLA</span>
-        <span className="h-1 flex-1 overflow-hidden rounded-full bg-white/10">
-          <span
-            className="entrada-progresso block h-full rounded-full"
-            style={{
-              animationDelay: atraso,
-              // Estado parado, para quem pediu para reduzir movimento.
-              width: `${[34, 70, 100][estatica - 1]}%`,
-              backgroundColor: `hsl(var(--${['info', 'warning', 'success'][estatica - 1]}))`,
-            }}
-          />
-        </span>
-      </div>
-    </div>
-  );
+function querMenosMovimento() {
+  return typeof window !== 'undefined'
+    && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
 }
 
 export default function PainelBoasVindas() {
+  const semMovimento = useMemo(querMenosMovimento, []);
+  const painel = useRef(null);
+  const quadro = useRef(0);
+
+  // Cada entrada começa numa frase diferente: quem abre o sistema todo dia
+  // não lê sempre a mesma primeira.
+  const inicioFrase = useMemo(() => Math.floor(Math.random() * FRASES.length), []);
+  const [passo, setPasso] = useState(0);
+
+  useEffect(() => {
+    if (semMovimento || FOTOS.length < 2) return undefined;
+    const t = setInterval(() => {
+      // Aba escondida não gira: ninguém está vendo, e a pessoa volta para a
+      // mesma foto em que estava.
+      if (!document.hidden) setPasso((p) => p + 1);
+    }, INTERVALO_MS);
+    return () => clearInterval(t);
+  }, [semMovimento]);
+
+  const fotoAtiva = FOTOS.length ? passo % FOTOS.length : 0;
+  const frase = FRASES[(inicioFrase + passo) % FRASES.length];
+
+  /*
+   * Profundidade: grava a posição do mouse em duas variáveis CSS, e o CSS
+   * faz o resto. Nada é re-renderizado a cada movimento — só uma escrita por
+   * quadro de animação.
+   */
+  const mover = (e) => {
+    if (semMovimento || !painel.current) return;
+    const { left, top, width, height } = painel.current.getBoundingClientRect();
+    const x = ((e.clientX - left) / width) * 2 - 1;
+    const y = ((e.clientY - top) / height) * 2 - 1;
+    cancelAnimationFrame(quadro.current);
+    quadro.current = requestAnimationFrame(() => {
+      painel.current?.style.setProperty('--px', x.toFixed(3));
+      painel.current?.style.setProperty('--py', y.toFixed(3));
+    });
+  };
+
+  const centralizar = () => {
+    painel.current?.style.setProperty('--px', '0');
+    painel.current?.style.setProperty('--py', '0');
+  };
+
   return (
     <aside
-      className="relative hidden overflow-hidden lg:flex lg:w-[55%] lg:flex-col lg:justify-between"
-      style={{ backgroundColor: 'hsl(222 47% 13%)' }}
+      ref={painel}
+      onPointerMove={mover}
+      onPointerLeave={centralizar}
+      className="entrada-painel relative hidden overflow-hidden lg:block lg:w-[55%]"
       aria-hidden="true"
     >
-      {/* Fundo: pontilhado e duas luzes na cor institucional. */}
-      <div className="entrada-grade absolute inset-0" />
-      <div
-        className="entrada-brilho absolute -left-24 top-1/4 h-96 w-96 rounded-full blur-3xl"
-        style={{ backgroundColor: 'hsl(var(--primary) / 0.35)' }}
-      />
-      <div
-        className="entrada-brilho absolute -bottom-32 right-0 h-80 w-80 rounded-full blur-3xl"
-        style={{ backgroundColor: 'hsl(var(--primary) / 0.2)', animationDelay: '-7s' }}
-      />
+      {/* Fundo: a mesma foto, ampliada e desfocada. */}
+      <div className="entrada-profundidade-fundo absolute -inset-[8%]">
+        {FOTOS.map((src, i) => (
+          <img
+            key={src}
+            src={src}
+            alt=""
+            decoding="async"
+            className={`absolute inset-0 h-full w-full object-cover blur-2xl brightness-[.45] saturate-[1.2]
+              transition-opacity duration-[1200ms] ${i === fotoAtiva ? 'opacity-100' : 'opacity-0'}`}
+          />
+        ))}
+      </div>
 
-      <div className="relative flex items-center gap-3 p-12">
+      {/* A foto inteira, na altura do painel. */}
+      <div className="entrada-profundidade-frente absolute inset-y-0 left-[3%] w-[62%]">
+        {FOTOS.map((src, i) => (
+          <img
+            key={src}
+            src={src}
+            alt=""
+            decoding="async"
+            className={`absolute inset-y-0 left-0 h-full w-auto max-w-none object-contain
+              transition-opacity duration-[1200ms]
+              ${i === fotoAtiva ? 'entrada-kenburns opacity-100' : 'opacity-0'}`}
+          />
+        ))}
+      </div>
+
+      {/* Escurece a direita, para o texto ler bem sobre qualquer foto. */}
+      <div className="entrada-veu absolute inset-0" />
+
+      <div className="absolute left-10 top-10 flex items-center gap-3">
         <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-lg font-bold text-primary-foreground">
           C
         </span>
         <span className="text-lg font-semibold text-white">Portal CRC</span>
       </div>
 
-      <div className="relative flex flex-col gap-5 px-12 xl:px-20">
-        {CARTOES.map((c) => <CartaoTratativa key={c.tipo} {...c} />)}
-      </div>
+      {/* O lema das camisetas, com o "&" na cor da marca. */}
+      <p className="absolute right-12 top-[20%] text-right text-4xl font-bold leading-[1.08] tracking-tight text-white xl:text-5xl 2xl:text-6xl">
+        {['Simplificar', 'Transformar', 'Apoiar'].map((palavra, i, todas) => (
+          <span key={palavra} className="block overflow-hidden pb-1">
+            <span className="entrada-linha block" style={{ animationDelay: `${150 + i * 140}ms` }}>
+              {palavra}
+              {i < todas.length - 1
+                ? <span className="entrada-e-comercial">&amp;</span>
+                : '.'}
+            </span>
+          </span>
+        ))}
+      </p>
 
-      <div className="relative max-w-md space-y-3 p-12">
-        <p className="text-2xl font-semibold leading-snug text-white">
-          Cada cliente, do primeiro contato à solução.
-        </p>
-        <p className="text-sm leading-relaxed text-white/60">
-          Tratativas, escalas, pontuação e desenvolvimento da equipe num só lugar.
-        </p>
-      </div>
+      {/* A frase: troca junto com a foto. */}
+      <figure key={passo} className="entrada-frase absolute bottom-16 right-12 max-w-sm text-right">
+        <blockquote className="text-base font-light leading-relaxed text-white/90 xl:text-lg">
+          “{frase.texto}”
+        </blockquote>
+        <figcaption className="mt-3 text-xs font-medium uppercase tracking-[0.2em] text-white/50">
+          {frase.autor}
+        </figcaption>
+      </figure>
+
+      {/* Em qual foto estamos, e quanto falta para a próxima. */}
+      {FOTOS.length > 1 && !semMovimento && (
+        <div className="absolute bottom-10 left-10 flex gap-2">
+          {FOTOS.map((src, i) => (
+            <span key={src} className="h-0.5 w-8 overflow-hidden rounded-full bg-white/25">
+              {i === fotoAtiva && (
+                <span key={passo} className="entrada-progresso-foto block h-full origin-left bg-white" />
+              )}
+            </span>
+          ))}
+        </div>
+      )}
     </aside>
   );
 }

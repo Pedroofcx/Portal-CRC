@@ -177,69 +177,79 @@
    TELA DE ENTRADA — a única exceção à regra de animação
    Ver documentacao/regras-ui-ux.md, seção 8.
 
-   O painel mostra tratativas passando por Registrada → Em andamento →
-   Encerrada, que é o ciclo central do sistema. A animação fica SÓ no
-   painel: o formulário ao lado pode ser usado no instante em que a tela
-   abre, e nada nele se move além das transições normais de 150ms.
+   Tudo aqui vive no painel da esquerda. O formulário ao lado pode ser
+   usado no instante em que a tela abre, e nada nele se move além das
+   transições normais de 150ms.
    ============================================================ */
+@layer base {
+  :root {
+    /* Identidade das camisetas da equipe: marinho de fundo e o "&" em
+       vermelho. Usados SÓ no painel de entrada — o vermelho continua
+       restrito no resto do sistema (regras, seções 1 e 8). */
+    --marca-marinho: 236 45% 20%;
+    --marca-vermelho: 3 85% 57%;
+  }
+}
+
 @layer components {
-  /* Ciclo de 9s dividido em três fases de 3s. Os cartões rodam o mesmo
-     ciclo defasados, então sempre há um em cada estado. */
-  .entrada-cartao { animation: entrada-flutuar 6s ease-in-out infinite; }
-
-  .entrada-fase { opacity: 0; }
-  .entrada-fase-1 { animation: entrada-fase-1 9s linear infinite; }
-  .entrada-fase-2 { animation: entrada-fase-2 9s linear infinite; }
-  .entrada-fase-3 { animation: entrada-fase-3 9s linear infinite; }
-
-  .entrada-progresso { animation: entrada-progresso 9s ease-in-out infinite; }
-
-  /* Pontilhado de fundo, deslizando devagar: dá vida sem chamar atenção. */
-  .entrada-grade {
-    background-image: radial-gradient(hsl(0 0% 100% / 0.07) 1px, transparent 1px);
-    background-size: 24px 24px;
-    animation: entrada-grade 40s linear infinite;
+  .entrada-painel {
+    background-color: hsl(var(--marca-marinho));
+    --px: 0;
+    --py: 0;
   }
 
-  .entrada-brilho { animation: entrada-brilho 14s ease-in-out infinite; }
+  /* Profundidade: fundo e frente andam em sentidos opostos. A transição
+     longa suaviza o movimento do mouse, que chega em saltos. */
+  .entrada-profundidade-fundo {
+    transform: translate3d(calc(var(--px) * -18px), calc(var(--py) * -12px), 0);
+    transition: transform 700ms cubic-bezier(.2, .7, .2, 1);
+  }
+  .entrada-profundidade-frente {
+    transform: translate3d(calc(var(--px) * 10px), calc(var(--py) * 6px), 0);
+    transition: transform 700ms cubic-bezier(.2, .7, .2, 1);
+  }
 
-  /* Saudação: aparece em 200ms, dentro do limite da regra. */
+  /* Dois véus: o da direita, para o lema e a frase lerem bem sobre qualquer
+     foto; o do alto, para a marca não sumir quando a foto tem janela clara
+     atrás da pessoa. */
+  .entrada-veu {
+    background:
+      linear-gradient(180deg, hsl(var(--marca-marinho) / .7) 0%, transparent 22%),
+      linear-gradient(90deg,
+        transparent 32%,
+        hsl(var(--marca-marinho) / .75) 58%,
+        hsl(var(--marca-marinho) / .95) 78%);
+  }
+
+  .entrada-kenburns {
+    transform-origin: 40% 30%;
+    animation: entrada-kenburns 9s ease-out both;
+  }
+
+  .entrada-linha { animation: entrada-linha 800ms cubic-bezier(.2, .7, .2, 1) both; }
+  .entrada-e-comercial { color: hsl(var(--marca-vermelho)); }
+  .entrada-frase { animation: entrada-frase 900ms ease-out both; }
+  .entrada-progresso-foto { animation: entrada-progresso-foto 8s linear both; }
+
+  /* Saudação do formulário: aparece em 200ms, dentro do limite da regra. */
   .entrada-surgir { animation: entrada-surgir 200ms ease-out both; }
 }
 
-@keyframes entrada-flutuar {
-  0%, 100% { transform: translateY(0); }
-  50%      { transform: translateY(-6px); }
+@keyframes entrada-kenburns {
+  from { transform: scale(1); }
+  to   { transform: scale(1.06); }
 }
-@keyframes entrada-fase-1 {
-  0%, 28%   { opacity: 1; }
-  33%, 100% { opacity: 0; }
+@keyframes entrada-linha {
+  from { transform: translateY(110%); }
+  to   { transform: translateY(0); }
 }
-@keyframes entrada-fase-2 {
-  0%, 28%   { opacity: 0; }
-  33%, 61%  { opacity: 1; }
-  66%, 100% { opacity: 0; }
+@keyframes entrada-frase {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
-@keyframes entrada-fase-3 {
-  0%, 61%  { opacity: 0; }
-  66%, 95% { opacity: 1; }
-  100%     { opacity: 0; }
-}
-@keyframes entrada-progresso {
-  0%   { width: 10%;  background-color: hsl(var(--info)); }
-  30%  { width: 34%;  background-color: hsl(var(--info)); }
-  36%  { width: 40%;  background-color: hsl(var(--warning)); }
-  62%  { width: 78%;  background-color: hsl(var(--warning)); }
-  68%  { width: 100%; background-color: hsl(var(--success)); }
-  100% { width: 100%; background-color: hsl(var(--success)); }
-}
-@keyframes entrada-grade {
-  from { background-position: 0 0; }
-  to   { background-position: 240px 240px; }
-}
-@keyframes entrada-brilho {
-  0%, 100% { transform: translate(0, 0) scale(1);        opacity: 0.55; }
-  50%      { transform: translate(40px, -30px) scale(1.1); opacity: 0.8; }
+@keyframes entrada-progresso-foto {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
 }
 @keyframes entrada-surgir {
   from { opacity: 0; transform: translateY(4px); }
@@ -255,9 +265,8 @@
     transition-duration: 0.01ms !important;
   }
 
-  /* Na tela de entrada, sem movimento, cada cartão fica parado num estado
-     diferente — o painel continua contando a mesma história. */
-  .entrada-fase { animation: none !important; }
-  .entrada-fase-estatica { opacity: 1; }
-  .entrada-progresso { animation: none !important; }
+  /* Na tela de entrada, sem movimento: sem zoom e sem profundidade. */
+  .entrada-kenburns { animation: none !important; }
+  .entrada-profundidade-fundo,
+  .entrada-profundidade-frente { transform: none !important; }
 }
