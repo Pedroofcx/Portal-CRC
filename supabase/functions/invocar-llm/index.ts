@@ -148,24 +148,49 @@ Deno.serve(async (req) => {
   }
 
   // --- a chamada ao modelo --------------------------------------------------
-  let resposta: Response;
-  try {
-    resposta = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${MODELO}:generateContent`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'x-goog-api-key': CHAVE },
-        body: JSON.stringify({
-          contents: [{ role: 'user', parts: [{ text: prompt }] }],
-          generationConfig: geracao,
-        }),
-      },
-    );
-  } catch (e) {
-    return responder({ error: `Não consegui falar com o provedor de IA: ${String(e)}` }, 502);
-  }
+  /*
+   * Sobrecarga do provedor (503) é a falha mais comum e a mais boba: passa
+   * sozinha em segundos. Sem repetição, o gestor clicaria, veria erro e
+   * concluiria que a IA não funciona. Três tentativas, esperando 1s e depois
+   * 2s — dentro do tempo que alguém tolera olhando para um botão.
+   *
+   * Só repete o que adianta repetir. 429 é cota esgotada e 400 é pedido
+   * malformado: repetir não muda nada, só gasta tempo.
+   */
+  const corpoModelo = JSON.stringify({
+    contents: [{ role: 'user', parts: [{ text: prompt }] }],
+    generationConfig: geracao,
+  });
 
-  const dados = await resposta.json().catch(() => null);
+  let resposta!: Response;
+  let dados: any = null;
+
+  for (let tentativa = 1; tentativa <= 3; tentativa++) {
+    try {
+      resposta = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${MODELO}:generateContent`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'x-goog-api-key': CHAVE },
+          body: corpoModelo,
+        },
+      );
+    } catch (e) {
+      if (tentativa === 3) {
+        return responder({ error: `Não consegui falar com o provedor de IA: ${String(e)}` }, 502);
+      }
+      await new Promise((r) => setTimeout(r, tentativa * 1000));
+      continue;
+    }
+
+    dados = await resposta.json().catch(() => null);
+
+    // 5xx é problema do lado deles; 4xx é do pedido, e repetir não conserta.
+    const vaiPassarSozinho = resposta.status >= 500;
+    if (resposta.ok || !vaiPassarSozinho || tentativa === 3) break;
+
+    await new Promise((r) => setTimeout(r, tentativa * 1000));
+  }
 
   if (!resposta.ok) {
     /*
@@ -173,10 +198,23 @@ Deno.serve(async (req) => {
      * "cota esgotada" é acionável, "erro 429" não é.
      */
     const detalhe = dados?.error?.message ?? `HTTP ${resposta.status}`;
-    const mensagem = resposta.status === 429
-      ? 'A cota gratuita de IA do dia acabou. Tente de novo mais tarde.'
-      : `O provedor de IA recusou o pedido: ${detalhe}`;
-    return responder({ error: mensagem }, resposta.status === 429 ? 429 : 502);
+
+    if (resposta.status === 429) {
+      return responder({ error: 'A cota gratuita de IA do dia acabou. Tente de novo mais tarde.' }, 429);
+    }
+
+    /*
+     * Sobrecarga é do provedor, não do Portal, e some sozinha. Dizer isso
+     * evita que alguém vá caçar defeito onde não há.
+     */
+    if (resposta.status === 503) {
+      return responder({
+        error: 'O modelo de IA está sobrecarregado neste momento. Isso costuma passar em alguns minutos — tente de novo.',
+        sobrecarga: true,
+      }, 503);
+    }
+
+    return responder({ error: `O provedor de IA recusou o pedido: ${detalhe}` }, 502);
   }
 
   const texto = dados?.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
