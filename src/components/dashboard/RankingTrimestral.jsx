@@ -1,9 +1,5 @@
-import db from '@/api/db';
-import React, { useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
-
-import { calculateTratativaPoints } from '@/components/utils/helpers';
-import { tratativaNosCiclo } from '@/hooks/usePontuacaoAgente';
+import React from 'react';
+import { useRankingCiclo } from '@/hooks/useRankingCiclo';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Award, Trophy, Medal, Star } from 'lucide-react';
@@ -23,78 +19,8 @@ function getMedalBg(pos) {
 }
 
 export default function RankingTrimestral({ colaboradorAtualId, visivel = true }) {
-  const { data: colaboradores = [] } = useQuery({
-    queryKey: ['colaboradores'],
-    queryFn: () => db.entities.Colaborador.list(),
-    staleTime: 120000,
-  });
-
-  // Ciclo ativo — fonte de verdade do período
-  const { data: ciclos = [] } = useQuery({
-    queryKey: ['ciclos-trimestrais'],
-    queryFn: () => db.entities.CicloTrimestral.list(),
-    staleTime: 300000,
-  });
-  const cicloAtivo = useMemo(() => ciclos.find(c => c.ativo) || null, [ciclos]);
-
-  const { data: pontuacoes = [] } = useQuery({
-    queryKey: ['pontuacoes'],
-    queryFn: () => db.entities.Pontuacao.list('-created_date', 200),
-    staleTime: 60000,
-  });
-
-  // Busca todas as tratativas encerradas — filtradas pelo ciclo ativo no useMemo
-  const { data: todasTratativas = [], isLoading: loadingTratativas } = useQuery({
-    queryKey: ['tratativas-encerradas-ranking'],
-    queryFn: () =>
-      db.entities.Tratativa.filter(
-        {},
-        '-data_encerramento',
-        1000
-      ),
-    staleTime: 120000,
-    gcTime: 300000,
-    refetchOnWindowFocus: false,
-    select: (data) =>
-      data.filter(
-        (t) =>
-          (t.status === 'encerrada' || t.status === 'aguardando_confirmacao_reabertura') &&
-          !!t.agente_responsavel_id &&
-          !t.excluida
-      ),
-  });
-
-  const ranking = useMemo(() => {
-    if (!cicloAtivo) return [];
-    const agentes = colaboradores.filter(c => c.papel === 'agente' && c.ativo !== false);
-
-    return agentes.map(agente => {
-      // Apenas tratativas dentro do ciclo ativo
-      const minhasTratativas = todasTratativas.filter(
-        t => t.agente_responsavel_id === agente.id && tratativaNosCiclo(t, cicloAtivo)
-      );
-      let pontosCalculados = 0;
-      minhasTratativas.forEach(t => {
-        const { pontos } = calculateTratativaPoints(t);
-        pontosCalculados += pontos;
-      });
-
-      // Bonus manual do gestor (somente tipo bonus_manual, vinculado ao ciclo)
-      const bonus = pontuacoes
-        .filter(p => p.colaborador_id === agente.id && p.ciclo_id === cicloAtivo.id && p.tipo === 'bonus_manual')
-        .reduce((acc, p) => acc + (p.total_pontos || 0), 0);
-
-      const totalPontos = pontosCalculados + bonus;
-
-      return {
-        id: agente.id,
-        nome: agente.nome_completo,
-        foto: agente.foto_url,
-        totalPontos,
-        tratativasEncerradas: minhasTratativas.length,
-      };
-    }).sort((a, b) => b.totalPontos - a.totalPontos);
-  }, [colaboradores, pontuacoes, todasTratativas, cicloAtivo]);
+  // A conta mora em useRankingCiclo: a tela inicial do operador usa a mesma.
+  const { ranking, cicloAtivo, isLoading: loadingTratativas } = useRankingCiclo();
 
   if (!visivel) {
     return (

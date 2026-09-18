@@ -16,9 +16,9 @@ import RankingTrimestral from '@/components/dashboard/RankingTrimestral';
 import MeuTurnoCard from '@/components/turnos/MeuTurnoCard';
 import CardHorasImplantacao from '@/components/dashboard/CardHorasImplantacao';
 import CardRodizioDashboard from '@/components/rodizio/CardRodizioDashboard';
+import PainelMeuCiclo from '@/components/dashboard/operador/PainelMeuCiclo';
+import FilaDoOperador from '@/components/dashboard/operador/FilaDoOperador';
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
-import PDIModal from '@/components/performance/PDIModal';
-import FeedbackModal from '@/components/performance/FeedbackModal';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -31,19 +31,14 @@ import {
   Bell,
   ArrowRight,
   Users,
-  Award,
   Target,
   MessageSquare,
   CheckSquare,
   Star,
-  BarChart2,
   Eye,
   Activity,
   Zap,
-  Palmtree,
-  CalendarCheck,
-  ChevronDown,
-  ChevronUp
+  Palmtree
 } from 'lucide-react';
 import { 
   Dialog,
@@ -51,7 +46,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Progress } from '@/components/ui/progress';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
@@ -65,9 +59,6 @@ export default function Dashboard() {
   const [currentPesquisaIndex, setCurrentPesquisaIndex] = React.useState(0);
   const [hanseiPopupOpen, setHanseiPopupOpen] = React.useState(false);
   const [respostasPesquisaAtual, setRespostasPesquisaAtual] = React.useState({});
-  const [detalhamentoExpanded, setDetalhamentoExpanded] = React.useState(true);
-  const [selectedPDI, setSelectedPDI] = React.useState(null);
-  const [selectedFeedback, setSelectedFeedback] = React.useState(null);
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 
@@ -175,6 +166,22 @@ export default function Dashboard() {
     refetchOnWindowFocus: false,
   });
 
+  // Férias esperando a validação da própria pessoa — só dá para validar
+  // pelo diálogo desta tela, então o card na lateral do operador não pode sair.
+  const minhasferiasPendentes = React.useMemo(() => {
+    if (!colaborador?.id) return [];
+    const meusCiclos = ciclosFerias.filter(c => c.colaborador_id === colaborador.id);
+    const pendentes = [];
+    meusCiclos.forEach(ciclo => {
+      (ciclo.fragmentos || []).forEach(frag => {
+        if (frag.status === 'pendente_validacao') {
+          pendentes.push({ ...frag, ciclo });
+        }
+      });
+    });
+    return pendentes;
+  }, [ciclosFerias, colaborador]);
+
   const { data: solicitacoesApoio = [] } = useQuery({
     queryKey: ['solicitacoes-apoio-dashboard'],
     queryFn: () => db.entities.SolicitacaoApoio.list('-created_date', 500),
@@ -234,19 +241,6 @@ export default function Dashboard() {
 
 
   // Férias pendentes de validação para o agente atual
-  const minhasferiasPendentes = React.useMemo(() => {
-    if (!colaborador?.id) return [];
-    const meusCiclos = ciclosFerias.filter(c => c.colaborador_id === colaborador.id);
-    const pendentes = [];
-    meusCiclos.forEach(ciclo => {
-      (ciclo.fragmentos || []).forEach(frag => {
-        if (frag.status === 'pendente_validacao') {
-          pendentes.push({ ...frag, ciclo });
-        }
-      });
-    });
-    return pendentes;
-  }, [ciclosFerias, colaborador]);
 
   // Filtrar tratativas baseado no papel
   const minhasTratativas = React.useMemo(() => {
@@ -300,22 +294,8 @@ export default function Dashboard() {
   }, [pontuacoes, colaborador]);
 
   // Meus PDIs e Observações
-  const meusPDIs = React.useMemo(() => {
-    if (!colaborador?.id || !Array.isArray(pdis)) return [];
-    return pdis.filter(p => p.colaborador_id === colaborador.id);
-  }, [pdis, colaborador]);
   
-  const pdiAtivo = React.useMemo(() => {
-    return meusPDIs.find(p => p.status === 'em_andamento');
-  }, [meusPDIs]);
   
-  const minhasObservacoes = React.useMemo(() => {
-    if (!colaborador?.id || !Array.isArray(observacoes)) return [];
-    return observacoes.filter(obs => {
-      if (obs.visibilidade === 'gestor') return false;
-      return obs.colaboradores_ids?.includes(colaborador.id);
-    }).slice(0, 3);
-  }, [observacoes, colaborador]);
 
   // Avisos não lidos para exibir no card (excluir os já confirmados)
   const avisosParaExibir = React.useMemo(() => {
@@ -392,13 +372,6 @@ export default function Dashboard() {
   }, [hanseiEnvios, colaborador, isGestor]);
 
   // Dados de Performance (consolidado de MinhaPerformance)
-  const { data: apuracoes = [] } = useQuery({
-    queryKey: ['apuracoes'],
-    queryFn: () => db.entities.Apuracao.list('-created_date', 20),
-    staleTime: 120000,
-    gcTime: 300000,
-    refetchOnWindowFocus: false,
-  });
 
   // Config ranking visível
   const { data: configuracoes = [] } = useQuery({
@@ -414,14 +387,7 @@ export default function Dashboard() {
     return conf.valor !== 'false';
   }, [configuracoes]);
 
-  const minhasApuracoes = React.useMemo(() => {
-    if (!colaborador?.id || !Array.isArray(apuracoes)) return [];
-    return apuracoes.filter(a => a.colaborador_id === colaborador.id).sort((a, b) => 
-      new Date(b.periodo_inicio) - new Date(a.periodo_inicio)
-    );
-  }, [apuracoes, colaborador]);
   
-  const minhaApuracao = minhasApuracoes[0] || null;
 
   // Horas de Implantação utilizadas no mês (global)
   const horasImplantacaoUtilizadas = React.useMemo(() => {
@@ -434,16 +400,11 @@ export default function Dashboard() {
 
   const {
     totalPontos: totalPontosAgente,
-    pontosCalculados,
     detalhamentoPontos,
-    tratativasEncerradas,
-    trimestre = 'Ciclo Atual',
+    cicloAtivo,
+    bonusManual,
   } = usePontuacaoAgente(colaborador?.id);
   
-  const meusHansei = React.useMemo(() => {
-    if (!colaborador?.id || !Array.isArray(hanseiEnvios)) return [];
-    return hanseiEnvios.filter(h => h.colaborador_id === colaborador.id);
-  }, [hanseiEnvios, colaborador]);
 
   // Exibir avisos obrigatórios como popup — apenas após leituras carregadas do servidor
   React.useEffect(() => {
@@ -581,6 +542,10 @@ export default function Dashboard() {
         fiExpiracao={colaborador?.fi_expiracao}
       />
 
+      {/* Visão do GESTOR: mantida como estava. O operador tem uma tela
+          própria logo abaixo (proposta B, "Meu ciclo"). */}
+      {isGestor && (
+      <>
       {/* Indicadores — os quatro números que importam, iguais para os dois
           papéis. O gestor recebe uma segunda faixa com o que só ele acompanha. */}
       <SecaoDashboard
@@ -609,7 +574,7 @@ export default function Dashboard() {
         </div>
       </SecaoDashboard>
 
-      {isGestor && (
+      {(
         <SecaoDashboard titulo="Requer atenção" descricao="O que não pode esperar">
           <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
             <button type="button" className="text-left" onClick={() => navigate(createPageUrl('Tratativas') + '?status=critica')}>
@@ -633,279 +598,38 @@ export default function Dashboard() {
         <CardRodizioDashboard tipo="n2" />
       </div>
 
-      {/* Layout para Agentes: Performance + Anotações + Avisos + Tratativas */}
+      </>
+      )}
+
+      {/*
+        * Visão do OPERADOR — proposta B, "Meu ciclo".
+        *
+        * Antes eram 24 blocos, com números repetidos (encerradas e taxa de
+        * conclusão apareciam duas vezes) e a lista de tratativas na 8ª seção,
+        * mostrando as mais recentes em vez das mais urgentes. Agora: o ciclo
+        * de premiação no topo, a fila por prazo do SLA, e o contexto do dia
+        * ao lado. PDI, Hansei, férias e feedbacks continuam no menu.
+        */}
       {!isGestor && (
         <div className="space-y-6">
-          {/* Linha 1: Stats de performance */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <Card className="border-0 shadow-sm bg-warning text-white">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-warning text-xs font-medium">Pontuação {trimestre}</span>
-                  <Award className="w-4 h-4 text-warning" />
-                </div>
-                <div className="text-3xl font-bold">{totalPontosAgente.toFixed(1)}</div>
-                <p className="text-warning text-xs mt-1">pts acumulados</p>
-              </CardContent>
-            </Card>
-            <StatCard title="Tratativas Encerradas" value={stats.encerradas} subtitle={`de ${stats.total} total`} icon={CheckCircle} color="green" />
-            <StatCard title="Taxa de Conclusão" value={`${stats.total > 0 ? Math.round((stats.encerradas / stats.total) * 100) : 0}%`} icon={Target} color="blue" />
-            <StatCard title="Dentro do SLA" value={tratativasEncerradas.filter(t => t.encerrado_no_sla).length} subtitle="tratativas" icon={TrendingUp} color="purple" />
-          </div>
+          <PainelMeuCiclo
+            colaborador={colaborador}
+            cicloAtivo={cicloAtivo}
+            totalPontos={totalPontosAgente}
+            detalhamentoPontos={detalhamentoPontos}
+            bonusManual={bonusManual}
+            minhasTratativas={minhasTratativas}
+            exigencias={elegibilidades}
+            rankingVisivel={rankingVisivel}
+          />
 
-          {/* Linha 2: Detalhamento de pontos + Qualidade + PDI */}
-          <div className="grid lg:grid-cols-3 gap-6">
-            {/* Detalhamento de pontos */}
-            <Card className="border-0 shadow-sm">
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle className="flex items-center gap-2 text-base">
-                    <Star className="w-5 h-5 text-warning" />
-                    Detalhamento de Pontos
-                  </CardTitle>
-                  <button onClick={() => setDetalhamentoExpanded(!detalhamentoExpanded)} className="p-1 hover:bg-muted rounded transition-colors">
-                    {detalhamentoExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-                  </button>
-                </div>
-              </CardHeader>
-              <CardContent>
-                {!detalhamentoExpanded ? (
-                  <div className="text-center py-4 text-muted-foreground">
-                    <p className="text-sm">Clique para expandir</p>
-                    <p className="text-2xl font-bold text-warning mt-2">{pontosCalculados.toFixed(1)} pts</p>
-                  </div>
-                ) : detalhamentoPontos.length === 0 ? (
-                  <div className="text-center py-6 text-muted-foreground">
-                    <Award className="w-8 h-8 mx-auto mb-2 opacity-40" />
-                    <p className="text-sm">Nenhuma pontuação registrada</p>
-                    <p className="text-xs mt-1">Encerre tratativas para acumular pontos</p>
-                  </div>
-                ) : (
-                  <div className="space-y-2 max-h-64 overflow-y-auto">
-                    {detalhamentoPontos.map((item, index) => (
-                      <div key={index} className="flex items-center justify-between p-2.5 bg-muted rounded-lg hover:bg-muted transition-colors">
-                        <div className="flex items-center gap-2">
-                          <div className="w-7 h-7 bg-warning-soft rounded-full flex items-center justify-center flex-shrink-0">
-                            <Star className="w-3.5 h-3.5 text-warning" />
-                          </div>
-                          <div>
-                            <p className="font-medium text-foreground text-xs">{item.tipo}</p>
-                            <p className="text-xs text-muted-foreground">#{item.tratativa_id?.substring(0, 8)}</p>
-                          </div>
-                        </div>
-                        <Badge className="bg-warning-soft text-warning border-warning/25 text-xs">+{item.pontos} pts</Badge>
-                      </div>
-                    ))}
-                    <div className="flex justify-between items-center pt-3 border-t sticky bottom-0 bg-card">
-                      <span className="font-semibold text-foreground text-sm">Total</span>
-                      <span className="text-xl font-bold text-warning">{pontosCalculados.toFixed(1)}</span>
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+          <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
+            <FilaDoOperador tratativas={minhasTratativas} />
 
-            {/* Indicadores de Qualidade */}
-            <Card className="border-0 shadow-sm">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-base flex items-center gap-2">
-                  <BarChart2 className="w-4 h-4" />
-                  Indicadores de Qualidade
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {minhaApuracao ? (
-                  <>
-                    {minhaApuracao.canal_telefone && (
-                      <>
-                        <div>
-                          <div className="flex justify-between text-sm mb-1">
-                            <span>CSAT Telefone</span>
-                            <span className="font-medium">{minhaApuracao.canal_telefone.csat?.toFixed(1)}%</span>
-                          </div>
-                          <Progress value={minhaApuracao.canal_telefone.csat || 0} className="h-2" />
-                        </div>
-                        <div>
-                          <div className="flex justify-between text-sm mb-1">
-                            <span>FCR</span>
-                            <span className="font-medium">{minhaApuracao.canal_telefone.fcr?.toFixed(1)}%</span>
-                          </div>
-                          <Progress value={minhaApuracao.canal_telefone.fcr || 0} className="h-2" />
-                        </div>
-                        <div>
-                          <div className="flex justify-between text-sm mb-1">
-                            <span>Performance</span>
-                            <span className="font-medium">{minhaApuracao.canal_telefone.performance?.toFixed(1)}%</span>
-                          </div>
-                          <Progress value={minhaApuracao.canal_telefone.performance || 0} className="h-2" />
-                        </div>
-                      </>
-                    )}
-                    {minhaApuracao.canal_chat && (
-                      <div>
-                        <div className="flex justify-between text-sm mb-1">
-                          <span>CSAT Chat</span>
-                          <span className="font-medium">{minhaApuracao.canal_chat.csat?.toFixed(1)}%</span>
-                        </div>
-                        <Progress value={minhaApuracao.canal_chat.csat || 0} className="h-2" />
-                      </div>
-                    )}
-                    {minhaApuracao.avaliacao_cx && (
-                      <div>
-                        <div className="flex justify-between text-sm mb-1">
-                          <span>Avaliação CX</span>
-                          <span className="font-medium">{minhaApuracao.avaliacao_cx.nota_media?.toFixed(2)}/5</span>
-                        </div>
-                        <Progress value={(minhaApuracao.avaliacao_cx.nota_media / 5) * 100 || 0} className="h-2" />
-                      </div>
-                    )}
-                    {minhaApuracao.percentual_avaliados && (
-                      <div>
-                        <div className="flex justify-between text-sm mb-1">
-                          <span>% Avaliados</span>
-                          <span className="font-medium">{minhaApuracao.percentual_avaliados?.toFixed(1)}%</span>
-                        </div>
-                        <Progress value={minhaApuracao.percentual_avaliados || 0} className="h-2" />
-                      </div>
-                    )}
-                  </>
-                ) : (
-                  <p className="text-sm text-muted-foreground text-center py-6">Sem apurações recentes</p>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* PDI + Hansei */}
             <div className="space-y-4">
-              {/* Hansei */}
-              <Card
-                className="border-0 shadow-sm bg-primary text-white cursor-pointer hover:shadow-sm transition-shadow"
-                onClick={() => navigate(createPageUrl('Hansei'))}
-              >
-                <CardContent className="p-3 flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-card/20 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <TrendingUp className="w-4 h-4" />
-                    </div>
-                    <div>
-                      <p className="font-semibold text-sm">Meu Hansei</p>
-                      <p className="text-primary text-xs">Resultados e desempenho</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {meusHansei.filter(h => !h.visualizado).length > 0 && (
-                      <Badge className="bg-card/25 text-white border-0 text-xs">{meusHansei.filter(h => !h.visualizado).length} novo(s)</Badge>
-                    )}
-                    <ArrowRight className="w-4 h-4 text-primary" />
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* PDI Ativo */}
-              {pdiAtivo ? (
-                <Card className="border-0 shadow-sm bg-info-soft cursor-pointer hover:shadow-sm transition-shadow" onClick={() => setSelectedPDI(pdiAtivo)}>
-                  <CardContent className="p-4">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Target className="w-4 h-4 text-primary" />
-                      <span className="text-sm font-semibold text-primary">PDI em Andamento</span>
-                    </div>
-                    <p className="font-medium text-primary text-sm line-clamp-1">{pdiAtivo.titulo}</p>
-                    <div className="mt-2">
-                      <div className="flex justify-between text-xs mb-1 text-primary">
-                        <span>Progresso</span>
-                        <span>{pdiAtivo.percentual_conclusao || 0}%</span>
-                      </div>
-                      <Progress value={pdiAtivo.percentual_conclusao || 0} className="h-1.5 bg-primary" />
-                    </div>
-                    <p className="text-xs text-primary mt-2">{pdiAtivo.etapas?.filter(e => !e.concluida).length || 0} etapa(s) pendente(s) · clique para detalhes</p>
-                  </CardContent>
-                </Card>
-              ) : (
-                <Card className="border-0 shadow-sm">
-                  <CardContent className="py-6 text-center">
-                    <Target className="w-8 h-8 mx-auto mb-1 text-muted-foreground" />
-                    <p className="text-muted-foreground text-sm">Nenhum PDI ativo</p>
-                  </CardContent>
-                </Card>
-              )}
-
-              {/* Elegibilidade Premiação */}
-              {elegibilidades.length > 0 && (
-                <Card className="border-0 shadow-sm">
-                  <CardContent className="p-4">
-                    <div className="flex items-center gap-2 mb-3">
-                      <Award className="w-4 h-4 text-warning" />
-                      <span className="text-sm font-semibold text-foreground">Elegibilidade Premiação</span>
-                    </div>
-                    <div className="space-y-1.5">
-                      {elegibilidades.slice(0, 4).map(elegib => (
-                        <div key={elegib.id} className="flex items-center justify-between p-1.5 bg-muted rounded text-xs">
-                          <span className="text-foreground">{elegib.nome_exigencia}</span>
-                          <CheckCircle className="w-3.5 h-3.5 text-success" />
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
-            </div>
-          </div>
-
-          {/* Ranking Trimestral */}
-          <RankingTrimestral colaboradorAtualId={colaborador?.id} visivel={rankingVisivel} />
-
-          {/* Linha 3: Tratativas + Sidebar (Anotações, Avisos, Férias, Feedbacks, Ações) */}
-          <div className="grid lg:grid-cols-3 gap-6">
-            {/* Tratativas Recentes */}
-            <Card className="lg:col-span-2 border-0 shadow-sm">
-              <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-base font-semibold flex items-center gap-2">
-                    <ClipboardList className="w-4 h-4" />
-                    Tratativas Recentes
-                  </CardTitle>
-                  <Link to={createPageUrl('Tratativas')}>
-                    <Button variant="ghost" size="sm" className="text-primary">
-                      Ver todas <ArrowRight className="w-4 h-4 ml-1" />
-                    </Button>
-                  </Link>
-                </div>
-              </CardHeader>
-              <CardContent>
-                {tratativasRecentes.length === 0 ? (
-                  <div className="text-center py-8 text-muted-foreground">
-                    <ClipboardList className="w-10 h-10 mx-auto mb-2 opacity-50" />
-                    <p>Nenhuma tratativa registrada</p>
-                  </div>
-                ) : (
-                  <div className="space-y-2">
-                    {tratativasRecentes.map((tratativa) => (
-                      <Link key={tratativa.id} to={createPageUrl(`TratativaDetalhe?id=${tratativa.id}`)} className="block p-3 bg-muted rounded-lg hover:bg-muted transition-colors">
-                        <div className="flex items-start justify-between gap-3">
-                          <div className="flex-1 min-w-0">
-                            <p className="font-medium text-foreground text-sm truncate">{tratativa.nome_cliente || tratativa.link_zendesk?.substring(0, 40)}</p>
-                            <p className="text-xs text-muted-foreground mt-0.5">{formatDateSP(tratativa.created_date, 'DD/MM/YYYY HH:mm')}</p>
-                          </div>
-                          <div className="flex items-center gap-1.5 flex-shrink-0">
-                            <StatusBadge status={tratativa.prioridade} />
-                            <StatusBadge status={tratativa.status} />
-                          </div>
-                        </div>
-                      </Link>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Sidebar do agente */}
-            <div className="space-y-4">
-              {/* Turno do Dia */}
               <MeuTurnoCard colaboradorId={colaborador?.id} />
-
-              {/* Anotações Pessoais — destaque */}
-              <MinhasAnotacoes colaboradorId={colaborador?.id} />
-
+              <CardRodizioDashboard tipo="lider" />
+              <CardRodizioDashboard tipo="n2" />
               {/* Avisos */}
               <Card className="border-0 shadow-sm">
                 <CardHeader className="pb-2">
@@ -944,98 +668,25 @@ export default function Dashboard() {
                 </CardContent>
               </Card>
 
-              {/* Observações/Feedbacks */}
-              {minhasObservacoes.length > 0 && (
-                <Card className="border-0 shadow-sm">
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-sm font-semibold flex items-center gap-2">
-                      <MessageSquare className="w-4 h-4 text-primary" />
-                      Feedbacks Recebidos
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="pt-0 space-y-2">
-                    {minhasObservacoes.map(obs => {
-                      const cat = obs.tipo || 'Observação';
-                      const isPos = cat.toLowerCase().includes('reconhecimento') || cat.toLowerCase().includes('elogio');
-                      const isDev = cat.toLowerCase().includes('desenvolvimento');
-                      const isAlert = cat.toLowerCase().includes('alerta');
-                      const bg = isPos ? 'bg-success-soft border-success/25' : isDev ? 'bg-info-soft border-info/25' : isAlert ? 'bg-warning-soft border-warning/25' : 'bg-muted border-border';
-                      const badge = isPos ? 'bg-success-soft text-success' : isDev ? 'bg-info-soft text-primary' : isAlert ? 'bg-warning-soft text-warning' : 'bg-muted text-foreground';
-                      return (
-                        <div key={obs.id} className={`p-2.5 border rounded-lg cursor-pointer hover:shadow-sm transition-all ${bg}`} onClick={() => setSelectedFeedback(obs)}>
-                          <div className="flex items-start justify-between gap-1 mb-1">
-                            <Badge className={`${badge} text-xs py-0`}>{cat}</Badge>
-                            <span className="text-xs text-muted-foreground">{formatDateSP(obs.data_registro, 'DD/MM')}</span>
-                          </div>
-                          <p className="text-xs font-medium text-foreground line-clamp-2">{obs.titulo || obs.conteudo?.substring(0, 50)}</p>
-                          <p className="text-xs text-muted-foreground mt-0.5">Por: {obs.autor_nome}</p>
-                        </div>
-                      );
-                    })}
-                  </CardContent>
-                </Card>
-              )}
+              <MinhasAnotacoes colaboradorId={colaborador?.id} />
 
-              {/* Minhas Férias */}
-              <Card
-                className={`border-0 shadow-sm cursor-pointer hover:shadow-sm transition-shadow ${minhasferiasPendentes.length > 0 ? 'bg-warning-soft' : 'bg-success-soft'}`}
+              {/* Férias: validar os próprios períodos só é possível por aqui. */}
+              <button
+                type="button"
                 onClick={() => setValidarFeriasOpen(true)}
+                className={`w-full rounded-xl border p-4 text-left transition-colors hover:bg-muted/60 ${
+                  minhasferiasPendentes.length > 0 ? 'border-warning/40 bg-warning-soft' : 'border-border bg-card'}`}
               >
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-2">
-                      <Palmtree className="w-4 h-4 text-success" />
-                      <span className="text-sm font-semibold text-foreground">Minhas Férias</span>
-                    </div>
-                    {minhasferiasPendentes.length > 0 && (
-                      <Badge className="bg-warning text-white text-xs">{minhasferiasPendentes.length} pendente{minhasferiasPendentes.length > 1 ? 's' : ''}</Badge>
-                    )}
-                  </div>
-                  {minhasferiasPendentes.length > 0 ? (
-                    <div>
-                      <p className="text-xs text-warning mb-1">Períodos pendentes de validação</p>
-                      <Button size="sm" className="w-full bg-warning hover:bg-warning text-white mt-1 h-7 text-xs">
-                        <CalendarCheck className="w-3 h-3 mr-1" /> Ver e Validar
-                      </Button>
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-2 text-success">
-                      <CheckCircle className="w-4 h-4" />
-                      <span className="text-xs font-medium">Nenhum período pendente</span>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-
-              {/* Ações Rápidas */}
-              <Card className="border-0 shadow-sm">
-                <CardContent className="p-4 grid grid-cols-2 gap-2">
-                  <Link to={createPageUrl('Tratativas')}>
-                    <Button variant="outline" className="w-full h-auto py-2.5 flex-col gap-1">
-                      <ClipboardList className="w-4 h-4" />
-                      <span className="text-xs">Nova Tratativa</span>
-                    </Button>
-                  </Link>
-                  <Link to={createPageUrl('Avisos')}>
-                    <Button variant="outline" className="w-full h-auto py-2.5 flex-col gap-1">
-                      <Bell className="w-4 h-4" />
-                      <span className="text-xs">Avisos</span>
-                    </Button>
-                  </Link>
-                  <Link to={createPageUrl('PDI')}>
-                    <Button variant="outline" className="w-full h-auto py-2.5 flex-col gap-1">
-                      <Target className="w-4 h-4" />
-                      <span className="text-xs">Meu PDI</span>
-                    </Button>
-                  </Link>
-                  <Link to={createPageUrl('Hansei')}>
-                    <Button variant="outline" className="w-full h-auto py-2.5 flex-col gap-1">
-                      <TrendingUp className="w-4 h-4" />
-                      <span className="text-xs">Hansei</span>
-                    </Button>
-                  </Link>
-                </CardContent>
-              </Card>
+                <span className="flex items-center gap-2 text-sm font-semibold text-foreground">
+                  <Palmtree className="h-4 w-4 text-success" aria-hidden="true" />
+                  Minhas férias
+                </span>
+                <span className={`mt-1 block text-xs ${minhasferiasPendentes.length > 0 ? 'font-medium text-warning' : 'text-muted-foreground'}`}>
+                  {minhasferiasPendentes.length > 0
+                    ? `${minhasferiasPendentes.length} período${minhasferiasPendentes.length > 1 ? 's' : ''} esperando a sua validação — ver e validar`
+                    : 'Nenhum período esperando validação'}
+                </span>
+              </button>
             </div>
           </div>
         </div>
@@ -1179,9 +830,6 @@ export default function Dashboard() {
       </div>
       )}
 
-          {/* Modals */}
-          {selectedPDI && <PDIModal pdi={selectedPDI} open={!!selectedPDI} onClose={() => setSelectedPDI(null)} />}
-          {selectedFeedback && <FeedbackModal feedback={selectedFeedback} open={!!selectedFeedback} onClose={() => setSelectedFeedback(null)} />}
 
           {/* Modal: Minhas Férias - Validação */}
       <Dialog open={validarFeriasOpen} onOpenChange={setValidarFeriasOpen}>

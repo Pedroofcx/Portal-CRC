@@ -39,3 +39,6 @@ portalcrc-dados-*.json
 
 # Senhas provisorias geradas pelo criar-contas - nunca versionar
 senhas-provisorias/
+
+# Copia do banco para a previa da tela do operador - tem nome de cliente
+previas/dados-operador.json

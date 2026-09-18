@@ -19,7 +19,8 @@
     "testar-ia": "node ferramentas/testar-ia.mjs",
     "conferir-contas": "node ferramentas/conferir-contas.mjs",
     "criar-contas": "node ferramentas/criar-contas.mjs",
-    "exigir-troca-de-senha": "node ferramentas/exigir-troca-de-senha.mjs"
+    "exigir-troca-de-senha": "node ferramentas/exigir-troca-de-senha.mjs",
+    "previa-operador": "node ferramentas/gerar-previa-operador.mjs"
   },
   "dependencies": {
     "@hello-pangea/dnd": "^17.0.0",

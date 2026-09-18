@@ -9,6 +9,8 @@
  * agora e 23:59:59. O que venceu antes de agora conta como vencido, não como
  * "hoje" — senão uma tratativa atrasada há uma hora sumiria das duas contas.
  */
+import { prazoDaTratativa } from './prazoSla.js';
+
 const FECHADAS = new Set(['encerrada', 'excluida']);
 
 export function resumoDoDia(tratativas = [], agora = new Date()) {
@@ -23,11 +25,8 @@ export function resumoDoDia(tratativas = [], agora = new Date()) {
     if (!t || FECHADAS.has(t.status) || t.excluida) continue;
     abertas += 1;
 
-    const inicio = t.data_registro ? new Date(t.data_registro) : null;
-    const horas = Number(t.sla_atribuido);
-    if (!inicio || Number.isNaN(inicio.getTime()) || !(horas > 0)) continue;
-
-    const prazo = new Date(inicio.getTime() + horas * 3600 * 1000);
+    const prazo = prazoDaTratativa(t);
+    if (!prazo) continue;
     if (prazo < agora) vencidas += 1;
     else if (prazo <= fimDoDia) vencemHoje += 1;
   }

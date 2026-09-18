@@ -1,3 +1,4 @@
+import { pontosDaFaixa } from '../../lib/faixasIndicadores.js';
 // Formatar data para fuso horário de São Paulo
 export function formatDateSP(date, format = 'DD/MM/YYYY HH:mm') {
   if (!date) return '-';
@@ -137,27 +138,18 @@ export function calculateTratativaPoints(tratativa) {
   return { pontos, detalhes };
 }
 
-// Calcular pontos CSAT
+// Pontos dos indicadores: as faixas moram em src/lib/faixasIndicadores.js,
+// que também diz qual é a próxima faixa. Uma fonte só para as duas perguntas.
 export function calculateCSATPoints(csatPercentage) {
-  if (csatPercentage >= 95) return 10;
-  if (csatPercentage >= 90) return 9;
-  if (csatPercentage >= 85) return 7;
-  return 0;
+  return pontosDaFaixa('csat', csatPercentage);
 }
 
-// Calcular pontos Performance
 export function calculatePerformancePoints(performancePercentage) {
-  if (performancePercentage >= 100) return 10;
-  if (performancePercentage >= 95) return 7;
-  return 0;
+  return pontosDaFaixa('performance', performancePercentage);
 }
 
-// Calcular pontos Avaliação CX
 export function calculateCXPoints(notaMedia) {
-  if (notaMedia >= 4.5) return 10;
-  if (notaMedia >= 4.3) return 4;
-  if (notaMedia >= 4.2) return 1;
-  return 0;
+  return pontosDaFaixa('cx', notaMedia);
 }
 
 // Labels para tipos de tratativa

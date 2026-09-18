@@ -42,7 +42,11 @@ import AdminBulkActions from '@/components/tratativas/AdminBulkActions';
 import DadosComerciaisForm from '@/components/tratativas/DadosComerciaisForm';
 
 export default function Tratativas() {
-  const [dialogOpen, setDialogOpen] = useState(false);
+  // ?nova=1 abre o formulário direto: é para onde leva o "Registrar tratativa"
+  // da tela inicial do operador.
+  const [dialogOpen, setDialogOpen] = useState(
+    () => new URLSearchParams(window.location.search).get('nova') === '1',
+  );
   const [filterStatus, setFilterStatus] = useState('all');
   const [filterTipo, setFilterTipo] = useState('all');
   const [filterPrioridade, setFilterPrioridade] = useState('all');
