@@ -139,7 +139,7 @@ export default function DiaDetalheDialog({ open, onClose, data, atribuicoes, col
                                         className="w-8 h-8 rounded-full object-cover"
                                       />
                                     ) : (
-                                      <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-xs font-bold text-white">
+                                      <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-xs font-bold text-foreground">
                                         {colab.nome_completo?.substring(0, 2).toUpperCase()}
                                       </div>
                                     )}

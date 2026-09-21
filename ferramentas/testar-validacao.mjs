@@ -13,6 +13,7 @@ import { pontosPorSemana } from '../src/lib/ritmoSemanal.js';
 import { posicaoNoRanking } from '../src/lib/posicaoRanking.js';
 import { prazoDaTratativa, descreverPrazo, consumoDoPrazo } from '../src/lib/prazoSla.js';
 import { indicadoresDoCiclo } from '../src/lib/indicadoresCiclo.js';
+import { conferirLinha } from './conferir-cores.mjs';
 import { calculateCSATPoints, calculateCXPoints } from '../src/components/utils/helpers.js';
 
 let passou = 0;
@@ -232,6 +233,16 @@ checa('CX do ultimo mes', String(ind.cx.valor), '4.4');
 checa('mes fora do ciclo nao entra', String(indicadoresDoCiclo([apur[4]], cicloT).csat), 'null');
 checa('sem telefone usa o chat', indicadoresDoCiclo([apur[2]], cicloT).csat.canal, 'chat');
 checa('sem ciclo nao ha indicador', String(indicadoresDoCiclo(apur, null).cx), 'null');
+
+console.log('\n== conferencia de cores (o verificador pega o que deve) ==');
+const cor = (html) => conferirLinha(html).join(' | ') || null;
+checa('ambar sobre ambar', cor('<div className="bg-warning text-warning">'), 'texto da cor do fundo (warning)');
+checa('branco sobre cinza-claro', cor('<p className="bg-muted text-white">'), 'texto branco sobre fundo claro');
+checa('card azul cheio', cor('<Card className="border-0 bg-primary text-white">'), 'card inteiro de cor cheia');
+checa('fundo claro -soft passa', cor('<Card className="bg-warning-soft text-warning">'), null);
+checa('ramos diferentes da condicao passam', cor("<b className={`p-2 ${x ? 'bg-primary text-white' : 'bg-muted text-muted-foreground'}`}>"), null);
+checa('superficie escura passa', cor('<div className="bg-muted superficie-escura text-white">'), null);
+checa('mesmo ramo com erro e pego', cor("<b className={`p-2 ${x ? 'bg-muted text-white' : 'bg-card'}`}>"), 'texto branco sobre fundo claro');
 
 console.log('\n' + passou + ' passaram, ' + falhou + ' falharam');
 process.exit(falhou ? 1 : 0);

@@ -191,3 +191,44 @@ tela sobe como uma cortina e o conteúdo da página entra de cima para baixo.
 
 Nenhuma outra tela ganha animação contínua por analogia. Uma nova exceção
 exige uma nova revisão neste documento.
+
+---
+
+## 9. Revisão de 21/09/2026 — Cor suave e rolagem
+
+Decisões do responsável pelo produto.
+
+### Cor suave: superfície neutra, cor só no detalhe
+
+As cores de **situação** (registrada, em andamento, vencida, encerrada)
+continuam como estão: sinalizam estado, em selos pequenos. Para todo o resto:
+
+1. **Superfície sempre neutra.** Card branco, fundo cinza-claríssimo. Nenhum
+   card grande com fundo colorido cheio.
+2. **A cor da categoria vai no detalhe**: o fundo claro de um ícone, uma linha
+   fina, a cor de um número. Exemplo: Líder Técnico (roxo, `chart-5`) e Apoio
+   N2 (petróleo, `chart-4`) se distinguem pelo ícone, não pelo card inteiro.
+   O azul dos botões (`chart-1`/`primary`) não é usado como categoria:
+   categoria não é ação.
+3. **Cor forte só para o que pede ação ou sinaliza estado**: o botão
+   principal (um por tela) e os selos de situação.
+4. **Destaque de fundo usa a versão clara** (`bg-warning-soft`,
+   `bg-info-soft`, `bg-primary/10`), nunca a cheia.
+
+**Garantia automática:** `npm run lint` roda `ferramentas/conferir-cores.mjs`,
+que falha com texto da mesma cor do fundo, texto branco sobre fundo claro, ou
+card inteiro de cor cheia. Os dois primeiros deixavam texto invisível — foram
+12 lugares depois da troca de cores da Fase 05, incluindo o detalhamento de
+pontos da tratativa encerrada.
+
+### Rolagem: sem barra dentro de card
+
+**Card é resumo; a lista inteira é a página própria.** Um card com lista
+mostra os primeiros itens (de 3 a 5, os mais relevantes) e um link com o total
+— "Ver todos os 7 avisos". Nenhum card tem barra de rolagem por dentro.
+
+Propostos, aguardando decisão:
+* **Tabelas largas**: só as colunas que decidem, e o resto no painel de
+  detalhe ao lado, em vez de rolagem horizontal.
+* **Janelas altas**: painel lateral de altura cheia, ou passos curtos.
+* **Rolagem da página**: barra fina e discreta.

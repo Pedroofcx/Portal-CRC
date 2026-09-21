@@ -1331,7 +1331,7 @@ export default function TratativaDetalhe({ idExterno = null, embutido = false })
 
           {/* Pontuação */}
           {isEncerrada && pontosPreview && (
-            <Card className="border-0 shadow-sm bg-warning text-white">
+            <Card className="border border-warning/25 shadow-none bg-warning-soft">
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-medium text-warning flex items-center gap-2">
                   <Award className="w-4 h-4" />
@@ -1339,10 +1339,10 @@ export default function TratativaDetalhe({ idExterno = null, embutido = false })
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-4xl font-bold mb-3">{pontosPreview.pontos.toFixed(1)}</div>
+                <div className="text-4xl font-bold mb-3 text-foreground">{pontosPreview.pontos.toFixed(1)}</div>
                 <div className="space-y-1">
                   {pontosPreview.detalhes.map((d, i) => (
-                    <div key={i} className="text-sm text-warning flex justify-between">
+                    <div key={i} className="text-sm text-foreground flex justify-between">
                       <span>{d.tipo}</span>
                       <span>+{d.pontos}</span>
                     </div>

@@ -54,7 +54,7 @@ export default function CardAgenteEquidade({ agente, distribuicoes, todas }) {
           <p className="text-xs text-muted-foreground mt-0.5">{agente.cargo_atual || 'Agente'}</p>
         </div>
         <div className="flex items-center gap-2 flex-shrink-0">
-          <Badge className="bg-muted text-white text-xs">{minhas.length} tickets</Badge>
+          <Badge className="bg-muted text-muted-foreground text-xs hover:bg-muted">{minhas.length} tickets</Badge>
           <button onClick={() => setExpandido(e => !e)} className="p-1 hover:bg-card/60 rounded transition-colors">
             {expandido ? <ChevronUp className="w-4 h-4 text-muted-foreground" /> : <ChevronDown className="w-4 h-4 text-muted-foreground" />}
           </button>

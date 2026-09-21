@@ -485,8 +485,8 @@ export default function Relatorios() {
             <div className="flex items-center justify-between">
               <div className="flex-1">
                 <div className="flex items-center gap-3 mb-3">
-                  <div className="p-2 bg-primary rounded-lg">
-                    <Brain className="w-6 h-6 text-white" />
+                  <div className="p-2 bg-primary/10 rounded-lg">
+                    <Brain className="w-6 h-6 text-primary" />
                   </div>
                   <h3 className="text-xl font-bold text-primary">
                     Inteligência Operacional Preditiva

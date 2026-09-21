@@ -2,12 +2,26 @@ import db from '@/api/db';
 import React, { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 
-import { Card, CardContent } from '@/components/ui/card';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { UserCog, Headset } from 'lucide-react';
 import { findNextLider, getPosicaoAtual } from '@/components/lider-tecnico/rodizioUtils';
 import { findNextN2, getPosicaoAtualN2 } from '@/components/apoio-n2/rodizioN2Utils';
+import { primeiroNome } from '@/lib/nomes';
+
+/**
+ * Rodízio do Líder Técnico e do Apoio N2: quem é o próximo, quem foi o último
+ * e quem fez a última solicitação.
+ *
+ * Card branco, cor só no ícone (regras-ui-ux.md, seção 9). Antes era um bloco
+ * de cor cheia — roxo um, azul o outro — que gritava mais alto que a fila de
+ * trabalho ao lado. A cor continua separando as duas categorias, mas no
+ * detalhe: roxo (chart-5) para o Líder, petróleo (chart-4) para o N2. O
+ * azul-botão (chart-1) fica de fora: categoria não é ação.
+ *
+ * "Próximo" vem primeiro porque é a pergunta de quem abre o card.
+ */
+const DATA_HORA = { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' };
 
 export default function CardRodizioDashboard({ tipo }) {
   const isLider = tipo === 'lider';
@@ -19,9 +33,7 @@ export default function CardRodizioDashboard({ tipo }) {
   const findNext = isLider ? findNextLider : findNextN2;
   const getPosicao = isLider ? getPosicaoAtual : getPosicaoAtualN2;
   const titulo = isLider ? 'Líder Técnico' : 'Apoio N2';
-  // Líder Técnico e Apoio N2 são categorias, não níveis — usam a paleta
-  // categórica, que distingue sem sugerir que um é melhor que o outro.
-  const tom = isLider ? 'bg-chart-5' : 'bg-chart-1';
+  const tomIcone = isLider ? 'bg-chart-5/10 text-chart-5' : 'bg-chart-4/10 text-chart-4';
 
   const { data: participantes = [] } = useQuery({
     queryKey: [`rodizio-${tipo}-dashboard`],
@@ -51,28 +63,38 @@ export default function CardRodizioDashboard({ tipo }) {
     : '—';
   const ultimoNome = ultimo ? ultimo[nomeField] || '—' : '—';
 
+  // Quem pediu por último, pelo primeiro nome — o mesmo padrão das boas-vindas.
+  const solicitante = ultimo?.usuario_nome ? primeiroNome(ultimo.usuario_nome) : null;
+  const quando = ultimo?.data_acionamento
+    ? new Date(ultimo.data_acionamento).toLocaleString('pt-BR', DATA_HORA).replace(', ', ' às ')
+    : null;
+
   return (
     // block: link é elemento de linha e ignora a margem vertical — empilhado
     // na lateral do operador, o card grudava no de cima.
-    <Link to={createPageUrl('FerramentasOperacionais')} className="block">
-      <Card className={`h-full cursor-pointer border-0 shadow-none ${tom} text-white transition-colors`}>
-        <CardContent className="p-4">
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-white/90 text-sm font-medium">{titulo}</span>
-            <Icon className="w-4 h-4 text-white/80" />
-          </div>
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="text-white/70 text-xs">Último:</span>
-              <span className="text-white font-semibold text-sm truncate ml-2">{ultimoNome}</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-white/70 text-xs">Próximo:</span>
-              <span className="text-white font-semibold text-sm truncate ml-2">{proximoNome}</span>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+    <Link
+      to={createPageUrl('FerramentasOperacionais')}
+      className="block h-full rounded-xl border border-border bg-card p-4 transition-colors hover:bg-muted/50"
+    >
+      <div className="flex items-start gap-3">
+        <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${tomIcone}`}>
+          <Icon className="h-4 w-4" aria-hidden="true" />
+        </span>
+        <div className="min-w-0 flex-1">
+          <p className="text-sm font-semibold text-foreground">{titulo}</p>
+          <p className="mt-0.5 truncate text-xs text-muted-foreground" title={`Próximo: ${proximoNome} · último: ${ultimoNome}`}>
+            Próximo: <span className="font-semibold text-foreground">{proximoNome}</span>
+            <span aria-hidden="true"> · </span>
+            último: {ultimoNome}
+          </p>
+          {solicitante && (
+            <p className="mt-0.5 truncate text-xs text-muted-foreground" title={`Última solicitação: ${solicitante}${quando ? ` · ${quando}` : ''}`}>
+              Última solicitação: <span className="font-medium text-foreground">{solicitante}</span>
+              {quando && <span> · {quando}</span>}
+            </p>
+          )}
+        </div>
+      </div>
     </Link>
   );
 }

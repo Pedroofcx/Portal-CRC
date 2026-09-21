@@ -256,21 +256,21 @@ export default function MinhaPerformance() {
         <div className="space-y-6">
           {/* Card de Acesso ao Hansei */}
           <Link to={createPageUrl('Hansei')}>
-            <Card className="border-0 shadow-sm bg-primary text-white cursor-pointer hover:shadow-sm transition-all hover:scale-105">
+            <Card className="border border-border shadow-none cursor-pointer transition-colors hover:bg-muted/50">
               <CardHeader className="pb-3">
-                <CardTitle className="text-base flex items-center gap-2 text-white">
-                  <TrendingUp className="w-5 h-5" />
+                <CardTitle className="text-base flex items-center gap-2 text-foreground">
+                  <TrendingUp className="w-5 h-5 text-primary" />
                   Acesse seu Hansei
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                <p className="text-sm text-primary">
+                <p className="text-sm text-muted-foreground">
                   Visualize seus resultados consolidados, histórico de desempenho e gráficos de evolução
                 </p>
                 {meusHansei.length > 0 && (
-                  <div className="p-3 bg-card/20 rounded-lg backdrop-blur-sm">
-                    <p className="text-xs text-primary mb-1">Últimos resultados:</p>
-                    <p className="text-sm font-medium text-white">
+                  <div className="p-3 bg-muted rounded-lg">
+                    <p className="text-xs text-muted-foreground mb-1">Últimos resultados:</p>
+                    <p className="text-sm font-medium text-foreground">
                       {meusHansei.filter(h => !h.visualizado).length} novo(s) • {meusHansei.length} total
                     </p>
                   </div>

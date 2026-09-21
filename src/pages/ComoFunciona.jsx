@@ -357,15 +357,15 @@ export default function ComoFunciona() {
         icon={BookOpen}
       />
 
-      <Card className="border-0 shadow-sm bg-primary text-white">
+      <Card className="border border-info/25 shadow-none bg-info-soft">
         <CardContent className="py-6">
           <div className="flex items-start gap-4">
-            <div className="w-12 h-12 bg-card/20 rounded-xl flex items-center justify-center flex-shrink-0">
+            <div className="w-12 h-12 bg-card text-primary rounded-xl flex items-center justify-center flex-shrink-0">
               <BookOpen className="w-6 h-6" />
             </div>
             <div>
-              <h3 className="font-bold text-lg mb-2">Bem-vindo ao Guia do Portal CRC</h3>
-              <p className="text-primary text-sm leading-relaxed">
+              <h3 className="font-bold text-lg mb-2 text-foreground">Boas-vindas ao Guia do Portal CRC</h3>
+              <p className="text-muted-foreground text-sm leading-relaxed">
                 Este guia apresenta todos os módulos do sistema e como utilizá-los de forma eficiente. 
                 {isGestor 
                   ? ' Como gestor, você tem acesso a módulos administrativos e de análise da equipe.'

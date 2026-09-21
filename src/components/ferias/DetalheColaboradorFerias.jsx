@@ -294,7 +294,7 @@ export default function DetalheColaboradorFerias({ colaborador, ciclos, onBack, 
                     {(ciclo.fragmentos || []).map((frag, idx) => (
                       <div key={frag.id || idx} className="flex items-center justify-between p-3 bg-success-soft border border-success/25 rounded-lg">
                         <div className="flex items-center gap-3 text-sm">
-                          <span className="w-6 h-6 rounded-full bg-success text-success flex items-center justify-center text-xs font-bold flex-shrink-0">{idx + 1}</span>
+                          <span className="w-6 h-6 rounded-full bg-success-soft text-success flex items-center justify-center text-xs font-bold flex-shrink-0">{idx + 1}</span>
                           <div>
                             <span className="font-medium">{fmtDate(frag.data_inicio)}</span>
                             <span className="text-muted-foreground mx-1">→</span>

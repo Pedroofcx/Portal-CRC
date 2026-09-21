@@ -65,7 +65,7 @@ export default function MoverTurnoDialog({ open, onClose, turno, diaIndex, escal
               <div className="flex items-center gap-1.5 mb-3">
                 <Sun className="w-4 h-4 text-warning" />
                 <span className="text-sm font-semibold text-warning">Manhã</span>
-                <span className="ml-auto text-xs bg-warning text-warning rounded-full w-5 h-5 flex items-center justify-center font-bold">
+                <span className="ml-auto text-xs bg-warning-soft text-warning rounded-full w-5 h-5 flex items-center justify-center font-bold">
                   {localManha.length}
                 </span>
               </div>
@@ -94,7 +94,7 @@ export default function MoverTurnoDialog({ open, onClose, turno, diaIndex, escal
               <div className="flex items-center gap-1.5 mb-3">
                 <Moon className="w-4 h-4 text-primary" />
                 <span className="text-sm font-semibold text-primary">Tarde</span>
-                <span className="ml-auto text-xs bg-primary text-primary rounded-full w-5 h-5 flex items-center justify-center font-bold">
+                <span className="ml-auto text-xs bg-primary/10 text-primary rounded-full w-5 h-5 flex items-center justify-center font-bold">
                   {localTarde.length}
                 </span>
               </div>

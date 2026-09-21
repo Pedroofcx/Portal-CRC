@@ -233,7 +233,7 @@ export default function Turnos() {
                         </p>
                       </div>
                       {turno.cancelado && (
-                        <div className="flex items-center gap-1 bg-destructive text-white text-xs font-bold px-2 py-1 rounded-md">
+                        <div className="flex items-center gap-1 bg-muted text-muted-foreground text-xs font-semibold px-2 py-1 rounded-md">
                           <BanIcon className="w-3 h-3" />
                           CANCELADO
                         </div>

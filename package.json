@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "lint": "eslint . --quiet",
+    "lint": "eslint . --quiet && node ferramentas/conferir-cores.mjs",
     "lint:fix": "eslint . --fix",
     "typecheck": "tsc -p ./jsconfig.json",
     "preview": "vite preview",
@@ -20,7 +20,8 @@
     "conferir-contas": "node ferramentas/conferir-contas.mjs",
     "criar-contas": "node ferramentas/criar-contas.mjs",
     "exigir-troca-de-senha": "node ferramentas/exigir-troca-de-senha.mjs",
-    "previa-operador": "node ferramentas/gerar-previa-operador.mjs"
+    "previa-operador": "node ferramentas/gerar-previa-operador.mjs",
+    "conferir-cores": "node ferramentas/conferir-cores.mjs"
   },
   "dependencies": {
     "@hello-pangea/dnd": "^17.0.0",

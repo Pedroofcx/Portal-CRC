@@ -2,7 +2,6 @@ import db from '@/api/db';
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 
-import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Sun, Moon, Clock, ArrowRight } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -61,43 +60,43 @@ export default function MeuTurnoCard({ colaboradorId }) {
 
   return (
     <>
-      <Card
-        className={`border-0 shadow-sm cursor-pointer hover:shadow-sm transition-all ${
-          meuTurnoHoje === 'manha'
-            ? 'bg-warning text-white'
-            : meuTurnoHoje === 'tarde'
-            ? 'bg-primary text-white'
-            : 'bg-muted'
-        }`}
+      {/* Card branco, cor só no ícone (regras-ui-ux.md, seção 9) — era um bloco
+          âmbar de manhã e azul à tarde, com texto branco. */}
+      <button
+        type="button"
         onClick={() => setAgendaOpen(true)}
+        className="flex w-full items-center gap-3 rounded-xl border border-border bg-card p-4 text-left transition-colors hover:bg-muted/50"
       >
-        <CardContent className="p-3 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-card/20 rounded-lg flex items-center justify-center flex-shrink-0">
-              {meuTurnoHoje === 'manha' ? (
-                <Sun className="w-4 h-4" />
-              ) : meuTurnoHoje === 'tarde' ? (
-                <Moon className="w-4 h-4" />
-              ) : (
-                <Clock className="w-4 h-4 text-muted-foreground" />
-              )}
-            </div>
-            <div>
-              <p className={`font-semibold text-sm ${!meuTurnoHoje ? 'text-foreground' : ''}`}>
-                Meu Turno Hoje
-              </p>
-              <p className={`text-xs ${meuTurnoHoje ? 'opacity-80' : 'text-muted-foreground'}`}>
-                {meuTurnoHoje === 'manha'
-                  ? 'Manhã'
-                  : meuTurnoHoje === 'tarde'
-                  ? 'Tarde'
-                  : diaHoje ? 'Dia não escalado' : 'Final de semana'}
-              </p>
-            </div>
-          </div>
-          <ArrowRight className={`w-4 h-4 ${meuTurnoHoje ? 'opacity-70' : 'text-muted-foreground'}`} />
-        </CardContent>
-      </Card>
+        <span
+          className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${
+            meuTurnoHoje === 'manha'
+              ? 'bg-warning-soft text-warning'
+              : meuTurnoHoje === 'tarde'
+                ? 'bg-info-soft text-primary'
+                : 'bg-muted text-muted-foreground'
+          }`}
+        >
+          {meuTurnoHoje === 'manha' ? (
+            <Sun className="h-4 w-4" aria-hidden="true" />
+          ) : meuTurnoHoje === 'tarde' ? (
+            <Moon className="h-4 w-4" aria-hidden="true" />
+          ) : (
+            <Clock className="h-4 w-4" aria-hidden="true" />
+          )}
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="block text-sm font-semibold text-foreground">Meu turno hoje</span>
+          <span className="block text-xs text-muted-foreground">
+            {meuTurnoHoje === 'manha'
+              ? 'Manhã'
+              : meuTurnoHoje === 'tarde'
+                ? 'Tarde'
+                : diaHoje ? 'Dia não escalado' : 'Final de semana'}
+            {' · ver a agenda da semana'}
+          </span>
+        </span>
+        <ArrowRight className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+      </button>
 
       <Dialog open={agendaOpen} onOpenChange={setAgendaOpen}>
         <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
@@ -117,7 +116,7 @@ export default function MeuTurnoCard({ colaboradorId }) {
                 >
                   <p className={`font-semibold text-sm mb-2 ${isMeuDia ? 'text-primary' : 'text-foreground'}`}>
                     {DIAS_PT[turno.dia]}
-                    {isMeuDia && <Badge className="ml-2 bg-primary text-white text-xs">Hoje</Badge>}
+                    {isMeuDia && <Badge className="ml-2 bg-primary/10 text-primary text-xs hover:bg-primary/10">Hoje</Badge>}
                   </p>
                   <div className="grid grid-cols-2 gap-2">
                     <div className="bg-warning-soft border border-warning/25 rounded-lg p-2">
@@ -126,7 +125,7 @@ export default function MeuTurnoCard({ colaboradorId }) {
                         <span className="text-xs font-semibold text-warning">Manhã</span>
                       </div>
                       {turno.manha?.length > 0 ? turno.manha.map(c => (
-                        <div key={c.colaborador_id} className={`text-xs py-0.5 px-1.5 rounded mb-0.5 ${c.colaborador_id === colaboradorId ? 'bg-warning font-semibold text-warning' : 'text-warning'}`}>
+                        <div key={c.colaborador_id} className={`text-xs py-0.5 px-1.5 rounded mb-0.5 ${c.colaborador_id === colaboradorId ? 'bg-card font-semibold text-foreground shadow-sm' : 'text-warning'}`}>
                           {c.colaborador_nome?.split(' ')[0]}
                         </div>
                       )) : <p className="text-xs text-warning italic">—</p>}
@@ -137,7 +136,7 @@ export default function MeuTurnoCard({ colaboradorId }) {
                         <span className="text-xs font-semibold text-primary">Tarde</span>
                       </div>
                       {turno.tarde?.length > 0 ? turno.tarde.map(c => (
-                        <div key={c.colaborador_id} className={`text-xs py-0.5 px-1.5 rounded mb-0.5 ${c.colaborador_id === colaboradorId ? 'bg-primary font-semibold text-primary' : 'text-primary'}`}>
+                        <div key={c.colaborador_id} className={`text-xs py-0.5 px-1.5 rounded mb-0.5 ${c.colaborador_id === colaboradorId ? 'bg-card font-semibold text-foreground shadow-sm' : 'text-primary'}`}>
                           {c.colaborador_nome?.split(' ')[0]}
                         </div>
                       )) : <p className="text-xs text-primary italic">—</p>}

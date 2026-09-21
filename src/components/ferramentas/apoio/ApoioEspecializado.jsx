@@ -94,7 +94,7 @@ export default function ApoioEspecializado() {
   return (
     <div className="space-y-6">
       <div className="flex items-start gap-3">
-        <div className="p-2.5 bg-primary rounded-xl text-white shadow-sm">
+        <div className="p-2.5 bg-primary/10 rounded-xl text-primary">
           <LifeBuoy className="w-6 h-6" />
         </div>
         <div>

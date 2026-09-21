@@ -761,9 +761,9 @@ export default function Apuracao() {
                   const ed = resultadosEditaveis[agente];
                   return (
                     <div key={agente} className="border rounded-lg overflow-hidden">
-                      <div className={`px-4 py-2 text-sm font-semibold text-white flex items-center justify-between ${r.validacao?.ok ? 'bg-muted' : 'bg-warning'}`}>
+                      <div className={`px-4 py-2 text-sm font-semibold flex items-center justify-between ${r.validacao?.ok ? 'bg-muted text-foreground' : 'bg-warning-soft text-warning'}`}>
                         <span>{agente}</span>
-                        {!r.validacao?.ok && <span className="text-xs bg-warning px-2 py-0.5 rounded">Verificar</span>}
+                        {!r.validacao?.ok && <span className="text-xs bg-card border border-warning/30 text-warning px-2 py-0.5 rounded">Verificar</span>}
                       </div>
                       <div className="p-3 bg-muted grid grid-cols-4 gap-2 text-xs text-center">
                         <div><p className="text-muted-foreground">Importados</p><p className="font-bold">{v?.registros_importados}</p></div>
@@ -895,7 +895,7 @@ export default function Apuracao() {
                   if (semanas.length === 0) return null;
                   return (
                     <div key={agente} className="border rounded-lg overflow-hidden">
-                      <div className="bg-muted text-white px-4 py-2 text-sm font-semibold">{agente} — Consolidação Semanal</div>
+                      <div className="bg-muted text-foreground px-4 py-2 text-sm font-semibold">{agente} — Consolidação Semanal</div>
                       <div className="overflow-x-auto">
                         <table className="w-full text-sm">
                           <thead className="bg-muted">
@@ -1003,7 +1003,7 @@ export default function Apuracao() {
                   if (semanas.length === 0) return null;
                   return (
                     <div key={agente} className="border rounded-lg overflow-hidden">
-                      <div className="bg-primary text-white px-4 py-2 text-sm font-semibold">{agente} — Consolidação Semanal (Chat)</div>
+                      <div className="bg-primary/10 text-primary px-4 py-2 text-sm font-semibold">{agente} — Consolidação Semanal (Chat)</div>
                       <table className="w-full text-sm">
                         <thead className="bg-muted">
                           <tr>

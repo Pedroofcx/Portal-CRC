@@ -168,7 +168,7 @@ export default function FerramentasOperacionais() {
     <div className="max-w-7xl mx-auto space-y-6">
       <div className="flex items-start justify-between gap-4">
         <div className="flex items-center gap-3">
-          <div className="p-2.5 bg-primary rounded-xl text-white shadow-sm">
+          <div className="p-2.5 bg-primary/10 rounded-xl text-primary">
             <Wrench className="w-6 h-6" />
           </div>
           <div>
