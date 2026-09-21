@@ -46,20 +46,6 @@ export const modulosComunicacao = [
     integracoes: ['Dados de contexto (tratativas, CSAT, pontuação) são digitados manualmente — não há leitura automática de Tratativa/Apuracao/Pontuacao no momento do envio.'],
   },
   {
-    id: 'universidade',
-    categoria: 'Comunicação',
-    nome: 'Universidade CRC',
-    paginas: ['src/pages/Universidade.jsx'],
-    entidades: ['Curso', 'CursoMatricula', 'Colaborador'],
-    objetivo: 'Catálogo de cursos internos com matrícula e progresso por colaborador.',
-    campos_chave: [
-      { campo: 'Curso.obrigatorio', descricao: 'Sinaliza cursos obrigatórios — usado como referência em ElegibilidadePremio (tipo cursos_obrigatorios).' },
-      { campo: 'CursoMatricula.status/progresso', descricao: 'inscrito → em_andamento → concluido; progresso é percentual manual/estimado, não há player de vídeo com tracking automático.' },
-    ],
-    regras_negocio: ['Conclusão de curso obrigatório pode ser pré-requisito de elegibilidade a prêmios (ver Elegibilidade de Prêmios).'],
-    integracoes: ['ElegibilidadePremio: tipo_validacao="cursos_obrigatorios" verifica CursoMatricula.status="concluido" para os cursos marcados obrigatorio=true.'],
-  },
-  {
     id: 'pop',
     categoria: 'Comunicação',
     nome: 'POP (Procedimentos Operacionais)',

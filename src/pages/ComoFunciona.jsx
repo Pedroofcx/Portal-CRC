@@ -16,10 +16,8 @@ import {
   TrendingUp,
   Eye,
   Search,
-  GraduationCap,
   FileText,
   Calendar,
-  Home,
   Palmtree,
   Bell,
   ClipboardCheck,
@@ -159,8 +157,7 @@ const modulosGestor = [
       'Defina tipos de tratativas customizados com SLAs específicos',
       'Configure etapas da jornada do cliente',
       'Gerencie skills, tipos de observação e elegibilidade para premiações',
-      'Controle permissões de módulos por perfil ou colaborador individualmente',
-      'Configure regras de home office: dias elegíveis, intervalos e Click Days'
+      'Controle permissões de módulos por perfil ou colaborador individualmente'
     ]
   }
 ];
@@ -204,17 +201,6 @@ const modulosAgente = [
     ]
   },
   {
-    icon: GraduationCap,
-    nome: 'Universidade CRC',
-    descricao: 'Plataforma de capacitação e desenvolvimento',
-    comoUsar: [
-      'Navegue pelo catálogo de cursos por categoria',
-      'Inscreva-se e acesse materiais de aprendizagem',
-      'Acompanhe seu progresso e cursos concluídos',
-      'Cursos obrigatórios aparecem destacados no seu perfil'
-    ]
-  },
-  {
     icon: FileText,
     nome: 'POP',
     descricao: 'Procedimentos Operacionais Padrão',
@@ -234,18 +220,6 @@ const modulosAgente = [
       'Confira quem está presencial, home office ou em treinamento',
       'Veja eventos especiais, reuniões obrigatórias e feriados',
       'Planeje-se com base na disponibilidade da equipe'
-    ]
-  },
-  {
-    icon: Home,
-    nome: 'Home Office Escolha',
-    descricao: 'Solicite e gerencie suas semanas de home office',
-    comoUsar: [
-      'Escolha até 2 semanas por mês para trabalho remoto',
-      'Respeite o intervalo mínimo de 5 dias úteis entre semanas escolhidas',
-      'Evite datas com Click Days e reuniões obrigatórias presenciais',
-      'Solicite com antecedência mínima de 7 dias corridos',
-      'Acompanhe o status da aprovação pelo gestor'
     ]
   },
   {
@@ -292,12 +266,6 @@ const modulosComuns = [
     resumo: 'Registro e gestão de reclamações, Reclame Aqui, Google e Contestações de Compra'
   },
   {
-    icon: GraduationCap,
-    nome: 'Universidade CRC',
-    categoria: 'Desenvolvimento',
-    resumo: 'Plataforma de cursos, capacitações e trilhas de aprendizagem da equipe'
-  },
-  {
     icon: FileText,
     nome: 'POP',
     categoria: 'Documentação',
@@ -308,12 +276,6 @@ const modulosComuns = [
     nome: 'Escalas',
     categoria: 'Logística',
     resumo: 'Calendário de escalas, turnos, home office e eventos especiais da equipe'
-  },
-  {
-    icon: Home,
-    nome: 'Home Office Escolha',
-    categoria: 'Gestão Pessoal',
-    resumo: 'Solicitação de semanas remotas com validação automática de regras e aprovação'
   },
   {
     icon: Palmtree,

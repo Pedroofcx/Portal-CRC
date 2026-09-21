@@ -99,24 +99,6 @@ export const modulosGestaoPessoas = [
     integracoes: ['Colaborador.data_admissao é a base do cálculo dos períodos aquisitivos.', 'EscalaAtribuicao pode registrar o período de férias aprovado como evento tipo "ferias" no calendário de equipe.'],
   },
   {
-    id: 'home-office',
-    categoria: 'Gestão de Pessoas',
-    nome: 'Home Office Escolha',
-    paginas: ['src/pages/HomeOfficeEscolha.jsx', 'src/components/escalas/SolicitarHomeOfficeDialog.jsx'],
-    entidades: ['SolicitacaoHomeOffice', 'ConfiguracaoHomeOffice'],
-    objetivo: 'Permitir que o colaborador escolha semanas de home office dentro de regras configuráveis pelo gestor, com validação automática de várias regras de negócio.',
-    campos_chave: [
-      { campo: 'ConfiguracaoHomeOffice (por mes_referencia)', descricao: 'Define: dias_elegiveis_home_office, prazo_minimo_dias, maximo_semanas_mes (padrão 2), intervalo_minimo_dias_uteis (padrão 5), minimo_colaboradores_presenciais, click_days[] e reunioes_obrigatorias[].' },
-      { campo: 'SolicitacaoHomeOffice.validacoes{}', descricao: 'Objeto com 8 flags booleanas (uma por regra) preenchido automaticamente ao validar a solicitação — permite auditar exatamente qual regra passou/falhou.' },
-      { campo: 'liberacao_coletiva', descricao: 'Quando true na configuração do mês, suspende temporariamente todas as regras (ex: situações excepcionais).' },
-    ],
-    regras_negocio: [
-      'Regras padrão: máx. 2 semanas de HO por mês, semanas não-consecutivas, intervalo mínimo de 5 dias úteis entre elas, respeitar Click Days e reuniões obrigatórias, e garantir mínimo de colaboradores presenciais no dia.',
-      'fora_do_prazo=true quando solicitado com menos de prazo_minimo_dias de antecedência — não bloqueia, mas gera alerta ao gestor.',
-    ],
-    integracoes: ['Não depende de SaldoFerias nem de EscalaAtribuicao — é um módulo próprio; a checagem de "mínimo de colaboradores presenciais" é feita cruzando outras solicitações aprovadas do mesmo mês.'],
-  },
-  {
     id: 'escalas-turnos',
     categoria: 'Gestão de Pessoas',
     nome: 'Escalas / Turnos (WFM)',

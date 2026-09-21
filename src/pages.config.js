@@ -67,7 +67,6 @@ import Dashboard from './pages/Dashboard';
 import Escalas from './pages/Escalas';
 import GestaoFerias from './pages/GestaoFerias';
 import Hansei from './pages/Hansei';
-import HomeOfficeEscolha from './pages/HomeOfficeEscolha';
 import JornadaCliente from './pages/JornadaCliente';
 import MinhaPerformance from './pages/MinhaPerformance';
 import Observacoes from './pages/Observacoes';
@@ -82,7 +81,6 @@ import RelatoriosTratativas from './pages/RelatoriosTratativas';
 import TratativaDetalhe from './pages/TratativaDetalhe';
 import Tratativas from './pages/Tratativas';
 import Turnos from './pages/Turnos';
-import Universidade from './pages/Universidade';
 import UploadFoto from './pages/UploadFoto';
 import FerramentasOperacionais from './pages/FerramentasOperacionais';
 import __Layout from './Layout.jsx';
@@ -108,7 +106,6 @@ export const PAGES = {
     "Escalas": Escalas,
     "GestaoFerias": GestaoFerias,
     "Hansei": Hansei,
-    "HomeOfficeEscolha": HomeOfficeEscolha,
     "JornadaCliente": JornadaCliente,
     "MinhaPerformance": MinhaPerformance,
     "Observacoes": Observacoes,
@@ -123,7 +120,6 @@ export const PAGES = {
     "TratativaDetalhe": TratativaDetalhe,
     "Tratativas": Tratativas,
     "Turnos": Turnos,
-    "Universidade": Universidade,
     "UploadFoto": UploadFoto,
     "FerramentasOperacionais": FerramentasOperacionais,
 }

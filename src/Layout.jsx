@@ -22,7 +22,6 @@ import {
   Settings,
   Menu,
   Search,
-  GraduationCap,
   Star,
   TrendingUp,
   ClipboardCheck,
@@ -70,11 +69,9 @@ const menuItems = [
   { 
     section: 'Recursos',
     items: [
-      { name: 'Universidade CRC', page: 'Universidade', icon: GraduationCap },
       { name: 'POP', page: 'POP', icon: FileText },
       { name: 'Escalas', page: 'Escalas', icon: Calendar },
       { name: 'Turnos', page: 'Turnos', icon: Clock },
-      { name: 'Home Office Escolha', page: 'HomeOfficeEscolha', icon: Home },
       { name: 'Gestão de Férias', page: 'GestaoFerias', icon: Palmtree, gestorOnly: true },
     ]
   },
