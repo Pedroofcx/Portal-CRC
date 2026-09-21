@@ -10,11 +10,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
 import { MessageSquare, Plus, Search } from 'lucide-react';
 import RichTextEditor from '@/components/ui/RichTextEditor';
+import PainelLateral, { RodapeFixo } from '@/components/ui/PainelLateral';
 
 const TIPOS_OBS = [
   { value: 'observacao_diaria', label: 'Observação Diária' },
@@ -143,11 +143,11 @@ export default function Observacoes() {
           colaboradorAtual={colaboradorAtual}
           onDelete={(id) => deleteMutation.mutate(id)}
         />
-        <Dialog open={dialogNovaObs} onOpenChange={setDialogNovaObs}>
-          <DialogContent className="max-w-2xl w-[95vw] max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>Nova Observação — {colaboradorSelecionado.nome_completo}</DialogTitle>
-            </DialogHeader>
+        <PainelLateral
+          open={dialogNovaObs} onOpenChange={setDialogNovaObs}
+          largura="xl"
+          titulo={<>Nova Observação — {colaboradorSelecionado.nome_completo}</>}
+        >
             <div className="space-y-4 mt-2">
               <div>
                 <Label>Tipo *</Label>
@@ -182,16 +182,15 @@ export default function Observacoes() {
                   <p className="text-xs text-muted-foreground">{form.visibilidade === 'ambos' ? 'O agente poderá visualizar este registro' : 'Apenas gestores verão este registro'}</p>
                 </div>
               </div>
-              <div className="flex justify-end gap-3 pt-2">
+              <RodapeFixo>
                 <Button variant="outline" onClick={() => setDialogNovaObs(false)}>Cancelar</Button>
                 <Button onClick={handleCriar} disabled={criarMutation.isPending} className="bg-primary hover:bg-primary/90">
                   <Plus className="w-4 h-4 mr-2" />
                   {criarMutation.isPending ? 'Salvando...' : 'Salvar Observação'}
                 </Button>
-              </div>
+              </RodapeFixo>
             </div>
-          </DialogContent>
-        </Dialog>
+        </PainelLateral>
       </>
     );
   }

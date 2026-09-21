@@ -16,12 +16,8 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+
+
 import {
   Star,
   Plus,
@@ -36,6 +32,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import AgendamentoPesquisa from '@/components/pesquisas/AgendamentoPesquisa';
 import { ResultadosVisuaisCSAT, ResultadosVisuaisNPS } from '@/components/pesquisas/ResultadosVisuais';
+import PainelLateral, { RodapeFixo } from '@/components/ui/PainelLateral';
 
 export default function Pesquisas() {
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -505,11 +502,11 @@ export default function Pesquisas() {
       />
 
       {/* Dialog de Criação */}
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Nova Pesquisa</DialogTitle>
-          </DialogHeader>
+      <PainelLateral
+        open={dialogOpen} onOpenChange={setDialogOpen}
+        largura="xl"
+        titulo="Nova Pesquisa"
+      >
           <form onSubmit={handleSubmit} className="space-y-4 mt-4">
             <div>
               <Label>Título *</Label>
@@ -702,24 +699,23 @@ export default function Pesquisas() {
               </p>
             </div>
 
-            <div className="flex justify-end gap-3 pt-4">
+            <RodapeFixo>
               <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
                 Cancelar
               </Button>
               <Button type="submit" className="bg-primary hover:bg-primary/90" disabled={createMutation.isPending}>
                 {createMutation.isPending ? 'Criando...' : 'Criar Pesquisa'}
               </Button>
-            </div>
+            </RodapeFixo>
           </form>
-        </DialogContent>
-      </Dialog>
+        </PainelLateral>
 
       {/* Dialog de Resposta */}
-      <Dialog open={responderDialogOpen} onOpenChange={setResponderDialogOpen}>
-        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>{selectedPesquisa?.titulo}</DialogTitle>
-          </DialogHeader>
+      <PainelLateral
+        open={responderDialogOpen} onOpenChange={setResponderDialogOpen}
+        largura="lg"
+        titulo={selectedPesquisa?.titulo}
+      >
           {selectedPesquisa && (
             <div className="space-y-4 mt-4">
               {selectedPesquisa.descricao && (
@@ -847,20 +843,14 @@ export default function Pesquisas() {
               </div>
             </div>
           )}
-        </DialogContent>
-      </Dialog>
+        </PainelLateral>
 
       {/* Dialog de Visualização com Resultados Visuais */}
-      <Dialog open={viewDialogOpen} onOpenChange={setViewDialogOpen}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              {selectedPesquisa?.tipo === 'csat' && 'CSAT - '}
-              {selectedPesquisa?.tipo === 'nps' && 'NPS - '}
-              {selectedPesquisa?.tipo === 'clima_organizacional' && 'Clima - '}
-              {selectedPesquisa?.titulo}
-            </DialogTitle>
-          </DialogHeader>
+      <PainelLateral
+        open={viewDialogOpen} onOpenChange={setViewDialogOpen}
+        largura="4xl"
+        titulo={<>{selectedPesquisa?.tipo === 'csat' && 'CSAT - '} {selectedPesquisa?.tipo === 'nps' && 'NPS - '} {selectedPesquisa?.tipo === 'clima_organizacional' && 'Clima - '} {selectedPesquisa?.titulo}</>}
+      >
           {selectedPesquisa && (
             <Tabs defaultValue="resultados" className="mt-4">
               <TabsList className="grid w-full grid-cols-3">
@@ -978,8 +968,7 @@ export default function Pesquisas() {
               </TabsContent>
             </Tabs>
           )}
-        </DialogContent>
-      </Dialog>
+        </PainelLateral>
 
       <ConfirmDialog
         open={deleteDialogOpen}
@@ -1002,11 +991,11 @@ export default function Pesquisas() {
       />
 
       {/* Dialog de Edição */}
-      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Editar Pesquisa</DialogTitle>
-          </DialogHeader>
+      <PainelLateral
+        open={editDialogOpen} onOpenChange={setEditDialogOpen}
+        largura="xl"
+        titulo="Editar Pesquisa"
+      >
           {editingPesquisa && (
             <form onSubmit={handleSaveEdit} className="space-y-4 mt-4">
               <div>
@@ -1115,16 +1104,15 @@ export default function Pesquisas() {
                 ))}
               </div>
 
-              <div className="flex justify-end gap-3 pt-4">
+              <RodapeFixo>
                 <Button type="button" variant="outline" onClick={() => setEditDialogOpen(false)}>Cancelar</Button>
                 <Button type="submit" className="bg-primary hover:bg-primary/90" disabled={updateMutation.isPending}>
                   {updateMutation.isPending ? 'Salvando...' : 'Salvar Alterações'}
                 </Button>
-              </div>
+              </RodapeFixo>
             </form>
           )}
-        </DialogContent>
-      </Dialog>
+        </PainelLateral>
     </div>
   );
 }

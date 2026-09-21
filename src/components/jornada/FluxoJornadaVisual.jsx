@@ -12,8 +12,8 @@ import {
   Zap,
   Target
 } from 'lucide-react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Progress } from '@/components/ui/progress';
+import PainelLateral from '@/components/ui/PainelLateral';
 
 export default function FluxoJornadaVisual({ etapas = [], tratativas = [], _motivos = [] }) {
   const [etapaSelecionada, setEtapaSelecionada] = useState(null);
@@ -288,18 +288,11 @@ export default function FluxoJornadaVisual({ etapas = [], tratativas = [], _moti
       </div>
 
       {/* Modal de Detalhes da Etapa */}
-      <Dialog open={mostrarDetalhes} onOpenChange={setMostrarDetalhes}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-3">
-              <div 
-                className="w-6 h-6 rounded-full" 
-                style={{ backgroundColor: etapaSelecionada?.etapa?.cor || 'hsl(var(--chart-1))' }}
-              />
-              {etapaSelecionada?.etapa?.nome}
-            </DialogTitle>
-          </DialogHeader>
-
+      <PainelLateral
+        open={mostrarDetalhes} onOpenChange={setMostrarDetalhes}
+        largura="xl"
+        titulo={<><div className="w-6 h-6 rounded-full" style={{ backgroundColor: etapaSelecionada?.etapa?.cor || 'hsl(var(--chart-1))' }} /> {etapaSelecionada?.etapa?.nome}</>}
+      >
           {etapaSelecionada && (
             <div className="space-y-6 mt-4">
               {/* Overview */}
@@ -452,8 +445,7 @@ export default function FluxoJornadaVisual({ etapas = [], tratativas = [], _moti
               </Card>
             </div>
           )}
-        </DialogContent>
-      </Dialog>
+        </PainelLateral>
     </div>
   );
 }

@@ -55,7 +55,9 @@ export default function PageHeader({
         </div>
 
         {actions && (
-          <div className="flex shrink-0 flex-wrap items-center gap-2">{actions}</div>
+          // Sem shrink-0: com muitos botões (Jornada do Cliente), o bloco não
+          // encolhia e empurrava a página 145px para o lado. Agora quebra linha.
+          <div className="flex min-w-0 flex-wrap items-center gap-2 sm:justify-end">{actions}</div>
         )}
       </div>
     </header>

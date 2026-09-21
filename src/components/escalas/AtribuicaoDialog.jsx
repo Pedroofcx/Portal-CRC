@@ -1,11 +1,11 @@
 import React, { useState, useCallback, useMemo } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { X } from 'lucide-react';
 import { configDoStatus, classesSolidasDoStatus } from '@/components/ui/StatusBadge';
+import PainelLateral, { RodapeFixo } from '@/components/ui/PainelLateral';
 
 /**
  * Os rótulos e cores vêm do StatusBadge, que é a fonte única do sistema.
@@ -104,11 +104,11 @@ export default function AtribuicaoDialog({
   };
 
   return (
-    <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>Atribuir Escala</DialogTitle>
-        </DialogHeader>
+    <PainelLateral
+      open={open} onOpenChange={handleClose}
+      largura="xl"
+      titulo="Atribuir Escala"
+    >
         <div className="space-y-4 mt-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
@@ -180,7 +180,7 @@ export default function AtribuicaoDialog({
             </div>
           </div>
 
-          <div className="flex justify-end gap-3 pt-4">
+          <RodapeFixo>
             <Button variant="outline" onClick={handleClose}>
               Cancelar
             </Button>
@@ -191,9 +191,8 @@ export default function AtribuicaoDialog({
             >
               Atribuir
             </Button>
-          </div>
+          </RodapeFixo>
         </div>
-      </DialogContent>
-    </Dialog>
+    </PainelLateral>
   );
 }

@@ -227,8 +227,39 @@ pontos da tratativa encerrada.
 mostra os primeiros itens (de 3 a 5, os mais relevantes) e um link com o total
 — "Ver todos os 7 avisos". Nenhum card tem barra de rolagem por dentro.
 
-Propostos, aguardando decisão:
-* **Tabelas largas**: só as colunas que decidem, e o resto no painel de
-  detalhe ao lado, em vez de rolagem horizontal.
-* **Janelas altas**: painel lateral de altura cheia, ou passos curtos.
-* **Rolagem da página**: barra fina e discreta.
+**Exceção única — a lista de Tratativas no modo dividido.** Lista à esquerda
+e tratativa aberta à direita (seção 2, *master-detail*): a lista rola por
+conta própria para a tratativa aberta não sair da tela. É a única rolagem
+interna permitida, e é de coluna, não de card.
+
+### Tabelas largas: nada rola para o lado (decidido em 21/09/2026)
+
+Só as colunas que decidem ficam na linha; o resto aparece ao **abrir a
+linha** (componente `TabelaResumida`), em pares rótulo/valor logo abaixo.
+Rolagem horizontal esconde metade da tabela de quem não sabe que precisa
+arrastar. Aplicado nos Relatórios de Apuração (ligações, chat e consolidado
+semanal, de 12 e 15 colunas).
+
+Medição em 1280×720 e 1366×768, nas 38 telas e 77 abas, com os dados reais
+(`npm run previa-sistema`, `window.__auditar()` em previas/sistema.html):
+nenhuma tabela rola para o lado, nenhuma página fica mais larga que a janela.
+Duas causas corrigidas na raiz: o bloco de ações do `PageHeader` não
+encolhia (empurrava a Jornada do Cliente 145px) e campos de data sem
+`min-w-0` lado a lado.
+
+### Janelas altas: painel lateral de altura cheia (decidido em 21/09/2026)
+
+Formulário longo ou visualização extensa abre no **painel lateral**
+(`PainelLateral`), à direita, na altura inteira: o título fica fixo em cima,
+os botões fixos embaixo (`rodape` do painel, ou `RodapeFixo` quando os
+botões moram dentro de um formulário), e só os campos rolam. A lista de onde
+a pessoa veio continua à vista, esmaecida. 33 janelas convertidas.
+
+Continua sendo janela no meio da tela o que é curto: confirmações e
+formulários de até uns 5 campos que cabem sem rolar. "Passos curtos" fica
+para os fluxos que já são passo a passo (a Apuração).
+
+### Rolagem da página: barra fina e discreta (decidido em 21/09/2026)
+
+`scrollbar-width: thin`, cinza translúcido sobre trilho transparente, no
+sistema inteiro (src/index.css).

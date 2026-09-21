@@ -4,11 +4,11 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Send, Eye, Zap, AlertTriangle, CheckCircle, Info } from 'lucide-react';
 import { getQuickPeriod, calcularDadosConsolidados, gerarInsights } from './hanseiUtils';
 import { formatDateSP } from '@/components/utils/helpers';
+import PainelLateral from '@/components/ui/PainelLateral';
 
 const TIPOS_LABEL = {
   reclamacao_interna: 'Rec. Interna', reclame_aqui: 'Reclame Aqui',
@@ -143,15 +143,11 @@ export default function HanseiEnvioDialog({ open, onClose, colaboradores, tratat
   const colSelecionado = colaboradores.find(c => c.id === formData.colaborador_id);
 
   return (
-    <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Send className="w-5 h-5 text-primary" />
-            Enviar Resultados Hansei
-          </DialogTitle>
-        </DialogHeader>
-
+    <PainelLateral
+      open={open} onOpenChange={onClose}
+      largura="2xl"
+      titulo={<><Send className="w-5 h-5 text-primary" /> Enviar Resultados Hansei</>}
+    >
         <div className="grid md:grid-cols-2 gap-6 mt-4">
           {/* Formulário */}
           <div className="space-y-4">
@@ -247,7 +243,6 @@ export default function HanseiEnvioDialog({ open, onClose, colaboradores, tratat
             )}
           </div>
         </div>
-      </DialogContent>
-    </Dialog>
+      </PainelLateral>
   );
 }

@@ -44,6 +44,11 @@ export default [
        * NavigationTracker e `Columns2 is not defined` em Tratativas.
        */
       "no-undef": "error",
+      // Pelo mesmo motivo, a regra que acusa COMPONENTE usado sem importar
+      // também se perdia: <RodapeFixo> sem import passava no lint e só
+      // quebrava ao abrir a janela (aconteceu em 5 telas na conversão para
+      // painel lateral, pegas antes de publicar).
+      "react/jsx-no-undef": "error",
       "no-unused-vars": "off",
       "react/jsx-uses-vars": "error",
       "react/jsx-uses-react": "error",

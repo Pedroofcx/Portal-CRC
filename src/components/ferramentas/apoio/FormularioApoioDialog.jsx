@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -7,6 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { AlertCircle } from 'lucide-react';
 import { TIPOS_APOIO, formatMinutos, getMesReferencia } from './constants';
+import PainelLateral from '@/components/ui/PainelLateral';
 
 const FORM_VAZIO = {
   tipo_apoio: '', tipo_apoio_outro: '', tipo_zendesk: '',
@@ -59,11 +59,15 @@ export default function FormularioApoioDialog({ open, onOpenChange, onSubmit, di
     (form.tipo_apoio !== 'outro' || form.tipo_apoio_outro) && !saldoInsuficiente;
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>Nova Solicitação de Apoio Especializado</DialogTitle>
-        </DialogHeader>
+    <PainelLateral
+      open={open} onOpenChange={onOpenChange}
+      largura="xl"
+      titulo="Nova Solicitação de Apoio Especializado"
+      rodape={<><Button variant="outline" onClick={() => onOpenChange(false)}>Cancelar</Button>
+          <Button onClick={handleSubmit} disabled={!canSubmit || isSubmitting} className="bg-primary hover:bg-primary">
+            {isSubmitting ? 'Registrando...' : 'Criar Solicitação'}
+          </Button></>}
+    >
         <div className="space-y-4">
           <div className="space-y-1.5">
             <Label className="text-xs">Tipo de Apoio <span className="text-destructive">*</span></Label>
@@ -150,13 +154,6 @@ export default function FormularioApoioDialog({ open, onOpenChange, onSubmit, di
             )}
           </div>
         </div>
-        <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>Cancelar</Button>
-          <Button onClick={handleSubmit} disabled={!canSubmit || isSubmitting} className="bg-primary hover:bg-primary">
-            {isSubmitting ? 'Registrando...' : 'Criar Solicitação'}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+    </PainelLateral>
   );
 }

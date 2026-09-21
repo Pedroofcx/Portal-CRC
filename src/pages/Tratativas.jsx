@@ -22,12 +22,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { toast } from 'sonner';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+
+
 import {
   ClipboardList,
   Plus,
@@ -42,6 +38,7 @@ import {
 import ImportExportCSV from '@/components/tratativas/ImportExportCSV';
 import AdminBulkActions from '@/components/tratativas/AdminBulkActions';
 import DadosComerciaisForm from '@/components/tratativas/DadosComerciaisForm';
+import PainelLateral from '@/components/ui/PainelLateral';
 
 export default function Tratativas() {
   // ?nova=1 abre o formulário direto: é para onde leva o "Registrar tratativa"
@@ -774,22 +771,42 @@ export default function Tratativas() {
       )}
 
       {/* Dialog de Nova Tratativa */}
-      <Dialog open={dialogOpen} onOpenChange={(open) => {
-        if (!open && Object.values(formData).some(v => v && (Array.isArray(v) ? v.length > 0 : v !== ''))) {
-          if (!confirm('Você tem alterações não salvas. Deseja realmente sair?')) {
-            return;
+      <PainelLateral
+        open={dialogOpen}
+        onOpenChange={(open) => {
+          if (!open && Object.values(formData).some(v => v && (Array.isArray(v) ? v.length > 0 : v !== ''))) {
+            if (!confirm('Você tem alterações não salvas. Deseja realmente sair?')) {
+              return;
+            }
           }
-        }
-        setDialogOpen(open);
-      }}>
-        <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col" aria-describedby="nova-tratativa-description">
-          <DialogHeader>
-            <DialogTitle>Nova Tratativa</DialogTitle>
-            <p id="nova-tratativa-description" className="text-sm text-muted-foreground">
-              Preencha os campos abaixo para registrar uma nova tratativa
-            </p>
-          </DialogHeader>
-          <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto px-1">
+          setDialogOpen(open);
+        }}
+        largura="xl"
+        titulo="Nova Tratativa"
+        descricao="Preencha os campos abaixo para registrar uma nova tratativa"
+        rodape={(
+          <>
+            <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
+              Cancelar
+            </Button>
+            <Button
+              onClick={handleSubmit}
+              className="bg-primary hover:bg-primary/90"
+              disabled={createMutation.isPending}
+            >
+              {createMutation.isPending ? (
+                <>
+                  <div className="w-4 h-4 mr-2 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  Registrando...
+                </>
+              ) : (
+                'Registrar'
+              )}
+            </Button>
+          </>
+        )}
+      >
+          <form onSubmit={handleSubmit}>
             <div className="space-y-4 pb-4">
             <CampoFormulario
               id="link_zendesk"
@@ -1114,27 +1131,7 @@ export default function Tratativas() {
                   })()}
             </div>
           </form>
-          <div className="flex justify-end gap-3 pt-4 border-t">
-            <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
-              Cancelar
-            </Button>
-            <Button 
-              onClick={handleSubmit}
-              className="bg-primary hover:bg-primary/90"
-              disabled={createMutation.isPending}
-            >
-              {createMutation.isPending ? (
-                <>
-                  <div className="w-4 h-4 mr-2 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  Registrando...
-                </>
-              ) : (
-                'Registrar'
-              )}
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+        </PainelLateral>
     </div>
   );
 }

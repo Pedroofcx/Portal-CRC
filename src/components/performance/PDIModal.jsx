@@ -3,12 +3,12 @@ import React, { useCallback } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { formatDateSP } from '@/components/utils/helpers';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Clock } from 'lucide-react';
 import { toast } from 'sonner';
+import PainelLateral from '@/components/ui/PainelLateral';
 
 const EtapaItem = React.memo(({ etapa, index, isChecked, onToggle }) => {
   return (
@@ -95,11 +95,11 @@ export default function PDIModal({ pdi, open, onClose }) {
   if (!open || !pdi) return null;
 
   return (
-    <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>{pdi.titulo}</DialogTitle>
-        </DialogHeader>
+    <PainelLateral
+      open={open} onOpenChange={onClose}
+      largura="xl"
+      titulo={pdi.titulo}
+    >
         <div className="space-y-4 mt-4">
           <div>
             <p className="text-sm text-muted-foreground">Objetivo</p>
@@ -131,7 +131,6 @@ export default function PDIModal({ pdi, open, onClose }) {
             </div>
           </div>
         </div>
-      </DialogContent>
-    </Dialog>
+      </PainelLateral>
   );
 }

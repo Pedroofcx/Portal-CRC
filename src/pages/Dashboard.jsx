@@ -50,6 +50,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { usePontuacaoAgente } from '@/hooks/usePontuacaoAgente';
+import PainelLateral, { RodapeFixo } from '@/components/ui/PainelLateral';
 
 export default function Dashboard() {
   const [avisoPopupOpen, setAvisoPopupOpen] = React.useState(false);
@@ -708,14 +709,11 @@ export default function Dashboard() {
 
 
           {/* Modal: Minhas Férias - Validação */}
-      <Dialog open={validarFeriasOpen} onOpenChange={setValidarFeriasOpen}>
-        <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Palmtree className="w-5 h-5 text-success" />
-              Meus Períodos de Férias
-            </DialogTitle>
-          </DialogHeader>
+      <PainelLateral
+        open={validarFeriasOpen} onOpenChange={setValidarFeriasOpen}
+        largura="xl"
+        titulo={<><Palmtree className="w-5 h-5 text-success" /> Meus Períodos de Férias</>}
+      >
           <div className="space-y-4 mt-2">
             {ciclosFerias.filter(c => c.colaborador_id === colaborador?.id).length === 0 ? (
               <p className="text-muted-foreground text-sm text-center py-6">Nenhum ciclo de férias cadastrado.</p>
@@ -751,16 +749,15 @@ export default function Dashboard() {
                   );
                 })
             )}
-            <div className="pt-2">
+            <RodapeFixo>
               <Link to={createPageUrl('GestaoFerias')}>
                 <Button variant="outline" className="w-full">
                   <ArrowRight className="w-4 h-4 mr-2" /> Ver Gestão de Férias completa
                 </Button>
               </Link>
-            </div>
+            </RodapeFixo>
           </div>
-        </DialogContent>
-      </Dialog>
+      </PainelLateral>
 
       {/* Popup de Avisos Obrigatórios - SEM botão X */}
       {avisoPopupOpen && avisoAtual && (

@@ -1,23 +1,20 @@
 import React from 'react';
 import { formatDateSP } from '@/components/utils/helpers';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { MessageSquare, Sparkles } from 'lucide-react';
 import RichTextViewer from '@/components/ui/RichTextViewer';
+import PainelLateral from '@/components/ui/PainelLateral';
 
 export default function FeedbackModal({ feedback, open, onClose }) {
   if (!feedback) return null;
 
   return (
-    <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <MessageSquare className="w-5 h-5 text-primary" />
-            {feedback.titulo || feedback.tipo}
-          </DialogTitle>
-        </DialogHeader>
+    <PainelLateral
+      open={open} onOpenChange={(isOpen) => !isOpen && onClose()}
+      largura="xl"
+      titulo={<><MessageSquare className="w-5 h-5 text-primary" /> {feedback.titulo || feedback.tipo}</>}
+    >
         <div className="space-y-4 mt-4">
           <div>
             <p className="text-sm text-muted-foreground">De: {feedback.autor_nome || 'Desconhecido'}</p>
@@ -148,7 +145,6 @@ export default function FeedbackModal({ feedback, open, onClose }) {
             </Card>
           )}
         </div>
-      </DialogContent>
-    </Dialog>
+      </PainelLateral>
   );
 }

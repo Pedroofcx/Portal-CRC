@@ -14,12 +14,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+
+
 import {
   Calendar as CalendarIcon,
   Plus,
@@ -33,6 +29,7 @@ import EquipeCard from '@/components/escalas/EquipeCard';
 import EquipeDetalhes from '@/components/escalas/EquipeDetalhes';
 import AtribuicaoDialog from '@/components/escalas/AtribuicaoDialog';
 import FerramentasLancamentoColetivo from '@/components/escalas/FerramentasLancamentoColetivo';
+import PainelLateral, { RodapeFixo } from '@/components/ui/PainelLateral';
 
 const periodosSobrepoem = (atrib, dataInicio, dataFim) => {
   const inicio = new Date(atrib.data_inicio).toISOString().split('T')[0];
@@ -477,11 +474,11 @@ export default function Escalas() {
       )}
 
       {/* Dialog de Criação */}
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Nova Chave de Escala</DialogTitle>
-          </DialogHeader>
+      <PainelLateral
+        open={dialogOpen} onOpenChange={setDialogOpen}
+        largura="xl"
+        titulo="Nova Chave de Escala"
+      >
           <form onSubmit={handleSubmit} className="space-y-4 mt-4">
             <div>
               <Label>Nome da Chave *</Label>
@@ -565,7 +562,7 @@ export default function Escalas() {
               ))}
             </div>
 
-            <div className="flex justify-end gap-3 pt-4">
+            <RodapeFixo>
               <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
                 Cancelar
               </Button>
@@ -579,10 +576,9 @@ export default function Escalas() {
                   'Criar Escala'
                 )}
               </Button>
-            </div>
+            </RodapeFixo>
           </form>
-        </DialogContent>
-      </Dialog>
+        </PainelLateral>
 
       {/* Dialog de Atribuição Simplificado */}
       <AtribuicaoDialog

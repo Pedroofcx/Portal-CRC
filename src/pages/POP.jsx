@@ -13,13 +13,10 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { toast } from 'sonner';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+
+
 import { FileText, Plus, Eye, Trash2, Search } from 'lucide-react';
+import PainelLateral from '@/components/ui/PainelLateral';
 
 export default function POP() {
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -188,11 +185,11 @@ export default function POP() {
       )}
 
       {/* Dialog — Criação */}
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-3xl w-[95vw] max-h-[92vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="text-base font-semibold">Novo Procedimento Operacional Padrão</DialogTitle>
-          </DialogHeader>
+      <PainelLateral
+        open={dialogOpen} onOpenChange={setDialogOpen}
+        largura="2xl"
+        titulo="Novo Procedimento Operacional Padrão"
+      >
           <div className="mt-2">
             <POPForm
               onSubmit={(data) => createMutation.mutate(data)}
@@ -200,18 +197,16 @@ export default function POP() {
               isLoading={createMutation.isPending}
             />
           </div>
-        </DialogContent>
-      </Dialog>
+        </PainelLateral>
 
       {/* Dialog — Visualização */}
-      <Dialog open={viewDialogOpen} onOpenChange={setViewDialogOpen}>
-        <DialogContent className="max-w-3xl w-[95vw] max-h-[92vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="sr-only">Visualizar POP</DialogTitle>
-          </DialogHeader>
+      <PainelLateral
+        open={viewDialogOpen} onOpenChange={setViewDialogOpen}
+        largura="2xl"
+        titulo="Visualizar POP"
+      >
           <POPViewer pop={selectedPOP} />
-        </DialogContent>
-      </Dialog>
+        </PainelLateral>
 
       {/* Confirm Delete */}
       <ConfirmDialog

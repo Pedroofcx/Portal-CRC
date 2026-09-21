@@ -10,12 +10,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from 'sonner';
 import { Plus, Trash2, Award, CalendarDays, Info, AlertTriangle, CheckCircle2 } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import ConfigCiclosTrimestral from '@/components/elegibilidade/ConfigCiclosTrimestral';
+import PainelLateral, { RodapeFixo } from '@/components/ui/PainelLateral';
 
 function fmtDate(d) {
   try { return format(parseISO(d), 'dd/MM/yyyy'); } catch { return d || '—'; }
@@ -246,11 +246,11 @@ export default function ConfigElegibilidade() {
       {activeSection === 'ciclos' && <ConfigCiclosTrimestral />}
 
       {/* Dialog nova exigência */}
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-lg">
-          <DialogHeader>
-            <DialogTitle>Nova Exigência</DialogTitle>
-          </DialogHeader>
+      <PainelLateral
+        open={dialogOpen} onOpenChange={setDialogOpen}
+        largura="lg"
+        titulo="Nova Exigência"
+      >
           <div className="space-y-4 mt-2">
             <div>
               <Label>Nome da Exigência *</Label>
@@ -351,7 +351,7 @@ export default function ConfigElegibilidade() {
               />
               <Label>Obrigatória para participação</Label>
             </div>
-            <div className="flex justify-end gap-3 pt-2">
+            <RodapeFixo>
               <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancelar</Button>
               <Button
                 onClick={() => createMutation.mutate(formData)}
@@ -359,10 +359,9 @@ export default function ConfigElegibilidade() {
               >
                 Criar
               </Button>
-            </div>
+            </RodapeFixo>
           </div>
-        </DialogContent>
-      </Dialog>
+      </PainelLateral>
     </div>
   );
 }

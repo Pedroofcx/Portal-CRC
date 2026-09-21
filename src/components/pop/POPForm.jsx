@@ -4,6 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Plus, Trash2, Target, Wrench, ShieldCheck, GitBranch, Info, Users } from 'lucide-react';
+import { RodapeFixo } from '@/components/ui/PainelLateral';
 
 const PARTICIPANTES = [
   'Agentes CSC',
@@ -240,14 +241,14 @@ export default function POPForm({ onSubmit, onCancel, isLoading }) {
       </SectionCard>
 
       {/* Ações */}
-      <div className="flex justify-end gap-3 pt-2 border-t border-border">
+      <RodapeFixo>
         <Button type="button" variant="outline" onClick={onCancel}>
           Cancelar
         </Button>
-        <Button type="submit" className="bg-muted superficie-escura hover:bg-muted" disabled={isLoading}>
+        <Button type="submit" disabled={isLoading}>
           {isLoading ? 'Salvando...' : 'Salvar POP'}
         </Button>
-      </div>
+      </RodapeFixo>
     </form>
   );
 }

@@ -1,11 +1,11 @@
 import React from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { formatDateSP } from '@/components/utils/helpers';
 import { Users, Calendar } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { configDoStatus, classesSolidasDoStatus } from '@/components/ui/StatusBadge';
+import PainelLateral from '@/components/ui/PainelLateral';
 
 /**
  * Os rótulos e cores vêm do StatusBadge, que é a fonte única do sistema.
@@ -63,15 +63,11 @@ export default function DiaDetalheDialog({ open, onClose, data, atribuicoes, col
   const totalPessoas = atribsDia.length;
 
   return (
-    <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Calendar className="w-5 h-5 text-primary" />
-            {formatDateSP(data, 'DD/MM/YYYY')} - {data.toLocaleDateString('pt-BR', { weekday: 'long' })}
-          </DialogTitle>
-        </DialogHeader>
-
+    <PainelLateral
+      open={open} onOpenChange={onClose}
+      largura="xl"
+      titulo={<><Calendar className="w-5 h-5 text-primary" /> {formatDateSP(data, 'DD/MM/YYYY')} - {data.toLocaleDateString('pt-BR', { weekday: 'long' })}</>}
+    >
         <div className="space-y-4 mt-4">
           {/* Resumo */}
           <Card className="p-4 bg-info-soft border-info/25">
@@ -176,7 +172,6 @@ export default function DiaDetalheDialog({ open, onClose, data, atribuicoes, col
             </div>
           )}
         </div>
-      </DialogContent>
-    </Dialog>
+      </PainelLateral>
   );
 }

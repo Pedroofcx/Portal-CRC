@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -14,6 +13,7 @@ import { CheckCircle, Clock, Target, MessageSquare, BarChart3, Award, AlertTrian
 import { formatDateSP } from '@/components/utils/helpers';
 import { gerarInsights, ACOES_MELHORIA } from './hanseiUtils';
 import { corDaSerie } from '@/lib/cores-grafico';
+import PainelLateral from '@/components/ui/PainelLateral';
 
 const TIPOS_LABEL = {
   reclamacao_interna: 'Rec. Interna', reclame_aqui: 'Reclame Aqui',
@@ -93,15 +93,11 @@ export default function HanseiVisualizarDialog({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <BarChart3 className="w-5 h-5 text-primary" />
-            Hansei — {envio.colaborador_nome || 'Meus Resultados'}
-          </DialogTitle>
-        </DialogHeader>
-
+    <PainelLateral
+      open={open} onOpenChange={onClose}
+      largura="4xl"
+      titulo={<><BarChart3 className="w-5 h-5 text-primary" /> Hansei — {envio.colaborador_nome || 'Meus Resultados'}</>}
+    >
         <div className="space-y-6 mt-2">
           {/* Cabeçalho do período */}
           <div className="flex flex-wrap gap-2 items-center p-3 bg-muted rounded-lg">
@@ -374,7 +370,6 @@ export default function HanseiVisualizarDialog({
             </div>
           )}
         </div>
-      </DialogContent>
-    </Dialog>
+      </PainelLateral>
   );
 }

@@ -15,12 +15,8 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+
+
 import {
   GraduationCap,
   Plus,
@@ -30,6 +26,7 @@ import {
   Play,
   ExternalLink
 } from 'lucide-react';
+import PainelLateral, { RodapeFixo } from '@/components/ui/PainelLateral';
 
 export default function Universidade() {
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -385,11 +382,11 @@ export default function Universidade() {
       </Tabs>
 
       {/* Dialog de Criação de Curso */}
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-lg">
-          <DialogHeader>
-            <DialogTitle>Novo Curso</DialogTitle>
-          </DialogHeader>
+      <PainelLateral
+        open={dialogOpen} onOpenChange={setDialogOpen}
+        largura="lg"
+        titulo="Novo Curso"
+      >
           <form onSubmit={handleSubmit} className="space-y-4 mt-4">
             <div>
               <Label>Título *</Label>
@@ -445,17 +442,16 @@ export default function Universidade() {
                 <p className="text-xs text-warning">Será destacado para todos os colaboradores</p>
               </div>
             </div>
-            <div className="flex justify-end gap-3 pt-4">
+            <RodapeFixo>
               <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
                 Cancelar
               </Button>
               <Button type="submit" className="bg-primary hover:bg-primary/90" disabled={createCursoMutation.isPending}>
                 {createCursoMutation.isPending ? 'Salvando...' : 'Criar Curso'}
               </Button>
-            </div>
+            </RodapeFixo>
           </form>
-        </DialogContent>
-      </Dialog>
+        </PainelLateral>
     </div>
   );
 }

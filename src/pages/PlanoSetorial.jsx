@@ -15,12 +15,8 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from 'sonner';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+
+
 import {
   BarChart3,
   Plus,
@@ -33,6 +29,7 @@ import {
 } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import PainelLateral, { RodapeFixo } from '@/components/ui/PainelLateral';
 
 export default function PlanoSetorial() {
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -493,11 +490,11 @@ export default function PlanoSetorial() {
       </Tabs>
 
       {/* Dialog de Criação Plano */}
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Novo Plano Setorial</DialogTitle>
-          </DialogHeader>
+      <PainelLateral
+        open={dialogOpen} onOpenChange={setDialogOpen}
+        largura="2xl"
+        titulo="Novo Plano Setorial"
+      >
           <form onSubmit={handleSubmit} className="space-y-6 mt-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
@@ -651,24 +648,23 @@ export default function PlanoSetorial() {
               ))}
             </div>
 
-            <div className="flex justify-end gap-3 pt-4">
+            <RodapeFixo>
               <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
                 Cancelar
               </Button>
               <Button type="submit" className="bg-primary hover:bg-primary/90" disabled={createMutation.isPending}>
                 {createMutation.isPending ? 'Salvando...' : 'Criar Plano'}
               </Button>
-            </div>
+            </RodapeFixo>
           </form>
-        </DialogContent>
-      </Dialog>
+        </PainelLateral>
 
       {/* Dialog de Visualização */}
-      <Dialog open={viewDialogOpen} onOpenChange={setViewDialogOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>{selectedPlano?.titulo}</DialogTitle>
-          </DialogHeader>
+      <PainelLateral
+        open={viewDialogOpen} onOpenChange={setViewDialogOpen}
+        largura="xl"
+        titulo={selectedPlano?.titulo}
+      >
           {selectedPlano && (
             <div className="space-y-6 mt-4">
               <div className="flex items-center gap-4 text-sm text-muted-foreground">
@@ -727,15 +723,14 @@ export default function PlanoSetorial() {
               )}
             </div>
           )}
-        </DialogContent>
-      </Dialog>
+        </PainelLateral>
 
       {/* Dialog Criar PDI */}
-      <Dialog open={pdiDialogOpen} onOpenChange={setPdiDialogOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Novo PDI</DialogTitle>
-          </DialogHeader>
+      <PainelLateral
+        open={pdiDialogOpen} onOpenChange={setPdiDialogOpen}
+        largura="xl"
+        titulo="Novo PDI"
+      >
           <form onSubmit={handlePDISubmit} className="space-y-4 mt-4">
             <div>
               <Label>Colaborador *</Label>
@@ -783,22 +778,21 @@ export default function PlanoSetorial() {
                 <p className="text-center text-muted-foreground py-4 bg-muted rounded-lg">Nenhuma etapa adicionada</p>
               )}
             </div>
-            <div className="flex justify-end gap-3 pt-4">
+            <RodapeFixo>
               <Button type="button" variant="outline" onClick={() => setPdiDialogOpen(false)}>Cancelar</Button>
               <Button type="submit" className="bg-primary hover:bg-primary/90" disabled={createPDIMutation.isPending}>
                 {createPDIMutation.isPending ? 'Salvando...' : 'Criar PDI'}
               </Button>
-            </div>
+            </RodapeFixo>
           </form>
-        </DialogContent>
-      </Dialog>
+        </PainelLateral>
 
       {/* Dialog Visualizar PDI */}
-      <Dialog open={viewPDIDialogOpen} onOpenChange={setViewPDIDialogOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>{selectedPDI?.titulo}</DialogTitle>
-          </DialogHeader>
+      <PainelLateral
+        open={viewPDIDialogOpen} onOpenChange={setViewPDIDialogOpen}
+        largura="xl"
+        titulo={selectedPDI?.titulo}
+      >
           {selectedPDI && (
             <div className="space-y-4 mt-4">
               <div className="flex items-center justify-between">
@@ -850,8 +844,7 @@ export default function PlanoSetorial() {
               </div>
             </div>
           )}
-        </DialogContent>
-      </Dialog>
+        </PainelLateral>
     </div>
   );
 }

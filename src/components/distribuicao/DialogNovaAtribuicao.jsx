@@ -1,5 +1,4 @@
 import React, { useState, useMemo } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -8,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertTriangle, RotateCcw, User } from 'lucide-react';
 import { TIPOS_CONFIG, PRIORIDADE_CONFIG, sugerirProximoAgente } from './distribuicaoUtils';
+import PainelLateral, { RodapeFixo } from '@/components/ui/PainelLateral';
 
 // Usar fuso SP para não criar atribuição com data de ontem (ex: 23h SP = dia seguinte UTC)
 function hoje() {
@@ -66,14 +66,11 @@ export default function DialogNovaAtribuicao({ open, onClose, onSalvar, agentes,
   const podeConfirmar = !ehOverride || overrideConfirmado;
 
   return (
-    <Dialog open={open} onOpenChange={(v) => { if (!v) onClose(); }}>
-      <DialogContent className="max-w-lg max-h-[92vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <User className="w-4 h-4" /> Nova Atribuição de Tratativa
-          </DialogTitle>
-        </DialogHeader>
-
+    <PainelLateral
+      open={open} onOpenChange={(v) => { if (!v) onClose(); }}
+      largura="lg"
+      titulo={<><User className="w-4 h-4" /> Nova Atribuição de Tratativa</>}
+    >
         <div className="space-y-4 mt-2">
           {/* Tipo */}
           <div>
@@ -207,7 +204,7 @@ export default function DialogNovaAtribuicao({ open, onClose, onSalvar, agentes,
             <Input value={form.observacao} onChange={e => f('observacao', e.target.value)} placeholder="Opcional" className="mt-1" />
           </div>
 
-          <div className="flex justify-end gap-3 pt-2 border-t">
+          <RodapeFixo>
             <Button variant="outline" onClick={onClose}>Cancelar</Button>
             <Button
               onClick={handleSalvar}
@@ -216,9 +213,8 @@ export default function DialogNovaAtribuicao({ open, onClose, onSalvar, agentes,
             >
               {isPending ? 'Registrando...' : 'Registrar Atribuição'}
             </Button>
-          </div>
+          </RodapeFixo>
         </div>
-      </DialogContent>
-    </Dialog>
+    </PainelLateral>
   );
 }

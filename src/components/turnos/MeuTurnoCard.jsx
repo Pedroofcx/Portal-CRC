@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 
 import { Badge } from '@/components/ui/badge';
 import { Sun, Moon, Clock, ArrowRight } from 'lucide-react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import PainelLateral from '@/components/ui/PainelLateral';
 
 const DIAS_PT = {
   segunda: 'Segunda-feira',
@@ -98,14 +98,11 @@ export default function MeuTurnoCard({ colaboradorId }) {
         <ArrowRight className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
       </button>
 
-      <Dialog open={agendaOpen} onOpenChange={setAgendaOpen}>
-        <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Clock className="w-5 h-5 text-primary" />
-              Agenda de Turnos — Semana {escalaAtual?.semana_referencia}
-            </DialogTitle>
-          </DialogHeader>
+      <PainelLateral
+        open={agendaOpen} onOpenChange={setAgendaOpen}
+        largura="lg"
+        titulo={<><Clock className="w-5 h-5 text-primary" /> Agenda de Turnos — Semana {escalaAtual?.semana_referencia}</>}
+      >
           <div className="space-y-3 mt-2">
             {escalaAtual?.turnos?.map(turno => {
               const isMeuDia = turno.dia === diaHoje;
@@ -146,8 +143,7 @@ export default function MeuTurnoCard({ colaboradorId }) {
               );
             })}
           </div>
-        </DialogContent>
-      </Dialog>
+        </PainelLateral>
     </>
   );
 }

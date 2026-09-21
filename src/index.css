@@ -117,6 +117,19 @@
     @apply border-border;
   }
 
+  /* Barra de rolagem fina e discreta (regras-ui-ux.md, seção 9, padrão D).
+     Cinza translúcido sobre trilho transparente: some no fundo claro e no
+     escuro, e continua visível para quem procura. Vale para a página, o
+     menu, a lista de Tratativas e as janelas. */
+  html {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--muted-foreground) / 0.35) transparent;
+  }
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--muted-foreground) / 0.35) transparent;
+  }
+
   body {
     @apply bg-background text-foreground;
     font-family: Inter, 'Segoe UI', system-ui, -apple-system, sans-serif;

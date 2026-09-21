@@ -1,5 +1,4 @@
 import React, { useState, useMemo } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -7,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertCircle, Calendar, CheckCircle2, Home } from 'lucide-react';
+import PainelLateral from '@/components/ui/PainelLateral';
 
 const diasSemanaLabels = {
   0: 'Domingo',
@@ -215,15 +215,11 @@ export default function SolicitarHomeOfficeDialog({
                        validacoes?.regra_dias_elegiveis;
 
   return (
-    <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Home className="w-5 h-5 text-primary" />
-            Solicitar Home Office por Escolha
-          </DialogTitle>
-        </DialogHeader>
-
+    <PainelLateral
+      open={open} onOpenChange={(isOpen) => !isOpen && onClose()}
+      largura="xl"
+      titulo={<><Home className="w-5 h-5 text-primary" /> Solicitar Home Office por Escolha</>}
+    >
         {!configuracao?.ativo ? (
           <Alert>
             <AlertCircle className="w-4 h-4" />
@@ -374,7 +370,6 @@ export default function SolicitarHomeOfficeDialog({
             </div>
           </div>
         )}
-      </DialogContent>
-    </Dialog>
+      </PainelLateral>
   );
 }

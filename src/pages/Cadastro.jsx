@@ -37,6 +37,7 @@ import {
   FileText
 } from 'lucide-react';
 import ExternalImage, { validateImageUrl } from '@/components/ui/ExternalImage';
+import PainelLateral, { RodapeFixo } from '@/components/ui/PainelLateral';
 
 export default function Cadastro() {
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -350,14 +351,11 @@ export default function Cadastro() {
       />
 
       {/* Dialog de Criação/Edição */}
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>
-              {selectedColaborador ? 'Editar Colaborador' : 'Novo Colaborador'}
-            </DialogTitle>
-          </DialogHeader>
-
+      <PainelLateral
+        open={dialogOpen} onOpenChange={setDialogOpen}
+        largura="xl"
+        titulo={selectedColaborador ? 'Editar Colaborador' : 'Novo Colaborador'}
+      >
           {selectedColaborador ? (
             <Tabs defaultValue="dados" className="mt-4">
               <TabsList className="grid w-full grid-cols-3">
@@ -586,7 +584,7 @@ export default function Cadastro() {
                       )}
                     </div>
                   </div>
-                  <div className="flex justify-end gap-3 pt-4">
+                  <RodapeFixo>
                     <Button type="button" variant="outline" onClick={closeDialog}>
                       Cancelar
                     </Button>
@@ -597,7 +595,7 @@ export default function Cadastro() {
                     >
                       {createMutation.isPending || updateMutation.isPending ? 'Salvando...' : 'Salvar'}
                     </Button>
-                  </div>
+                  </RodapeFixo>
                 </form>
               </TabsContent>
 
@@ -962,7 +960,7 @@ export default function Cadastro() {
                   )}
                 </div>
               </div>
-              <div className="flex justify-end gap-3 pt-4">
+              <RodapeFixo>
                 <Button type="button" variant="outline" onClick={closeDialog}>
                   Cancelar
                 </Button>
@@ -973,11 +971,10 @@ export default function Cadastro() {
                 >
                   {createMutation.isPending || updateMutation.isPending ? 'Salvando...' : 'Salvar'}
                 </Button>
-              </div>
+              </RodapeFixo>
             </form>
           )}
-        </DialogContent>
-      </Dialog>
+        </PainelLateral>
 
       {/* Dialog de Promoção */}
       <Dialog open={promocaoDialog} onOpenChange={setPromocaoDialog}>

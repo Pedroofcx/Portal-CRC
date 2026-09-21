@@ -11,10 +11,10 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { toast } from 'sonner';
 import { Settings, Plus, Pencil, Trash2, Tag } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import PainelLateral, { RodapeFixo } from '@/components/ui/PainelLateral';
 
 export default function ConfigMotivosJornada() {
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -250,11 +250,11 @@ export default function ConfigMotivosJornada() {
       </Card>
 
       {/* Dialog */}
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>{selected ? 'Editar Motivo' : 'Novo Motivo'}</DialogTitle>
-          </DialogHeader>
+      <PainelLateral
+        open={dialogOpen} onOpenChange={setDialogOpen}
+        largura="lg"
+        titulo={selected ? 'Editar Motivo' : 'Novo Motivo'}
+      >
           <form onSubmit={handleSubmit} className="space-y-4 mt-4">
             <div>
               <Label>Motivo *</Label>
@@ -336,17 +336,16 @@ export default function ConfigMotivosJornada() {
               </Select>
               <p className="text-xs text-muted-foreground mt-1">Usado na Matriz de Esforço x Impacto (Jornada do Cliente)</p>
             </div>
-            <div className="flex justify-end gap-3 pt-4">
+            <RodapeFixo>
               <Button type="button" variant="outline" onClick={closeDialog}>
                 Cancelar
               </Button>
               <Button type="submit" className="bg-primary hover:bg-primary/90">
                 {selected ? 'Atualizar' : 'Criar'}
               </Button>
-            </div>
+            </RodapeFixo>
           </form>
-        </DialogContent>
-      </Dialog>
+        </PainelLateral>
 
       <ConfirmDialog
         open={deleteDialogOpen}

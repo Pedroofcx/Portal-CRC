@@ -14,12 +14,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+
+
 import {
   Bell,
   Plus,
@@ -30,6 +26,7 @@ import {
   Trash2,
   Eye
 } from 'lucide-react';
+import PainelLateral, { RodapeFixo } from '@/components/ui/PainelLateral';
 
 const tipoConfig = {
   informativo: { icon: Info, color: 'bg-info-soft text-primary border-info/25' },
@@ -268,11 +265,11 @@ export default function Avisos() {
       )}
 
       {/* Dialog de Criação */}
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-lg">
-          <DialogHeader>
-            <DialogTitle>Novo Aviso</DialogTitle>
-          </DialogHeader>
+      <PainelLateral
+        open={dialogOpen} onOpenChange={setDialogOpen}
+        largura="lg"
+        titulo="Novo Aviso"
+      >
           <form onSubmit={handleSubmit} className="space-y-4 mt-4">
             <div>
               <Label>Título *</Label>
@@ -352,29 +349,23 @@ export default function Avisos() {
                 />
               </div>
             </div>
-            <div className="flex justify-end gap-3 pt-4">
+            <RodapeFixo>
               <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
                 Cancelar
               </Button>
               <Button type="submit" className="bg-primary hover:bg-primary/90" disabled={createMutation.isPending}>
                 {createMutation.isPending ? 'Publicando...' : 'Publicar'}
               </Button>
-            </div>
+            </RodapeFixo>
           </form>
-        </DialogContent>
-      </Dialog>
+        </PainelLateral>
 
       {/* Dialog de Visualização com Leituras */}
-      <Dialog open={viewDialogOpen} onOpenChange={setViewDialogOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              {selectedAviso?.titulo}
-              <Badge variant="outline" className={tipoConfig[selectedAviso?.tipo]?.color}>
-                {selectedAviso?.tipo}
-              </Badge>
-            </DialogTitle>
-          </DialogHeader>
+      <PainelLateral
+        open={viewDialogOpen} onOpenChange={setViewDialogOpen}
+        largura="xl"
+        titulo={<>{selectedAviso?.titulo} <Badge variant="outline" className={tipoConfig[selectedAviso?.tipo]?.color}> {selectedAviso?.tipo} </Badge></>}
+      >
           {selectedAviso && (
             <div className="space-y-4 mt-4">
               <p className="text-foreground whitespace-pre-wrap">{selectedAviso.conteudo}</p>
@@ -412,8 +403,7 @@ export default function Avisos() {
               )}
             </div>
           )}
-        </DialogContent>
-      </Dialog>
+        </PainelLateral>
 
       <ConfirmDialog
         open={deleteDialogOpen}

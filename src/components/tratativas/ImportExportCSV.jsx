@@ -6,9 +6,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { toast } from 'sonner';
 import { Download, Upload, FileSpreadsheet, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
+import PainelLateral, { RodapeFixo } from '@/components/ui/PainelLateral';
 
 // Campos comerciais que podem ser atualizados via importação
 const COMMERCIAL_FIELDS = [
@@ -279,15 +279,11 @@ export default function ImportExportCSV({ tratativas, onRefresh }) {
         </Button>
       </div>
 
-      <Dialog open={importOpen} onOpenChange={(v) => { setImportOpen(v); if (!v) { setPreview([]); setAllRows([]); setErros([]); setLogImport([]); } }}>
-        <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <FileSpreadsheet className="w-5 h-5 text-primary" />
-              Importar Tratativas via CSV
-            </DialogTitle>
-          </DialogHeader>
-
+      <PainelLateral
+        open={importOpen} onOpenChange={(v) => { setImportOpen(v); if (!v) { setPreview([]); setAllRows([]); setErros([]); setLogImport([]); } }}
+        largura="2xl"
+        titulo={<><FileSpreadsheet className="w-5 h-5 text-primary" /> Importar Tratativas via CSV</>}
+      >
           <div className="space-y-4 mt-2">
             {/* Info */}
             <div className="p-3 bg-info-soft border border-info/25 rounded-lg text-sm text-primary space-y-1">
@@ -463,7 +459,7 @@ export default function ImportExportCSV({ tratativas, onRefresh }) {
               </div>
             )}
 
-            <div className="flex justify-end gap-3 pt-2 border-t">
+            <RodapeFixo>
               <Button variant="outline" onClick={() => { setImportOpen(false); setPreview([]); setAllRows([]); setErros([]); setLogImport([]); }} disabled={importando}>
                 Cancelar
               </Button>
@@ -478,10 +474,9 @@ export default function ImportExportCSV({ tratativas, onRefresh }) {
                   <><Upload className="w-4 h-4 mr-2" />Importar {allRows.length} registro(s)</>
                 )}
               </Button>
-            </div>
+            </RodapeFixo>
           </div>
-        </DialogContent>
-      </Dialog>
+      </PainelLateral>
     </>
   );
 }

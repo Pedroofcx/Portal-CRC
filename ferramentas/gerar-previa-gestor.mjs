@@ -29,9 +29,14 @@ const tudo = async (tabela) => {
   }
 };
 
-const [colaboradores, tratativas, ciclos, pontuacoes, exigencias, apuracoes, pdis, observacoes, hanseis, ciclosFerias] = await Promise.all(
+const [colaboradores, tratativas, ciclos, pontuacoes, exigencias, apuracoes, pdis, observacoes, hanseis, ciclosFerias,
+  avisos, leituras, pesquisas, respostas, frases, lideres, agentesN2, acionamentosLider, acionamentosN2,
+  configuracoes, distribuicoes, solicitacoesApoio] = await Promise.all(
   ['colaborador_base', 'tratativa_base', 'ciclo_trimestral', 'pontuacao', 'elegibilidade_premio', 'apuracao',
-    'pdi', 'observacao', 'hansei_envio', 'ciclo_ferias'].map(tudo));
+    'pdi', 'observacao', 'hansei_envio', 'ciclo_ferias',
+    // O resto da tela inicial inteira (avisos, pesquisas, rodízio, distribuição):
+    'aviso', 'aviso_leitura', 'pesquisa', 'resposta_pesquisa', 'frase_motivacional', 'lider_tecnico', 'agente_n2',
+    'acionamento_lider_tecnico', 'acionamento_n2', 'configuracao', 'distribuicao_tratativa', 'solicitacao_apoio'].map(tudo));
 // As ANOTAÇÕES PESSOAIS ficam de fora de propósito: são privadas de cada pessoa.
 
 const gestor = colaboradores.find((c) => c.papel === 'gestor' && c.ativo !== false);
@@ -41,6 +46,8 @@ writeFileSync('previas/dados-gestor.json', JSON.stringify({
   gestorEmail: gestor?.email ?? null,
   colaboradores, tratativas, ciclos, pontuacoes, apuracoes, pdis, observacoes, hanseis, ciclosFerias,
   elegibilidades: exigencias.filter((e) => e.ativa),
+  avisos, leituras, pesquisas, respostas, frases, lideres, agentesN2, acionamentosLider, acionamentosN2,
+  configuracoes, distribuicoes, solicitacoesApoio,
 }));
 
 console.log(`\nPrévia do gestor (${gestor?.nome_completo ?? 'nenhum gestor ativo'})`);

@@ -5,13 +5,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import ConfirmDialog from '@/components/ui/ConfirmDialog';
 import RichTextViewer from '@/components/ui/RichTextViewer';
 import { formatDateSP } from '@/components/utils/helpers';
 import {
   ArrowLeft, Plus, Eye, EyeOff, Trash2, Sparkles, Calendar, User, Filter, MessageSquare
 } from 'lucide-react';
+import PainelLateral from '@/components/ui/PainelLateral';
 
 const tipoLabels = {
   observacao_diaria: 'Observação Diária',
@@ -252,11 +252,11 @@ export default function HistoricoColaborador({
       </div>
 
       {/* Dialog Visualização */}
-      <Dialog open={!!viewObs} onOpenChange={() => setViewObs(null)}>
-        <DialogContent className="max-w-2xl w-[95vw] max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>{viewObs?.titulo || tipoLabels[viewObs?.tipo] || viewObs?.tipo}</DialogTitle>
-          </DialogHeader>
+      <PainelLateral
+        open={!!viewObs} onOpenChange={() => setViewObs(null)}
+        largura="xl"
+        titulo={viewObs?.titulo || tipoLabels[viewObs?.tipo] || viewObs?.tipo}
+      >
           {viewObs && (
             <div className="space-y-4 mt-2">
               <div className="flex items-center gap-2 flex-wrap">
@@ -315,8 +315,7 @@ export default function HistoricoColaborador({
               )}
             </div>
           )}
-        </DialogContent>
-      </Dialog>
+        </PainelLateral>
 
       <ConfirmDialog
         open={!!deleteObs}

@@ -7,8 +7,9 @@ import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import TabelaResumida from '@/components/ui/TabelaResumida';
+import { Input } from '@/components/ui/input';
 import { BarChart3, Phone, MessageSquare, TrendingUp } from 'lucide-react';
 import { agruparDadosPorSemana } from '@/components/apuracao/calculosApuracao';
 
@@ -345,20 +346,30 @@ export default function RelatoriosApuracao() {
             </div>
 
             <div>
-              <Label>Intervalo Personalizado</Label>
-              <div className="flex gap-2">
-                <input
-                  type="date"
-                  value={filtroDataInicio}
-                  onChange={(e) => setFiltroDataInicio(e.target.value)}
-                  className="border rounded px-2 py-1 text-sm flex-1"
-                />
-                <input
-                  type="date"
-                  value={filtroDataFim}
-                  onChange={(e) => setFiltroDataFim(e.target.value)}
-                  className="border rounded px-2 py-1 text-sm flex-1"
-                />
+              <p className="text-sm font-medium leading-none">Intervalo personalizado</p>
+              {/* min-w-0: o campo de data tem largura mínima própria e, sem
+                  isto, os dois lado a lado empurravam a página para o lado. */}
+              <div className="mt-2 grid grid-cols-2 gap-2">
+                <div className="min-w-0 space-y-1">
+                  <Label htmlFor="rel-apuracao-de" className="text-xs text-muted-foreground">De</Label>
+                  <Input
+                    id="rel-apuracao-de"
+                    type="date"
+                    value={filtroDataInicio}
+                    onChange={(e) => setFiltroDataInicio(e.target.value)}
+                    className="min-w-0"
+                  />
+                </div>
+                <div className="min-w-0 space-y-1">
+                  <Label htmlFor="rel-apuracao-ate" className="text-xs text-muted-foreground">Até</Label>
+                  <Input
+                    id="rel-apuracao-ate"
+                    type="date"
+                    value={filtroDataFim}
+                    onChange={(e) => setFiltroDataFim(e.target.value)}
+                    className="min-w-0"
+                  />
+                </div>
               </div>
             </div>
           </div>
@@ -392,54 +403,24 @@ export default function RelatoriosApuracao() {
               {dadosAgregados.length === 0 ? (
                 <p className="text-center text-muted-foreground py-8">Nenhum dado disponível para os filtros selecionados</p>
               ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
-                    <thead className="bg-muted">
-                      <tr>
-                        <th className="text-left p-3 font-medium">Agente</th>
-                        <th className="text-left p-3 font-medium">Período</th>
-                        <th className="text-center p-3 font-medium">Total Lig.</th>
-                        <th className="text-center p-3 font-medium">Atendidas</th>
-                        <th className="text-center p-3 font-medium">Avaliadas</th>
-                        <th className="text-center p-3 font-medium">Nota 4</th>
-                        <th className="text-center p-3 font-medium">Nota 5</th>
-                        <th className="text-center p-3 font-medium">Positivas (4+5)</th>
-                        <th className="text-center p-3 font-medium">Transf.</th>
-                        <th className="text-center p-3 font-medium">Perf. %</th>
-                        <th className="text-center p-3 font-medium">% Aval.</th>
-                        <th className="text-center p-3 font-medium">CSAT %</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {dadosAgregados.map((agg, idx) => (
-                        <tr key={idx} className="border-t hover:bg-muted">
-                          <td className="p-3 font-medium whitespace-nowrap">{agg.agente}</td>
-                          <td className="p-3 whitespace-nowrap">{agg.periodo}</td>
-                          <td className="text-center p-3">{agg.telefone.total_ligacoes}</td>
-                          <td className="text-center p-3">{agg.telefone.total_atendidas}</td>
-                          <td className="text-center p-3">{agg.telefone.total_avaliadas}</td>
-                          <td className="text-center p-3">{agg.telefone.nota4 || 0}</td>
-                          <td className="text-center p-3">{agg.telefone.nota5 || 0}</td>
-                          <td className="text-center p-3 font-medium">{agg.telefone.total_positivas}</td>
-                          <td className="text-center p-3">
-                            <Badge variant="outline" className="bg-warning-soft text-warning border-warning/30">
-                              {agg.telefone.transferencias}
-                            </Badge>
-                          </td>
-                          <td className="text-center p-3">
-                            <Badge variant="outline" className="bg-success-soft text-success">{agg.telefone.performance.toFixed(1)}%</Badge>
-                          </td>
-                          <td className="text-center p-3">
-                            <Badge variant="outline" className="bg-warning-soft text-warning">{agg.telefone.percentual_avaliados.toFixed(1)}%</Badge>
-                          </td>
-                          <td className="text-center p-3">
-                            <Badge variant="outline" className="bg-info-soft text-primary">{agg.telefone.csat.toFixed(1)}%</Badge>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                <TabelaResumida
+                  linhas={dadosAgregados}
+                  chaveDaLinha={(agg, i) => `${agg.agente}-${agg.periodo}-${i}`}
+                  colunas={[
+                    { chave: 'agente', rotulo: 'Agente', alinhar: 'esquerda', principal: true, valor: (agg) => <span className="font-medium">{agg.agente}</span> },
+                    { chave: 'periodo', rotulo: 'Período', alinhar: 'esquerda', principal: true, valor: (agg) => <span className="whitespace-nowrap">{agg.periodo}</span> },
+                    { chave: 'atendidas', rotulo: 'Atendidas', principal: true, valor: (agg) => agg.telefone.total_atendidas },
+                    { chave: 'perf', rotulo: 'Perf. %', principal: true, valor: (agg) => `${agg.telefone.performance.toFixed(1)}%` },
+                    { chave: 'aval', rotulo: '% Aval.', principal: true, valor: (agg) => `${agg.telefone.percentual_avaliados.toFixed(1)}%` },
+                    { chave: 'csat', rotulo: 'CSAT %', principal: true, valor: (agg) => <span className="font-semibold text-primary">{agg.telefone.csat.toFixed(1)}%</span> },
+                    { chave: 'total', rotulo: 'Total de ligações', valor: (agg) => agg.telefone.total_ligacoes },
+                    { chave: 'avaliadas', rotulo: 'Avaliadas', valor: (agg) => agg.telefone.total_avaliadas },
+                    { chave: 'nota4', rotulo: 'Nota 4', valor: (agg) => agg.telefone.nota4 || 0 },
+                    { chave: 'nota5', rotulo: 'Nota 5', valor: (agg) => agg.telefone.nota5 || 0 },
+                    { chave: 'positivas', rotulo: 'Positivas (4+5)', valor: (agg) => agg.telefone.total_positivas },
+                    { chave: 'transf', rotulo: 'Transferências', valor: (agg) => agg.telefone.transferencias },
+                  ]}
+                />
               )}
               {dadosAgregados.length > 0 && (
                 <div className="mt-4 p-3 bg-warning-soft border border-warning/25 rounded-lg text-sm">
@@ -461,38 +442,19 @@ export default function RelatoriosApuracao() {
               {dadosAgregados.length === 0 ? (
                 <p className="text-center text-muted-foreground py-8">Nenhum dado disponível</p>
               ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
-                    <thead className="bg-muted">
-                      <tr>
-                        <th className="text-left p-3 font-medium">Agente</th>
-                        <th className="text-left p-3 font-medium">Período</th>
-                        <th className="text-center p-3 font-medium">Total Chats</th>
-                        <th className="text-center p-3 font-medium">Avaliados</th>
-                        <th className="text-center p-3 font-medium">Positivos</th>
-                        <th className="text-center p-3 font-medium">% Avaliados</th>
-                        <th className="text-center p-3 font-medium">CSAT (%)</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {dadosAgregados.map((agg, idx) => (
-                        <tr key={idx} className="border-t hover:bg-muted">
-                          <td className="p-3 font-medium">{agg.agente}</td>
-                          <td className="p-3">{agg.periodo}</td>
-                          <td className="text-center p-3">{agg.chat.total_chats}</td>
-                          <td className="text-center p-3">{agg.chat.total_avaliados}</td>
-                          <td className="text-center p-3">{agg.chat.total_positivos}</td>
-                          <td className="text-center p-3">
-                            <Badge variant="outline">{agg.chat.percentual_avaliados.toFixed(1)}%</Badge>
-                          </td>
-                          <td className="text-center p-3">
-                            <Badge variant="outline">{agg.chat.csat.toFixed(1)}%</Badge>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                <TabelaResumida
+                  linhas={dadosAgregados}
+                  chaveDaLinha={(agg, i) => `${agg.agente}-${agg.periodo}-${i}`}
+                  colunas={[
+                    { chave: 'agente', rotulo: 'Agente', alinhar: 'esquerda', principal: true, valor: (agg) => <span className="font-medium">{agg.agente}</span> },
+                    { chave: 'periodo', rotulo: 'Período', alinhar: 'esquerda', principal: true, valor: (agg) => <span className="whitespace-nowrap">{agg.periodo}</span> },
+                    { chave: 'total', rotulo: 'Total de chats', principal: true, valor: (agg) => agg.chat.total_chats },
+                    { chave: 'avaliados', rotulo: 'Avaliados', principal: true, valor: (agg) => agg.chat.total_avaliados },
+                    { chave: 'positivos', rotulo: 'Positivos', principal: true, valor: (agg) => agg.chat.total_positivos },
+                    { chave: 'aval', rotulo: '% Avaliados', principal: true, valor: (agg) => `${agg.chat.percentual_avaliados.toFixed(1)}%` },
+                    { chave: 'csat', rotulo: 'CSAT %', principal: true, valor: (agg) => <span className="font-semibold text-primary">{agg.chat.csat.toFixed(1)}%</span> },
+                  ]}
+                />
               )}
             </CardContent>
           </Card>
@@ -549,50 +511,27 @@ export default function RelatoriosApuracao() {
                 {consolidadoSemanal.length === 0 ? (
                   <p className="text-center text-muted-foreground py-8">Nenhum dado disponível</p>
                 ) : (
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-sm">
-                      <thead className="bg-muted">
-                        <tr>
-                          <th className="text-left p-3 font-medium">Período</th>
-                          <th className="text-center p-3 font-medium bg-info-soft">Tel: Ligações</th>
-                          <th className="text-center p-3 font-medium bg-info-soft">Tel: Atendidas</th>
-                          <th className="text-center p-3 font-medium bg-info-soft">Tel: Avaliadas</th>
-                          <th className="text-center p-3 font-medium bg-info-soft">Tel: Positivas</th>
-                          <th className="text-center p-3 font-medium bg-info-soft">Tel: CSAT %</th>
-                          <th className="text-center p-3 font-medium bg-info-soft">Tel: % Aval.</th>
-                          <th className="text-center p-3 font-medium bg-info-soft">Tel: Perf. %</th>
-                          <th className="text-center p-3 font-medium bg-info-soft">Chat: Total</th>
-                          <th className="text-center p-3 font-medium bg-info-soft">Chat: Aval.</th>
-                          <th className="text-center p-3 font-medium bg-info-soft">Chat: Positivos</th>
-                          <th className="text-center p-3 font-medium bg-info-soft">Chat: CSAT %</th>
-                          <th className="text-center p-3 font-medium bg-info-soft">Chat: % Aval.</th>
-                          <th className="text-center p-3 font-medium bg-success-soft">Satisf. Média</th>
-                          <th className="text-center p-3 font-medium bg-success-soft">% Aval. Comb.</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {consolidadoSemanal.map((s, idx) => (
-                          <tr key={idx} className="border-t hover:bg-muted">
-                            <td className="p-3 text-xs font-medium whitespace-nowrap">{s.rotulo}</td>
-                            <td className="text-center p-3">{s.telefone.total_ligacoes}</td>
-                            <td className="text-center p-3">{s.telefone.total_atendidas}</td>
-                            <td className="text-center p-3">{s.telefone.total_avaliadas}</td>
-                            <td className="text-center p-3">{s.telefone.total_positivas}</td>
-                            <td className="text-center p-3 font-semibold text-primary">{s.telefone.csat.toFixed(1)}%</td>
-                            <td className="text-center p-3 font-semibold text-warning">{s.telefone.percentual_avaliados.toFixed(1)}%</td>
-                            <td className="text-center p-3 font-semibold text-success">{s.telefone.performance.toFixed(1)}%</td>
-                            <td className="text-center p-3">{s.chat.total_chats}</td>
-                            <td className="text-center p-3">{s.chat.total_avaliados}</td>
-                            <td className="text-center p-3">{s.chat.total_positivos}</td>
-                            <td className="text-center p-3 font-semibold text-primary">{s.chat.csat.toFixed(1)}%</td>
-                            <td className="text-center p-3 font-semibold text-primary">{s.chat.percentual_avaliados.toFixed(1)}%</td>
-                            <td className="text-center p-3 font-bold text-success">{s.satisfacao_media.toFixed(1)}%</td>
-                            <td className="text-center p-3 font-bold text-success">{s.percentual_avaliados_medio.toFixed(1)}%</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
+                  <TabelaResumida
+                    linhas={consolidadoSemanal}
+                    chaveDaLinha={(sem, i) => `${sem.rotulo}-${i}`}
+                    colunas={[
+                      { chave: 'periodo', rotulo: 'Semana', alinhar: 'esquerda', principal: true, valor: (sem) => <span className="whitespace-nowrap text-xs font-medium">{sem.rotulo}</span> },
+                      { chave: 'telcsat', rotulo: 'CSAT tel.', principal: true, valor: (sem) => `${sem.telefone.csat.toFixed(1)}%` },
+                      { chave: 'telperf', rotulo: 'Perf. tel.', principal: true, valor: (sem) => `${sem.telefone.performance.toFixed(1)}%` },
+                      { chave: 'chatcsat', rotulo: 'CSAT chat', principal: true, valor: (sem) => `${sem.chat.csat.toFixed(1)}%` },
+                      { chave: 'satisf', rotulo: 'Satisf. média', principal: true, valor: (sem) => <span className="font-semibold text-success">{sem.satisfacao_media.toFixed(1)}%</span> },
+                      { chave: 'avalcomb', rotulo: '% aval. comb.', principal: true, valor: (sem) => <span className="font-semibold text-success">{sem.percentual_avaliados_medio.toFixed(1)}%</span> },
+                      { chave: 'tellig', rotulo: 'Tel: ligações', valor: (sem) => sem.telefone.total_ligacoes },
+                      { chave: 'telaten', rotulo: 'Tel: atendidas', valor: (sem) => sem.telefone.total_atendidas },
+                      { chave: 'telavald', rotulo: 'Tel: avaliadas', valor: (sem) => sem.telefone.total_avaliadas },
+                      { chave: 'telpos', rotulo: 'Tel: positivas', valor: (sem) => sem.telefone.total_positivas },
+                      { chave: 'telaval', rotulo: 'Tel: % aval.', valor: (sem) => `${sem.telefone.percentual_avaliados.toFixed(1)}%` },
+                      { chave: 'chattotal', rotulo: 'Chat: total', valor: (sem) => sem.chat.total_chats },
+                      { chave: 'chataval', rotulo: 'Chat: avaliados', valor: (sem) => sem.chat.total_avaliados },
+                      { chave: 'chatpos', rotulo: 'Chat: positivos', valor: (sem) => sem.chat.total_positivos },
+                      { chave: 'chatpaval', rotulo: 'Chat: % aval.', valor: (sem) => `${sem.chat.percentual_avaliados.toFixed(1)}%` },
+                    ]}
+                  />
                 )}
               </CardContent>
             </Card>
