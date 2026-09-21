@@ -1007,7 +1007,7 @@ create index if not exists "ix_pontuacao_ciclo_id" on public."pontuacao" ("ciclo
 create index if not exists "ix_pontuacao_lancado_por_id" on public."pontuacao" ("lancado_por_id");
 create index if not exists "ix_pontuacao_colaborador_id" on public."pontuacao" ("colaborador_id");
 
--- POP  (12 campos)
+-- POP  (20 campos)
 create table if not exists public."pop" (
   "id" uuid primary key default gen_random_uuid(),
   "base44_id" text unique,
@@ -1028,11 +1028,62 @@ create table if not exists public."pop" (
   "raci" jsonb,
   "versao" text DEFAULT '1.0',
   "ativo" boolean DEFAULT true,
-  "data_criacao" timestamptz
+  "data_criacao" timestamptz,
+  "prazos" jsonb,
+  "tipos_tratativa" jsonb,
+  "ordem" numeric DEFAULT 0,
+  "vigencia" date,
+  "o_que_mudou" text,
+  "publicado_em" timestamptz,
+  "publicado_por_nome" text,
+  "exige_ciencia" boolean DEFAULT true
 );
 
 create index if not exists "ix_pop_base44_id" on public."pop" ("base44_id");
 create index if not exists "ix_pop_ativo" on public."pop" ("ativo");
+
+-- PopLeitura  (4 campos)
+create table if not exists public."pop_leitura" (
+  "id" uuid primary key default gen_random_uuid(),
+  "base44_id" text unique,
+  "created_date" timestamptz not null default now(),
+  "updated_date" timestamptz not null default now(),
+  "created_by" text,
+  "importado_em" timestamptz,
+  "criado_em" timestamptz not null default now(),
+  "atualizado_em" timestamptz not null default now(),
+  "pop_id" text,
+  "versao" text,
+  "colaborador_id" text,
+  "data_leitura" timestamptz
+);
+
+create index if not exists "ix_pop_leitura_base44_id" on public."pop_leitura" ("base44_id");
+create index if not exists "ix_pop_leitura_pop_id" on public."pop_leitura" ("pop_id");
+create index if not exists "ix_pop_leitura_colaborador_id" on public."pop_leitura" ("colaborador_id");
+
+-- PopVersao  (7 campos)
+create table if not exists public."pop_versao" (
+  "id" uuid primary key default gen_random_uuid(),
+  "base44_id" text unique,
+  "created_date" timestamptz not null default now(),
+  "updated_date" timestamptz not null default now(),
+  "created_by" text,
+  "importado_em" timestamptz,
+  "criado_em" timestamptz not null default now(),
+  "atualizado_em" timestamptz not null default now(),
+  "pop_id" text,
+  "versao" text,
+  "snapshot" jsonb,
+  "o_que_mudou" text,
+  "publicado_em" timestamptz,
+  "publicado_por_id" text,
+  "publicado_por_nome" text
+);
+
+create index if not exists "ix_pop_versao_base44_id" on public."pop_versao" ("base44_id");
+create index if not exists "ix_pop_versao_pop_id" on public."pop_versao" ("pop_id");
+create index if not exists "ix_pop_versao_publicado_por_id" on public."pop_versao" ("publicado_por_id");
 
 -- RespostaPesquisa  (12 campos)
 create table if not exists public."resposta_pesquisa" (

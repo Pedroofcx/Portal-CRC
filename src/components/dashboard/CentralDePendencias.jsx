@@ -2,7 +2,7 @@ import React, { useMemo, useState } from 'react';
 import * as Primitivo from '@radix-ui/react-dialog';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
-import { Bell, ClipboardCheck, TrendingUp } from 'lucide-react';
+import { Bell, ClipboardCheck, FileText, TrendingUp } from 'lucide-react';
 import { toast } from 'sonner';
 import db from '@/api/db';
 import { createPageUrl } from '@/utils';
@@ -10,11 +10,13 @@ import { Button } from '@/components/ui/button';
 import CampoPergunta from '@/components/pesquisas/CampoPergunta';
 import { formatDateSP } from '@/components/utils/helpers';
 import { filaDePendencias, obrigatoriasSemResposta, montarResposta } from '@/lib/pendencias';
+import { popsParaCiencia } from '@/lib/pops';
 import { traduzirErro } from '@/lib/erros';
 
 /**
  * Central de pendências — o que a pessoa precisa ver ao entrar: avisos a
- * confirmar, pesquisas a responder e (agentes) resultados de Hansei novos.
+ * confirmar, pesquisas a responder, POPs com versão nova para ler e
+ * (agentes) resultados de Hansei novos.
  *
  * Substitui três pop-ups soltos que brigavam entre si e voltavam depois de
  * confirmados. As regras moram em src/lib/pendencias.js (testadas):
@@ -72,6 +74,20 @@ export default function CentralDePendencias({ colaborador }) {
     staleTime: 60000,
   });
 
+  // POPs com versão nova a confirmar (migration 18).
+  const { data: pops = [] } = useQuery({
+    queryKey: ['pops', 'ativos'],
+    queryFn: () => db.entities.POP.filter({ ativo: true }),
+    enabled: Boolean(id),
+    staleTime: 60000,
+  });
+  const { data: leiturasPop = [] } = useQuery({
+    queryKey: ['pop-leituras', id],
+    queryFn: () => db.entities.PopLeitura.filter({ colaborador_id: id }),
+    enabled: Boolean(id),
+    staleTime: 0,
+  });
+
   // O que foi tratado nesta sessão sai da fila na hora (regra 4).
   const [tratados, setTratados] = useState(() => new Set());
   const [concluidos, setConcluidos] = useState(0);
@@ -85,9 +101,10 @@ export default function CentralDePendencias({ colaborador }) {
   const fila = useMemo(() => {
     if (!carregado) return [];
     const base = filaDePendencias({ colaborador, avisos, leituras, pesquisas, respostas, tratados });
+    for (const pop of popsParaCiencia({ pops, leituras: leiturasPop, colaborador, tratados })) base.push({ tipo: 'pop', item: pop });
     if (ehAgente && hanseis.length && !hanseiAdiado) base.push({ tipo: 'hansei', item: hanseis });
     return base;
-  }, [carregado, colaborador, avisos, leituras, pesquisas, respostas, tratados, ehAgente, hanseis, hanseiAdiado]);
+  }, [carregado, colaborador, avisos, leituras, pesquisas, respostas, tratados, ehAgente, hanseis, hanseiAdiado, pops, leiturasPop]);
 
   const atual = fila[0];
   const total = concluidos + fila.length;
@@ -108,6 +125,17 @@ export default function CentralDePendencias({ colaborador }) {
       concluir(avisoId);
       queryClient.invalidateQueries({ queryKey: ['aviso-leituras'] });
       queryClient.invalidateQueries({ queryKey: ['avisoLeituras'] });
+    },
+    onError: (e) => { setFalhou(true); toast.error(`Não foi possível confirmar: ${traduzirErro(e)}`); },
+  });
+
+  const confirmarPop = useMutation({
+    mutationFn: (pop) => db.entities.PopLeitura.create({
+      pop_id: pop.id, versao: pop.versao, colaborador_id: id, data_leitura: new Date().toISOString(),
+    }),
+    onSuccess: (_, pop) => {
+      concluir(`${pop.id}@${pop.versao}`);
+      queryClient.invalidateQueries({ queryKey: ['pop-leituras'] });
     },
     onError: (e) => { setFalhou(true); toast.error(`Não foi possível confirmar: ${traduzirErro(e)}`); },
   });
@@ -187,6 +215,44 @@ export default function CentralDePendencias({ colaborador }) {
     acoes = (
       <Button onClick={enviarPesquisa} disabled={responder.isPending}>
         {responder.isPending ? 'Enviando…' : 'Enviar resposta'}
+      </Button>
+    );
+  } else if (atual.tipo === 'pop') {
+    const p = atual.item;
+    icone = FileText;
+    rotulo = p.versao === '1.0' ? 'POP publicado' : `POP — nova versão ${p.versao}`;
+    titulo = `${p.codigo} · ${p.titulo}`;
+    corpo = (
+      <div className="space-y-3">
+        {p.o_que_mudou && p.versao !== '1.0' && (
+          <div className="rounded-lg border border-info/25 bg-info-soft px-3 py-2 text-sm">
+            <span className="font-medium text-foreground">O que mudou: </span>{p.o_que_mudou}
+          </div>
+        )}
+        {p.objetivo && <p className="text-sm leading-relaxed text-foreground/90">{p.objetivo}</p>}
+        {(p.prazos ?? []).length > 0 && (
+          <ul className="grid gap-1.5 sm:grid-cols-2">
+            {p.prazos.map((z, i) => (
+              <li key={i} className="rounded-lg border border-border bg-card px-3 py-2 text-sm">
+                <span className="block text-xs text-muted-foreground">{z.rotulo}</span>
+                <span className="font-semibold text-foreground">{z.valor}</span>
+              </li>
+            ))}
+          </ul>
+        )}
+        <button
+          type="button"
+          onClick={() => navigate(`${createPageUrl('POP')}?abrir=${encodeURIComponent(p.codigo)}`)}
+          className="text-sm font-medium text-primary hover:underline"
+        >
+          Abrir o POP completo →
+        </button>
+      </div>
+    );
+    acoes = (
+      <Button onClick={() => confirmarPop.mutate(p)} disabled={confirmarPop.isPending}>
+        <ClipboardCheck className="mr-2 h-4 w-4" aria-hidden="true" />
+        {confirmarPop.isPending ? 'Confirmando…' : 'Li e compreendi'}
       </Button>
     );
   } else {

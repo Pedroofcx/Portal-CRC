@@ -46,6 +46,7 @@ import DesfechoContestacao from '@/components/tratativas/DesfechoContestacao';
 import MonetizacaoAtritoForm from '@/components/tratativas/MonetizacaoAtritoForm';
 import CustoOperacionalCard from '@/components/tratativas/CustoOperacionalCard';
 import PerfilComercialCliente from '@/components/jornada/PerfilComercialCliente';
+import BotaoVerPOP from '@/components/pop/BotaoVerPOP';
 
 // Finite State Machine - estados permitidos
 const FSM_TRANSITIONS = {
@@ -721,7 +722,10 @@ export default function TratativaDetalhe({ idExterno = null, embutido = false })
                 )}
                 <div>
                   <Label className="text-muted-foreground text-xs">Tipo de Tratativa</Label>
-                  <p className="font-medium">{tipoTratativaLabels[tratativa.tipo_tratativa]}</p>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <p className="font-medium">{tipoTratativaLabels[tratativa.tipo_tratativa]}</p>
+                    <BotaoVerPOP tipoTratativa={tratativa.tipo_tratativa} />
+                  </div>
                 </div>
                 <div>
                   <Label className="text-muted-foreground text-xs">SLA</Label>

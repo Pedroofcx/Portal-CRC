@@ -37,6 +37,8 @@ SO_GESTOR_ESCREVE = {
     "config_estorno", "ciclo_trimestral", "ciclo_ferias", "equipe", "escala",
     "skill_mestre", "motivo_tratativa", "tipo_tratativa", "categoria_tratativa",
     "tipo_observacao", "etapa_jornada", "lider_tecnico", "agente_n2",
+    # POPs (migration 18): só o gestor cria, edita e publica versão.
+    "pop", "pop_versao",
 }
 
 # Trilha de auditoria: qualquer um registra, ninguém edita nem apaga.
@@ -49,6 +51,11 @@ SO_DO_DONO = {"anotacao_pessoal": "colaborador_id"}
 # Feedbacks (migration 16): o gestor lê e grava tudo; o agente lê só os que o
 # citam E que o gestor marcou como visíveis para ele. Nenhum agente grava.
 # Tabela -> (coluna com a lista de ids citados, condição de visibilidade).
+# Confirmação de leitura de POP (migration 18): todo colaborador lê (o gestor
+# precisa ver quem leu), mas cada um só GRAVA a própria — ninguém confirma
+# leitura em nome de outra pessoa. Alterar e apagar: só o gestor.
+GRAVA_SO_O_PROPRIO = {"pop_leitura": "colaborador_id"}
+
 LEITURA_DO_CITADO = {
     "observacao": ("colaboradores_ids", "visibilidade in ('agente', 'ambos')"),
 }
@@ -191,6 +198,15 @@ grant  execute on function public.meu_colaborador_id() to authenticated;
             p.append(f'create policy "{tabela}_inserir" on public."{tabela}" for insert to authenticated with check ({dono});')
             p.append(f'create policy "{tabela}_alterar" on public."{tabela}" for update to authenticated using ({dono}) with check ({dono});')
             p.append(f'create policy "{tabela}_apagar" on public."{tabela}" for delete to authenticated using ({dono});')
+            continue
+
+        if tabela in GRAVA_SO_O_PROPRIO:
+            dono = f"{GRAVA_SO_O_PROPRIO[tabela]} = public.meu_colaborador_id()"
+            p.append(f"-- {tabela}: todos leem; cada um grava só a própria; gestor altera e apaga")
+            p.append(f'create policy "{tabela}_ler" on public."{tabela}" for select to authenticated using (public.eh_colaborador());')
+            p.append(f'create policy "{tabela}_inserir" on public."{tabela}" for insert to authenticated with check ({dono});')
+            p.append(f'create policy "{tabela}_alterar" on public."{tabela}" for update to authenticated using (public.eh_gestor()) with check (public.eh_gestor());')
+            p.append(f'create policy "{tabela}_apagar" on public."{tabela}" for delete to authenticated using (public.eh_gestor());')
             continue
 
         if tabela in LEITURA_DO_CITADO:

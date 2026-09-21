@@ -1,147 +1,157 @@
-import React from 'react';
-import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
+import React, { useState } from 'react';
+import { CheckCircle2, ChevronDown, ChevronRight, Clock, GitBranch, History, Info, ShieldCheck, Target, Users, Wrench } from 'lucide-react';
+import TextoFormatado from '@/components/ui/TextoFormatado';
 import { formatDateSP } from '@/components/utils/helpers';
-import { Target, Wrench, ShieldCheck, GitBranch, Info, Users } from 'lucide-react';
+import { primeiroNome } from '@/lib/nomes';
 
-const PARTICIPANTES_CORES = {
-  'Agentes CSC': 'bg-info-soft text-primary',
-  'Supervisor CSC': 'bg-info-soft text-primary',
-  'Facilitador Interno': 'bg-info-soft text-primary',
-  'Gestão / Diretoria': 'bg-muted text-foreground',
-  'Área Técnica': 'bg-success-soft text-success',
-};
+/**
+ * Um POP, para ler rápido: prazos em destaque no topo, depois objetivo,
+ * ferramentas, fluxo, critérios, outras informações e RACI. Para o gestor,
+ * quem já confirmou a leitura da versão atual e o histórico de versões.
+ */
 
-function ParticipanteBadge({ value }) {
-  if (!value) return <span className="text-muted-foreground">—</span>;
-  const cls = PARTICIPANTES_CORES[value] || 'bg-muted text-muted-foreground';
+function Secao({ icone: Icone, titulo, children }) {
   return (
-    <span className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${cls}`}>
-      {value}
-    </span>
-  );
-}
-
-function SectionBlock({ icon: Icon, title, children, color = 'slate' }) {
-  const borders = {
-    slate: 'border-l-slate-300',
-    blue: 'border-l-blue-400',
-    emerald: 'border-l-emerald-400',
-    violet: 'border-l-violet-400',
-    amber: 'border-l-amber-400',
-    indigo: 'border-l-indigo-400',
-  };
-  return (
-    <div className={`border-l-4 ${borders[color]} pl-4`}>
-      <div className="flex items-center gap-2 mb-2">
-        <Icon className="w-4 h-4 text-muted-foreground" />
-        <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">{title}</h3>
-      </div>
+    <section>
+      <h3 className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+        <Icone className="h-3.5 w-3.5" aria-hidden="true" /> {titulo}
+      </h3>
       {children}
-    </div>
+    </section>
   );
 }
 
-function TextBlock({ text }) {
-  if (!text) return <p className="text-muted-foreground text-sm italic">Não preenchido.</p>;
-  return (
-    <div className="text-sm text-foreground whitespace-pre-wrap leading-relaxed">
-      {text}
-    </div>
-  );
-}
-
-export default function POPViewer({ pop }) {
+export default function POPViewer({ pop, versoes = [], leitores = null, isGestor = false }) {
+  const [historicoAberto, setHistoricoAberto] = useState(false);
   if (!pop) return null;
-
-  const raciValido = pop.raci?.filter((r) => r.atividade);
+  const raci = (pop.raci ?? []).filter((r) => r.atividade);
+  const prazos = (pop.prazos ?? []).filter((p) => p.rotulo || p.valor);
 
   return (
     <div className="space-y-6">
-      {/* Cabeçalho */}
-      <div className="flex items-start justify-between flex-wrap gap-3">
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <Badge variant="outline" className="font-mono text-xs">{pop.codigo}</Badge>
-            {pop.categoria && (
-              <Badge variant="secondary" className="text-xs">{pop.categoria}</Badge>
-            )}
-            <Badge variant="outline" className="text-xs">v{pop.versao || '1.0'}</Badge>
-          </div>
-          <h2 className="text-lg font-bold text-foreground">{pop.titulo}</h2>
-        </div>
-        <div className="text-xs text-muted-foreground">
-          Criado em {formatDateSP(pop.data_criacao, 'DD/MM/YYYY')}
-        </div>
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+        <span className="rounded-md bg-muted px-2 py-0.5 font-mono font-semibold text-foreground">{pop.codigo}</span>
+        {pop.categoria && <span>{pop.categoria}</span>}
+        <span>· versão {pop.versao || '1.0'}</span>
+        {pop.vigencia && <span>· vigente desde {formatDateSP(pop.vigencia, 'DD/MM/YYYY')}</span>}
+        {pop.publicado_em && <span>· publicada em {formatDateSP(pop.publicado_em, 'DD/MM/YYYY')}{pop.publicado_por_nome ? ` por ${primeiroNome(pop.publicado_por_nome)}` : ''}</span>}
       </div>
 
-      <Separator />
-
-      {/* Objetivo — Destaque */}
-      <div className="bg-muted superficie-escura rounded-xl p-5 text-white">
-        <div className="flex items-center gap-2 mb-3">
-          <Target className="w-4 h-4 text-muted-foreground" />
-          <span className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Objetivo</span>
+      {pop.o_que_mudou && pop.versao !== '1.0' && (
+        <div className="rounded-lg border border-info/25 bg-info-soft px-4 py-3 text-sm">
+          <p className="font-medium text-foreground">O que mudou na versão {pop.versao}</p>
+          <p className="mt-0.5 text-muted-foreground">{pop.o_que_mudou}</p>
         </div>
-        <p className="text-sm leading-relaxed whitespace-pre-wrap text-muted-foreground">{pop.objetivo}</p>
-      </div>
-
-      {/* Ferramentas */}
-      {pop.ferramentas && (
-        <SectionBlock icon={Wrench} title="Ferramentas Utilizadas" color="slate">
-          <TextBlock text={pop.ferramentas} />
-        </SectionBlock>
       )}
 
-      {/* Critério de Qualidade */}
-      {pop.criterio_qualidade && (
-        <SectionBlock icon={ShieldCheck} title="Critério de Qualidade" color="emerald">
-          <TextBlock text={pop.criterio_qualidade} />
-        </SectionBlock>
+      {prazos.length > 0 && (
+        <div className="grid gap-2 sm:grid-cols-2">
+          {prazos.map((p, i) => (
+            <div key={i} className="flex items-start gap-3 rounded-lg border border-border bg-card px-3 py-2.5">
+              <Clock className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
+              <div className="min-w-0">
+                <p className="text-xs text-muted-foreground">{p.rotulo}</p>
+                <p className="text-sm font-semibold text-foreground">{p.valor}</p>
+              </div>
+            </div>
+          ))}
+        </div>
       )}
 
-      {/* Fluxo Operacional */}
+      {pop.objetivo && (
+        <Secao icone={Target} titulo="Objetivo">
+          <p className="text-sm leading-relaxed text-foreground/90">{pop.objetivo}</p>
+        </Secao>
+      )}
+
+      {pop.ferramentas && pop.ferramentas !== '—' && (
+        <Secao icone={Wrench} titulo="Ferramentas">
+          <p className="text-sm text-foreground/90">{pop.ferramentas}</p>
+        </Secao>
+      )}
+
       {pop.fluxo_operacional && (
-        <SectionBlock icon={GitBranch} title="Fluxo Operacional" color="violet">
-          <TextBlock text={pop.fluxo_operacional} />
-        </SectionBlock>
+        <Secao icone={GitBranch} titulo="Fluxo operacional">
+          <TextoFormatado texto={pop.fluxo_operacional} />
+        </Secao>
       )}
 
-      {/* Outras Informações */}
+      {pop.criterio_qualidade && (
+        <Secao icone={ShieldCheck} titulo="Critérios de qualidade">
+          <TextoFormatado texto={pop.criterio_qualidade} />
+        </Secao>
+      )}
+
       {pop.outras_informacoes && (
-        <SectionBlock icon={Info} title="Outras Informações, Padrões e Diretrizes" color="amber">
-          <TextBlock text={pop.outras_informacoes} />
-        </SectionBlock>
+        <Secao icone={Info} titulo="Outras informações">
+          <TextoFormatado texto={pop.outras_informacoes} />
+        </Secao>
       )}
 
-      {/* Tabela RACI */}
-      {raciValido?.length > 0 && (
-        <SectionBlock icon={Users} title="Tabela RACI — Responsabilidades" color="indigo">
-          <div className="overflow-x-auto rounded-lg border border-border mt-2">
-            <table className="w-full text-xs">
-              <thead>
-                <tr className="bg-muted border-b border-border">
-                  <th className="text-left px-3 py-2 font-semibold text-muted-foreground w-1/3">Atividade</th>
-                  <th className="text-left px-3 py-2 font-semibold text-muted-foreground">Responsável</th>
-                  <th className="text-left px-3 py-2 font-semibold text-muted-foreground">Aprovador</th>
-                  <th className="text-left px-3 py-2 font-semibold text-muted-foreground">Consultado</th>
-                  <th className="text-left px-3 py-2 font-semibold text-muted-foreground">Informado</th>
+      {raci.length > 0 && (
+        <Secao icone={Users} titulo="Matriz RACI">
+          <table className="w-full text-xs">
+            <thead>
+              <tr className="border-b border-border text-left text-muted-foreground">
+                <th className="py-2 pr-2 font-medium">Atividade</th>
+                <th className="px-2 py-2 font-medium" title="Responsável — executa">R</th>
+                <th className="px-2 py-2 font-medium" title="Aprovador — responde pelo resultado">A</th>
+                <th className="px-2 py-2 font-medium" title="Consultado">C</th>
+                <th className="px-2 py-2 font-medium" title="Informado">I</th>
+              </tr>
+            </thead>
+            <tbody>
+              {raci.map((r, i) => (
+                <tr key={i} className="border-b border-border/60 last:border-0">
+                  <td className="py-2 pr-2 font-medium text-foreground">{r.atividade}</td>
+                  <td className="px-2 py-2">{r.responsavel || '—'}</td>
+                  <td className="px-2 py-2 font-semibold text-foreground">{r.aprovador || '—'}</td>
+                  <td className="px-2 py-2">{r.consultado || '—'}</td>
+                  <td className="px-2 py-2">{r.informado || '—'}</td>
                 </tr>
-              </thead>
-              <tbody>
-                {raciValido.map((row, i) => (
-                  <tr key={i} className="border-b border-border last:border-0 hover:bg-muted">
-                    <td className="px-3 py-2.5 font-medium text-foreground">{row.atividade || '—'}</td>
-                    <td className="px-3 py-2.5"><ParticipanteBadge value={row.responsavel} /></td>
-                    <td className="px-3 py-2.5"><ParticipanteBadge value={row.aprovador} /></td>
-                    <td className="px-3 py-2.5"><ParticipanteBadge value={row.consultado} /></td>
-                    <td className="px-3 py-2.5"><ParticipanteBadge value={row.informado} /></td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </SectionBlock>
+              ))}
+            </tbody>
+          </table>
+          <p className="mt-1.5 text-xs text-muted-foreground">R executa · A aprova e responde pelo resultado · C é consultado · I é informado</p>
+        </Secao>
+      )}
+
+      {isGestor && leitores && (
+        <Secao icone={CheckCircle2} titulo={`Leitura da versão ${pop.versao || '1.0'}`}>
+          <p className="text-sm text-foreground">
+            <span className="font-semibold">{leitores.leram.length}</span> de {leitores.total} confirmaram
+          </p>
+          {leitores.faltam.length > 0 && (
+            <p className="mt-1 text-xs text-muted-foreground">Faltam: {leitores.faltam.map((c) => primeiroNome(c.nome_completo)).join(', ')}</p>
+          )}
+        </Secao>
+      )}
+
+      {versoes.length > 0 && (
+        <section>
+          <button
+            type="button"
+            onClick={() => setHistoricoAberto((v) => !v)}
+            aria-expanded={historicoAberto}
+            className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground hover:text-foreground"
+          >
+            <History className="h-3.5 w-3.5" aria-hidden="true" /> Histórico de versões ({versoes.length})
+            {historicoAberto ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />}
+          </button>
+          {historicoAberto && (
+            <ol className="mt-2 space-y-2 border-l border-border pl-4">
+              {versoes.map((v) => (
+                <li key={v.id} className="text-sm">
+                  <span className="font-semibold text-foreground">v{v.versao}</span>
+                  <span className="ml-2 text-xs text-muted-foreground">
+                    {formatDateSP(v.publicado_em, 'DD/MM/YYYY')}{v.publicado_por_nome ? ` · ${primeiroNome(v.publicado_por_nome)}` : ''}
+                  </span>
+                  {v.o_que_mudou && <p className="text-xs text-muted-foreground">{v.o_que_mudou}</p>}
+                </li>
+              ))}
+            </ol>
+          )}
+        </section>
       )}
     </div>
   );

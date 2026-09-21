@@ -69,6 +69,43 @@
     "data_criacao": {
       "type": "string",
       "format": "date-time"
+    },
+    "prazos": {
+      "type": "array",
+      "description": "Prazos e números-chave em destaque no topo do POP (migration 18): [{rotulo, valor}]",
+      "items": { "type": "object", "properties": { "rotulo": { "type": "string" }, "valor": { "type": "string" } } }
+    },
+    "tipos_tratativa": {
+      "type": "array",
+      "description": "Chaves de tipo_tratativa ligadas a este POP — o botão Ver POP da tratativa usa",
+      "items": { "type": "string" }
+    },
+    "ordem": {
+      "type": "number",
+      "default": 0,
+      "description": "Ordem de exibição dentro da categoria"
+    },
+    "vigencia": {
+      "type": "string",
+      "format": "date",
+      "description": "Data a partir da qual a versão atual vale"
+    },
+    "o_que_mudou": {
+      "type": "string",
+      "description": "Resumo do que mudou na versão atual"
+    },
+    "publicado_em": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Quando a versão atual foi publicada"
+    },
+    "publicado_por_nome": {
+      "type": "string"
+    },
+    "exige_ciencia": {
+      "type": "boolean",
+      "default": true,
+      "description": "A versão atual pede confirmação de leitura dos agentes"
     }
   },
   "required": [

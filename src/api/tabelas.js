@@ -40,6 +40,8 @@ export const TABELAS = {
   PlanoSetorial: 'plano_setorial',
   Pontuacao: 'pontuacao',
   POP: 'pop',
+  PopLeitura: 'pop_leitura',
+  PopVersao: 'pop_versao',
   RespostaPesquisa: 'resposta_pesquisa',
   SaldoFerias: 'saldo_ferias',
   SkillMestre: 'skill_mestre',

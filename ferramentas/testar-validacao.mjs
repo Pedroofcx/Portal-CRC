@@ -14,6 +14,7 @@ import { posicaoNoRanking } from '../src/lib/posicaoRanking.js';
 import { prazoDaTratativa, descreverPrazo, consumoDoPrazo } from '../src/lib/prazoSla.js';
 import { indicadoresDoCiclo } from '../src/lib/indicadoresCiclo.js';
 import { conferirLinha } from './conferir-cores.mjs';
+import { proximaVersao, popsParaCiencia, agruparPorCategoria, popsDoTipo, fotografia } from '../src/lib/pops.js';
 import { filaDePendencias, avisosVisiveis, pesquisasVisiveis, obrigatoriasSemResposta, montarResposta } from '../src/lib/pendencias.js';
 import { traduzirErro } from '../src/lib/erros.js';
 import { formatDateSP, dataDoCalendario } from '../src/components/utils/helpers.js';
@@ -397,6 +398,43 @@ console.log('\n== central de pendencias (avisos e pesquisas) ==');
   checa('CSAT 4 e positivo', `${r.nota_calculada} ${r.sentimento}`, '4 positivo');
   checa('resposta leva todas as perguntas', String(r.respostas.length), '3');
   checa('NPS 7 e neutro', montarResposta({ ...pesq, tipo: 'nps' }, { q1: '7' }, { id: 'c1' }, hoje).sentimento, 'neutro');
+}
+
+console.log('\n== POPs: versao, ciencia e busca ==');
+{
+  checa('ajuste sobe o menor', proximaVersao('1.0'), '1.1');
+  checa('ajuste depois de 1.9', proximaVersao('1.9', 'ajuste'), '1.10');
+  checa('nova versao sobe o maior', proximaVersao('1.3', 'nova'), '2.0');
+  checa('sem versao comeca em 1.1', proximaVersao(null), '1.1');
+
+  const pops = [
+    { id: 'p1', versao: '1.0', ordem: 4, ativo: true, exige_ciencia: true, publicado_em: '2026-09-21T12:00:00Z', categoria: 'Tratativas', codigo: 'POP 04', titulo: 'Reclame Aqui', prazos: [{ rotulo: '1º contato', valor: 'até 1h' }], tipos_tratativa: ['reclame_aqui'] },
+    { id: 'p2', versao: '2.0', ordem: 1, ativo: true, exige_ciencia: true, publicado_em: '2026-09-21T12:00:00Z', categoria: 'Tratativas', codigo: 'POP 01', titulo: 'Reclamação Interna — AC', tipos_tratativa: ['reclamacao_interna'] },
+    { id: 'p3', versao: '1.0', ordem: 0, ativo: true, exige_ciencia: false, publicado_em: '2026-09-21T12:00:00Z', categoria: 'Governança', codigo: 'POP 00', titulo: 'Manual' },
+    { id: 'p4', versao: '1.0', ordem: 9, ativo: false, exige_ciencia: true, publicado_em: '2026-09-21T12:00:00Z', categoria: 'Tratativas', codigo: 'POP 09', titulo: 'Antigo' },
+    { id: 'p5', versao: '1.0', ordem: 5, ativo: true, exige_ciencia: true, publicado_em: '2026-01-01T12:00:00Z', categoria: 'Pessoas e rotina', codigo: 'POP 10', titulo: 'FI' },
+  ];
+  const ana = { id: 'c1', created_date: '2026-01-26T12:00:00Z' };
+  const novo = { id: 'c2', created_date: '2026-09-22T12:00:00Z' };
+  const leituras = [{ pop_id: 'p2', versao: '1.0', colaborador_id: 'c1' }];
+
+  checa('ciencia: ordem, sem inativo e sem o que nao pede',
+    popsParaCiencia({ pops, leituras, colaborador: ana }).map((p) => p.id).join(','), 'p2,p1');
+  checa('ler a 1.0 nao vale para a 2.0', String(popsParaCiencia({ pops, leituras, colaborador: ana }).some((p) => p.id === 'p2')), 'true');
+  checa('confirmada a versao atual, sai',
+    popsParaCiencia({ pops, leituras: [...leituras, { pop_id: 'p2', versao: '2.0', colaborador_id: 'c1' }], colaborador: ana }).map((p) => p.id).join(','), 'p1');
+  checa('gestor nao precisa confirmar o que publica', String(popsParaCiencia({ pops, colaborador: { ...ana, papel: 'gestor' } }).length), '0');
+  checa('quem chegou depois nao recebe versao antiga', String(popsParaCiencia({ pops, colaborador: novo }).length), '0');
+  checa('tratado na sessao sai na hora',
+    popsParaCiencia({ pops, leituras, colaborador: ana, tratados: new Set(['p1@1.0']) }).map((p) => p.id).join(','), 'p2');
+
+  const grupos = agruparPorCategoria(pops.filter((p) => p.ativo), '');
+  checa('grupos na ordem das categorias', grupos.map((g) => g.categoria).join(','), 'Governança,Tratativas,Pessoas e rotina');
+  checa('dentro do grupo, pela ordem', grupos[1].pops.map((p) => p.codigo).join(','), 'POP 01,POP 04');
+  checa('busca sem acento acha com acento', agruparPorCategoria(pops, 'reclamacao')[0].pops[0].codigo, 'POP 01');
+  checa('busca acha pelo prazo', agruparPorCategoria(pops, 'ate 1h')[0].pops[0].codigo, 'POP 04');
+  checa('POPs do tipo', popsDoTipo(pops, 'reclamacao_interna').map((p) => p.id).join(','), 'p2');
+  checa('fotografia guarda os campos do POP', Object.keys(fotografia(pops[0])).includes('prazos') ? 'sim' : 'nao', 'sim');
 }
 
 console.log('\n== conferencia de cores (o verificador pega o que deve) ==');

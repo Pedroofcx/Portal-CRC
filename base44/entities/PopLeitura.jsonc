@@ -1,0 +1,11 @@
+{
+  "name": "PopLeitura",
+  "type": "object",
+  "properties": {
+    "pop_id": { "type": "string", "description": "ID do POP" },
+    "versao": { "type": "string", "description": "Versão lida" },
+    "colaborador_id": { "type": "string", "description": "ID de quem confirmou a leitura" },
+    "data_leitura": { "type": "string", "format": "date-time" }
+  },
+  "required": ["pop_id", "versao", "colaborador_id"]
+}

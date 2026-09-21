@@ -49,6 +49,8 @@ alter table public."pesquisa" enable row level security;
 alter table public."plano_setorial" enable row level security;
 alter table public."pontuacao" enable row level security;
 alter table public."pop" enable row level security;
+alter table public."pop_leitura" enable row level security;
+alter table public."pop_versao" enable row level security;
 alter table public."resposta_pesquisa" enable row level security;
 alter table public."saldo_ferias" enable row level security;
 alter table public."skill_mestre" enable row level security;

@@ -152,8 +152,11 @@ export default function Tratativas() {
   });
 
   const { data: tratativasRecentes = [], isLoading } = useQuery({
-    queryKey: ['tratativas', "list('-created_date', 300)"],
-    queryFn: () => db.entities.Tratativa.list('-created_date', 300),
+    // TODAS (o db.js pagina de 1000 em 1000). Com as "300 mais recentes", as
+    // encerradas mais antigas sumiam da lista e da busca — 59 de 355 em
+    // 21/09/2026, e o número só cresce. Mesma chave do Analytics: uma busca só.
+    queryKey: ['tratativas', "list('-created_date')"],
+    queryFn: () => db.entities.Tratativa.list('-created_date'),
     staleTime: 60000,
     gcTime: 300000,
     refetchOnWindowFocus: false,

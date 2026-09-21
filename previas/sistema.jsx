@@ -27,6 +27,20 @@ import copia from './dados-sistema.json';
 // ------------------------------------------------------ banco em memória
 const memoria = structuredClone(copia.dados);
 
+// ?pops=novos: os POPs da Estrutura de Trabalho 2026 (ferramentas/pops),
+// como se o importador já tivesse rodado — para testar antes da migration 18.
+if (new URLSearchParams(window.location.search).get('pops') === 'novos') {
+  const { POPS } = await import('../ferramentas/pops/estrutura-2026.mjs');
+  const agora = new Date().toISOString();
+  memoria.POP = POPS.map((pop, i) => ({
+    ...pop, id: `pop-${i}`, versao: '1.0', ativo: true, exige_ciencia: true, created_date: agora,
+    publicado_em: agora, publicado_por_nome: 'Pedro Henrique Soares', vigencia: agora.slice(0, 10),
+    o_que_mudou: 'Primeira versão no Portal.',
+  }));
+  memoria.PopVersao = memoria.POP.map((pop) => ({ id: `v-${pop.id}`, pop_id: pop.id, versao: '1.0', publicado_em: agora, publicado_por_nome: 'Pedro Henrique Soares', o_que_mudou: pop.o_que_mudou }));
+  memoria.PopLeitura = [];
+}
+
 const casa = (valor, condicao) => {
   if (condicao === null) return valor === null || valor === undefined;
   if (condicao && typeof condicao === 'object' && !Array.isArray(condicao)) {

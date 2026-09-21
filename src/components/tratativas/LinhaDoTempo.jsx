@@ -46,7 +46,11 @@ function tipoDaEntrada(entrada) {
   return 'nota';
 }
 
-export default function LinhaDoTempo({ entradas = [] }) {
+export default function LinhaDoTempo({ entradas: recebidas }) {
+  // Tratativa sem histórico chega com o campo NULO, não ausente — e o valor
+  // padrão "= []" só vale para ausente. Com null, `.length` derrubava a tela
+  // inteira da tratativa ("Cannot read properties of null").
+  const entradas = Array.isArray(recebidas) ? recebidas : [];
   if (!entradas.length) {
     return <p className="text-sm text-muted-foreground">Nenhum registro ainda.</p>;
   }

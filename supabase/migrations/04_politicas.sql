@@ -516,10 +516,32 @@ drop policy if exists "pop_inserir"  on public."pop";
 drop policy if exists "pop_alterar"  on public."pop";
 drop policy if exists "pop_apagar"   on public."pop";
 create policy "pop_ler" on public."pop" for select to authenticated using (public.eh_colaborador());
--- pop: qualquer colaborador ativo grava
-create policy "pop_inserir" on public."pop" for insert to authenticated with check (public.eh_colaborador());
-create policy "pop_alterar" on public."pop" for update to authenticated using (public.eh_colaborador()) with check (public.eh_colaborador());
-create policy "pop_apagar" on public."pop" for delete to authenticated using (public.eh_colaborador());
+-- pop: só gestor grava
+create policy "pop_inserir" on public."pop" for insert to authenticated with check (public.eh_gestor());
+create policy "pop_alterar" on public."pop" for update to authenticated using (public.eh_gestor()) with check (public.eh_gestor());
+create policy "pop_apagar" on public."pop" for delete to authenticated using (public.eh_gestor());
+
+-- pop_leitura
+drop policy if exists "pop_leitura_ler"      on public."pop_leitura";
+drop policy if exists "pop_leitura_inserir"  on public."pop_leitura";
+drop policy if exists "pop_leitura_alterar"  on public."pop_leitura";
+drop policy if exists "pop_leitura_apagar"   on public."pop_leitura";
+-- pop_leitura: todos leem; cada um grava só a própria; gestor altera e apaga
+create policy "pop_leitura_ler" on public."pop_leitura" for select to authenticated using (public.eh_colaborador());
+create policy "pop_leitura_inserir" on public."pop_leitura" for insert to authenticated with check (colaborador_id = public.meu_colaborador_id());
+create policy "pop_leitura_alterar" on public."pop_leitura" for update to authenticated using (public.eh_gestor()) with check (public.eh_gestor());
+create policy "pop_leitura_apagar" on public."pop_leitura" for delete to authenticated using (public.eh_gestor());
+
+-- pop_versao
+drop policy if exists "pop_versao_ler"      on public."pop_versao";
+drop policy if exists "pop_versao_inserir"  on public."pop_versao";
+drop policy if exists "pop_versao_alterar"  on public."pop_versao";
+drop policy if exists "pop_versao_apagar"   on public."pop_versao";
+create policy "pop_versao_ler" on public."pop_versao" for select to authenticated using (public.eh_colaborador());
+-- pop_versao: só gestor grava
+create policy "pop_versao_inserir" on public."pop_versao" for insert to authenticated with check (public.eh_gestor());
+create policy "pop_versao_alterar" on public."pop_versao" for update to authenticated using (public.eh_gestor()) with check (public.eh_gestor());
+create policy "pop_versao_apagar" on public."pop_versao" for delete to authenticated using (public.eh_gestor());
 
 -- resposta_pesquisa
 drop policy if exists "resposta_pesquisa_ler"      on public."resposta_pesquisa";

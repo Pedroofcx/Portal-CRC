@@ -1,222 +1,270 @@
 import db from '@/api/db';
-import React, { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-
-import { formatDateSP } from '@/components/utils/helpers';
+import React, { useMemo, useState } from 'react';
+import { useLocation } from 'react-router-dom';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
+import { ClipboardCheck, FileText, Pencil, Plus, Search, Trash2 } from 'lucide-react';
 import PageHeader from '@/components/ui/PageHeader';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import ConfirmDialog from '@/components/ui/ConfirmDialog';
+import PainelLateral from '@/components/ui/PainelLateral';
 import POPForm from '@/components/pop/POPForm';
 import POPViewer from '@/components/pop/POPViewer';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent } from '@/components/ui/card';
-import { toast } from 'sonner';
+import { todaySP } from '@/components/utils/helpers';
+import { agruparPorCategoria, fotografia, popsParaCiencia, proximaVersao } from '@/lib/pops';
 
-
-import { FileText, Plus, Eye, Trash2, Search } from 'lucide-react';
-import PainelLateral from '@/components/ui/PainelLateral';
-
+/**
+ * POP — a biblioteca de procedimentos da Estrutura de Trabalho CRC 2026.
+ *
+ * Todo mundo lê; só o gestor cria, edita e desativa (o banco garante —
+ * migration 18). Cada edição publica uma VERSÃO nova, guardada no histórico,
+ * e pode pedir confirmação de leitura da equipe (central de pendências).
+ *
+ * ?abrir=POP%2004 abre direto num POP — é o que o "Ver POP" da tratativa usa.
+ */
 export default function POP() {
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [viewDialogOpen, setViewDialogOpen] = useState(false);
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [selectedPOP, setSelectedPOP] = useState(null);
-  const [searchTerm, setSearchTerm] = useState('');
-
   const queryClient = useQueryClient();
+  const { search } = useLocation();
+  const [busca, setBusca] = useState('');
+  const [abertoId, setAbertoId] = useState(null);
+  const [editando, setEditando] = useState(null); // null | 'novo' | pop
+  const [desativando, setDesativando] = useState(null);
 
-  const { data: user } = useQuery({
-    queryKey: ['currentUser'],
-    queryFn: () => db.auth.me(),
-  });
-
+  const { data: user } = useQuery({ queryKey: ['currentUser'], queryFn: () => db.auth.me() });
   const { data: colaboradores = [] } = useQuery({
     queryKey: ['colaboradores', "list()"],
     queryFn: () => db.entities.Colaborador.list(),
   });
+  const eu = colaboradores.find((c) => c.email?.toLowerCase() === user?.email?.toLowerCase());
+  const isGestor = eu?.papel === 'gestor';
 
   const { data: pops = [], isLoading } = useQuery({
-    queryKey: ['pops'],
-    queryFn: () => db.entities.POP.filter({ ativo: true }, '-created_date'),
+    queryKey: ['pops', 'ativos'],
+    queryFn: () => db.entities.POP.filter({ ativo: true }),
+  });
+  const { data: minhasLeituras = [] } = useQuery({
+    queryKey: ['pop-leituras', eu?.id],
+    queryFn: () => db.entities.PopLeitura.filter({ colaborador_id: eu.id }),
+    enabled: Boolean(eu?.id),
+  });
+  const { data: tiposTratativa = [] } = useQuery({
+    queryKey: ['tipos-tratativa', "filter({ ativa: true })"],
+    queryFn: () => db.entities.TipoTratativa.filter({ ativa: true }),
+    enabled: isGestor,
   });
 
-  const colaborador = colaboradores.find((c) => c.email === user?.email);
-  const isGestor = colaborador?.papel === 'gestor';
+  // Abrir direto pelo endereço (?abrir=POP 04), uma vez só.
+  const [abriuPeloLink, setAbriuPeloLink] = useState(false);
+  if (!abriuPeloLink && pops.length) {
+    const codigo = new URLSearchParams(search).get('abrir');
+    const alvo = codigo && pops.find((p) => p.codigo === codigo);
+    setAbriuPeloLink(true);
+    if (alvo) setAbertoId(alvo.id);
+  }
 
-  const popsFiltrados = pops.filter(
-    (pop) =>
-      pop.titulo?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      pop.codigo?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      pop.categoria?.toLowerCase().includes(searchTerm.toLowerCase())
+  const aberto = pops.find((p) => p.id === abertoId) ?? null;
+  const grupos = useMemo(() => agruparPorCategoria(pops, busca), [pops, busca]);
+  const pendentes = useMemo(
+    () => new Set(popsParaCiencia({ pops, leituras: minhasLeituras, colaborador: eu }).map((p) => p.id)),
+    [pops, minhasLeituras, eu],
   );
 
-  const createMutation = useMutation({
-    mutationFn: (data) =>
-      db.entities.POP.create({
-        ...data,
-        ativo: true,
-        versao: '1.0',
-        data_criacao: new Date().toISOString(),
-      }),
-    onSuccess: () => {
-      queryClient.invalidateQueries(['pops']);
-      toast.success('POP criado com sucesso');
-      setDialogOpen(false);
+  const { data: versoes = [] } = useQuery({
+    queryKey: ['pop-versoes', abertoId],
+    queryFn: () => db.entities.PopVersao.filter({ pop_id: abertoId }, '-publicado_em'),
+    enabled: Boolean(abertoId),
+  });
+  const { data: leiturasDaVersao = [] } = useQuery({
+    queryKey: ['pop-leituras-versao', abertoId, aberto?.versao],
+    queryFn: () => db.entities.PopLeitura.filter({ pop_id: abertoId, versao: aberto.versao }),
+    enabled: Boolean(isGestor && aberto),
+  });
+  const leitores = useMemo(() => {
+    if (!isGestor || !aberto) return null;
+    const equipe = colaboradores.filter((c) => c.ativo !== false && c.papel === 'agente');
+    const leram = new Set(leiturasDaVersao.map((l) => l.colaborador_id));
+    return { total: equipe.length, leram: equipe.filter((c) => leram.has(c.id)), faltam: equipe.filter((c) => !leram.has(c.id)) };
+  }, [isGestor, aberto, colaboradores, leiturasDaVersao]);
+
+  const atualizar = () => {
+    queryClient.invalidateQueries({ queryKey: ['pops'] });
+    queryClient.invalidateQueries({ queryKey: ['pop-versoes'] });
+  };
+
+  const salvar = useMutation({
+    mutationFn: async ({ dados, versao: meta }) => {
+      const agora = new Date().toISOString();
+      const autoria = { publicado_em: agora, publicado_por_nome: eu?.nome_completo ?? null, vigencia: todaySP() };
+      let pop;
+      if (editando === 'novo') {
+        pop = await db.entities.POP.create({
+          ...dados, ...autoria, versao: '1.0', ativo: true, exige_ciencia: true,
+          data_criacao: agora, o_que_mudou: 'Primeira versão.',
+        });
+      } else {
+        pop = await db.entities.POP.update(editando.id, {
+          ...dados, ...autoria,
+          versao: proximaVersao(editando.versao, meta.tipoVersao),
+          o_que_mudou: meta.o_que_mudou,
+          exige_ciencia: meta.exige_ciencia,
+        });
+      }
+      await db.entities.PopVersao.create({
+        pop_id: pop.id, versao: pop.versao, snapshot: fotografia(pop), o_que_mudou: pop.o_que_mudou,
+        publicado_em: agora, publicado_por_id: eu?.id ?? null, publicado_por_nome: eu?.nome_completo ?? null,
+      });
+      return pop;
     },
-    onError: () => toast.error('Erro ao criar POP'),
+    onSuccess: (pop) => {
+      toast.success(`${pop.codigo} publicado — versão ${pop.versao}`);
+      atualizar();
+      setEditando(null);
+      setAbertoId(pop.id);
+    },
   });
 
-  const deleteMutation = useMutation({
+  const desativar = useMutation({
     mutationFn: (id) => db.entities.POP.update(id, { ativo: false }),
-    onSuccess: () => {
-      queryClient.invalidateQueries(['pops']);
-      toast.success('POP excluído');
-      setDeleteDialogOpen(false);
-    },
-    onError: () => toast.error('Erro ao excluir'),
+    onSuccess: () => { toast.success('POP desativado'); atualizar(); setDesativando(null); setAbertoId(null); },
   });
+
+  const confirmarLeitura = useMutation({
+    mutationFn: (pop) => db.entities.PopLeitura.create({
+      pop_id: pop.id, versao: pop.versao, colaborador_id: eu.id, data_leitura: new Date().toISOString(),
+    }),
+    onSuccess: () => {
+      toast.success('Leitura confirmada');
+      queryClient.invalidateQueries({ queryKey: ['pop-leituras'] });
+      queryClient.invalidateQueries({ queryKey: ['pop-leituras-versao'] });
+    },
+  });
+
+  if (isLoading) return <LoadingSpinner text="Carregando procedimentos…" />;
 
   return (
     <div className="space-y-6">
       <PageHeader
         title="POP — Procedimentos Operacionais"
-        subtitle="Central de documentação operacional padronizada do CSC"
+        subtitle="Estrutura de Trabalho CRC 2026 · um procedimento por tema"
         icon={FileText}
-        actions={
-          isGestor && (
-            <Button
-              onClick={() => setDialogOpen(true)}
-              className="bg-muted superficie-escura hover:bg-muted gap-2"
-            >
-              <Plus className="w-4 h-4" />
-              Novo POP
-            </Button>
-          )
-        }
+        actions={isGestor && (
+          <Button onClick={() => setEditando('novo')}>
+            <Plus className="mr-2 h-4 w-4" aria-hidden="true" /> Novo POP
+          </Button>
+        )}
       />
 
-      {/* Busca */}
-      <Card className="border-0 shadow-sm">
-        <CardContent className="p-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <Input
-              placeholder="Buscar por código, título ou categoria..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
-            />
-          </div>
-        </CardContent>
-      </Card>
+      <div className="relative max-w-xl">
+        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
+        <Input
+          aria-label="Buscar nos POPs"
+          placeholder="Buscar em todo o texto: código, tema, prazo, macro…"
+          value={busca}
+          onChange={(e) => setBusca(e.target.value)}
+          className="pl-10"
+        />
+      </div>
 
-      {/* Listagem */}
-      {isLoading ? (
-        <LoadingSpinner text="Carregando procedimentos..." />
-      ) : popsFiltrados.length === 0 ? (
-        <div className="text-center py-16 text-muted-foreground">
-          <FileText className="w-10 h-10 mx-auto mb-3 opacity-30" />
-          <p className="font-medium">Nenhum POP encontrado</p>
-          {isGestor && (
-            <Button
-              variant="outline"
-              className="mt-4"
-              onClick={() => setDialogOpen(true)}
-            >
-              Criar primeiro POP
-            </Button>
-          )}
-        </div>
-      ) : (
-        <div className="space-y-2">
-          {popsFiltrados.map((pop) => (
-            <Card
-              key={pop.id}
-              className="border-0 shadow-sm hover:shadow-sm transition-shadow cursor-pointer"
-              onClick={() => { setSelectedPOP(pop); setViewDialogOpen(true); }}
-            >
-              <CardContent className="p-4 flex items-center justify-between gap-4">
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center flex-shrink-0">
-                    <FileText className="w-4 h-4 text-muted-foreground" />
-                  </div>
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <Badge variant="outline" className="font-mono text-xs">{pop.codigo}</Badge>
-                      {pop.categoria && (
-                        <Badge variant="secondary" className="text-xs">{pop.categoria}</Badge>
-                      )}
-                    </div>
-                    <p className="text-sm font-semibold text-foreground mt-0.5 truncate">{pop.titulo}</p>
-                    {pop.objetivo && (
-                      <p className="text-xs text-muted-foreground mt-0.5 truncate max-w-xl">{pop.objetivo}</p>
-                    )}
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2 flex-shrink-0">
-                  <span className="text-xs text-muted-foreground hidden sm:block">
-                    {formatDateSP(pop.data_criacao, 'DD/MM/YYYY')}
-                  </span>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={(e) => { e.stopPropagation(); setSelectedPOP(pop); setViewDialogOpen(true); }}
-                  >
-                    <Eye className="w-4 h-4" />
-                  </Button>
-                  {isGestor && (
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="text-destructive hover:text-destructive"
-                      onClick={(e) => { e.stopPropagation(); setSelectedPOP(pop); setDeleteDialogOpen(true); }}
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+      {pendentes.size > 0 && (
+        <p className="rounded-lg bg-info-soft px-4 py-2.5 text-sm text-foreground">
+          <ClipboardCheck className="mr-1.5 inline h-4 w-4 text-primary" aria-hidden="true" />
+          {pendentes.size} POP{pendentes.size === 1 ? '' : 's'} com versão nova para você ler e confirmar.
+        </p>
       )}
 
-      {/* Dialog — Criação */}
-      <PainelLateral
-        open={dialogOpen} onOpenChange={setDialogOpen}
-        largura="2xl"
-        titulo="Novo Procedimento Operacional Padrão"
-      >
-          <div className="mt-2">
-            <POPForm
-              onSubmit={(data) => createMutation.mutate(data)}
-              onCancel={() => setDialogOpen(false)}
-              isLoading={createMutation.isPending}
-            />
+      {grupos.length === 0 ? (
+        <div className="py-16 text-center text-muted-foreground">
+          <FileText className="mx-auto mb-3 h-10 w-10 opacity-30" aria-hidden="true" />
+          <p className="font-medium">{busca ? 'Nenhum POP encontrado para essa busca' : 'Nenhum POP publicado'}</p>
+        </div>
+      ) : grupos.map((g) => (
+        <section key={g.categoria}>
+          <h2 className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+            {g.categoria} <span className="font-normal">· {g.pops.length}</span>
+          </h2>
+          <div className="divide-y divide-border overflow-hidden rounded-xl border border-border bg-card">
+            {g.pops.map((p) => (
+              <button
+                key={p.id}
+                type="button"
+                onClick={() => setAbertoId(p.id)}
+                className="flex w-full items-center gap-4 px-4 py-3 text-left transition-colors hover:bg-muted/50"
+              >
+                <span className="w-16 shrink-0 font-mono text-xs font-semibold text-muted-foreground">{p.codigo}</span>
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate text-sm font-medium text-foreground">{p.titulo}</span>
+                  {p.prazos?.length > 0 && (
+                    <span className="block truncate text-xs text-muted-foreground">
+                      {p.prazos.slice(0, 2).map((z) => `${z.rotulo}: ${z.valor}`).join(' · ')}
+                    </span>
+                  )}
+                </span>
+                {pendentes.has(p.id)
+                  ? <span className="shrink-0 rounded-full bg-info-soft px-2 py-0.5 text-xs font-semibold text-primary">Ler nova versão</span>
+                  : <span className="shrink-0 text-xs text-muted-foreground">v{p.versao || '1.0'}</span>}
+              </button>
+            ))}
           </div>
-        </PainelLateral>
+        </section>
+      ))}
 
-      {/* Dialog — Visualização */}
       <PainelLateral
-        open={viewDialogOpen} onOpenChange={setViewDialogOpen}
+        open={Boolean(aberto) && !editando}
+        onOpenChange={(v) => { if (!v) setAbertoId(null); }}
         largura="2xl"
-        titulo="Visualizar POP"
+        titulo={aberto ? aberto.titulo : ''}
+        icone={FileText}
+        rodape={aberto && (
+          <>
+            {isGestor && (
+              <>
+                <Button variant="ghost" className="mr-auto text-destructive hover:text-destructive" onClick={() => setDesativando(aberto)}>
+                  <Trash2 className="mr-1.5 h-4 w-4" aria-hidden="true" /> Desativar
+                </Button>
+                <Button variant="outline" onClick={() => setEditando(aberto)}>
+                  <Pencil className="mr-1.5 h-4 w-4" aria-hidden="true" /> Editar
+                </Button>
+              </>
+            )}
+            {pendentes.has(aberto.id) && (
+              <Button onClick={() => confirmarLeitura.mutate(aberto)} disabled={confirmarLeitura.isPending}>
+                <ClipboardCheck className="mr-1.5 h-4 w-4" aria-hidden="true" /> Li e compreendi a versão {aberto.versao}
+              </Button>
+            )}
+          </>
+        )}
       >
-          <POPViewer pop={selectedPOP} />
-        </PainelLateral>
+        <POPViewer pop={aberto} versoes={versoes} leitores={leitores} isGestor={isGestor} />
+      </PainelLateral>
 
-      {/* Confirm Delete */}
+      <PainelLateral
+        open={Boolean(editando)}
+        onOpenChange={(v) => { if (!v) setEditando(null); }}
+        largura="2xl"
+        titulo={editando === 'novo' ? 'Novo POP' : editando ? `Editar ${editando.codigo}` : ''}
+        descricao={editando && editando !== 'novo' ? `Versão atual ${editando.versao} — salvar publica uma versão nova` : undefined}
+      >
+        {editando && (
+          <POPForm
+            key={editando === 'novo' ? 'novo' : editando.id}
+            popInicial={editando === 'novo' ? null : editando}
+            tiposTratativa={tiposTratativa}
+            isLoading={salvar.isPending}
+            onCancel={() => setEditando(null)}
+            onSubmit={(dados, versao) => salvar.mutate({ dados, versao })}
+          />
+        )}
+      </PainelLateral>
+
       <ConfirmDialog
-        open={deleteDialogOpen}
-        onOpenChange={setDeleteDialogOpen}
-        title="Excluir POP"
-        description={`Tem certeza que deseja excluir o POP "${selectedPOP?.codigo} — ${selectedPOP?.titulo}"?`}
-        confirmLabel="Excluir"
-        onConfirm={() => selectedPOP && deleteMutation.mutate(selectedPOP.id)}
-        variant="danger"
+        open={Boolean(desativando)}
+        onOpenChange={(v) => { if (!v) setDesativando(null); }}
+        title="Desativar este POP?"
+        description={desativando ? `${desativando.codigo} — ${desativando.titulo} sai da lista. O histórico de versões fica guardado.` : ''}
+        confirmLabel="Desativar"
+        onConfirm={() => desativar.mutate(desativando.id)}
       />
     </div>
   );

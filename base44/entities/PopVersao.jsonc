@@ -1,0 +1,14 @@
+{
+  "name": "PopVersao",
+  "type": "object",
+  "properties": {
+    "pop_id": { "type": "string", "description": "ID do POP" },
+    "versao": { "type": "string", "description": "Número da versão (1.0, 1.1, 2.0...)" },
+    "snapshot": { "type": "object", "description": "O POP inteiro como estava nesta versão" },
+    "o_que_mudou": { "type": "string", "description": "Resumo da mudança, escrito pelo gestor" },
+    "publicado_em": { "type": "string", "format": "date-time" },
+    "publicado_por_id": { "type": "string", "description": "ID do colaborador que publicou" },
+    "publicado_por_nome": { "type": "string" }
+  },
+  "required": ["pop_id", "versao"]
+}
