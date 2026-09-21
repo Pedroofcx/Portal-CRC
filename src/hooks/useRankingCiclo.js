@@ -3,9 +3,10 @@ import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { calculateTratativaPoints } from '@/components/utils/helpers';
 import { tratativaNosCiclo } from '@/hooks/usePontuacaoAgente';
+import { STATUS_ENCERRADOS, somaDoBonus } from '@/lib/bonusManual';
 
 /**
- * Ranking dos agentes no ciclo ativo.
+ * Ranking dos agentes num ciclo — o ativo, ou um já encerrado (histórico).
  *
  * Saiu de dentro do RankingTrimestral para a tela inicial do operador poder
  * dizer "3º lugar, a 2,0 pts do 2º" com a MESMA conta do ranking — duas
@@ -13,8 +14,13 @@ import { tratativaNosCiclo } from '@/hooks/usePontuacaoAgente';
  *
  * Pontos = tratativas encerradas no ciclo (calculateTratativaPoints) + bônus
  * manual que o gestor lança para o ciclo.
+ *
+ * Quem entra: os agentes ativos. Num ciclo que não é o ativo, entra também
+ * quem já saiu mas pontuou nele — o histórico não pode perder gente.
+ *
+ * @param cicloId o ciclo a mostrar; sem ele, o ativo.
  */
-export function useRankingCiclo() {
+export function useRankingCiclo(cicloId = null) {
   const { data: colaboradores = [] } = useQuery({
     queryKey: ['colaboradores'],
     queryFn: () => db.entities.Colaborador.list(),
@@ -27,51 +33,71 @@ export function useRankingCiclo() {
     staleTime: 300000,
   });
   const cicloAtivo = useMemo(() => ciclos.find((c) => c.ativo) || null, [ciclos]);
+  const ciclo = useMemo(
+    () => (cicloId ? ciclos.find((c) => c.id === cicloId) : cicloAtivo) || null,
+    [ciclos, cicloId, cicloAtivo],
+  );
 
-  const { data: pontuacoes = [] } = useQuery({
-    queryKey: ['pontuacoes'],
-    queryFn: () => db.entities.Pontuacao.list('-created_date', 200),
+  const { data: bonus = [] } = useQuery({
+    queryKey: ['bonus-manual'],
+    queryFn: () => db.entities.Pontuacao.filter({ tipo: 'bonus_manual' }, '-created_date'),
     staleTime: 60000,
   });
 
+  // TODAS as encerradas (paginado pelo db.js), e não as "últimas 1000": o
+  // histórico de ciclos antigos precisa das antigas.
   const { data: todasTratativas = [], isLoading } = useQuery({
     queryKey: ['tratativas-encerradas-ranking'],
-    queryFn: () => db.entities.Tratativa.filter({}, '-data_encerramento', 1000),
+    queryFn: () => db.entities.Tratativa.filter({ status: { $in: STATUS_ENCERRADOS } }, '-data_encerramento'),
     staleTime: 120000,
     gcTime: 300000,
     refetchOnWindowFocus: false,
     select: (data) => data.filter((t) =>
-      (t.status === 'encerrada' || t.status === 'aguardando_confirmacao_reabertura')
+      STATUS_ENCERRADOS.includes(t.status)
       && !!t.agente_responsavel_id
       && !t.excluida),
   });
 
   const ranking = useMemo(() => {
-    if (!cicloAtivo) return [];
-    const agentes = colaboradores.filter((c) => c.papel === 'agente' && c.ativo !== false);
+    if (!ciclo) return [];
+    const doCiclo = todasTratativas.filter((t) => tratativaNosCiclo(t, ciclo));
+    const bonusDoCiclo = bonus.filter((b) => b.ciclo_id === ciclo.id);
+    const pontuouNoCiclo = new Set([...doCiclo.map((t) => t.agente_responsavel_id), ...bonusDoCiclo.map((b) => b.colaborador_id)]);
+    const historico = ciclo.id !== cicloAtivo?.id;
+
+    const agentes = colaboradores.filter((c) => c.papel === 'agente'
+      && (c.ativo !== false || (historico && pontuouNoCiclo.has(c.id))));
 
     return agentes.map((agente) => {
-      const minhasTratativas = todasTratativas.filter(
-        (t) => t.agente_responsavel_id === agente.id && tratativaNosCiclo(t, cicloAtivo),
-      );
-      let pontosCalculados = 0;
-      minhasTratativas.forEach((t) => { pontosCalculados += calculateTratativaPoints(t).pontos; });
-
-      const bonus = pontuacoes
-        .filter((p) => p.colaborador_id === agente.id && p.ciclo_id === cicloAtivo.id && p.tipo === 'bonus_manual')
-        .reduce((acc, p) => acc + (p.total_pontos || 0), 0);
+      // Uma linha por tratativa: a página detalhada do gestor monta dela o
+      // ritmo por semana, os pontos por canal e o % no SLA.
+      const itens = doCiclo.filter((t) => t.agente_responsavel_id === agente.id).map((t) => ({
+        tratativa_id: t.id,
+        pontos: calculateTratativaPoints(t).pontos,
+        tipo_tratativa: t.tipo_tratativa,
+        data_encerramento: t.data_encerramento,
+        encerrado_no_sla: t.encerrado_no_sla,
+      }));
+      const pontosCalculados = itens.reduce((acc, i) => acc + i.pontos, 0);
+      const lancamentos = bonusDoCiclo.filter((b) => b.colaborador_id === agente.id);
+      const somaBonus = somaDoBonus(lancamentos);
 
       return {
         id: agente.id,
         nome: agente.nome_completo,
         foto: agente.foto_url,
-        totalPontos: pontosCalculados + bonus,
-        tratativasEncerradas: minhasTratativas.length,
+        ativo: agente.ativo !== false,
+        totalPontos: pontosCalculados + somaBonus,
+        pontosTratativas: pontosCalculados,
+        bonus: somaBonus,
+        lancamentosBonus: lancamentos,
+        itens,
+        tratativasEncerradas: itens.length,
       };
     }).sort((a, b) => b.totalPontos - a.totalPontos);
-  }, [colaboradores, pontuacoes, todasTratativas, cicloAtivo]);
+  }, [colaboradores, bonus, todasTratativas, ciclo, cicloAtivo]);
 
-  return { ranking, cicloAtivo, isLoading };
+  return { ranking, ciclo, cicloAtivo, ciclos, isLoading };
 }
 
 export { posicaoNoRanking } from '@/lib/posicaoRanking';

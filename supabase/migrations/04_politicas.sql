@@ -427,11 +427,11 @@ drop policy if exists "observacao_ler"      on public."observacao";
 drop policy if exists "observacao_inserir"  on public."observacao";
 drop policy if exists "observacao_alterar"  on public."observacao";
 drop policy if exists "observacao_apagar"   on public."observacao";
-create policy "observacao_ler" on public."observacao" for select to authenticated using (public.eh_colaborador());
--- observacao: qualquer colaborador ativo grava
-create policy "observacao_inserir" on public."observacao" for insert to authenticated with check (public.eh_colaborador());
-create policy "observacao_alterar" on public."observacao" for update to authenticated using (public.eh_colaborador()) with check (public.eh_colaborador());
-create policy "observacao_apagar" on public."observacao" for delete to authenticated using (public.eh_colaborador());
+-- observacao: gestor lê e grava tudo; o agente lê só o que o cita e é visível para ele
+create policy "observacao_ler" on public."observacao" for select to authenticated using (public.eh_gestor() or (visibilidade in ('agente', 'ambos') and colaboradores_ids ? public.meu_colaborador_id()));
+create policy "observacao_inserir" on public."observacao" for insert to authenticated with check (public.eh_gestor());
+create policy "observacao_alterar" on public."observacao" for update to authenticated using (public.eh_gestor()) with check (public.eh_gestor());
+create policy "observacao_apagar" on public."observacao" for delete to authenticated using (public.eh_gestor());
 
 -- oraculo_lancamento
 drop policy if exists "oraculo_lancamento_ler"      on public."oraculo_lancamento";

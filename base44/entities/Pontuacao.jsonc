@@ -2,6 +2,27 @@
   "name": "Pontuacao",
   "type": "object",
   "properties": {
+    "tipo": {
+      "type": "string",
+      "enum": ["bonus_manual"],
+      "description": "bonus_manual = pontos lançados pelo gestor para um ciclo (migration 17). Vazio nos registros antigos."
+    },
+    "ciclo_id": {
+      "type": "string",
+      "description": "ID do ciclo trimestral (ciclo_trimestral) a que o bônus pertence"
+    },
+    "descricao": {
+      "type": "string",
+      "description": "Motivo do bônus, escrito pelo gestor"
+    },
+    "lancado_por_id": {
+      "type": "string",
+      "description": "ID do colaborador (gestor) que lançou o bônus"
+    },
+    "lancado_por_nome": {
+      "type": "string",
+      "description": "Nome de quem lançou o bônus"
+    },
     "colaborador_id": {
       "type": "string",
       "description": "ID do colaborador"

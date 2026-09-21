@@ -170,7 +170,7 @@ export default function DistribuicaoTratativas({ gestorId, gestorNome, colaborad
           </div>
 
           <Tabs defaultValue="agentes">
-            <TabsList className="bg-muted">
+            <TabsList className="h-auto flex-wrap justify-start bg-muted">
               <TabsTrigger value="agentes" className="text-xs gap-1.5 data-[state=active]:bg-card">
                 <Users className="w-3.5 h-3.5" /> Agentes ({agentesAtivos.length})
               </TabsTrigger>

@@ -3,6 +3,7 @@ import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 
 import { calculateTratativaPoints } from '@/components/utils/helpers';
+import { somaDoBonus } from '@/lib/bonusManual';
 
 /**
  * Verifica se uma tratativa está dentro do período de um ciclo trimestral.
@@ -78,10 +79,11 @@ export function usePontuacaoAgente(colaboradorId) {
     return { pontosCalculados: pontos, detalhamentoPontos: detalhamento };
   }, [tratativasEncerradas]);
 
-  // Pontuação com bônus manual (somente adicional, nunca substitui o calculado)
-  const { data: pontuacoes = [], isLoading: loadingPontuacoes } = useQuery({
-    queryKey: ['pontuacoes'],
-    queryFn: () => db.entities.Pontuacao.list('-created_date', 200),
+  // Bônus manual: todos os lançamentos do gestor para a pessoa no ciclo
+  // (migration 17) — a mesma consulta e a mesma soma do ranking.
+  const { data: lancamentos = [], isLoading: loadingPontuacoes } = useQuery({
+    queryKey: ['bonus-manual'],
+    queryFn: () => db.entities.Pontuacao.filter({ tipo: 'bonus_manual' }, '-created_date'),
     staleTime: 60000,
     gcTime: 300000,
     refetchOnWindowFocus: false,
@@ -89,13 +91,8 @@ export function usePontuacaoAgente(colaboradorId) {
 
   const bonusManual = useMemo(() => {
     if (!colaboradorId || !cicloAtivo) return 0;
-    const salvo = pontuacoes.find(
-      p => p.colaborador_id === colaboradorId &&
-           p.ciclo_id === cicloAtivo.id &&
-           p.tipo === 'bonus_manual'
-    );
-    return salvo?.total_pontos ?? 0;
-  }, [pontuacoes, colaboradorId, cicloAtivo]);
+    return somaDoBonus(lancamentos.filter(p => p.colaborador_id === colaboradorId && p.ciclo_id === cicloAtivo.id));
+  }, [lancamentos, colaboradorId, cicloAtivo]);
 
   const totalPontos = pontosCalculados + bonusManual;
 

@@ -33,3 +33,14 @@ export function pontosPorSemana(itens = [], agora = new Date(), quantas = 6) {
   }
   return semanas;
 }
+
+/**
+ * Até quando o gráfico de ritmo vai: hoje, ou o último dia do ciclo se ele
+ * já terminou. Sem isto, um ciclo encerrado mostrava as semanas DEPOIS do
+ * fim — zeradas, e a última em destaque como se fosse "esta semana".
+ */
+export function fimDoRitmo(ciclo, agora = new Date()) {
+  if (!ciclo?.data_fim) return agora;
+  const fim = new Date(`${ciclo.data_fim}T23:59:59`);
+  return fim < agora ? fim : agora;
+}

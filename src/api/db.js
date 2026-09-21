@@ -51,6 +51,24 @@ function aplicarOrdem(consulta, sort) {
 }
 
 /**
+ * Uma condição do `where`. Igualdade, como sempre; e os dois operadores de
+ * lista que o SDK do Base44 aceitava: { status: { $in: [...] } } e
+ * { status: { $nin: [...] } }. Com $nin, NULL também passa — "status fora da
+ * lista" inclui quem não tem status, como era no Base44.
+ */
+function aplicarCondicao(consulta, campo, valor) {
+  if (valor === null) return consulta.is(campo, null);
+  if (valor && typeof valor === 'object' && !Array.isArray(valor)) {
+    if (Array.isArray(valor.$in)) return consulta.in(campo, valor.$in);
+    if (Array.isArray(valor.$nin)) {
+      const lista = valor.$nin.map((v) => `"${String(v).replace(/"/g, '')}"`).join(',');
+      return consulta.or(`${campo}.is.null,${campo}.not.in.(${lista})`);
+    }
+  }
+  return consulta.eq(campo, valor);
+}
+
+/**
  * Remove chaves com valor undefined. O Base44 ignorava; o PostgREST
  * transformaria em NULL e apagaria o valor que já estava gravado.
  */
@@ -92,7 +110,7 @@ function criarEntidade(entidade) {
       let consulta = supabase.from(tabela).select('*');
       if (where) {
         for (const [campo, valor] of Object.entries(where)) {
-          consulta = valor === null ? consulta.is(campo, null) : consulta.eq(campo, valor);
+          consulta = aplicarCondicao(consulta, campo, valor);
         }
       }
       consulta = aplicarOrdem(consulta, sort);

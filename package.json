@@ -21,6 +21,7 @@
     "criar-contas": "node ferramentas/criar-contas.mjs",
     "exigir-troca-de-senha": "node ferramentas/exigir-troca-de-senha.mjs",
     "previa-operador": "node ferramentas/gerar-previa-operador.mjs",
+    "previa-gestor": "node ferramentas/gerar-previa-gestor.mjs",
     "conferir-cores": "node ferramentas/conferir-cores.mjs"
   },
   "dependencies": {

@@ -4,10 +4,11 @@ import db from '@/api/db';
 import { tipoTratativaLabels } from '@/components/utils/helpers';
 import { useRankingCiclo, posicaoNoRanking } from '@/hooks/useRankingCiclo';
 import { pontosDaFaixa, proximaFaixa } from '@/lib/faixasIndicadores';
-import { avaliarExigencia, volumePorCanal } from '@/lib/elegibilidade';
+import { avaliarExigencia } from '@/lib/elegibilidade';
 import { indicadoresDoCiclo } from '@/lib/indicadoresCiclo';
-import { pontosPorSemana } from '@/lib/ritmoSemanal';
-import { AlertCircle, CheckCircle2, MinusCircle } from 'lucide-react';
+import { pontosPorSemana, fimDoRitmo } from '@/lib/ritmoSemanal';
+import IconeExigencia from '@/components/ciclo/IconeExigencia';
+import { registrosNoCiclo } from '@/lib/cicloEquipe';
 
 /**
  * "Meu ciclo" — o painel de pontuação da tela inicial do operador.
@@ -55,12 +56,6 @@ function Linha({ rotulo, detalhe, valor }) {
   );
 }
 
-const ICONE_EXIGENCIA = {
-  ok: { Icone: CheckCircle2, cor: 'text-success', rotulo: 'Cumprida' },
-  pendente: { Icone: AlertCircle, cor: 'text-warning', rotulo: 'Pendente' },
-  sem_dado: { Icone: MinusCircle, cor: 'text-muted-foreground', rotulo: 'Sem dado ainda' },
-};
-
 export default function PainelMeuCiclo({
   colaborador,
   cicloAtivo,
@@ -85,7 +80,10 @@ export default function PainelMeuCiclo({
   const { ranking } = useRankingCiclo();
   const posicao = rankingVisivel ? posicaoNoRanking(ranking, colaborador?.id) : null;
 
-  const semanas = useMemo(() => pontosPorSemana(detalhamentoPontos, agora, 6), [detalhamentoPontos, agora]);
+  const semanas = useMemo(
+    () => pontosPorSemana(detalhamentoPontos, fimDoRitmo(cicloAtivo, agora), 6),
+    [detalhamentoPontos, cicloAtivo, agora],
+  );
   const maiorSemana = Math.max(1, ...semanas.map((s) => s.pontos));
   const estaSemana = semanas[semanas.length - 1]?.pontos ?? 0;
 
@@ -100,17 +98,9 @@ export default function PainelMeuCiclo({
 
   const indicadores = useMemo(() => indicadoresDoCiclo(apuracoes, cicloAtivo), [apuracoes, cicloAtivo]);
 
-  // Registros por canal no ciclo: conta pelo REGISTRO (data_registro), que é
-  // o que a Estrutura de Trabalho chama de "registros no trimestre".
-  const volume = useMemo(() => {
-    if (!cicloAtivo) return volumePorCanal([]);
-    const inicio = `${cicloAtivo.data_inicio}T00:00:00`;
-    const fim = `${cicloAtivo.data_fim}T23:59:59`;
-    return volumePorCanal(minhasTratativas.filter((t) => {
-      const d = t.data_registro ? new Date(t.data_registro) : null;
-      return d && d >= new Date(inicio) && d <= new Date(fim);
-    }));
-  }, [minhasTratativas, cicloAtivo]);
+  // Registros por canal no ciclo: conta pelo REGISTRO (data_registro) — a
+  // mesma conta da página do gestor (src/lib/cicloEquipe.js).
+  const volume = useMemo(() => registrosNoCiclo(minhasTratativas, cicloAtivo), [minhasTratativas, cicloAtivo]);
 
   const contexto = {
     csat: indicadores.csat?.valor,
@@ -174,7 +164,7 @@ export default function PainelMeuCiclo({
         </div>
         <p className="mt-2 text-sm text-muted-foreground">
           <span className={`font-semibold ${estaSemana > 0 ? 'text-success' : 'text-muted-foreground'}`}>
-            +{fmt(estaSemana)} esta semana
+            +{fmt(estaSemana)} {fimDoRitmo(cicloAtivo, agora) < agora ? 'na última semana' : 'esta semana'}
           </span>
           {' · '}
           {encerrado
@@ -219,10 +209,9 @@ export default function PainelMeuCiclo({
           <ul className="mt-2 space-y-2">
             {exigencias.map((e) => {
               const r = avaliarExigencia(e, contexto);
-              const { Icone, cor, rotulo } = ICONE_EXIGENCIA[r.status];
               return (
                 <li key={e.id} className="flex items-start gap-2 text-sm">
-                  <Icone className={`mt-0.5 h-4 w-4 shrink-0 ${cor}`} aria-label={rotulo} />
+                  <IconeExigencia status={r.status} className="mt-0.5 h-4 w-4" />
                   <span>
                     <span className="block text-foreground">{e.nome_exigencia}</span>
                     <span className="block text-xs text-muted-foreground">{r.detalhe}</span>

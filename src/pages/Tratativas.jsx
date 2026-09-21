@@ -13,6 +13,7 @@ import { useValidacao } from '@/hooks/useValidacao';
 import { obrigatorio, url, cnpj as validarCnpj, numeroPositivo, dataNaoFutura } from '@/lib/validacao';
 import TratativaDetalhe from '@/pages/TratativaDetalhe';
 import StatusBadge from '@/components/ui/StatusBadge';
+import { STATUS_FECHADOS, estaAberta, situacaoDoPrazo } from '@/lib/cicloEquipe';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -35,7 +36,8 @@ import {
   Eye,
   Archive,
   Columns2,
-  Rows3
+  Rows3,
+  X
 } from 'lucide-react';
 import ImportExportCSV from '@/components/tratativas/ImportExportCSV';
 import AdminBulkActions from '@/components/tratativas/AdminBulkActions';
@@ -52,6 +54,23 @@ export default function Tratativas() {
   const [filterPrioridade, setFilterPrioridade] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [filterCnpj, setFilterCnpj] = useState('');
+  // Filtros que chegam pelo link, vindos da tela do gestor: "Ver as vencidas"
+  // (?situacao=vencidas) e "Ver as abertas de Fulana" (?agente=id&situacao=abertas).
+  const [filtroLink, setFiltroLink] = useState(() => {
+    try {
+      const q = new URLSearchParams(window.location.search);
+      const situacao = ['abertas', 'vencidas'].includes(q.get('situacao')) ? q.get('situacao') : null;
+      const agente = q.get('agente') || null;
+      return situacao || agente ? { situacao, agente } : null;
+    } catch { return null; }
+  });
+  const limparFiltroLink = () => {
+    setFiltroLink(null);
+    const url = new URL(window.location.href);
+    url.searchParams.delete('situacao');
+    url.searchParams.delete('agente');
+    window.history.replaceState({}, '', url);
+  };
   const [formData, setFormData] = useState({
     link_zendesk: '',
     link_intranet: '',
@@ -135,7 +154,7 @@ export default function Tratativas() {
     queryFn: () => db.entities.Colaborador.list(),
   });
 
-  const { data: tratativas = [], isLoading } = useQuery({
+  const { data: tratativasRecentes = [], isLoading } = useQuery({
     queryKey: ['tratativas'],
     queryFn: () => db.entities.Tratativa.list('-created_date', 300),
     staleTime: 60000,
@@ -143,6 +162,20 @@ export default function Tratativas() {
     refetchOnWindowFocus: false,
     retry: 2,
   });
+
+  // Todas as ABERTAS, de qualquer data: a lista acima traz só as 300 mais
+  // recentes, e uma aberta antiga — justamente a mais atrasada — sumiria.
+  const { data: abertasTodas = [] } = useQuery({
+    queryKey: ['tratativas-abertas-equipe'],
+    queryFn: () => db.entities.Tratativa.filter({ status: { $nin: STATUS_FECHADOS } }, 'data_registro'),
+    staleTime: 60000,
+    refetchOnWindowFocus: false,
+  });
+
+  const tratativas = React.useMemo(() => {
+    const vistas = new Set(tratativasRecentes.map((t) => t.id));
+    return [...tratativasRecentes, ...abertasTodas.filter((t) => !vistas.has(t.id))];
+  }, [tratativasRecentes, abertasTodas]);
 
   const { data: motivos = [] } = useQuery({
     queryKey: ['motivos'],
@@ -229,6 +262,15 @@ export default function Tratativas() {
   // Filtrar excluídas (padrão: não mostrar)
   if (!mostrarExcluidas) {
     filteredTratativas = filteredTratativas.filter(t => t.status !== 'excluida');
+  }
+
+  if (filtroLink?.agente) {
+    filteredTratativas = filteredTratativas.filter(t => t.agente_responsavel_id === filtroLink.agente);
+  }
+  if (filtroLink?.situacao) {
+    const agora = new Date();
+    filteredTratativas = filteredTratativas.filter(t => estaAberta(t)
+      && (filtroLink.situacao === 'abertas' || situacaoDoPrazo(t, agora) === 'vencida'));
   }
 
   if (filterStatus !== 'all') {
@@ -643,6 +685,17 @@ export default function Tratativas() {
               ))}
             </SelectContent>
           </Select>
+          {filtroLink && (
+            <span className="inline-flex items-center gap-2 rounded-full bg-info-soft px-3 py-1 text-sm text-foreground">
+              {[
+                filtroLink.agente && (colaboradores.find(c => c.id === filtroLink.agente)?.nome_completo || 'Um agente'),
+                filtroLink.situacao === 'vencidas' ? 'com o SLA vencido' : filtroLink.situacao === 'abertas' ? 'abertas' : null,
+              ].filter(Boolean).join(' · ')}
+              <button type="button" onClick={limparFiltroLink} className="text-muted-foreground hover:text-foreground" aria-label="Tirar este filtro">
+                <X className="h-3.5 w-3.5" />
+              </button>
+            </span>
+          )}
           {(filterStatus !== 'all' || filterTipo !== 'all' || filterPrioridade !== 'all' || searchTerm || filterCnpj) && (
           <Button 
             variant="ghost" 

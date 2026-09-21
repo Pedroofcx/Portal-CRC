@@ -139,6 +139,20 @@ function transformar(entidade, r) {
         naoResolvidos.set(chave, atual);
       }
     }
+    // Listas de vínculos (colaboradores_ids): cada item é trocado como um
+    // _id. Sem isto, observacao.colaboradores_ids chegava com os ids antigos
+    // e nenhuma tela achava os feedbacks de ninguém (migration 15).
+    if (campo.endsWith('_ids') && Array.isArray(v)) {
+      v = v.map((item) => {
+        if (typeof item !== 'string' || !item) return item;
+        if (mapaIds.has(item)) { vinculosRemapeados++; return mapaIds.get(item); }
+        const chave = `${entidade}.${campo}[]`;
+        const atual = naoResolvidos.get(chave) || { n: 0, exemplo: item };
+        atual.n++;
+        naoResolvidos.set(chave, atual);
+        return item;
+      });
+    }
     saida[campo] = v;
   }
   return saida;

@@ -2,17 +2,17 @@ import db from '@/api/db';
 import React from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import { formatDateSP, getCurrentTrimester } from '@/components/utils/helpers';
-import StatCard from '@/components/ui/StatCard';
+import { formatDateSP } from '@/components/utils/helpers';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import StatusBadge from '@/components/ui/StatusBadge';
 import CardBoasVindas from '@/components/dashboard/CardBoasVindas';
-import SecaoDashboard from '@/components/dashboard/SecaoDashboard';
 import MinhasAnotacoes from '@/components/dashboard/MinhasAnotacoes';
 import DistribuicaoTratativas from '@/components/dashboard/DistribuicaoTratativas';
-import RankingTrimestral from '@/components/dashboard/RankingTrimestral';
+import FaixaVencidas from '@/components/dashboard/gestor/FaixaVencidas';
+import PainelCicloGestor from '@/components/dashboard/gestor/PainelCicloGestor';
+import { useCicloEquipe } from '@/hooks/useCicloEquipe';
 import MeuTurnoCard from '@/components/turnos/MeuTurnoCard';
 import CardHorasImplantacao from '@/components/dashboard/CardHorasImplantacao';
 import CardRodizioDashboard from '@/components/rodizio/CardRodizioDashboard';
@@ -28,19 +28,15 @@ import { Badge } from '@/components/ui/badge';
 import {
   ClipboardList,
   TrendingUp,
-  Clock,
   CheckCircle,
   AlertCircle,
   Bell,
   ArrowRight,
   Users,
   Target,
-  MessageSquare,
   CheckSquare,
   Star,
   Eye,
-  Activity,
-  Zap,
   Palmtree
 } from 'lucide-react';
 import { 
@@ -87,30 +83,8 @@ export default function Dashboard() {
 
   // avisos: usar todosAvisos abaixo (query unificada)
 
-  const { data: pontuacoes = [] } = useQuery({
-    queryKey: ['pontuacoes'],
-    queryFn: () => db.entities.Pontuacao.list('-created_date', 50),
-    staleTime: 120000,
-    gcTime: 300000,
-    refetchOnWindowFocus: false,
-    retry: 2,
-  });
 
-  const { data: pdis = [] } = useQuery({
-    queryKey: ['pdis'],
-    queryFn: () => db.entities.PDI.list('-created_date', 50),
-    staleTime: 120000,
-    gcTime: 300000,
-    refetchOnWindowFocus: false,
-  });
 
-  const { data: observacoes = [] } = useQuery({
-    queryKey: ['observacoes'],
-    queryFn: () => db.entities.Observacao.list('-created_date', 500),
-    staleTime: 120000,
-    gcTime: 300000,
-    refetchOnWindowFocus: false,
-  });
 
   const { data: elegibilidades = [] } = useQuery({
     queryKey: ['elegibilidades'],
@@ -169,21 +143,6 @@ export default function Dashboard() {
     refetchOnWindowFocus: false,
   });
 
-  // Férias esperando a validação da própria pessoa — só dá para validar
-  // pelo diálogo desta tela, então o card na lateral do operador não pode sair.
-  const minhasferiasPendentes = React.useMemo(() => {
-    if (!colaborador?.id) return [];
-    const meusCiclos = ciclosFerias.filter(c => c.colaborador_id === colaborador.id);
-    const pendentes = [];
-    meusCiclos.forEach(ciclo => {
-      (ciclo.fragmentos || []).forEach(frag => {
-        if (frag.status === 'pendente_validacao') {
-          pendentes.push({ ...frag, ciclo });
-        }
-      });
-    });
-    return pendentes;
-  }, [ciclosFerias, colaborador]);
 
   const { data: solicitacoesApoio = [] } = useQuery({
     queryKey: ['solicitacoes-apoio-dashboard'],
@@ -242,6 +201,24 @@ export default function Dashboard() {
   );
   const isGestor = colaborador?.papel === 'gestor';
 
+  // Férias esperando a validação da própria pessoa. Precisa vir DEPOIS de
+  // `colaborador`: antes, o useMemo lia a variável ainda não criada e a tela
+  // inicial inteira caía (ReferenceError). — só dá para validar
+  // pelo diálogo desta tela, então o card na lateral do operador não pode sair.
+  const minhasferiasPendentes = React.useMemo(() => {
+    if (!colaborador?.id) return [];
+    const meusCiclos = ciclosFerias.filter(c => c.colaborador_id === colaborador.id);
+    const pendentes = [];
+    meusCiclos.forEach(ciclo => {
+      (ciclo.fragmentos || []).forEach(frag => {
+        if (frag.status === 'pendente_validacao') {
+          pendentes.push({ ...frag, ciclo });
+        }
+      });
+    });
+    return pendentes;
+  }, [ciclosFerias, colaborador]);
+
 
   // Férias pendentes de validação para o agente atual
 
@@ -255,46 +232,12 @@ export default function Dashboard() {
     );
   }, [tratativas, isGestor, colaborador, user]);
 
-  // Estatísticas base
-  const stats = React.useMemo(() => {
-    if (!Array.isArray(minhasTratativas)) return { total: 0, emAndamento: 0, encerradas: 0, criticas: 0 };
-    return {
-      total: minhasTratativas.length,
-      emAndamento: minhasTratativas.filter(t => ['tratativa_iniciada', 'em_andamento'].includes(t.status)).length,
-      encerradas: minhasTratativas.filter(t => t.status === 'encerrada' || t.status === 'aguardando_confirmacao_reabertura').length,
-      criticas: minhasTratativas.filter(t => t.prioridade === 'critica' && !['encerrada', 'aguardando_confirmacao_reabertura'].includes(t.status)).length,
-    };
-  }, [minhasTratativas]);
-
-  // Métricas de qualidade para gestor
-  const metricas = React.useMemo(() => {
-    if (!isGestor) return null;
-    const todasAtivas = Array.isArray(tratativas) ? tratativas.filter(t => !['encerrada','excluida','aguardando_confirmacao_reabertura'].includes(t.status)) : [];
-    const foraSLA = Array.isArray(tratativas) ? tratativas.filter(t => t.encerrado_no_sla === false).length : 0;
-    const pdisAtivos = Array.isArray(pdis) ? pdis.filter(p => p.status === 'em_andamento').length : 0;
-    const feedbacksMes = Array.isArray(observacoes) ? observacoes.filter(o => {
-      const d = new Date(o.created_date || o.data_registro);
-      const now = new Date();
-      return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
-    }).length : 0;
-    return { todasAtivas: todasAtivas.length, foraSLA, pdisAtivos, feedbacksMes };
-  }, [tratativas, pdis, observacoes, isGestor]);
-
   // Tratativas recentes
   const tratativasRecentes = React.useMemo(() => {
     if (!Array.isArray(minhasTratativas)) return [];
     return minhasTratativas.slice(0, 5);
   }, [minhasTratativas]);
 
-  // Minha pontuação do trimestre atual
-  const _minhaPontuacao = React.useMemo(() => {
-    if (!colaborador?.id || !Array.isArray(pontuacoes)) return null;
-    const trimestreAtual = getCurrentTrimester();
-    return pontuacoes.find(p => 
-      p.colaborador_id === colaborador.id && 
-      p.periodo_trimestre === trimestreAtual
-    );
-  }, [pontuacoes, colaborador]);
 
   // Meus PDIs e Observações
   
@@ -407,6 +350,16 @@ export default function Dashboard() {
     cicloAtivo,
     bonusManual,
   } = usePontuacaoAgente(colaborador?.id);
+  // A equipe no ciclo — só a visão do gestor usa, mas hooks não podem ser
+  // condicionais; para o operador as consultas são as mesmas do ranking.
+  // ?ciclo=<id> mostra um ciclo do histórico; sem ele, o ativo. Fica no
+  // endereço para o "voltar" da página detalhada cair no mesmo ciclo.
+  const [parametros, setParametros] = useSearchParams();
+  const cicloEquipe = useCicloEquipe(parametros.get('ciclo'));
+  const escolherCiclo = (id) => setParametros(
+    id === cicloEquipe.cicloAtivo?.id ? {} : { ciclo: id },
+    { replace: true },
+  );
   
 
   // Exibir avisos obrigatórios como popup — apenas após leituras carregadas do servidor
@@ -545,52 +498,25 @@ export default function Dashboard() {
         fiExpiracao={colaborador?.fi_expiracao}
       />
 
-      {/* Visão do GESTOR: mantida como estava. O operador tem uma tela
-          própria logo abaixo (proposta B, "Meu ciclo"). */}
+      {/* Visão do GESTOR — proposta C, "O ciclo". No topo, a faixa com as
+          tratativas vencidas AGORA (o antigo "Fora do SLA" contava o histórico
+          inteiro); abaixo, o ranking com o ritmo e a elegibilidade de cada
+          pessoa. Clicar numa pessoa abre a página detalhada (CicloColaborador). */}
       {isGestor && (
       <>
-      {/* Indicadores — os quatro números que importam, iguais para os dois
-          papéis. O gestor recebe uma segunda faixa com o que só ele acompanha. */}
-      <SecaoDashboard
-        titulo="Panorama"
-        descricao={isGestor ? 'Operação inteira' : 'Suas tratativas'}
-        verMais={createPageUrl('Tratativas')}
-        verMaisLabel="Abrir tratativas"
-      >
-        <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-          <button type="button" className="text-left" onClick={() => navigate(createPageUrl('Tratativas'))}>
-            <StatCard title="Total de Tratativas" value={stats.total} icon={ClipboardList} tom="info" />
-          </button>
-          <button type="button" className="text-left" onClick={() => navigate(createPageUrl('Tratativas') + '?status=em_andamento')}>
-            <StatCard title="Em Andamento" value={stats.emAndamento} icon={Activity} tom="warning" />
-          </button>
-          <button type="button" className="text-left" onClick={() => navigate(createPageUrl('Tratativas') + '?status=encerrada')}>
-            <StatCard title="Encerradas" value={stats.encerradas} icon={CheckCircle} tom="success" />
-          </button>
-          <StatCard
-            title="Performance Operacional"
-            value={`${stats.total > 0 ? Math.round((stats.encerradas / stats.total) * 100) : 0}%`}
-            subtitle="resolução geral"
-            icon={Zap}
-            tom="info"
-          />
-        </div>
-      </SecaoDashboard>
-
-      {(
-        <SecaoDashboard titulo="Requer atenção" descricao="O que não pode esperar">
-          <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-            <button type="button" className="text-left" onClick={() => navigate(createPageUrl('Tratativas') + '?status=critica')}>
-              <StatCard title="Críticas Abertas" value={stats.criticas} icon={AlertCircle} tom="critical" />
-            </button>
-            <button type="button" className="text-left" onClick={() => navigate(createPageUrl('Tratativas'))}>
-              <StatCard title="Fora do SLA" value={metricas?.foraSLA ?? 0} icon={Clock} tom="critical" />
-            </button>
-            <StatCard title="PDIs Ativos" value={metricas?.pdisAtivos ?? 0} icon={Target} tom="info" subtitle="em andamento" />
-            <StatCard title="Feedbacks do Mês" value={metricas?.feedbacksMes ?? 0} icon={MessageSquare} tom="neutral" />
-          </div>
-        </SecaoDashboard>
-      )}
+      <FaixaVencidas retrato={cicloEquipe.retrato} isLoading={cicloEquipe.isLoading} />
+      <PainelCicloGestor
+        ciclo={cicloEquipe.ciclo}
+        cicloAtivo={cicloEquipe.cicloAtivo}
+        ciclos={cicloEquipe.ciclos}
+        aoEscolherCiclo={escolherCiclo}
+        gestor={colaborador}
+        agentes={cicloEquipe.agentes}
+        exigencias={cicloEquipe.exigencias}
+        equipe={cicloEquipe.equipe}
+        agora={cicloEquipe.agora}
+        isLoading={cicloEquipe.isLoading}
+      />
 
       {/* Card Horas de Implantação */}
       <CardHorasImplantacao utilizadosMinutos={horasImplantacaoUtilizadas} />
@@ -648,7 +574,7 @@ export default function Dashboard() {
       {/* Layout para Gestores */}
       {isGestor && (
       <div className="space-y-6">
-      <div className="grid lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         {/* Tratativas Recentes */}
         <Card className="lg:col-span-2 border-0 shadow-sm">
           <CardHeader className="pb-3">
@@ -770,9 +696,6 @@ export default function Dashboard() {
           </Card>
         </div>
       </div>
-
-      {/* Ranking — visão do gestor */}
-      <RankingTrimestral colaboradorAtualId={colaborador?.id} visivel={true} />
 
       {/* Controle de Distribuição de Tratativas — exclusivo gestor, apenas Equipe CRC */}
       <DistribuicaoTratativas

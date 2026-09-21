@@ -972,7 +972,7 @@ create table if not exists public."plano_setorial" (
 create index if not exists "ix_plano_setorial_base44_id" on public."plano_setorial" ("base44_id");
 create index if not exists "ix_plano_setorial_criado_por_id" on public."plano_setorial" ("criado_por_id");
 
--- Pontuacao  (12 campos)
+-- Pontuacao  (17 campos)
 create table if not exists public."pontuacao" (
   "id" uuid primary key default gen_random_uuid(),
   "base44_id" text unique,
@@ -982,6 +982,11 @@ create table if not exists public."pontuacao" (
   "importado_em" timestamptz,
   "criado_em" timestamptz not null default now(),
   "atualizado_em" timestamptz not null default now(),
+  "tipo" text,
+  "ciclo_id" text,
+  "descricao" text,
+  "lancado_por_id" text,
+  "lancado_por_nome" text,
   "colaborador_id" text,
   "colaborador_nome" text,
   "periodo_trimestre" text,
@@ -993,10 +998,13 @@ create table if not exists public."pontuacao" (
   "pontos_performance" numeric DEFAULT 0,
   "pontos_avaliacao_cx" numeric DEFAULT 0,
   "total_pontos" numeric DEFAULT 0,
-  "detalhamento" jsonb
+  "detalhamento" jsonb,
+  CHECK ("tipo" IS NULL OR "tipo" IN ('bonus_manual'))
 );
 
 create index if not exists "ix_pontuacao_base44_id" on public."pontuacao" ("base44_id");
+create index if not exists "ix_pontuacao_ciclo_id" on public."pontuacao" ("ciclo_id");
+create index if not exists "ix_pontuacao_lancado_por_id" on public."pontuacao" ("lancado_por_id");
 create index if not exists "ix_pontuacao_colaborador_id" on public."pontuacao" ("colaborador_id");
 
 -- POP  (12 campos)

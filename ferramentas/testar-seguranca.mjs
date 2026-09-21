@@ -268,6 +268,65 @@ console.log('\n5) Anotações pessoais de outra pessoa:');
   }
 }
 
+// --------------------------------------------------------- 6. feedbacks
+// Feedback "só gestor" não aparece para o agente, nem quando é sobre ele;
+// o "ambos" aparece só para quem é citado (migration 16). Como na seção 5,
+// a chave de administrador só prepara os alvos e limpa no fim.
+console.log('\n6) Feedbacks (observações do gestor):');
+{
+  let admin = null;
+  try {
+    const envImport = readFileSync(new URL('../.env.import', import.meta.url), 'utf8');
+    const chave = envImport.match(/^SUPABASE_SERVICE_ROLE_KEY\s*=\s*(.+)$/m)?.[1].trim().replace(/^["']|["']$/g, '');
+    if (chave) admin = createClient(URL_SUPABASE, chave, { auth: { persistSession: false } });
+  } catch { /* sem .env.import */ }
+
+  if (!admin) {
+    registrar('Feedbacks protegidos', false,
+      'INCONCLUSIVO: sem a chave de administrador (.env.import) para preparar o alvo.');
+  } else {
+    const { data: eu } = await admin.from('colaborador_base').select('id').ilike('email', email).maybeSingle();
+    const { data: outra } = await admin.from('colaborador_base').select('id')
+      .neq('id', eu?.id ?? '').eq('ativo', true).limit(1).maybeSingle();
+
+    const marca = `TESTE-SEGURANCA-${Date.now()}`;
+    const criar = async (sufixo, ids, visibilidade) => (await admin.from('observacao').insert({
+      titulo: `${marca} ${sufixo}`, conteudo: 'original', colaboradores_ids: ids, visibilidade, tipo: 'feedback',
+    }).select('id').single()).data;
+    const soGestorSobreMim = await criar('so-gestor', [eu.id], 'gestor');
+    const ambosSobreMim = await criar('ambos-meu', [eu.id], 'ambos');
+    const ambosDeOutra = await criar('ambos-outra', [outra.id], 'ambos');
+
+    const { data: visiveis } = await agente.from('observacao').select('id').like('titulo', `${marca}%`);
+    const ids = new Set((visiveis || []).map((o) => o.id));
+    registrar('Agente não lê feedback "só gestor", nem sobre ele', !ids.has(soGestorSobreMim.id),
+      ids.has(soGestorSobreMim.id) ? 'LEU o feedback reservado ao gestor' : 'invisível para ele');
+    registrar('Agente não lê feedback de outra pessoa', !ids.has(ambosDeOutra.id),
+      ids.has(ambosDeOutra.id) ? 'LEU o feedback de outra pessoa' : 'invisível para ele');
+    registrar('Agente continua lendo o feedback compartilhado com ele', ids.has(ambosSobreMim.id),
+      ids.has(ambosSobreMim.id) ? 'o dele aparece' : 'o dele SUMIU — a regra bloqueou demais');
+
+    await agente.from('observacao').update({ conteudo: 'alterado pelo agente' }).eq('id', ambosSobreMim.id);
+    const { data: depois } = await admin.from('observacao').select('conteudo').eq('id', ambosSobreMim.id).single();
+    registrar('Agente não altera feedback', depois?.conteudo === 'original',
+      depois?.conteudo === 'original' ? 'alteração ignorada' : 'ALTEROU!');
+
+    await agente.from('observacao').delete().eq('id', ambosSobreMim.id);
+    const { data: aindaLa } = await admin.from('observacao').select('id').eq('id', ambosSobreMim.id);
+    registrar('Agente não apaga feedback', (aindaLa?.length ?? 0) === 1,
+      (aindaLa?.length ?? 0) === 1 ? 'exclusão ignorada' : 'APAGOU!');
+
+    const { error: erroCriar } = await agente.from('observacao').insert({
+      titulo: `${marca} plantado`, conteudo: 'plantado', colaboradores_ids: [outra.id], visibilidade: 'ambos', tipo: 'feedback',
+    });
+    registrar('Agente não cria feedback', ehBloqueioDeSeguranca(erroCriar),
+      ehBloqueioDeSeguranca(erroCriar) ? 'bloqueado pelo RLS'
+        : erroCriar ? `falhou por outro motivo: ${erroCriar.message}` : 'CRIOU um feedback!');
+
+    await admin.from('observacao').delete().like('titulo', `${marca}%`);
+  }
+}
+
 // -------------------------------------------------------------------- fim
 await agente.auth.signOut();
 

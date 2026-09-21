@@ -16,6 +16,8 @@ import { ChevronDown, ChevronUp } from 'lucide-react';
  * atrás de uma barra fina — difícil de acertar com o mouse (lei de Fitts) e
  * fácil de não perceber que havia mais.
  *
+ * `feminino` troca "Ver todos os" por "Ver todas as" ("as 8 tratativas abertas").
+ *
  * `renderItem(item, indice)` recebe o mesmo que o callback do .map() antigo, e
  * deve devolver o elemento com `key`.
  */
@@ -25,6 +27,7 @@ export default function ListaResumida({
   limite = 5,
   verTodosHref,
   rotulo = 'itens',
+  feminino = false,
   className = 'space-y-2',
 }) {
   const [aberta, setAberta] = useState(false);
@@ -37,7 +40,7 @@ export default function ListaResumida({
 
       {sobra > 0 && (verTodosHref ? (
         <Link to={verTodosHref} className="mt-2 inline-block text-sm font-medium text-primary hover:underline">
-          Ver todos os {itens.length} {rotulo}
+          {feminino ? 'Ver todas as' : 'Ver todos os'} {itens.length} {rotulo}
         </Link>
       ) : (
         <button

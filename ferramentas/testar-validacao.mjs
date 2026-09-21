@@ -9,11 +9,13 @@ import { primeiroNome } from '../src/lib/nomes.js';
 import { resumoDoDia } from '../src/lib/resumoDoDia.js';
 import { pontosDaFaixa, proximaFaixa } from '../src/lib/faixasIndicadores.js';
 import { avaliarExigencia, volumePorCanal } from '../src/lib/elegibilidade.js';
-import { pontosPorSemana } from '../src/lib/ritmoSemanal.js';
+import { pontosPorSemana, fimDoRitmo } from '../src/lib/ritmoSemanal.js';
 import { posicaoNoRanking } from '../src/lib/posicaoRanking.js';
 import { prazoDaTratativa, descreverPrazo, consumoDoPrazo } from '../src/lib/prazoSla.js';
 import { indicadoresDoCiclo } from '../src/lib/indicadoresCiclo.js';
 import { conferirLinha } from './conferir-cores.mjs';
+import { montarBonus, somaDoBonus, ciclosEmOrdem } from '../src/lib/bonusManual.js';
+import { vencidasDaEquipe, situacaoDoPrazo, ordenarPorPrazo, registrosNoCiclo, percentualNoSla, acompanhamentoDa } from '../src/lib/cicloEquipe.js';
 import { calculateCSATPoints, calculateCXPoints } from '../src/components/utils/helpers.js';
 
 let passou = 0;
@@ -233,6 +235,94 @@ checa('CX do ultimo mes', String(ind.cx.valor), '4.4');
 checa('mes fora do ciclo nao entra', String(indicadoresDoCiclo([apur[4]], cicloT).csat), 'null');
 checa('sem telefone usa o chat', indicadoresDoCiclo([apur[2]], cicloT).csat.canal, 'chat');
 checa('sem ciclo nao ha indicador', String(indicadoresDoCiclo(apur, null).cx), 'null');
+
+console.log('\n== tela do gestor: vencidas, registros e acompanhamento ==');
+{
+  const reg = (h) => emH(h).toISOString();
+  const lista = [
+    { id: 't1', status: 'em_andamento', agente_responsavel_id: 'A', agente_responsavel_nome: 'Ana Souza', data_registro: reg(-48), sla_atribuido: 24 },
+    { id: 't2', status: 'tratativa_iniciada', agente_responsavel_id: 'A', data_registro: reg(-20), sla_atribuido: 24 },
+    { id: 't3', status: 'aguardando_terceiro', agente_responsavel_id: 'B', data_registro: reg(-1), sla_atribuido: 72 },
+    { id: 't4', status: 'encerrada', agente_responsavel_id: 'A', data_registro: reg(-90), sla_atribuido: 24 },
+    { id: 't5', status: 'em_andamento', excluida: true, agente_responsavel_id: 'A', data_registro: reg(-90), sla_atribuido: 24 },
+    { id: 't6', status: 'em_andamento', agente_responsavel_id: 'B', data_registro: reg(-5) },
+    { id: 't7', status: 'em_andamento', agente_responsavel_id: 'B', data_registro: reg(-100), sla_atribuido: 24 },
+    { id: 't8', status: 'em_andamento', agente_responsavel_id: 'C', data_registro: reg(-13), sla_atribuido: 24 },
+  ];
+  const r = vencidasDaEquipe(lista, ag);
+  checa('abertas: encerrada e excluida ficam de fora', String(r.abertas), '6');
+  checa('vencidas agora (nao o historico)', String(r.vencidas), '2');
+  checa('vence ainda hoje', String(r.venceHoje), '1');
+  checa('prazo 01:00 de amanha nao e "hoje"', situacaoDoPrazo(lista[7], ag), 'no_prazo');
+  checa('sem SLA fica sem prazo', situacaoDoPrazo(lista[5], ag), 'sem_prazo');
+  checa('empate em vencidas: mais abertas primeiro', r.porAgente.map((p) => p.id).join(','), 'B,A,C');
+  checa('conta por agente', `${r.porAgente[1].abertas}/${r.porAgente[1].vencidas}/${r.porAgente[1].venceHoje}`, '2/1/1');
+  checa('ordem por prazo: a mais atrasada primeiro, sem prazo no fim',
+    ordenarPorPrazo(lista.filter((t) => ['t1', 't2', 't3', 't6', 't7', 't8'].includes(t.id))).map((t) => t.id).join(','),
+    't7,t1,t2,t8,t3,t6');
+
+  const cicloR = { data_inicio: '2026-06-16', data_fim: '2026-09-16' };
+  const vol = registrosNoCiclo([
+    { tipo_tratativa: 'reclame_aqui', data_registro: '2026-06-16T08:00:00' },
+    { tipo_tratativa: 'reclame_aqui', data_registro: '2026-06-15T23:00:00' },
+    { tipo_tratativa: 'contestacao_compra', data_registro: '2026-09-16T20:00:00' },
+    { tipo_tratativa: 'contestacao', data_registro: '2026-09-17T08:00:00' },
+  ], cicloR);
+  checa('registro no 1o dia do ciclo conta', String(vol.reclame_aqui), '1');
+  checa('ultimo dia conta; contestacao_compra vira contestacao', String(vol.contestacao), '1');
+  checa('sem ciclo, nada conta', String(registrosNoCiclo([{ tipo_tratativa: 'reclame_aqui', data_registro: '2026-07-01' }], null).reclame_aqui), '0');
+
+  checa('% no SLA ignora quem nao tem marcacao', String(percentualNoSla([{ encerrado_no_sla: true }, { encerrado_no_sla: true }, { encerrado_no_sla: false }, {}])).slice(0, 5), '66.66');
+  checa('% no SLA sem marcacao nenhuma', String(percentualNoSla([{}, {}])), 'null');
+
+  const ac = acompanhamentoDa('A', {
+    pdis: [
+      { colaborador_id: 'A', status: 'em_andamento', titulo: 'Comunicação', percentual_conclusao: 40, data_criacao: '2026-08-01' },
+      { colaborador_id: 'A', status: 'concluido', titulo: 'Antigo' },
+      { colaborador_id: 'B', status: 'em_andamento', titulo: 'De outra pessoa' },
+    ],
+    observacoes: [
+      { colaboradores_ids: ['A', 'B'], titulo: 'Feedback 1:1', data_registro: reg(-72) },
+      { colaboradores_ids: ['A'], titulo: 'Antigo', data_registro: reg(-500) },
+      { colaboradores_ids: ['B'], titulo: 'De outra pessoa', data_registro: reg(-1) },
+    ],
+    hanseis: [{ colaborador_id: 'A', data_envio: '2026-09-10T12:00:00Z', visualizado: false }],
+    ciclosFerias: [{ colaborador_id: 'A', fragmentos: [
+      { data_inicio: '2026-09-01', data_fim: '2026-09-10' },
+      { data_inicio: '2026-12-01', data_fim: '2026-12-10' },
+      { data_inicio: '2026-10-05', data_fim: '2026-10-14', dias: 10 },
+    ] }],
+  }, ag);
+  checa('PDI em andamento da pessoa', `${ac.pdi.titulo} ${ac.pdi.percentual}`, 'Comunicação 40');
+  checa('ultimo feedback e o mais recente dela', `${ac.feedback.titulo} ${ac.feedback.dias}`, 'Feedback 1:1 3');
+  checa('Hansei nao visualizado', String(ac.hansei.visualizado), 'false');
+  checa('proximas ferias: ignora as que ja passaram', `${ac.ferias.inicio} ${ac.ferias.dias}`, '2026-10-05 10');
+  checa('ciclo encerrado: ritmo para no ultimo dia', fimDoRitmo({ data_fim: '2026-09-16' }, ag).toDateString(), new Date(2026, 8, 16).toDateString());
+  checa('ciclo em andamento: ritmo vai ate hoje', String(fimDoRitmo({ data_fim: '2026-12-16' }, ag).getTime()), String(ag.getTime()));
+  checa('sem registro nenhum', JSON.stringify(acompanhamentoDa('Z', {}, ag)), '{"pdi":null,"feedback":null,"hansei":null,"ferias":null}');
+}
+
+console.log('\n== bonus manual e historico de ciclos ==');
+{
+  const ciclo = { id: 'c3', nome: 'Ciclo 3 2026', data_inicio: '2026-09-16', data_fim: '2026-12-16' };
+  const pessoa = { id: 'p1', nome_completo: 'Dayane Santos' };
+  const gestor = { id: 'g1', nome_completo: 'Pedro Soares' };
+  const ok = montarBonus({ ciclo, pessoa, pontos: '2,5', descricao: '  Ajudou no mutirão  ', gestor });
+  checa('virgula vira ponto', String(ok.registro.total_pontos), '2.5');
+  checa('registro completo', `${ok.registro.tipo} ${ok.registro.ciclo_id} ${ok.registro.colaborador_id} ${ok.registro.lancado_por_id}`, 'bonus_manual c3 p1 g1');
+  checa('motivo sem espacos nas pontas', `[${ok.registro.descricao}]`, '[Ajudou no mutirão]');
+  checa('guarda o nome do ciclo', ok.registro.periodo_trimestre, 'Ciclo 3 2026');
+  checa('zero pontos recusa', montarBonus({ ciclo, pessoa, pontos: '0', descricao: 'x', gestor }).erro, 'maior que zero');
+  checa('pontos negativos recusa', montarBonus({ ciclo, pessoa, pontos: '-3', descricao: 'x', gestor }).erro, 'maior que zero');
+  checa('texto no lugar de pontos recusa', montarBonus({ ciclo, pessoa, pontos: 'dez', descricao: 'x', gestor }).erro, 'maior que zero');
+  checa('sem motivo recusa', montarBonus({ ciclo, pessoa, pontos: '3', descricao: '   ', gestor }).erro, 'motivo');
+  checa('sem pessoa recusa', montarBonus({ ciclo, pessoa: null, pontos: '3', descricao: 'x', gestor }).erro, 'pessoa');
+  checa('sem ciclo recusa', montarBonus({ ciclo: null, pessoa, pontos: '3', descricao: 'x', gestor }).erro, 'ciclo');
+  checa('soma todos os lancamentos', String(somaDoBonus([{ total_pontos: 2.5 }, { total_pontos: 3 }, {}])), '5.5');
+  checa('historico do mais recente ao mais antigo',
+    ciclosEmOrdem([{ id: 'c1', data_inicio: '2026-03-14' }, { id: 'c3', data_inicio: '2026-09-16' }, { id: 'c2', data_inicio: '2026-06-16' }]).map((c) => c.id).join(','),
+    'c3,c2,c1');
+}
 
 console.log('\n== conferencia de cores (o verificador pega o que deve) ==');
 const cor = (html) => conferirLinha(html).join(' | ') || null;

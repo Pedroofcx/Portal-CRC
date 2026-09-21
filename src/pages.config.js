@@ -61,6 +61,7 @@ import ConfigPermissoes from './pages/ConfigPermissoes';
 import ConfigSkills from './pages/ConfigSkills';
 import ConfigTiposObservacao from './pages/ConfigTiposObservacao';
 import ConfigTiposTratativa from './pages/ConfigTiposTratativa';
+import CicloColaborador from './pages/CicloColaborador';
 import Configuracoes from './pages/Configuracoes';
 import Dashboard from './pages/Dashboard';
 import Escalas from './pages/Escalas';
@@ -101,6 +102,7 @@ export const PAGES = {
     "ConfigSkills": ConfigSkills,
     "ConfigTiposObservacao": ConfigTiposObservacao,
     "ConfigTiposTratativa": ConfigTiposTratativa,
+    "CicloColaborador": CicloColaborador,
     "Configuracoes": Configuracoes,
     "Dashboard": Dashboard,
     "Escalas": Escalas,

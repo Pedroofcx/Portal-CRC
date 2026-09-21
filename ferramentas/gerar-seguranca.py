@@ -46,6 +46,13 @@ SO_INSERE = {"log_auditoria"}
 # Tabela -> coluna que guarda o id do colaborador dono.
 SO_DO_DONO = {"anotacao_pessoal": "colaborador_id"}
 
+# Feedbacks (migration 16): o gestor lê e grava tudo; o agente lê só os que o
+# citam E que o gestor marcou como visíveis para ele. Nenhum agente grava.
+# Tabela -> (coluna com a lista de ids citados, condição de visibilidade).
+LEITURA_DO_CITADO = {
+    "observacao": ("colaboradores_ids", "visibilidade in ('agente', 'ambos')"),
+}
+
 # Campos sensíveis, por tabela. Ficam visíveis só para gestor.
 MASCARAR = {
     "colaborador": ["salario", "promocoes"],
@@ -184,6 +191,17 @@ grant  execute on function public.meu_colaborador_id() to authenticated;
             p.append(f'create policy "{tabela}_inserir" on public."{tabela}" for insert to authenticated with check ({dono});')
             p.append(f'create policy "{tabela}_alterar" on public."{tabela}" for update to authenticated using ({dono}) with check ({dono});')
             p.append(f'create policy "{tabela}_apagar" on public."{tabela}" for delete to authenticated using ({dono});')
+            continue
+
+        if tabela in LEITURA_DO_CITADO:
+            lista, visivel = LEITURA_DO_CITADO[tabela]
+            ler = f"public.eh_gestor() or ({visivel} and {lista} ? public.meu_colaborador_id())"
+            p.append(f"-- {tabela}: gestor lê e grava tudo; o agente lê só o que o cita e é visível para ele")
+            p.append(f'create policy "{tabela}_ler" on public."{tabela}" for select to authenticated using ({ler});')
+            for nome, trecho in (("inserir", "for insert to authenticated with check (public.eh_gestor())"),
+                                 ("alterar", "for update to authenticated using (public.eh_gestor()) with check (public.eh_gestor())"),
+                                 ("apagar", "for delete to authenticated using (public.eh_gestor())")):
+                p.append(f'create policy "{tabela}_{nome}" on public."{tabela}" {trecho};')
             continue
 
         p.append(
