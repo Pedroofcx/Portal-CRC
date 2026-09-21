@@ -14,6 +14,7 @@ import { posicaoNoRanking } from '../src/lib/posicaoRanking.js';
 import { prazoDaTratativa, descreverPrazo, consumoDoPrazo } from '../src/lib/prazoSla.js';
 import { indicadoresDoCiclo } from '../src/lib/indicadoresCiclo.js';
 import { conferirLinha } from './conferir-cores.mjs';
+import { filaDePendencias, avisosVisiveis, pesquisasVisiveis, obrigatoriasSemResposta, montarResposta } from '../src/lib/pendencias.js';
 import { traduzirErro } from '../src/lib/erros.js';
 import { formatDateSP, dataDoCalendario } from '../src/components/utils/helpers.js';
 import { getMesReferencia } from '../src/components/ferramentas/apoio/constants.js';
@@ -347,6 +348,56 @@ checa('check constraint', traduzirErro(new Error('new row for relation "pontuaca
 checa('sem internet', traduzirErro(new Error('TypeError: Failed to fetch')), 'sem conexão');
 checa('desconhecido mantem a mensagem sem o prefixo tecnico', traduzirErro(new Error('[Aviso.update] prazo expirado')), 'prazo expirado');
 checa('sem mensagem', traduzirErro(null), 'erro desconhecido');
+
+console.log('\n== central de pendencias (avisos e pesquisas) ==');
+{
+  const hoje = new Date(2026, 8, 21, 10, 0);
+  const antigo = { id: 'c1', papel: 'agente', created_date: '2026-01-26T12:00:00Z' };
+  const novo = { id: 'c2', papel: 'agente', created_date: '2026-09-15T12:00:00Z' };
+  const gestor = { id: 'g1', papel: 'gestor', created_date: '2026-01-26T12:00:00Z' };
+  const avisos = [
+    { id: 'a1', tipo: 'informativo', destinatarios: 'todos', ativo: true, data_publicacao: '2026-03-01T12:00:00Z' },
+    { id: 'a2', tipo: 'urgente', destinatarios: 'todos', ativo: true, data_publicacao: '2026-09-18T12:00:00Z' },
+    { id: 'a3', tipo: 'alerta', destinatarios: 'gestores', ativo: true, data_publicacao: '2026-09-18T12:00:00Z' },
+    { id: 'a4', tipo: 'comunicado', destinatarios: 'todos', ativo: false, data_publicacao: '2026-09-18T12:00:00Z' },
+    { id: 'a5', tipo: 'comunicado', destinatarios: 'todos', ativo: true, data_publicacao: '2026-09-01T12:00:00Z', data_expiracao: '2026-09-10T12:00:00Z' },
+    { id: 'a6', tipo: 'comunicado', destinatarios: 'todos', ativo: true, data_publicacao: '2026-09-30T12:00:00Z' },
+  ];
+  const pesquisas = [
+    { id: 'p1', ativa: true, data_inicio: '2026-09-16', data_fim: '2030-12-31', created_date: '2026-09-16T10:00:00Z' },
+    { id: 'p2', ativa: true, data_inicio: '2026-01-01', data_fim: '2026-02-09', created_date: '2026-01-01T10:00:00Z' },
+    { id: 'p3', ativa: true, data_inicio: '2026-06-01', created_date: '2026-06-01T10:00:00Z' },
+    { id: 'p4', ativa: true, data_inicio: '2026-10-01', created_date: '2026-09-20T10:00:00Z' },
+  ];
+  const ids = (fila) => fila.map((f) => f.item.id).join(',');
+
+  const filaAntigo = filaDePendencias({ colaborador: antigo, avisos, pesquisas, agora: hoje });
+  checa('urgente primeiro; inativo, expirado, futuro e de gestor ficam de fora', ids(filaAntigo), 'a2,a1,p3,p1');
+  checa('pesquisa com periodo encerrado nao aparece', String(filaAntigo.some((f) => f.item.id === 'p2')), 'false');
+  checa('pesquisa que so comeca depois nao aparece', String(filaAntigo.some((f) => f.item.id === 'p4')), 'false');
+
+  const filaNovo = filaDePendencias({ colaborador: novo, avisos, pesquisas, agora: hoje });
+  checa('cadastrado em 15/09 so recebe o publicado depois', ids(filaNovo), 'a2,p1');
+
+  const leituras = [{ aviso_id: 'a2', colaborador_id: 'c1', confirmou: true }, { aviso_id: 'a1', colaborador_id: 'OUTRA', confirmou: true }];
+  const respostas = [{ pesquisa_id: 'p3', colaborador_id: 'c1' }];
+  checa('confirmado e respondido saem; confirmacao de outra pessoa nao conta',
+    ids(filaDePendencias({ colaborador: antigo, avisos, pesquisas, leituras, respostas, agora: hoje })), 'a1,p1');
+  checa('tratado nesta sessao sai na hora, antes do banco responder',
+    ids(filaDePendencias({ colaborador: antigo, avisos, pesquisas, tratados: new Set(['a2', 'p3']), agora: hoje })), 'a1,p1');
+  checa('gestor recebe aviso de gestores', ids(filaDePendencias({ colaborador: gestor, avisos, pesquisas: [], agora: hoje })), 'a2,a3,a1');
+
+  checa('lista de avisos do agente novo: so os depois do cadastro', avisosVisiveis(avisos, novo, hoje).map((a) => a.id).join(','), 'a2');
+  checa('lista do gestor: todos', String(avisosVisiveis(avisos, gestor, hoje).length), '6');
+  checa('lista de pesquisas do agente novo', pesquisasVisiveis(pesquisas, novo).map((p) => p.id).join(','), 'p1,p4');
+
+  const pesq = { id: 'x', titulo: 'CSAT', tipo: 'csat', perguntas: [{ id: 'q1', obrigatoria: true }, { id: 'q2', obrigatoria: true }, { id: 'q3' }] };
+  checa('obrigatorias sem resposta', obrigatoriasSemResposta(pesq, { q1: '4', q2: '  ' }).join(','), 'q2');
+  const r = montarResposta(pesq, { q1: '4', q2: 'ok' }, { id: 'c1', nome_completo: 'Ana' }, hoje);
+  checa('CSAT 4 e positivo', `${r.nota_calculada} ${r.sentimento}`, '4 positivo');
+  checa('resposta leva todas as perguntas', String(r.respostas.length), '3');
+  checa('NPS 7 e neutro', montarResposta({ ...pesq, tipo: 'nps' }, { q1: '7' }, { id: 'c1' }, hoje).sentimento, 'neutro');
+}
 
 console.log('\n== conferencia de cores (o verificador pega o que deve) ==');
 const cor = (html) => conferirLinha(html).join(' | ') || null;

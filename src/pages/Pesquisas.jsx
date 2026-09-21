@@ -33,6 +33,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import AgendamentoPesquisa from '@/components/pesquisas/AgendamentoPesquisa';
 import { ResultadosVisuaisCSAT, ResultadosVisuaisNPS } from '@/components/pesquisas/ResultadosVisuais';
 import PainelLateral, { RodapeFixo } from '@/components/ui/PainelLateral';
+import { pesquisasVisiveis } from '@/lib/pendencias';
 
 export default function Pesquisas() {
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -494,7 +495,7 @@ export default function Pesquisas() {
 
       <DataTable
         columns={columns}
-        data={pesquisas}
+        data={pesquisasVisiveis(pesquisas, colaborador)}
         isLoading={isLoading}
         emptyIcon={Star}
         emptyTitle="Nenhuma pesquisa disponível"

@@ -27,6 +27,7 @@ import {
   Eye
 } from 'lucide-react';
 import PainelLateral, { RodapeFixo } from '@/components/ui/PainelLateral';
+import { avisosVisiveis as filtrarAvisosVisiveis } from '@/lib/pendencias';
 
 const tipoConfig = {
   informativo: { icon: Info, color: 'bg-info-soft text-primary border-info/25' },
@@ -132,14 +133,11 @@ export default function Avisos() {
     return <LoadingSpinner />;
   }
 
-  // Filtrar avisos ativos e por destinatário
-  const avisosVisiveis = avisos.filter(aviso => {
-    if (!aviso.ativo) return false;
-    if (aviso.destinatarios === 'todos') return true;
-    if (aviso.destinatarios === 'agentes' && colaborador?.papel === 'agente') return true;
-    if (aviso.destinatarios === 'gestores' && colaborador?.papel === 'gestor') return true;
-    return isGestor; // Gestor vê todos
-  });
+  // Gestor vê todos os ativos; o agente, só os que são para ele, estão
+  // vigentes e foram publicados DEPOIS do cadastro dele (src/lib/pendencias).
+  const avisosVisiveis = isGestor
+    ? avisos.filter(aviso => aviso.ativo)
+    : filtrarAvisosVisiveis(avisos, colaborador);
 
   const resetForm = () => {
     setFormData({

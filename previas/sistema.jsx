@@ -90,7 +90,9 @@ const cacheFalso = {};
 window.__db = db;
 db.entities = new Proxy({}, { get: (_, e) => (typeof e === 'string' ? (cacheFalso[e] ||= falsa(e)) : undefined) });
 
-const gestor = copia.dados.Colaborador.find((c) => c.email === copia.gestorEmail);
+// ?como=email entra como outra pessoa (só aqui, no banco em memória).
+const comoEmail = new URLSearchParams(window.location.search).get('como');
+const gestor = copia.dados.Colaborador.find((c) => c.email === (comoEmail || copia.gestorEmail));
 db.auth.me = async () => ({ id: gestor?.id, email: gestor?.email, full_name: gestor?.nome_completo, role: 'user', trocar_senha: false });
 db.auth.logout = async () => {};
 db.integrations.Core.InvokeLLM = async () => { throw new Error('A IA não roda na prévia.'); };

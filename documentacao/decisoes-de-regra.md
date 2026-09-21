@@ -184,3 +184,41 @@ sem ninguém mexer em nada. O campo `via` na resposta diz qual caminho
 respondeu.
 
 **Medido em:** 18 de setembro de 2026, modelo `gemini-3.6-flash`.
+
+---
+
+## Avisos e pesquisas: quem recebe, e quando somem
+
+**Decidido em:** 21 de setembro de 2026, pelo responsável pelo produto.
+
+**A regra nova.** Quem é cadastrado agora só recebe — e só vê — avisos e
+pesquisas publicados **depois** do seu cadastro. Nada do passado aparece para
+quem acabou de chegar: nem na central de pendências da tela inicial, nem na
+lista de Avisos, nem na de Pesquisas. O gestor continua vendo tudo nas listas.
+
+**As outras regras, que já deviam valer e não valiam:**
+* aviso só para quem é destinatário (todos, agentes ou gestores), só se estiver
+  ativo, já publicado e não expirado (`data_expiracao` era ignorada);
+* pesquisa só dentro do período (`data_inicio` a `data_fim`) — uma pesquisa
+  encerrada em 09/02/2026 continuava aparecendo;
+* aviso some quando a pessoa confirma a leitura; pesquisa, quando ela responde.
+
+**Por que os pop-ups voltavam depois de confirmados.** Três causas:
+1. depois de responder, a lista de pendências só era relida um instante depois;
+   se nesse intervalo outro pop-up abria ou fechava, a mesma pesquisa voltava.
+   Agora o que foi tratado sai da fila na hora;
+2. a confirmação de leitura era procurada entre as últimas 1000 de todo mundo —
+   quando passasse disso, as antigas sumiam da conta e os avisos voltavam. Agora
+   cada pessoa busca só as dela;
+3. na troca de sistema, parte das confirmações e respostas ficou gravada com o
+   id antigo de quem as fez (inclusive 9 respostas do gestor, de 15/09), e o
+   sistema não as reconhecia. O importador corrigido evita isso na migração
+   completa.
+
+**Onde mora:** `src/lib/pendencias.js` (regras, com testes em `npm run testar`)
+e `src/components/dashboard/CentralDePendencias.jsx` (uma pendência por vez).
+
+**O que falta para ser regra do banco.** Hoje o filtro é das telas. Pelo
+console do navegador, um agente ainda consegue listar avisos antigos. Se isso
+precisar ser garantido pelo banco (como as anotações pessoais), é uma migration
+de políticas — decisão pendente.
