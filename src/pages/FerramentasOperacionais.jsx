@@ -44,7 +44,7 @@ export default function FerramentasOperacionais() {
   const [aplicarMulta, setAplicarMulta] = useState(true);
 
   const { data: user } = useQuery({ queryKey: ['currentUser'], queryFn: () => db.auth.me() });
-  const { data: colaboradores = [] } = useQuery({ queryKey: ['colaboradores'], queryFn: () => db.entities.Colaborador.list() });
+  const { data: colaboradores = [] } = useQuery({ queryKey: ['colaboradores', "list()"], queryFn: () => db.entities.Colaborador.list() });
   const { data: tratativas = [] } = useQuery({ queryKey: ['tratativas-select'], queryFn: () => db.entities.Tratativa.list('-created_date', 100) });
   const { data: configs = [] } = useQuery({ queryKey: ['config-estorno'], queryFn: () => db.entities.ConfigEstorno.list() });
   const { data: historico = [] } = useQuery({ queryKey: ['estornos-historico'], queryFn: () => db.entities.EstornoParcial.list('-created_date', 300) });

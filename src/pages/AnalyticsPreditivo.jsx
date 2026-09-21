@@ -228,12 +228,12 @@ export default function AnalyticsPreditivo() {
   const [periodoAnalise, setPeriodoAnalise] = useState('30');
   
   const { data: tratativas = [], isLoading: loadingTratativas } = useQuery({
-    queryKey: ['tratativas'],
+    queryKey: ['tratativas', "list('-created_date')"],
     queryFn: () => db.entities.Tratativa.list('-created_date'),
   });
 
   const { data: colaboradores = [] } = useQuery({
-    queryKey: ['colaboradores'],
+    queryKey: ['colaboradores', "list()"],
     queryFn: () => db.entities.Colaborador.list(),
   });
 

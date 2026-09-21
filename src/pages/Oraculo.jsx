@@ -47,7 +47,7 @@ export default function OraculoPage() {
 
   // Buscar dados
   const { data: colaboradores = [], isLoading: loadingColaboradores } = useQuery({
-    queryKey: ['colaboradores'],
+    queryKey: ['colaboradores', "list()"],
     queryFn: () => db.entities.Colaborador.list()
   });
 
@@ -62,17 +62,17 @@ export default function OraculoPage() {
   });
 
   const { data: pontuacoes = [] } = useQuery({
-    queryKey: ['pontuacoes'],
+    queryKey: ['pontuacoes', "list()"],
     queryFn: () => db.entities.Pontuacao.list()
   });
 
   const { data: apuracoes = [] } = useQuery({
-    queryKey: ['apuracoes'],
+    queryKey: ['apuracoes', "list()"],
     queryFn: () => db.entities.Apuracao.list()
   });
 
   const { data: tratativas = [] } = useQuery({
-    queryKey: ['tratativas'],
+    queryKey: ['tratativas', "list()"],
     queryFn: () => db.entities.Tratativa.list()
   });
 

@@ -1,4 +1,5 @@
 import { Toaster } from "@/components/ui/toaster"
+import { Toaster as Avisos } from "@/components/ui/sonner"
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
 import NavigationTracker from '@/lib/NavigationTracker'
@@ -95,6 +96,10 @@ function App() {
             <AuthenticatedApp />
           </Router>
           <Toaster />
+          {/* Os avisos do `sonner` (toast.success / toast.error), usados em 42
+              arquivos, só aparecem com este componente montado — e ele nunca
+              esteve: "Salvo", "Erro ao salvar", "Bônus lançado" eram invisíveis. */}
+          <Avisos position="bottom-right" richColors closeButton />
         </QueryClientProvider>
       </AuthProvider>
     </ErrorBoundary>

@@ -34,12 +34,12 @@ export default function ConfigMotivosJornada() {
   const queryClient = useQueryClient();
 
   const { data: motivos = [], isLoading } = useQuery({
-    queryKey: ['motivos'],
+    queryKey: ['motivos', "list()"],
     queryFn: () => db.entities.MotivoTratativa.list(),
   });
 
   const { data: etapas = [] } = useQuery({
-    queryKey: ['etapas-jornada'],
+    queryKey: ['etapas-jornada', "list()"],
     queryFn: () => db.entities.EtapaJornada.list(),
   });
 

@@ -249,7 +249,7 @@ export default function Layout({ children, currentPageName }) {
   });
 
   const { data: colaboradores = [], isLoading: loadingColaboradores } = useQuery({
-    queryKey: ['colaboradores'],
+    queryKey: ['colaboradores', "list()"],
     queryFn: () => db.entities.Colaborador.list(),
     enabled: !!user,
   });

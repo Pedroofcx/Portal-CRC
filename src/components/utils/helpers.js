@@ -1,27 +1,57 @@
 import { pontosDaFaixa } from '../../lib/faixasIndicadores.js';
+/**
+ * Data SEM hora ("2026-09-16", colunas `date` do banco) é uma data de
+ * CALENDÁRIO: não tem fuso. `new Date("2026-09-16")` a lê como meia-noite em
+ * UTC — que em São Paulo é 21h do dia 15. Por isso a admissão, os períodos de
+ * apuração, de Hansei e de escala apareciam com UM DIA A MENOS.
+ *
+ * `dataDoCalendario` devolve a meia-noite LOCAL do dia (ou null); use-a em
+ * vez de `new Date(...)` sempre que o valor for só data.
+ */
+const SO_DATA = /^(\d{4})-(\d{2})-(\d{2})$/;
+
+export function dataDoCalendario(valor) {
+  const m = typeof valor === 'string' ? SO_DATA.exec(valor.trim()) : null;
+  if (!m) return null;
+  return new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
+}
+
 // Formatar data para fuso horário de São Paulo
 export function formatDateSP(date, format = 'DD/MM/YYYY HH:mm') {
   if (!date) return '-';
-  
+
+  // Só data: formata os próprios números, sem passar por fuso nenhum.
+  const soData = typeof date === 'string' ? SO_DATA.exec(date.trim()) : null;
+  if (soData) {
+    const [, ano, mes, dia] = soData;
+    if (format === 'DD/MM') return `${dia}/${mes}`;
+    if (format === 'DD/MM/YY') return `${dia}/${mes}/${ano.slice(2)}`;
+    return `${dia}/${mes}/${ano}`; // formatos com hora: não há hora para mostrar
+  }
+
   try {
     const d = new Date(date);
-    
+
     // Validar se é uma data válida
     if (isNaN(d.getTime())) return '-';
-    
+
     const options = { timeZone: 'America/Sao_Paulo' };
-    
+
     if (format === 'DD/MM/YYYY') {
       return d.toLocaleDateString('pt-BR', options);
     }
     if (format === 'DD/MM/YYYY HH:mm') {
-      return d.toLocaleString('pt-BR', options);
+      return d.toLocaleString('pt-BR', { ...options, day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
     }
     if (format === 'HH:mm') {
       return d.toLocaleTimeString('pt-BR', { ...options, hour: '2-digit', minute: '2-digit' });
     }
     if (format === 'DD/MM') {
       return d.toLocaleDateString('pt-BR', { ...options, day: '2-digit', month: '2-digit' });
+    }
+    // Antes caía no formato completo, com segundos: "15/09/2026, 21:00:00".
+    if (format === 'DD/MM/YY') {
+      return d.toLocaleDateString('pt-BR', { ...options, day: '2-digit', month: '2-digit', year: '2-digit' });
     }
     return d.toLocaleString('pt-BR', options);
   } catch (error) {

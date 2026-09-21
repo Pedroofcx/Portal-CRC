@@ -147,12 +147,12 @@ export default function Tratativas() {
   });
 
   const { data: colaboradores = [] } = useQuery({
-    queryKey: ['colaboradores'],
+    queryKey: ['colaboradores', "list()"],
     queryFn: () => db.entities.Colaborador.list(),
   });
 
   const { data: tratativasRecentes = [], isLoading } = useQuery({
-    queryKey: ['tratativas'],
+    queryKey: ['tratativas', "list('-created_date', 300)"],
     queryFn: () => db.entities.Tratativa.list('-created_date', 300),
     staleTime: 60000,
     gcTime: 300000,
@@ -175,14 +175,14 @@ export default function Tratativas() {
   }, [tratativasRecentes, abertasTodas]);
 
   const { data: motivos = [] } = useQuery({
-    queryKey: ['motivos'],
+    queryKey: ['motivos', "filter({ ativo: true })"],
     queryFn: () => db.entities.MotivoTratativa.filter({ ativo: true }),
     staleTime: 120000,
     retry: 2
   });
 
   const { data: tiposTratativa = [] } = useQuery({
-    queryKey: ['tipos-tratativa'],
+    queryKey: ['tipos-tratativa', "filter({ ativa: true })"],
     queryFn: () => db.entities.TipoTratativa.filter({ ativa: true }),
   });
 

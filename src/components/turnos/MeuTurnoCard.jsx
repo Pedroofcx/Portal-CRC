@@ -35,7 +35,7 @@ export default function MeuTurnoCard({ colaboradorId }) {
   const semanaAtual = getISOWeek(new Date());
 
   const { data: escalas = [] } = useQuery({
-    queryKey: ['escalas-turno'],
+    queryKey: ['escalas-turno', "filter({ ativa: true }, '-created_date', 5)"],
     queryFn: () => db.entities.EscalaTurno.filter({ ativa: true }, '-created_date', 5),
     enabled: !!colaboradorId,
   });

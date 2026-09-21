@@ -125,17 +125,17 @@ export default function TratativaDetalhe({ idExterno = null, embutido = false })
   });
 
   const { data: colaboradores = [] } = useQuery({
-    queryKey: ['colaboradores'],
+    queryKey: ['colaboradores', "list()"],
     queryFn: () => db.entities.Colaborador.list(),
   });
 
   const { data: etapasJornada = [] } = useQuery({
-    queryKey: ['etapas-jornada'],
+    queryKey: ['etapas-jornada', "filter({ ativa: true })"],
     queryFn: () => db.entities.EtapaJornada.filter({ ativa: true }),
   });
 
   const { data: _motivos = [] } = useQuery({
-    queryKey: ['motivos'],
+    queryKey: ['motivos', "filter({ ativo: true })"],
     queryFn: () => db.entities.MotivoTratativa.filter({ ativo: true }),
   });
 

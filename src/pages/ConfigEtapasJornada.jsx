@@ -29,7 +29,7 @@ export default function ConfigEtapasJornada() {
   const queryClient = useQueryClient();
 
   const { data: etapas = [], isLoading } = useQuery({
-    queryKey: ['etapas-jornada'],
+    queryKey: ['etapas-jornada', "list()"],
     queryFn: () => db.entities.EtapaJornada.list(),
   });
 

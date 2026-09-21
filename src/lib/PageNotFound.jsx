@@ -13,7 +13,7 @@ export default function PageNotFound({}) {
             try {
                 const user = await db.auth.me();
                 return { user, isAuthenticated: true };
-            } catch (error) {
+            } catch (_error) {
                 return { user: null, isAuthenticated: false };
             }
         }

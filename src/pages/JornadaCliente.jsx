@@ -52,7 +52,7 @@ export default function JornadaCliente() {
   });
 
   const { data: colaboradores = [] } = useQuery({
-    queryKey: ['colaboradores'],
+    queryKey: ['colaboradores', "list()"],
     queryFn: () => db.entities.Colaborador.list(),
   });
 
@@ -67,14 +67,14 @@ export default function JornadaCliente() {
   });
 
   const { data: etapas = [] } = useQuery({
-    queryKey: ['etapas-jornada'],
+    queryKey: ['etapas-jornada', "filter({ ativa: true }, 'ordem', 100)"],
     queryFn: () => db.entities.EtapaJornada.filter({ ativa: true }, 'ordem', 100),
     staleTime: 120000,
     retry: 2
   });
 
   const { data: motivos = [] } = useQuery({
-    queryKey: ['motivos'],
+    queryKey: ['motivos', "filter({ ativo: true }, 'nome', 200)"],
     queryFn: () => db.entities.MotivoTratativa.filter({ ativo: true }, 'nome', 200),
     staleTime: 120000,
     retry: 2

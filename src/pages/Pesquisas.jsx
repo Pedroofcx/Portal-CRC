@@ -69,12 +69,12 @@ export default function Pesquisas() {
   });
 
   const { data: colaboradores = [] } = useQuery({
-    queryKey: ['colaboradores'],
+    queryKey: ['colaboradores', "list()"],
     queryFn: () => db.entities.Colaborador.list(),
   });
 
   const { data: pesquisas = [], isLoading } = useQuery({
-    queryKey: ['pesquisas'],
+    queryKey: ['pesquisas', "filter({ ativa: true }, '-created_date')"],
     queryFn: () => db.entities.Pesquisa.filter({ ativa: true }, '-created_date'),
     staleTime: 5000,
     refetchOnWindowFocus: true,
@@ -176,7 +176,7 @@ export default function Pesquisas() {
       toast.success('Pesquisa clonada! Você pode editá-la agora.');
       // Após clonar, abrir para edição
       setTimeout(() => {
-        queryClient.fetchQuery({ queryKey: ['pesquisas'], queryFn: () => db.entities.Pesquisa.filter({ ativa: true }, '-created_date') }).then(_lista => {
+        queryClient.fetchQuery({ queryKey: ['pesquisas', "filter({ ativa: true }, '-created_date')"], queryFn: () => db.entities.Pesquisa.filter({ ativa: true }, '-created_date') }).then(_lista => {
           // Recarregar e abrir edição não é trivial sem o id novo, então apenas notificamos
         });
       }, 500);

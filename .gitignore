@@ -42,5 +42,4 @@ senhas-provisorias/
 
 # Copia do banco para a previa da tela do operador - tem nome de cliente
 previas/dados-operador.json
-previas/dados-gestor.json
 previas/dados-sistema.json

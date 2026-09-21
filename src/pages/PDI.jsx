@@ -17,12 +17,12 @@ export default function PDIPage() {
   });
 
   const { data: colaboradores = [] } = useQuery({
-    queryKey: ['colaboradores'],
+    queryKey: ['colaboradores', "list()"],
     queryFn: () => db.entities.Colaborador.list(),
   });
 
   const { data: pdis = [], isLoading } = useQuery({
-    queryKey: ['pdis'],
+    queryKey: ['pdis', "list('-created_date')"],
     queryFn: () => db.entities.PDI.list('-created_date'),
   });
 

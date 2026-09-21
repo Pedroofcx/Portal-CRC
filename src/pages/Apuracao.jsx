@@ -72,12 +72,12 @@ export default function Apuracao() {
   });
 
   const { data: colaboradores = [] } = useQuery({
-    queryKey: ['colaboradores'],
+    queryKey: ['colaboradores', "list()"],
     queryFn: () => db.entities.Colaborador.list(),
   });
 
   const { data: apuracoes = [] } = useQuery({
-    queryKey: ['apuracoes'],
+    queryKey: ['apuracoes', "list('-created_date', 50)"],
     queryFn: () => db.entities.Apuracao.list('-created_date', 50),
   });
 

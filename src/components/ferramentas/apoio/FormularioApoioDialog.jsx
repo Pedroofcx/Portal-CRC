@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { AlertCircle } from 'lucide-react';
 import { TIPOS_APOIO, formatMinutos, getMesReferencia } from './constants';
 import PainelLateral from '@/components/ui/PainelLateral';
+import { dataDoCalendario } from '@/components/utils/helpers';
 
 const FORM_VAZIO = {
   tipo_apoio: '', tipo_apoio_outro: '', tipo_zendesk: '',
@@ -49,7 +50,9 @@ export default function FormularioApoioDialog({ open, onOpenChange, onSubmit, di
       tratativa_id: form.tratativa_id || '',
       horas_solicitadas: horasNum,
       minutos_solicitados: horasNum * 60,
-      mes_referencia: getMesReferencia(new Date(form.data_solicitacao)),
+      // dataDoCalendario: "2026-10-01" lido com new Date() vira 30/09 às 21h
+      // em São Paulo, e o pedido do dia 1º descontava as horas do mês anterior.
+      mes_referencia: getMesReferencia(dataDoCalendario(form.data_solicitacao) ?? new Date()),
       status: 'solicitada',
       historico_status: [{ status: 'solicitada', data: new Date().toISOString(), usuario: user?.full_name || '—' }],
     });

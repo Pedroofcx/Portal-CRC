@@ -90,9 +90,9 @@ export default function Turnos() {
   }, [semanaOffset]);
 
   const { data: user } = useQuery({ queryKey: ['currentUser'], queryFn: () => db.auth.me() });
-  const { data: colaboradores = [] } = useQuery({ queryKey: ['colaboradores'], queryFn: () => db.entities.Colaborador.list() });
-  const { data: escalas = [], isLoading: loadingEscalas } = useQuery({ queryKey: ['escalas-turno'], queryFn: () => db.entities.EscalaTurno.filter({ ativa: true }, '-created_date', 52) });
-  const { data: tratativas = [] } = useQuery({ queryKey: ['tratativas'], queryFn: () => db.entities.Tratativa.list('-created_date', 500) });
+  const { data: colaboradores = [] } = useQuery({ queryKey: ['colaboradores', "list()"], queryFn: () => db.entities.Colaborador.list() });
+  const { data: escalas = [], isLoading: loadingEscalas } = useQuery({ queryKey: ['escalas-turno', "filter({ ativa: true }, '-created_date', 52)"], queryFn: () => db.entities.EscalaTurno.filter({ ativa: true }, '-created_date', 52) });
+  const { data: tratativas = [] } = useQuery({ queryKey: ['tratativas', "list('-created_date', 500)"], queryFn: () => db.entities.Tratativa.list('-created_date', 500) });
 
   const colaborador = useMemo(() => colaboradores.find(c => c.email === user?.email), [colaboradores, user]);
   const isGestor = colaborador?.papel === 'gestor';

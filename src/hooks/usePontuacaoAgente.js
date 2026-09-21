@@ -27,7 +27,7 @@ export function tratativaNosCiclo(tratativa, ciclo) {
 export function usePontuacaoAgente(colaboradorId) {
   // Ciclo trimestral ativo — fonte de verdade para o período
   const { data: ciclos = [], isLoading: loadingCiclos } = useQuery({
-    queryKey: ['ciclos-trimestrais'],
+    queryKey: ['ciclos-trimestrais', "list()"],
     queryFn: () => db.entities.CicloTrimestral.list(),
     staleTime: 300000,
     gcTime: 600000,

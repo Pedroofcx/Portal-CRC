@@ -63,7 +63,7 @@ export default function Escalas() {
   });
 
   const { data: colaboradores = [] } = useQuery({
-    queryKey: ['colaboradores'],
+    queryKey: ['colaboradores', "list()"],
     queryFn: () => db.entities.Colaborador.list(),
   });
 
@@ -73,7 +73,7 @@ export default function Escalas() {
   });
 
   const { data: atribuicoes = [] } = useQuery({
-    queryKey: ['escalaAtribuicoes'],
+    queryKey: ['escalaAtribuicoes', "list('-created_date')"],
     queryFn: () => db.entities.EscalaAtribuicao.list('-created_date'),
   });
 

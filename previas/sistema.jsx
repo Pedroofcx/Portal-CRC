@@ -17,7 +17,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { MemoryRouter, Routes, Route, useNavigate } from 'react-router-dom';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClientProvider } from '@tanstack/react-query';
 import '@/index.css';
 import db from '@/api/db';
 import { Toaster } from '@/components/ui/toaster';
@@ -86,6 +86,8 @@ const falsa = (entidade) => {
 };
 
 const cacheFalso = {};
+// window.__db: o banco em memória, para montar cenários de teste pelo console.
+window.__db = db;
 db.entities = new Proxy({}, { get: (_, e) => (typeof e === 'string' ? (cacheFalso[e] ||= falsa(e)) : undefined) });
 
 const gestor = copia.dados.Colaborador.find((c) => c.email === copia.gestorEmail);
@@ -104,10 +106,26 @@ const { Pages, Layout, mainPage } = pagesConfig;
 // window.__ir('Tratativas'): troca de tela como um clique no menu.
 function Navegador() {
   const ir = useNavigate();
-  window.__ir = (nome) => ir(`/${nome}`);
+  window.__ir = (nome) => { window.__telaAtual = nome; ir(`/${nome}`); };
   window.__paginas = Object.keys(Pages);
   return null;
 }
+
+// ------------------------------------------------ erros e avisos do console
+// window.__erros: tudo o que sai como console.error/warn ou erro não tratado,
+// com a tela em que aconteceu. Base da caça a bugs em execução.
+window.__erros = [];
+window.__telaAtual = '?';
+for (const nivel of ['error', 'warn']) {
+  const original = console[nivel].bind(console);
+  console[nivel] = (...args) => {
+    const msg = args.map((a) => (a instanceof Error ? `${a.message}` : typeof a === 'string' ? a : (() => { try { return JSON.stringify(a).slice(0, 200); } catch { return String(a); } })())).join(' ');
+    window.__erros.push({ nivel, tela: window.__telaAtual, msg: msg.slice(0, 400) });
+    original(...args);
+  };
+}
+window.addEventListener('error', (e) => window.__erros.push({ nivel: 'uncaught', tela: window.__telaAtual, msg: `${e.message}` }));
+window.addEventListener('unhandledrejection', (e) => window.__erros.push({ nivel: 'promise', tela: window.__telaAtual, msg: `${e.reason?.message ?? e.reason}` }));
 
 // ---------------------------------------------------- auditoria de layout
 // window.__auditar(['Tratativas', ...]) abre cada tela (e cada aba dela) e
@@ -131,6 +149,13 @@ function medir(onde) {
     }
   }
   if (/Algo deu errado/.test(main.innerText)) achados.push({ tipo: 'QUEBROU', onde });
+  // Texto que denuncia conta ou dado errado aparecendo para a pessoa.
+  const SUSPEITO = /\b(NaN|Infinity|undefined|null|Invalid Date)\b|\[object Object\]/;
+  for (const no of main.querySelectorAll('*')) {
+    if (no.children.length) continue;
+    const t = (no.innerText || '').trim();
+    if (t && SUSPEITO.test(t)) achados.push({ tipo: 'texto suspeito', onde, o_que: `${t.slice(0, 60)} ← ${texto(no.parentElement?.parentElement, 70)}` });
+  }
   const W = document.documentElement.clientWidth;
   if (document.documentElement.scrollWidth > W) {
     const culpados = [...main.querySelectorAll('*')]
@@ -150,6 +175,7 @@ window.__auditar = async (paginas = Object.keys(Pages), { pausa = 1500 } = {}) =
     for (const aba of [...document.querySelectorAll('main [role=tab]')].slice(0, 8)) {
       aba.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
       aba.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+      window.__telaAtual = `${p} › ${aba.innerText.trim().slice(0, 25)}`;
       aba.click();
       await espera(450);
       achados = achados.concat(medir(`aba ${aba.innerText.trim().slice(0, 25)}`));
@@ -191,7 +217,9 @@ window.__abrir = async (pagina, textoBotao, { pausa = 1500 } = {}) => {
   };
 };
 
-const qc = new QueryClient({ defaultOptions: { queries: { refetchOnWindowFocus: false, retry: false, staleTime: 30000 } } });
+// O mesmo QueryClient do app (com o aviso central de gravação que falha).
+const { queryClientInstance: qc } = await import('@/lib/query-client');
+window.__qc = qc;
 const inicial = new URLSearchParams(window.location.search).get('p') || mainPage;
 
 function App() {
@@ -206,7 +234,7 @@ function App() {
           <Route path="*" element={<Layout currentPageName={mainPage}><p>Tela fora da prévia.</p></Layout>} />
         </Routes>
         <Toaster />
-        <Sonner />
+        <Sonner position="bottom-right" richColors closeButton />
       </MemoryRouter>
     </QueryClientProvider>
   );

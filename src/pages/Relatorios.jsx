@@ -52,31 +52,31 @@ export default function Relatorios() {
   });
 
   const { data: colaboradores = [] } = useQuery({
-    queryKey: ['colaboradores'],
+    queryKey: ['colaboradores', "list()"],
     queryFn: () => db.entities.Colaborador.list(),
     staleTime: 120000,
   });
 
   const { data: pontuacoes = [] } = useQuery({
-    queryKey: ['pontuacoes'],
+    queryKey: ['pontuacoes', "list('-created_date', 500)"],
     queryFn: () => db.entities.Pontuacao.list('-created_date', 500),
     staleTime: 120000,
   });
 
   const { data: apuracoes = [] } = useQuery({
-    queryKey: ['apuracoes'],
+    queryKey: ['apuracoes', "list('-created_date', 500)"],
     queryFn: () => db.entities.Apuracao.list('-created_date', 500),
     staleTime: 120000,
   });
 
   const { data: observacoes = [] } = useQuery({
-    queryKey: ['observacoes'],
+    queryKey: ['observacoes', "list('-created_date', 2000)"],
     queryFn: () => db.entities.Observacao.list('-created_date', 2000),
     staleTime: 120000,
   });
 
   const { data: pesquisas = [] } = useQuery({
-    queryKey: ['pesquisas'],
+    queryKey: ['pesquisas', "list('-created_date', 200)"],
     queryFn: () => db.entities.Pesquisa.list('-created_date', 200),
     staleTime: 120000,
   });

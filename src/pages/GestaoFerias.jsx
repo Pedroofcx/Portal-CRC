@@ -145,7 +145,7 @@ export default function GestaoFerias() {
   const queryClient = useQueryClient();
 
   const { data: user } = useQuery({ queryKey: ['currentUser'], queryFn: () => db.auth.me() });
-  const { data: colaboradores = [] } = useQuery({ queryKey: ['colaboradores'], queryFn: () => db.entities.Colaborador.list() });
+  const { data: colaboradores = [] } = useQuery({ queryKey: ['colaboradores', "list()"], queryFn: () => db.entities.Colaborador.list() });
   const { data: ciclos = [], isLoading } = useQuery({ queryKey: ['ciclos-ferias'], queryFn: () => db.entities.CicloFerias.list('-created_date') });
 
   const colaboradorAtual = colaboradores.find(c => c.email === user?.email);

@@ -69,12 +69,12 @@ export default function Dashboard() {
   });
 
   const { data: colaboradores = [] } = useQuery({
-    queryKey: ['colaboradores'],
+    queryKey: ['colaboradores', "list()"],
     queryFn: () => db.entities.Colaborador.list(),
   });
 
   const { data: tratativas = [], isLoading: loadingTratativas } = useQuery({
-    queryKey: ['tratativas'],
+    queryKey: ['tratativas', "list('-created_date', 500)"],
     queryFn: () => db.entities.Tratativa.list('-created_date', 500),
     staleTime: 60000,
     gcTime: 300000,
@@ -129,7 +129,7 @@ export default function Dashboard() {
   });
 
   const { data: hanseiEnvios = [] } = useQuery({
-    queryKey: ['hansei-envios'],
+    queryKey: ['hansei-envios', "list('-data_envio', 10)"],
     queryFn: () => db.entities.HanseiEnvio.list('-data_envio', 10),
     staleTime: 60000,
     gcTime: 300000,

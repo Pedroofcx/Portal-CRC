@@ -72,7 +72,7 @@ export default function CicloColaborador() {
 
   const { data: user } = useQuery({ queryKey: ['currentUser'], queryFn: () => db.auth.me() });
   const { data: colaboradores = [] } = useQuery({
-    queryKey: ['colaboradores'],
+    queryKey: ['colaboradores', "list()"],
     queryFn: () => db.entities.Colaborador.list(),
   });
   const eu = colaboradores.find((c) => c.email?.toLowerCase() === user?.email?.toLowerCase());
@@ -99,7 +99,7 @@ export default function CicloColaborador() {
     enabled: habilitado,
   });
   const { data: observacoes = [] } = useQuery({
-    queryKey: ['observacoes'],
+    queryKey: ['observacoes', "list('-created_date', 500)"],
     queryFn: () => db.entities.Observacao.list('-created_date', 500),
     enabled: habilitado,
     staleTime: 120000,

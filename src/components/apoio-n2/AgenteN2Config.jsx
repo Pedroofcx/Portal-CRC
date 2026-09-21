@@ -28,7 +28,7 @@ export default function AgenteN2Config() {
   const [excluirTarget, setExcluirTarget] = useState(null);
 
   const { data: user } = useQuery({ queryKey: ['currentUser'], queryFn: () => db.auth.me() });
-  const { data: colaboradores = [] } = useQuery({ queryKey: ['colaboradores'], queryFn: () => db.entities.Colaborador.list() });
+  const { data: colaboradores = [] } = useQuery({ queryKey: ['colaboradores', "list()"], queryFn: () => db.entities.Colaborador.list() });
   const { data: agentes = [], isLoading } = useQuery({ queryKey: ['agentes-n2'], queryFn: () => db.entities.AgenteN2.list() });
   const { data: acionamentosHist = [] } = useQuery({ queryKey: ['acionamentos-n2-config'], queryFn: () => db.entities.AcionamentoN2.list() });
 

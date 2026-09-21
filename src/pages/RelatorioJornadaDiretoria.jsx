@@ -24,7 +24,7 @@ export default function RelatorioJornadaDiretoria() {
   const [etapaAberta, setEtapaAberta] = useState(null);
 
   const { data: user } = useQuery({ queryKey: ['currentUser'], queryFn: () => db.auth.me() });
-  const { data: colaboradores = [] } = useQuery({ queryKey: ['colaboradores'], queryFn: () => db.entities.Colaborador.list() });
+  const { data: colaboradores = [] } = useQuery({ queryKey: ['colaboradores', "list()"], queryFn: () => db.entities.Colaborador.list() });
   const isGestor = colaboradores.find(c => c.email === user?.email)?.papel === 'gestor';
 
   const { data: tratativas = [], isLoading } = useQuery({
@@ -32,7 +32,7 @@ export default function RelatorioJornadaDiretoria() {
     queryFn: () => db.entities.Tratativa.list('-created_date', 2000),
   });
   const { data: motivos = [] } = useQuery({
-    queryKey: ['motivos'],
+    queryKey: ['motivos', "filter({ ativo: true }, 'nome', 200)"],
     queryFn: () => db.entities.MotivoTratativa.filter({ ativo: true }, 'nome', 200),
   });
 

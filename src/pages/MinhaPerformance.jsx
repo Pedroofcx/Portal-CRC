@@ -40,27 +40,27 @@ export default function MinhaPerformance() {
   });
 
   const { data: colaboradores = [] } = useQuery({
-    queryKey: ['colaboradores'],
+    queryKey: ['colaboradores', "list()"],
     queryFn: () => db.entities.Colaborador.list(),
   });
 
   const { data: pdis = [] } = useQuery({
-    queryKey: ['pdis'],
+    queryKey: ['pdis', "list('-created_date')"],
     queryFn: () => db.entities.PDI.list('-created_date'),
   });
 
   const { data: apuracoes = [] } = useQuery({
-    queryKey: ['apuracoes'],
+    queryKey: ['apuracoes', "list('-created_date')"],
     queryFn: () => db.entities.Apuracao.list('-created_date'),
   });
 
   const { data: observacoes = [] } = useQuery({
-    queryKey: ['observacoes'],
+    queryKey: ['observacoes', "list('-created_date')"],
     queryFn: () => db.entities.Observacao.list('-created_date'),
   });
 
   const { data: hanseiEnvios = [] } = useQuery({
-    queryKey: ['hansei-envios'],
+    queryKey: ['hansei-envios', "list('-data_envio', 5)"],
     queryFn: () => db.entities.HanseiEnvio.list('-data_envio', 5),
   });
 

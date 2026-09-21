@@ -24,7 +24,7 @@ export default function LiderTecnicoTool() {
   const [sucesso, setSucesso] = useState(null);
 
   const { data: user } = useQuery({ queryKey: ['currentUser'], queryFn: () => db.auth.me() });
-  const { data: colaboradores = [] } = useQuery({ queryKey: ['colaboradores'], queryFn: () => db.entities.Colaborador.list() });
+  const { data: colaboradores = [] } = useQuery({ queryKey: ['colaboradores', "list()"], queryFn: () => db.entities.Colaborador.list() });
   const { data: tratativas = [] } = useQuery({ queryKey: ['tratativas-lider'], queryFn: () => db.entities.Tratativa.list('-created_date', 200) });
   const { data: lideres = [] } = useQuery({ queryKey: ['lideres-tecnicos'], queryFn: () => db.entities.LiderTecnico.list() });
   const { data: configuracoes = [] } = useQuery({ queryKey: ['configuracoes'], queryFn: () => db.entities.Configuracao.list() });

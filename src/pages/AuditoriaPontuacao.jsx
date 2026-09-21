@@ -31,12 +31,12 @@ export default function AuditoriaPontuacao() {
   };
 
   const { data: colaboradores = [] } = useQuery({
-    queryKey: ['colaboradores'],
+    queryKey: ['colaboradores', "list()"],
     queryFn: () => db.entities.Colaborador.list(),
   });
 
   const { data: ciclos = [] } = useQuery({
-    queryKey: ['ciclos-trimestrais'],
+    queryKey: ['ciclos-trimestrais', "list()"],
     queryFn: () => db.entities.CicloTrimestral.list(),
   });
 

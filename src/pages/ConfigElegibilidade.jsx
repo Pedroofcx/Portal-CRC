@@ -83,7 +83,7 @@ export default function ConfigElegibilidade() {
   });
 
   const { data: ciclos = [] } = useQuery({
-    queryKey: ['ciclos-trimestrais'],
+    queryKey: ['ciclos-trimestrais', "list('-data_inicio')"],
     queryFn: () => db.entities.CicloTrimestral.list('-data_inicio'),
   });
 

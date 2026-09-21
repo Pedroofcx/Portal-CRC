@@ -47,12 +47,12 @@ export default function Observacoes() {
   });
 
   const { data: colaboradores = [], isLoading: loadingColabs } = useQuery({
-    queryKey: ['colaboradores'],
+    queryKey: ['colaboradores', "list()"],
     queryFn: () => db.entities.Colaborador.list(),
   });
 
   const { data: observacoes = [], isLoading: loadingObs } = useQuery({
-    queryKey: ['observacoes'],
+    queryKey: ['observacoes', "list('-created_date', 2000)"],
     queryFn: () => db.entities.Observacao.list('-created_date', 2000),
     staleTime: 60000,
     retry: 3,
@@ -60,7 +60,7 @@ export default function Observacoes() {
   });
 
   const { data: pdis = [] } = useQuery({
-    queryKey: ['pdis'],
+    queryKey: ['pdis', "list('-created_date', 500)"],
     queryFn: () => db.entities.PDI.list('-created_date', 500),
     staleTime: 120000,
   });

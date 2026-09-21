@@ -61,7 +61,7 @@ export default function PlanoSetorial() {
   });
 
   const { data: colaboradores = [] } = useQuery({
-    queryKey: ['colaboradores'],
+    queryKey: ['colaboradores', "list()"],
     queryFn: () => db.entities.Colaborador.list(),
   });
 
@@ -71,7 +71,7 @@ export default function PlanoSetorial() {
   });
 
   const { data: pdis = [] } = useQuery({
-    queryKey: ['pdis'],
+    queryKey: ['pdis', "list('-created_date')"],
     queryFn: () => db.entities.PDI.list('-created_date'),
   });
 

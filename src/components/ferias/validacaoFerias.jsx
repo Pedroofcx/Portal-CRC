@@ -110,6 +110,8 @@ export function verificarIntervaloMinimo(
 ) {
   if (!isStaff) return { valido: true };
   
+  // As datas daqui são "só data" lidas em UTC dos dois lados — as contas
+  // batem. Só a data MOSTRADA precisa de timeZone: 'UTC', senão sai um dia antes.
   const inicio = new Date(dataInicio);
   const INTERVALO_MINIMO_DIAS = 2;
   
@@ -133,7 +135,7 @@ export function verificarIntervaloMinimo(
     if (diasDiferenca < INTERVALO_MINIMO_DIAS) {
       return {
         valido: false,
-        erro: `É necessário aguardar ${INTERVALO_MINIMO_DIAS} dias úteis após o retorno de outro staff crítico. Próxima data disponível: ${new Date(fimUltimaFerias.getTime() + INTERVALO_MINIMO_DIAS * 24 * 60 * 60 * 1000).toLocaleDateString('pt-BR')}`,
+        erro: `É necessário aguardar ${INTERVALO_MINIMO_DIAS} dias úteis após o retorno de outro staff crítico. Próxima data disponível: ${new Date(fimUltimaFerias.getTime() + INTERVALO_MINIMO_DIAS * 24 * 60 * 60 * 1000).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}`,
         ultimaFerias
       };
     }

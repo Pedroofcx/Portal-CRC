@@ -32,7 +32,7 @@ export default function ConfigTiposTratativa() {
   const queryClient = useQueryClient();
 
   const { data: tipos = [], isLoading } = useQuery({
-    queryKey: ['tipos-tratativa'],
+    queryKey: ['tipos-tratativa', "list()"],
     queryFn: () => db.entities.TipoTratativa.list(),
   });
 

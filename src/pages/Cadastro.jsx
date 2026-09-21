@@ -69,7 +69,7 @@ export default function Cadastro() {
   const queryClient = useQueryClient();
 
   const { data: colaboradores = [], isLoading } = useQuery({
-    queryKey: ['colaboradores'],
+    queryKey: ['colaboradores', "list('-created_date')"],
     queryFn: () => db.entities.Colaborador.list('-created_date'),
   });
 

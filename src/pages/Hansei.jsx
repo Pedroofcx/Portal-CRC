@@ -34,11 +34,11 @@ export default function Hansei() {
   const queryClient = useQueryClient();
 
   const { data: user } = useQuery({ queryKey: ['currentUser'], queryFn: () => db.auth.me() });
-  const { data: colaboradores = [] } = useQuery({ queryKey: ['colaboradores'], queryFn: () => db.entities.Colaborador.list() });
-  const { data: tratativas = [] } = useQuery({ queryKey: ['tratativas'], queryFn: () => db.entities.Tratativa.list('-created_date', 500) });
-  const { data: apuracoes = [] } = useQuery({ queryKey: ['apuracoes'], queryFn: () => db.entities.Apuracao.list('-created_date', 200) });
-  const { data: pontuacoes = [] } = useQuery({ queryKey: ['pontuacoes'], queryFn: () => db.entities.Pontuacao.list('-created_date') });
-  const { data: envios = [], isLoading } = useQuery({ queryKey: ['hansei-envios'], queryFn: () => db.entities.HanseiEnvio.list('-data_envio', 200) });
+  const { data: colaboradores = [] } = useQuery({ queryKey: ['colaboradores', "list()"], queryFn: () => db.entities.Colaborador.list() });
+  const { data: tratativas = [] } = useQuery({ queryKey: ['tratativas', "list('-created_date', 500)"], queryFn: () => db.entities.Tratativa.list('-created_date', 500) });
+  const { data: apuracoes = [] } = useQuery({ queryKey: ['apuracoes', "list('-created_date', 200)"], queryFn: () => db.entities.Apuracao.list('-created_date', 200) });
+  const { data: pontuacoes = [] } = useQuery({ queryKey: ['pontuacoes', "list('-created_date')"], queryFn: () => db.entities.Pontuacao.list('-created_date') });
+  const { data: envios = [], isLoading } = useQuery({ queryKey: ['hansei-envios', "list('-data_envio', 200)"], queryFn: () => db.entities.HanseiEnvio.list('-data_envio', 200) });
   const { data: comentarios = [] } = useQuery({ queryKey: ['hansei-comentarios'], queryFn: () => db.entities.HanseiComentario.list('-data_comentario') });
 
   const colaborador = colaboradores.find(c => c.email === user?.email);

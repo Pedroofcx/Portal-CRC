@@ -14,6 +14,9 @@ import { posicaoNoRanking } from '../src/lib/posicaoRanking.js';
 import { prazoDaTratativa, descreverPrazo, consumoDoPrazo } from '../src/lib/prazoSla.js';
 import { indicadoresDoCiclo } from '../src/lib/indicadoresCiclo.js';
 import { conferirLinha } from './conferir-cores.mjs';
+import { traduzirErro } from '../src/lib/erros.js';
+import { formatDateSP, dataDoCalendario } from '../src/components/utils/helpers.js';
+import { getMesReferencia } from '../src/components/ferramentas/apoio/constants.js';
 import { montarBonus, somaDoBonus, ciclosEmOrdem } from '../src/lib/bonusManual.js';
 import { vencidasDaEquipe, situacaoDoPrazo, ordenarPorPrazo, registrosNoCiclo, percentualNoSla, acompanhamentoDa } from '../src/lib/cicloEquipe.js';
 import { calculateCSATPoints, calculateCXPoints } from '../src/components/utils/helpers.js';
@@ -323,6 +326,27 @@ console.log('\n== bonus manual e historico de ciclos ==');
     ciclosEmOrdem([{ id: 'c1', data_inicio: '2026-03-14' }, { id: 'c3', data_inicio: '2026-09-16' }, { id: 'c2', data_inicio: '2026-06-16' }]).map((c) => c.id).join(','),
     'c3,c2,c1');
 }
+
+console.log('\n== datas sem hora (colunas date) nao perdem um dia ==');
+checa('so data DD/MM/YYYY', formatDateSP('2026-09-16', 'DD/MM/YYYY'), '16/09/2026');
+checa('so data DD/MM', formatDateSP('2026-09-16', 'DD/MM'), '16/09');
+checa('so data DD/MM/YY', formatDateSP('2026-09-16', 'DD/MM/YY'), '16/09/26');
+checa('so data em formato com hora mostra so a data', formatDateSP('2026-01-01'), '01/01/2026');
+checa('data e hora continua no fuso de SP', formatDateSP('2026-09-16T02:30:00Z', 'DD/MM/YYYY HH:mm'), '15/09/2026');
+checa('DD/MM/YY com hora nao mostra segundos', formatDateSP('2026-09-16T15:00:00Z', 'DD/MM/YY'), '16/09/26');
+checa('vazio vira traco', formatDateSP(null), '-');
+checa('invalida vira traco', formatDateSP('ontem'), '-');
+checa('dataDoCalendario e meia-noite local', `${dataDoCalendario('2026-10-01').getDate()}/${dataDoCalendario('2026-10-01').getMonth() + 1}`, '1/10');
+checa('dataDoCalendario recusa data com hora', String(dataDoCalendario('2026-10-01T10:00:00Z')), 'null');
+checa('pedido do dia 1o conta no proprio mes', getMesReferencia(dataDoCalendario('2026-10-01')), '2026-10');
+
+console.log('\n== erro de gravacao em portugues ==');
+checa('RLS vira falta de permissao', traduzirErro(new Error('[CicloTrimestral.create] new row violates row-level security policy for table "ciclo_trimestral"')), 'não tem permissão');
+checa('duplicado', traduzirErro(new Error('[Colaborador.create] duplicate key value violates unique constraint "colaborador_email_key"')), 'já existe um registro igual');
+checa('check constraint', traduzirErro(new Error('new row for relation "pontuacao" violates check constraint "pontuacao_bonus_completo"')), 'fora do permitido');
+checa('sem internet', traduzirErro(new Error('TypeError: Failed to fetch')), 'sem conexão');
+checa('desconhecido mantem a mensagem sem o prefixo tecnico', traduzirErro(new Error('[Aviso.update] prazo expirado')), 'prazo expirado');
+checa('sem mensagem', traduzirErro(null), 'erro desconhecido');
 
 console.log('\n== conferencia de cores (o verificador pega o que deve) ==');
 const cor = (html) => conferirLinha(html).join(' | ') || null;

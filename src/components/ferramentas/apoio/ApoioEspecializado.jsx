@@ -15,7 +15,7 @@ export default function ApoioEspecializado() {
   const [dialogOpen, setDialogOpen] = useState(false);
 
   const { data: user } = useQuery({ queryKey: ['currentUser'], queryFn: () => db.auth.me() });
-  const { data: colaboradores = [] } = useQuery({ queryKey: ['colaboradores'], queryFn: () => db.entities.Colaborador.list() });
+  const { data: colaboradores = [] } = useQuery({ queryKey: ['colaboradores', "list()"], queryFn: () => db.entities.Colaborador.list() });
   const { data: tratativas = [] } = useQuery({ queryKey: ['tratativas-apoio'], queryFn: () => db.entities.Tratativa.list('-created_date', 200) });
   const { data: solicitacoes = [], isLoading } = useQuery({
     queryKey: ['solicitacoes-apoio'],

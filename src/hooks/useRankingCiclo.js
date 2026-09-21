@@ -22,13 +22,13 @@ import { STATUS_ENCERRADOS, somaDoBonus } from '@/lib/bonusManual';
  */
 export function useRankingCiclo(cicloId = null) {
   const { data: colaboradores = [] } = useQuery({
-    queryKey: ['colaboradores'],
+    queryKey: ['colaboradores', "list()"],
     queryFn: () => db.entities.Colaborador.list(),
     staleTime: 120000,
   });
 
   const { data: ciclos = [] } = useQuery({
-    queryKey: ['ciclos-trimestrais'],
+    queryKey: ['ciclos-trimestrais', "list()"],
     queryFn: () => db.entities.CicloTrimestral.list(),
     staleTime: 300000,
   });

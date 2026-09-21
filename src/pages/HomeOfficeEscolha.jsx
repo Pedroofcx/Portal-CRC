@@ -60,7 +60,7 @@ export default function HomeOfficeEscolha() {
   });
 
   const { data: colaboradores = [] } = useQuery({
-    queryKey: ['colaboradores'],
+    queryKey: ['colaboradores', "list()"],
     queryFn: () => db.entities.Colaborador.list(),
   });
 
@@ -75,7 +75,7 @@ export default function HomeOfficeEscolha() {
   });
 
   const { data: _atribuicoes = [] } = useQuery({
-    queryKey: ['escalaAtribuicoes'],
+    queryKey: ['escalaAtribuicoes', "list()"],
     queryFn: () => db.entities.EscalaAtribuicao.list(),
   });
 

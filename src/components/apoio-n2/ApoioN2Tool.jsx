@@ -31,7 +31,7 @@ export default function ApoioN2Tool() {
   const [sucesso, setSucesso] = useState(null);
 
   const { data: user } = useQuery({ queryKey: ['currentUser'], queryFn: () => db.auth.me() });
-  const { data: colaboradores = [] } = useQuery({ queryKey: ['colaboradores'], queryFn: () => db.entities.Colaborador.list() });
+  const { data: colaboradores = [] } = useQuery({ queryKey: ['colaboradores', "list()"], queryFn: () => db.entities.Colaborador.list() });
   const { data: tratativas = [] } = useQuery({ queryKey: ['tratativas-n2'], queryFn: () => db.entities.Tratativa.list('-created_date', 200) });
   const { data: agentesN2 = [] } = useQuery({ queryKey: ['agentes-n2'], queryFn: () => db.entities.AgenteN2.list() });
   const { data: configuracoes = [] } = useQuery({ queryKey: ['configuracoes'], queryFn: () => db.entities.Configuracao.list() });
