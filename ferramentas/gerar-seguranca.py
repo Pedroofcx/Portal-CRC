@@ -42,6 +42,10 @@ SO_GESTOR_ESCREVE = {
 # Trilha de auditoria: qualquer um registra, ninguém edita nem apaga.
 SO_INSERE = {"log_auditoria"}
 
+# Privadas de cada pessoa: só a dona lê e grava — nem o gestor (migration 14).
+# Tabela -> coluna que guarda o id do colaborador dono.
+SO_DO_DONO = {"anotacao_pessoal": "colaborador_id"}
+
 # Campos sensíveis, por tabela. Ficam visíveis só para gestor.
 MASCARAR = {
     "colaborador": ["salario", "promocoes"],
@@ -133,12 +137,30 @@ as $$
   )
 $$;
 
-revoke execute on function public.papel_atual()    from anon;
-revoke execute on function public.eh_gestor()      from anon;
-revoke execute on function public.eh_colaborador() from anon;
-grant  execute on function public.papel_atual()    to authenticated;
-grant  execute on function public.eh_gestor()      to authenticated;
-grant  execute on function public.eh_colaborador() to authenticated;
+-- O id do colaborador ativo dono do e-mail do login — usado pelas tabelas
+-- privadas de cada pessoa (SO_DO_DONO).
+create or replace function public.meu_colaborador_id()
+returns text
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select c.id::text
+  from public.colaborador c
+  where lower(c.email) = lower(auth.jwt() ->> 'email')
+    and coalesce(c.ativo, true)
+  limit 1
+$$;
+
+revoke execute on function public.papel_atual()        from anon;
+revoke execute on function public.eh_gestor()          from anon;
+revoke execute on function public.eh_colaborador()     from anon;
+revoke execute on function public.meu_colaborador_id() from anon;
+grant  execute on function public.papel_atual()        to authenticated;
+grant  execute on function public.eh_gestor()          to authenticated;
+grant  execute on function public.eh_colaborador()     to authenticated;
+grant  execute on function public.meu_colaborador_id() to authenticated;
 
 -- ------------------------------------------------------------------
 -- POLÍTICAS POR TABELA
@@ -154,6 +176,15 @@ grant  execute on function public.eh_colaborador() to authenticated;
         p.append(f'drop policy if exists "{tabela}_inserir"  on public."{tabela}";')
         p.append(f'drop policy if exists "{tabela}_alterar"  on public."{tabela}";')
         p.append(f'drop policy if exists "{tabela}_apagar"   on public."{tabela}";')
+
+        if tabela in SO_DO_DONO:
+            dono = f"{SO_DO_DONO[tabela]} = public.meu_colaborador_id()"
+            p.append(f"-- {tabela}: privada — só a dona lê e grava, nem o gestor")
+            p.append(f'create policy "{tabela}_ler" on public."{tabela}" for select to authenticated using ({dono});')
+            p.append(f'create policy "{tabela}_inserir" on public."{tabela}" for insert to authenticated with check ({dono});')
+            p.append(f'create policy "{tabela}_alterar" on public."{tabela}" for update to authenticated using ({dono}) with check ({dono});')
+            p.append(f'create policy "{tabela}_apagar" on public."{tabela}" for delete to authenticated using ({dono});')
+            continue
 
         p.append(
             f'create policy "{tabela}_ler" on public."{tabela}" '

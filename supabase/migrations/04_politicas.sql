@@ -61,12 +61,30 @@ as $$
   )
 $$;
 
-revoke execute on function public.papel_atual()    from anon;
-revoke execute on function public.eh_gestor()      from anon;
-revoke execute on function public.eh_colaborador() from anon;
-grant  execute on function public.papel_atual()    to authenticated;
-grant  execute on function public.eh_gestor()      to authenticated;
-grant  execute on function public.eh_colaborador() to authenticated;
+-- O id do colaborador ativo dono do e-mail do login — usado pelas tabelas
+-- privadas de cada pessoa (SO_DO_DONO).
+create or replace function public.meu_colaborador_id()
+returns text
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select c.id::text
+  from public.colaborador c
+  where lower(c.email) = lower(auth.jwt() ->> 'email')
+    and coalesce(c.ativo, true)
+  limit 1
+$$;
+
+revoke execute on function public.papel_atual()        from anon;
+revoke execute on function public.eh_gestor()          from anon;
+revoke execute on function public.eh_colaborador()     from anon;
+revoke execute on function public.meu_colaborador_id() from anon;
+grant  execute on function public.papel_atual()        to authenticated;
+grant  execute on function public.eh_gestor()          to authenticated;
+grant  execute on function public.eh_colaborador()     to authenticated;
+grant  execute on function public.meu_colaborador_id() to authenticated;
 
 -- ------------------------------------------------------------------
 -- POLÍTICAS POR TABELA
@@ -114,11 +132,11 @@ drop policy if exists "anotacao_pessoal_ler"      on public."anotacao_pessoal";
 drop policy if exists "anotacao_pessoal_inserir"  on public."anotacao_pessoal";
 drop policy if exists "anotacao_pessoal_alterar"  on public."anotacao_pessoal";
 drop policy if exists "anotacao_pessoal_apagar"   on public."anotacao_pessoal";
-create policy "anotacao_pessoal_ler" on public."anotacao_pessoal" for select to authenticated using (public.eh_colaborador());
--- anotacao_pessoal: qualquer colaborador ativo grava
-create policy "anotacao_pessoal_inserir" on public."anotacao_pessoal" for insert to authenticated with check (public.eh_colaborador());
-create policy "anotacao_pessoal_alterar" on public."anotacao_pessoal" for update to authenticated using (public.eh_colaborador()) with check (public.eh_colaborador());
-create policy "anotacao_pessoal_apagar" on public."anotacao_pessoal" for delete to authenticated using (public.eh_colaborador());
+-- anotacao_pessoal: privada — só a dona lê e grava, nem o gestor
+create policy "anotacao_pessoal_ler" on public."anotacao_pessoal" for select to authenticated using (colaborador_id = public.meu_colaborador_id());
+create policy "anotacao_pessoal_inserir" on public."anotacao_pessoal" for insert to authenticated with check (colaborador_id = public.meu_colaborador_id());
+create policy "anotacao_pessoal_alterar" on public."anotacao_pessoal" for update to authenticated using (colaborador_id = public.meu_colaborador_id()) with check (colaborador_id = public.meu_colaborador_id());
+create policy "anotacao_pessoal_apagar" on public."anotacao_pessoal" for delete to authenticated using (colaborador_id = public.meu_colaborador_id());
 
 -- apuracao
 drop policy if exists "apuracao_ler"      on public."apuracao";
