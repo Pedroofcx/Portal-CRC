@@ -21,6 +21,7 @@ import MemoriaCalculo from '@/components/ferramentas/MemoriaCalculo';
 import HistoricoEstornos from '@/components/ferramentas/HistoricoEstornos';
 import ExportacaoEstorno from '@/components/ferramentas/ExportacaoEstorno';
 import { DEFAULT_CONFIG, TIPO_ESTORNO_OPTIONS, TIPOS_PLANO, CLASSIFICACAO_PLANO_OPTIONS, getDiasContrato, calcularEstorno, formatarInputBRL, parseBRL, fmtBRL } from '@/components/ferramentas/calculos';
+import ListaResumida from '@/components/ui/ListaResumida';
 
 const FORM_VAZIO = {
   ticket_zendesk: '', tratativa_id: '', tratativa_id_interno: '',
@@ -597,8 +598,12 @@ export default function FerramentasOperacionais() {
                     const logs = configs.flatMap(c => c.log_alteracoes || []).sort((a, b) => new Date(b.data) - new Date(a.data));
                     if (!logs.length) return <p className="text-sm text-muted-foreground text-center py-8">Nenhuma alteração registrada ainda.</p>;
                     return (
-                      <div className="space-y-2 max-h-80 overflow-y-auto">
-                        {logs.map((l, i) => (
+                      <ListaResumida
+                        className="space-y-2"
+                        limite={8}
+                        rotulo="alterações"
+                        itens={logs}
+                        renderItem={(l, i) => (
                           <div key={i} className="flex items-start gap-3 text-xs p-2.5 rounded-lg bg-muted border border-border">
                             <div className="flex-1">
                               <span className="font-semibold text-foreground">{l.campo?.toUpperCase()}</span>
@@ -612,8 +617,8 @@ export default function FerramentasOperacionais() {
                               <p>{l.data ? new Date(l.data).toLocaleDateString('pt-BR') : '—'}</p>
                             </div>
                           </div>
-                        ))}
-                      </div>
+                        )}
+                      />
                     );
                   })()}
                 </CardContent>

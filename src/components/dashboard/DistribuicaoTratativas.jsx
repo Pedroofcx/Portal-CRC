@@ -19,6 +19,7 @@ import {
   TIPOS_CONFIG, calcularSaturacao,
   calcularPesoOperacional
 } from '@/components/distribuicao/distribuicaoUtils';
+import ListaResumida from '@/components/ui/ListaResumida';
 
 export default function DistribuicaoTratativas({ gestorId, gestorNome, colaboradores }) {
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -235,17 +236,19 @@ export default function DistribuicaoTratativas({ gestorId, gestorNome, colaborad
             </TabsContent>
 
             <TabsContent value="historico" className="mt-4">
-              <div className="space-y-1.5 max-h-80 overflow-y-auto">
-                {distribuicoesFiltradas.length === 0 ? (
-                  <p className="text-muted-foreground text-sm text-center py-6">Nenhuma distribuição no período selecionado.</p>
-                ) : (
-                  [...distribuicoesFiltradas]
-                    .sort((a, b) => {
-                      const da = `${a.data_atribuicao} ${a.horario_atribuicao || ''}`;
-                      const db = `${b.data_atribuicao} ${b.horario_atribuicao || ''}`;
-                      return db.localeCompare(da);
-                    })
-                    .map(d => (
+              {distribuicoesFiltradas.length === 0 ? (
+                <p className="text-muted-foreground text-sm text-center py-6">Nenhuma distribuição no período selecionado.</p>
+              ) : (
+                <ListaResumida
+                  className="space-y-1.5"
+                  limite={8}
+                  rotulo="distribuições"
+                  itens={[...distribuicoesFiltradas].sort((a, b) => {
+                    const da = `${a.data_atribuicao} ${a.horario_atribuicao || ''}`;
+                    const db = `${b.data_atribuicao} ${b.horario_atribuicao || ''}`;
+                    return db.localeCompare(da);
+                  })}
+                  renderItem={d => (
                       <div key={d.id} className="flex items-center justify-between p-2.5 bg-card border border-border rounded-lg text-xs hover:bg-muted transition-colors">
                         <div className="flex items-center gap-2 flex-wrap min-w-0">
                           <span className="font-medium text-foreground truncate max-w-[120px]">{d.agente_nome}</span>
@@ -267,9 +270,9 @@ export default function DistribuicaoTratativas({ gestorId, gestorNome, colaborad
                           </button>
                         </div>
                       </div>
-                    ))
-                )}
-              </div>
+                    )}
+                />
+              )}
 
               {distribuicoesFiltradas.filter(d => d.override_rodizio).length > 0 && (
                 <div className="mt-4 pt-4 border-t border-border">

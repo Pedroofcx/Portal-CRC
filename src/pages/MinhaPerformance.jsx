@@ -28,6 +28,7 @@ import { createPageUrl } from '@/utils';
 import PDIModal from '@/components/performance/PDIModal';
 import FeedbackModal from '@/components/performance/FeedbackModal';
 import EmptyPerformanceState from '@/components/performance/EmptyPerformanceState';
+import ListaResumida from '@/components/ui/ListaResumida';
 
 export default function MinhaPerformance() {
   const [detalhamentoExpanded, setDetalhamentoExpanded] = React.useState(true);
@@ -224,8 +225,13 @@ export default function MinhaPerformance() {
                 <p className="text-sm mt-1">Encerre tratativas para acumular pontos</p>
               </div>
             ) : (
-              <div className="space-y-3 max-h-96 overflow-y-auto">
-                {detalhamentoPontos.map((item, index) => (
+              <div>
+                <ListaResumida
+                  className="space-y-3"
+                  limite={6}
+                  rotulo="pontos"
+                  itens={detalhamentoPontos}
+                  renderItem={(item, index) => (
                   <div key={index} className="flex items-center justify-between p-3 bg-muted rounded-lg hover:bg-muted transition-colors">
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 bg-warning-soft rounded-full flex items-center justify-center flex-shrink-0">
@@ -242,8 +248,11 @@ export default function MinhaPerformance() {
                       +{item.pontos} pts
                     </Badge>
                   </div>
-                ))}
-                <div className="flex justify-between items-center pt-4 border-t mt-4 sticky bottom-0 bg-card">
+                  )}
+                />
+                {/* O total era "sticky" no rodapé de uma caixa que rolava; sem
+                    rolagem, é simplesmente a última linha. */}
+                <div className="flex justify-between items-center pt-4 border-t mt-4">
                   <span className="font-semibold text-foreground">Total de Pontos</span>
                   <span className="text-2xl font-bold text-warning">{pontosCalculados.toFixed(1)}</span>
                 </div>
@@ -401,8 +410,12 @@ export default function MinhaPerformance() {
               {minhasObservacoes.length === 0 ? (
                 <p className="text-muted-foreground text-sm text-center py-4">Nenhuma observação compartilhada</p>
               ) : (
-                <div className="space-y-3 max-h-96 overflow-y-auto">
-                  {minhasObservacoes.map(obs => {
+                <ListaResumida
+                  className="space-y-3"
+                  limite={4}
+                  rotulo="observações"
+                  itens={minhasObservacoes}
+                  renderItem={obs => {
                     // Determinar categoria e cor
                     const categoria = obs.tipo || 'Observação';
                     const isPositivo = categoria.toLowerCase().includes('reconhecimento') || 
@@ -455,8 +468,8 @@ export default function MinhaPerformance() {
                         </p>
                       </div>
                     );
-                  })}
-                </div>
+                  }}
+                />
               )}
             </CardContent>
           </Card>

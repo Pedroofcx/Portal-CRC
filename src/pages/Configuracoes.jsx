@@ -38,6 +38,7 @@ import LiderTecnicoConfig from '@/components/lider-tecnico/LiderTecnicoConfig';
 import AgenteN2Config from '@/components/apoio-n2/AgenteN2Config';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
+import ListaResumida from '@/components/ui/ListaResumida';
 
 export default function Configuracoes() {
   const [metas, setMetas] = useState({
@@ -625,8 +626,12 @@ export default function Configuracoes() {
               {logs.length === 0 ? (
                 <p className="text-muted-foreground text-center py-8">Nenhum log registrado</p>
               ) : (
-                <div className="space-y-2 max-h-96 overflow-y-auto">
-                  {logs.map((log) => (
+                <ListaResumida
+                  className="space-y-2"
+                  limite={8}
+                  rotulo="registros"
+                  itens={logs}
+                  renderItem={(log) => (
                     <div key={log.id} className="p-3 bg-muted rounded-lg text-sm">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
@@ -643,8 +648,8 @@ export default function Configuracoes() {
                         {log.modulo} {log.entidade ? `• ${log.entidade}` : ''}
                       </p>
                     </div>
-                  ))}
-                </div>
+                  )}
+                />
               )}
             </CardContent>
           </Card>

@@ -2,6 +2,7 @@ import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { ArrowRight, Users, UserCheck, BarChart3, AlertCircle, Clock } from 'lucide-react';
 import { formatDateSP } from '@/components/utils/helpers';
+import ListaResumida from '@/components/ui/ListaResumida';
 
 export default function CardsAcompanhamento({
   titulo,
@@ -93,8 +94,12 @@ export default function CardsAcompanhamento({
             {acionamentosPorPessoa.length === 0 || acionamentosPorPessoa.every(p => p.count === 0) ? (
               <p className="text-sm text-muted-foreground py-2">Nenhum acionamento registrado no ciclo atual.</p>
             ) : (
-              <div className="space-y-1.5 max-h-32 overflow-y-auto">
-                {acionamentosPorPessoa.map((p, i) => {
+              <ListaResumida
+                className="space-y-1.5"
+                limite={5}
+                rotulo="pessoas"
+                itens={acionamentosPorPessoa}
+                renderItem={(p, i) => {
                   const max = Math.max(...acionamentosPorPessoa.map(x => x.count), 1);
                   const pct = (p.count / max) * 100;
                   return (
@@ -106,8 +111,8 @@ export default function CardsAcompanhamento({
                       <span className="text-xs font-semibold text-foreground w-6 text-right">{p.count}</span>
                     </div>
                   );
-                })}
-              </div>
+                }}
+              />
             )}
           </CardContent>
         </Card>

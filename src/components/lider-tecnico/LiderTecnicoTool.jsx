@@ -13,6 +13,7 @@ import { formatDateSP } from '@/components/utils/helpers';
 import { findNextLider, getPosicaoAtual, STATUS_LABELS, TIPO_ACIONAMENTO_LABELS } from './rodizioUtils';
 import CardsAcompanhamento from '@/components/rodizio/CardsAcompanhamento';
 import FilaVisualizacao from '@/components/rodizio/FilaVisualizacao';
+import ListaResumida from '@/components/ui/ListaResumida';
 
 export default function LiderTecnicoTool() {
   const { toast } = useToast();
@@ -356,8 +357,12 @@ export default function LiderTecnicoTool() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-2 max-h-72 overflow-y-auto">
-                  {acionamentos.map(a => (
+                <ListaResumida
+                  className="space-y-2"
+                  limite={5}
+                  rotulo="acionamentos"
+                  itens={acionamentos}
+                  renderItem={a => (
                     <div key={a.id} className="flex items-center justify-between p-3 bg-muted rounded-lg text-sm">
                       <div>
                         <p className="font-medium text-foreground">#{a.tratativa_id_interno || a.tratativa_id.slice(0, 8)} — {a.tratativa_nome_cliente || '—'}</p>
@@ -370,8 +375,8 @@ export default function LiderTecnicoTool() {
                         <span className="text-xs text-muted-foreground">{a.data_acionamento ? formatDateSP(a.data_acionamento, 'DD/MM HH:mm') : '—'}</span>
                       </div>
                     </div>
-                  ))}
-                </div>
+                  )}
+                />
               </CardContent>
             </Card>
           )}

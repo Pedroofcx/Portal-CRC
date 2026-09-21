@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/dialog';
 import { StickyNote, X, Plus, Bell, CheckCircle, Clock } from 'lucide-react';
 import { toast } from 'sonner';
+import ListaResumida from '@/components/ui/ListaResumida';
 
 const corPaleta = {
   amarelo: 'bg-warning-soft border border-warning/25 text-warning',
@@ -227,8 +228,12 @@ export default function MinhasAnotacoes({ colaboradorId }) {
           {anotacoes.length === 0 ? (
             <p className="text-muted-foreground text-xs text-center py-3">Nenhuma anotação. Clique + para criar.</p>
           ) : (
-            <div className="space-y-1.5 max-h-48 overflow-y-auto">
-              {anotacoes.map((anotacao) => (
+            <ListaResumida
+              className="space-y-1.5"
+              limite={4}
+              rotulo="anotações"
+              itens={anotacoes}
+              renderItem={(anotacao) => (
                 <div
                   key={anotacao.id}
                   className={`rounded-lg p-2.5 ${corPaleta[anotacao.cor] || corPaleta.amarelo}`}
@@ -258,8 +263,8 @@ export default function MinhasAnotacoes({ colaboradorId }) {
                     </div>
                   </div>
                 </div>
-              ))}
-            </div>
+              )}
+            />
           )}
         </CardContent>
       </Card>

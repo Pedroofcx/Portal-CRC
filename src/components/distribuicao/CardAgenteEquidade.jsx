@@ -6,6 +6,7 @@ import {
   TIPOS_CONFIG, calcularSaturacao, getStatusOperacional,
   calcularPesoOperacional, calcularPontuacaoEstimada, gerarAlertas
 } from './distribuicaoUtils';
+import ListaResumida from '@/components/ui/ListaResumida';
 
 export default function CardAgenteEquidade({ agente, distribuicoes, todas }) {
   const [expandido, setExpandido] = useState(false);
@@ -138,12 +139,16 @@ export default function CardAgenteEquidade({ agente, distribuicoes, todas }) {
           {minhas.length === 0 ? (
             <p className="text-xs text-muted-foreground italic">Nenhuma distribuição registrada.</p>
           ) : (
-            <div className="space-y-1 max-h-32 overflow-y-auto">
-              {[...minhas].sort((a, b) => {
+            <ListaResumida
+              className="space-y-1"
+              limite={4}
+              rotulo="atribuições"
+              itens={[...minhas].sort((a, b) => {
                 const da = `${a.data_atribuicao} ${a.horario_atribuicao || ''}`;
                 const db = `${b.data_atribuicao} ${b.horario_atribuicao || ''}`;
                 return db.localeCompare(da);
-              }).slice(0, 5).map((d, i) => (
+              }).slice(0, 5)}
+              renderItem={(d, i) => (
                 <div key={d.id || i} className="flex items-center justify-between text-xs bg-card/50 rounded p-1.5">
                   <span className={`px-1.5 py-0.5 rounded-full font-medium ${TIPOS_CONFIG[d.tipo_tratativa]?.color || 'bg-muted text-muted-foreground'}`}>
                     {TIPOS_CONFIG[d.tipo_tratativa]?.label?.split(' ')[0] || d.tipo_tratativa}
@@ -151,8 +156,8 @@ export default function CardAgenteEquidade({ agente, distribuicoes, todas }) {
                   <span className="text-muted-foreground font-mono">#{d.ticket_id}</span>
                   <span className="text-muted-foreground">{d.data_atribuicao} {d.horario_atribuicao || ''}</span>
                 </div>
-              ))}
-            </div>
+              )}
+            />
           )}
 
           {/* Diversidade operacional */}
