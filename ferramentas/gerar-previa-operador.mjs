@@ -24,8 +24,12 @@ const tudo = async (tabela) => {
   return data;
 };
 
-const [colaboradores, tratativas, ciclos, pontuacoes, exigencias, apuracoes] = await Promise.all(
-  ['colaborador_base', 'tratativa_base', 'ciclo_trimestral', 'pontuacao', 'elegibilidade_premio', 'apuracao'].map(tudo));
+const [colaboradores, tratativas, ciclos, pontuacoes, exigencias, apuracoes,
+  escalas, lideres, agentesN2, acionamentosLider, acionamentosN2, configuracoes, avisos, leituras, ciclosFerias] = await Promise.all(
+  ['colaborador_base', 'tratativa_base', 'ciclo_trimestral', 'pontuacao', 'elegibilidade_premio', 'apuracao',
+    'escala_turno', 'lider_tecnico', 'agente_n2', 'acionamento_lider_tecnico', 'acionamento_n2', 'configuracao',
+    'aviso', 'aviso_leitura', 'ciclo_ferias'].map(tudo));
+// As ANOTAÇÕES PESSOAIS ficam de fora de propósito: são privadas de cada pessoa.
 
 const ciclo = ciclos.find((c) => c.ativo);
 if (!ciclo) { console.error('Nenhum ciclo ativo: a tela mostraria só o aviso de ciclo ausente.'); }
@@ -47,6 +51,9 @@ if (!escolhida) {
 writeFileSync('previas/dados-operador.json', JSON.stringify({
   colaboradores, tratativas, ciclos, pontuacoes,
   elegibilidades: exigencias.filter((e) => e.ativa), apuracoes, escolhidaId: escolhida.id,
+  escalas, lideres, agentesN2, acionamentosLider, acionamentosN2, configuracoes, avisos,
+  leituras: leituras.filter((l) => l.colaborador_id === escolhida.id),
+  ciclosFerias: ciclosFerias.filter((c) => c.colaborador_id === escolhida.id),
 }));
 
 console.log(`\nPrévia de ${escolhida.nome_completo}`);

@@ -18,6 +18,9 @@ import CardHorasImplantacao from '@/components/dashboard/CardHorasImplantacao';
 import CardRodizioDashboard from '@/components/rodizio/CardRodizioDashboard';
 import PainelMeuCiclo from '@/components/dashboard/operador/PainelMeuCiclo';
 import FilaDoOperador from '@/components/dashboard/operador/FilaDoOperador';
+import AvisosDoOperador from '@/components/dashboard/operador/AvisosDoOperador';
+import CardMinhasFerias from '@/components/dashboard/operador/CardMinhasFerias';
+import AtalhosDoOperador from '@/components/dashboard/operador/AtalhosDoOperador';
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -623,70 +626,20 @@ export default function Dashboard() {
             rankingVisivel={rankingVisivel}
           />
 
-          <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
+          {/* items-start: sem isto a lateral estica até a altura da fila, e o card
+              do rodízio (que usa h-full) virava uma coluna enorme. */}
+          <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
             <FilaDoOperador tratativas={minhasTratativas} />
 
             <div className="space-y-4">
               <MeuTurnoCard colaboradorId={colaborador?.id} />
               <CardRodizioDashboard tipo="lider" />
               <CardRodizioDashboard tipo="n2" />
-              {/* Avisos */}
-              <Card className="border-0 shadow-sm">
-                <CardHeader className="pb-2">
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="text-sm font-semibold flex items-center gap-2">
-                      <Bell className="w-4 h-4 text-primary" />
-                      Avisos
-                    </CardTitle>
-                    <Link to={createPageUrl('Avisos')}>
-                      <Button variant="ghost" size="sm" className="text-primary h-7 text-xs px-2">Ver todos</Button>
-                    </Link>
-                  </div>
-                </CardHeader>
-                <CardContent className="pt-0">
-                  {avisosParaExibir.length === 0 ? (
-                    <p className="text-muted-foreground text-xs text-center py-3">Nenhum aviso pendente</p>
-                  ) : (
-                    <div className="space-y-2">
-                      {avisosParaExibir.slice(0, 3).map((aviso) => {
-                        const jaLeu = leituras.some(l => l.aviso_id === aviso.id && l.colaborador_id === colaborador?.id && l.confirmou === true);
-                        return (
-                          <div key={aviso.id} className={`p-2.5 rounded-lg ${jaLeu ? 'bg-muted opacity-60' : 'bg-muted'}`}>
-                            <div className="flex items-start gap-1.5">
-                              {aviso.tipo === 'urgente' && <Badge variant="destructive" className="text-xs py-0">Urgente</Badge>}
-                              <div className="flex-1">
-                                <p className={`text-xs font-medium ${jaLeu ? 'text-muted-foreground' : 'text-foreground'}`}>{aviso.titulo}</p>
-                                <p className="text-xs text-muted-foreground">{formatDateSP(aviso.data_publicacao, 'DD/MM/YYYY')}</p>
-                              </div>
-                              {jaLeu && <CheckCircle className="w-3.5 h-3.5 text-success flex-shrink-0 mt-0.5" />}
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-
+              <AvisosDoOperador avisosParaExibir={avisosParaExibir} leituras={leituras} colaborador={colaborador} />
               <MinhasAnotacoes colaboradorId={colaborador?.id} />
 
-              {/* Férias: validar os próprios períodos só é possível por aqui. */}
-              <button
-                type="button"
-                onClick={() => setValidarFeriasOpen(true)}
-                className={`w-full rounded-xl border p-4 text-left transition-colors hover:bg-muted/60 ${
-                  minhasferiasPendentes.length > 0 ? 'border-warning/40 bg-warning-soft' : 'border-border bg-card'}`}
-              >
-                <span className="flex items-center gap-2 text-sm font-semibold text-foreground">
-                  <Palmtree className="h-4 w-4 text-success" aria-hidden="true" />
-                  Minhas férias
-                </span>
-                <span className={`mt-1 block text-xs ${minhasferiasPendentes.length > 0 ? 'font-medium text-warning' : 'text-muted-foreground'}`}>
-                  {minhasferiasPendentes.length > 0
-                    ? `${minhasferiasPendentes.length} período${minhasferiasPendentes.length > 1 ? 's' : ''} esperando a sua validação — ver e validar`
-                    : 'Nenhum período esperando validação'}
-                </span>
-              </button>
+              <CardMinhasFerias pendentes={minhasferiasPendentes.length} aoAbrir={() => setValidarFeriasOpen(true)} />
+              <AtalhosDoOperador />
             </div>
           </div>
         </div>

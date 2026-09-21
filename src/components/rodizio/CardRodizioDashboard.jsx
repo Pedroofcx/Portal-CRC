@@ -52,7 +52,9 @@ export default function CardRodizioDashboard({ tipo }) {
   const ultimoNome = ultimo ? ultimo[nomeField] || '—' : '—';
 
   return (
-    <Link to={createPageUrl('FerramentasOperacionais')}>
+    // block: link é elemento de linha e ignora a margem vertical — empilhado
+    // na lateral do operador, o card grudava no de cima.
+    <Link to={createPageUrl('FerramentasOperacionais')} className="block">
       <Card className={`h-full cursor-pointer border-0 shadow-none ${tom} text-white transition-colors`}>
         <CardContent className="p-4">
           <div className="flex items-center justify-between mb-3">
