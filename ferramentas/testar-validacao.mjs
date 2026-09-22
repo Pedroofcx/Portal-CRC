@@ -29,6 +29,7 @@ import { desfechoDaContestacao, resumoFinanceiro } from '../src/lib/relatorios/f
 import { pessoasNoPeriodo } from '../src/lib/relatorios/pessoas.js';
 import { filaDeHoje, entradaESaida, tempoPorCanal } from '../src/lib/relatorios/operacao.js';
 import { resumoDoCanal } from '../src/lib/relatorios/canais.js';
+import { resumoQualidade } from '../src/lib/relatorios/qualidade.js';
 
 let passou = 0;
 let falhou = 0;
@@ -609,6 +610,21 @@ console.log('\n== relatorio de canais ==');
     { tipo_tratativa: 'contestacao', status: 'em_andamento', data_registro: '2026-08-10T15:00:00Z' },
   ], 'contestacao', { inicio: '2026-08-01', fim: '2026-08-31' });
   checa('contestou aparece como perda', `${c.perdidas}/${c.emAndamento}`, '1/1');
+}
+
+console.log('\n== relatorio de qualidade ==');
+{
+  const tel = (data, av, pos) => ({ data, telefone: { total_ligacoes: 10, total_atendidas: 10, total_avaliadas: av, total_positivas: pos } });
+  const apuracoes = [
+    // Ana: 1 avaliação, 0 positiva; Bia: 9 avaliações, 9 positivas
+    { colaborador_id: 'a', tipo_apuracao: 'telefone', created_date: '2026-07-10', dados_por_data: [tel('2026-07-01', 1, 0)] },
+    { colaborador_id: 'b', tipo_apuracao: 'telefone', created_date: '2026-07-10', dados_por_data: [tel('2026-07-01', 9, 9), tel('2026-08-01', 1, 1)] },
+  ];
+  const colaboradores = [{ id: 'a', nome_completo: 'Ana', papel: 'agente' }, { id: 'b', nome_completo: 'Bia', papel: 'agente' }];
+  const q = resumoQualidade({ apuracoes, colaboradores, periodo: { inicio: '2026-07-01', fim: '2026-07-31' } });
+  checa('equipe ponderada: 9 de 10 = 90% (media de medias daria 50%)', String(q.equipe.csatTelefone), '90');
+  checa('agosto fora do periodo', String(q.meses.length), '1');
+  checa('por pessoa', q.pessoas.map((p) => `${p.nome}:${p.csatTelefone}`).join(','), 'Ana:0,Bia:100');
 }
 
 console.log('\n== conferencia de cores (o verificador pega o que deve) ==');

@@ -31,19 +31,24 @@ const quando = (a) => String(a.data_apuracao || a.created_date || '');
 const maisRecentePrimeiro = (lista) => [...lista].sort((a, b) => quando(b).localeCompare(quando(a)));
 const dentro = (dia, ciclo) => dia >= ciclo.data_inicio && dia <= ciclo.data_fim;
 
-/** { 'AAAA-MM-DD': dadosDoDia } do canal, a importação mais recente vencendo. */
-function diasDoCanal(apuracoes, tipo, ciclo) {
+/**
+ * Os dias apurados do canal dentro do período, cada dia uma vez só (vale a
+ * importação mais recente): [{ dia: 'AAAA-MM-DD', dados }].
+ */
+export function diasApurados(apuracoes, tipo, periodo) {
   const dias = new Map();
   for (const a of maisRecentePrimeiro(apuracoes.filter((x) => x.tipo_apuracao === tipo))) {
     for (const d of a.dados_por_data ?? []) {
       const dia = String(d?.data ?? '').slice(0, 10);
       const dados = d?.[tipo];
-      if (!dados || !dia || dias.has(dia) || !dentro(dia, ciclo)) continue;
+      if (!dados || !dia || dias.has(dia) || !dentro(dia, periodo)) continue;
       dias.set(dia, dados);
     }
   }
-  return [...dias.values()];
+  return [...dias.entries()].map(([dia, dados]) => ({ dia, dados }));
 }
+
+const diasDoCanal = (apuracoes, tipo, ciclo) => diasApurados(apuracoes, tipo, ciclo).map((d) => d.dados);
 
 const pct = (parte, total) => (total > 0 ? (parte / total) * 100 : null);
 
