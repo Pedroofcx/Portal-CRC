@@ -227,6 +227,10 @@
     "exclusao_avaliacao_negativa_google": {
       "type": "boolean"
     },
+    "inativada_na_plataforma": {
+      "type": "boolean",
+      "description": "Reclame Aqui ou Google Meu Negócio: a reclamação/avaliação foi inativada na plataforma. Vale +1 ponto a partir do Ciclo 3 (encerradas desde 17/09/2026)."
+    },
     "categoria_contestacao": {
       "type": "string",
       "enum": [

@@ -222,3 +222,27 @@ e `src/components/dashboard/CentralDePendencias.jsx` (uma pendência por vez).
 console do navegador, um agente ainda consegue listar avisos antigos. Se isso
 precisar ser garantido pelo banco (como as anotações pessoais), é uma migration
 de políticas — decisão pendente.
+
+---
+
+## Reclame Aqui e GMN inativados valem +1 — só a partir do Ciclo 3 (22/09/2026)
+
+**Decisão (Pedro):** reclamação do Reclame Aqui inativada e avaliação do Google
+Meu Negócio inativada passam a valer **+1 ponto**, somente a partir do Ciclo 3.
+Os ciclos 1 e 2 não mudam.
+
+**Como "a partir do Ciclo 3" foi traduzido.** Tratativa **encerrada de
+17/09/2026 em diante**, no horário de Brasília. O Ciclo 2 termina em 16/09 e o
+Ciclo 3 ainda não estava cadastrado. A data, e não o cadastro do ciclo, garante
+que nada do Ciclo 2 mude — mesmo que o Ciclo 3 seja cadastrado começando no
+próprio dia 16 (os ciclos 1 e 2 se tocam no dia 16/06).
+
+**O campo.** `inativada_na_plataforma` (sim/não), marcado pelo agente no
+encerramento de Reclame Aqui e de GMN. Soma com os outros pontos do tipo. Como
+os demais campos que geram ponto, congela quando a tratativa encerra — depois
+disso, só o gestor corrige.
+
+**Onde vive:** `inativadaPontua` e `calculateTratativaPoints` em
+`src/components/utils/helpers.js`; `pontos_da_tratativa` e o congelamento em
+`supabase/migrations/19_inativadas_pontuam.sql`. Os POPs 04, 05 e 11 já trazem
+o informativo.

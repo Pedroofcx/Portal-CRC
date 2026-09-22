@@ -95,6 +95,20 @@ export function getSLAByType(tipo) {
   return slaMap[tipo] || 24;
 }
 
+/**
+ * Reclame Aqui e GMN inativados valem +1 SÓ a partir do Ciclo 3 (decisão de
+ * 22/09/2026): tratativa encerrada de 17/09/2026 em diante, horário de
+ * Brasília. O Ciclo 2 termina em 16/09 — a pontuação dele e do Ciclo 1 não
+ * muda. A mesma data está em pontos_da_tratativa (migration 19).
+ */
+export const INATIVADAS_PONTUAM_DESDE = new Date('2026-09-17T00:00:00-03:00');
+
+export function inativadaPontua(tratativa) {
+  if (!tratativa?.inativada_na_plataforma || !tratativa.data_encerramento) return false;
+  if (!['reclame_aqui', 'google_meu_negocio'].includes(tratativa.tipo_tratativa)) return false;
+  return new Date(tratativa.data_encerramento) >= INATIVADAS_PONTUAM_DESDE;
+}
+
 // Calcular pontuação por tipo de tratativa
 export function calculateTratativaPoints(tratativa) {
   let pontos = 0;
@@ -146,6 +160,14 @@ export function calculateTratativaPoints(tratativa) {
       pontos += 1;
       detalhes.push({ tipo: 'Exclusão avaliação negativa', pontos: 1 });
     }
+  }
+
+  if (inativadaPontua(tratativa)) {
+    pontos += 1;
+    detalhes.push({
+      tipo: tratativa.tipo_tratativa === 'reclame_aqui' ? 'Reclamação inativada' : 'Avaliação inativada',
+      pontos: 1,
+    });
   }
 
   // Contestação — aceita ambos os valores do enum (contestacao_compra e contestacao)

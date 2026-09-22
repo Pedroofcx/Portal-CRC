@@ -1317,7 +1317,7 @@ create table if not exists public."tipo_tratativa" (
 
 create index if not exists "ix_tipo_tratativa_base44_id" on public."tipo_tratativa" ("base44_id");
 
--- Tratativa  (83 campos)
+-- Tratativa  (84 campos)
 create table if not exists public."tratativa" (
   "id" uuid primary key default gen_random_uuid(),
   "base44_id" text unique,
@@ -1368,6 +1368,7 @@ create table if not exists public."tratativa" (
   "situacao_comentario_google" text,
   "reavaliacao_positiva_google" boolean,
   "exclusao_avaliacao_negativa_google" boolean,
+  "inativada_na_plataforma" boolean,
   "categoria_contestacao" text,
   "tipo_resolucao_contestacao" text,
   "valor_contestacao" numeric,

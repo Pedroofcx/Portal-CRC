@@ -47,6 +47,7 @@ import MonetizacaoAtritoForm from '@/components/tratativas/MonetizacaoAtritoForm
 import CustoOperacionalCard from '@/components/tratativas/CustoOperacionalCard';
 import PerfilComercialCliente from '@/components/jornada/PerfilComercialCliente';
 import BotaoVerPOP from '@/components/pop/BotaoVerPOP';
+import ChaveInativada from '@/components/tratativas/ChaveInativada';
 
 // Finite State Machine - estados permitidos
 const FSM_TRANSITIONS = {
@@ -95,6 +96,7 @@ export default function TratativaDetalhe({ idExterno = null, embutido = false })
     valor_recuperado: '',
     reavaliacao_positiva_google: false,
     exclusao_avaliacao_negativa_google: false,
+    inativada_na_plataforma: false,
     etapa_jornada_id: '',
     causa_primaria: '',
     manter_motivo: true,
@@ -343,6 +345,7 @@ export default function TratativaDetalhe({ idExterno = null, embutido = false })
     if (tratativa.tipo_tratativa === 'reclame_aqui') {
       updateData.nota_reclame_aqui = solucaoForm.nota_reclame_aqui ? parseFloat(solucaoForm.nota_reclame_aqui) : null;
       updateData.voltaria_fazer_negocio = solucaoForm.voltaria_fazer_negocio;
+      updateData.inativada_na_plataforma = solucaoForm.inativada_na_plataforma;
       if (solucaoForm.categoria_reclame_aqui) updateData.categoria_reclame_aqui = solucaoForm.categoria_reclame_aqui;
     }
     if (tratativa.tipo_tratativa === 'contestacao') {
@@ -361,6 +364,7 @@ export default function TratativaDetalhe({ idExterno = null, embutido = false })
     if (tratativa.tipo_tratativa === 'google_meu_negocio') {
       updateData.reavaliacao_positiva_google = solucaoForm.reavaliacao_positiva_google;
       updateData.exclusao_avaliacao_negativa_google = solucaoForm.exclusao_avaliacao_negativa_google;
+      updateData.inativada_na_plataforma = solucaoForm.inativada_na_plataforma;
       if (solucaoForm.situacao_comentario_google) updateData.situacao_comentario_google = solucaoForm.situacao_comentario_google;
     }
 
@@ -1069,6 +1073,11 @@ export default function TratativaDetalhe({ idExterno = null, embutido = false })
                               <Label>Voltaria a fazer negócio</Label>
                             </div>
                           </div>
+                          <ChaveInativada
+                            rotulo="Reclamação inativada no Reclame Aqui"
+                            checked={solucaoForm.inativada_na_plataforma}
+                            onCheckedChange={(checked) => setSolucaoForm({ ...solucaoForm, inativada_na_plataforma: checked })}
+                          />
                         </div>
                       )}
 
@@ -1202,6 +1211,11 @@ export default function TratativaDetalhe({ idExterno = null, embutido = false })
                             />
                             <Label>Exclusão de avaliação negativa (+1 pt)</Label>
                           </div>
+                          <ChaveInativada
+                            rotulo="Avaliação inativada no Google"
+                            checked={solucaoForm.inativada_na_plataforma}
+                            onCheckedChange={(checked) => setSolucaoForm({ ...solucaoForm, inativada_na_plataforma: checked })}
+                          />
                         </div>
                       )}
 

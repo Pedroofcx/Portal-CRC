@@ -21,7 +21,7 @@ import { formatDateSP, dataDoCalendario } from '../src/components/utils/helpers.
 import { getMesReferencia } from '../src/components/ferramentas/apoio/constants.js';
 import { montarBonus, somaDoBonus, ciclosEmOrdem } from '../src/lib/bonusManual.js';
 import { vencidasDaEquipe, situacaoDoPrazo, ordenarPorPrazo, registrosNoCiclo, percentualNoSla, acompanhamentoDa } from '../src/lib/cicloEquipe.js';
-import { calculateCSATPoints, calculateCXPoints } from '../src/components/utils/helpers.js';
+import { calculateCSATPoints, calculateCXPoints, calculateTratativaPoints } from '../src/components/utils/helpers.js';
 
 let passou = 0;
 let falhou = 0;
@@ -435,6 +435,22 @@ console.log('\n== POPs: versao, ciencia e busca ==');
   checa('busca acha pelo prazo', agruparPorCategoria(pops, 'ate 1h')[0].pops[0].codigo, 'POP 04');
   checa('POPs do tipo', popsDoTipo(pops, 'reclamacao_interna').map((p) => p.id).join(','), 'p2');
   checa('fotografia guarda os campos do POP', Object.keys(fotografia(pops[0])).includes('prazos') ? 'sim' : 'nao', 'sim');
+}
+
+console.log('\n== inativadas (RA e GMN) pontuam so a partir do Ciclo 3 ==');
+{
+  const pts = (t) => String(calculateTratativaPoints(t).pontos);
+  const ra = { tipo_tratativa: 'reclame_aqui', inativada_na_plataforma: true };
+  const gmn = { tipo_tratativa: 'google_meu_negocio', inativada_na_plataforma: true };
+  checa('RA inativada no Ciclo 3 vale 1', pts({ ...ra, data_encerramento: '2026-09-17T12:00:00.000Z' }), '1');
+  checa('GMN inativada no Ciclo 3 vale 1', pts({ ...gmn, data_encerramento: '2026-10-01T15:00:00.000Z' }), '1');
+  checa('16/09 as 23h (Brasilia) ainda e Ciclo 2: nao muda', pts({ ...ra, data_encerramento: '2026-09-17T02:00:00.000Z' }), '0');
+  checa('17/09 a 0h (Brasilia) ja vale', pts({ ...gmn, data_encerramento: '2026-09-17T03:00:00.000Z' }), '1');
+  checa('Ciclo 2 nao muda', pts({ ...gmn, data_encerramento: '2026-08-10T12:00:00.000Z' }), '0');
+  checa('soma com a nota 10 + voltaria', pts({ ...ra, nota_reclame_aqui: 10, voltaria_fazer_negocio: true, data_encerramento: '2026-09-20T12:00:00.000Z' }), '4.5');
+  checa('sem a marcacao nao pontua', pts({ tipo_tratativa: 'reclame_aqui', data_encerramento: '2026-09-20T12:00:00.000Z' }), '0');
+  checa('outro tipo com a marcacao nao pontua', pts({ tipo_tratativa: 'contestacao', inativada_na_plataforma: true, data_encerramento: '2026-09-20T12:00:00.000Z' }), '0');
+  checa('aparece no detalhamento', calculateTratativaPoints({ ...ra, data_encerramento: '2026-09-20T12:00:00.000Z' }).detalhes[0].tipo, 'Reclamação inativada');
 }
 
 console.log('\n== conferencia de cores (o verificador pega o que deve) ==');
