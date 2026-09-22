@@ -168,19 +168,19 @@ export default function OraculoWizard({
             {contexto && (
               <div className="grid grid-cols-3 gap-4 p-4 bg-info-soft rounded-lg">
                 <div>
-                  <div className="text-xs text-muted-foreground">CSAT Recente</div>
+                  <div className="text-xs text-muted-foreground">CSAT no ciclo</div>
                   <div className="text-xl font-bold text-primary">
                     {contexto.csat_recente?.toFixed(1) || '-'}%
                   </div>
                 </div>
                 <div>
-                  <div className="text-xs text-muted-foreground">Tratativas</div>
+                  <div className="text-xs text-muted-foreground">Encerradas no ciclo</div>
                   <div className="text-xl font-bold text-primary">
                     {contexto.tratativas_periodo || 0}
                   </div>
                 </div>
                 <div>
-                  <div className="text-xs text-muted-foreground">Pontos (Trimestre)</div>
+                  <div className="text-xs text-muted-foreground">Pontos {contexto.ciclo_nome ? `(${contexto.ciclo_nome})` : 'no ciclo'}</div>
                   <div className="text-xl font-bold text-primary">
                     {contexto.pontos_trimestre?.toFixed(1) || 0}
                   </div>

@@ -18,7 +18,10 @@ import {
   Calendar,
   BarChart3
 } from 'lucide-react';
-import { formatDateSP, getCurrentTrimester } from '@/components/utils/helpers';
+import { formatDateSP } from '@/components/utils/helpers';
+import { indicadoresDoCiclo } from '@/lib/indicadoresCiclo';
+import { totalNoCiclo } from '@/lib/hanseiDados';
+import { tratativaNosCiclo } from '@/lib/pontuacaoCiclo';
 import { toast } from 'sonner';
 
 export default function OraculoPage() {
@@ -61,9 +64,14 @@ export default function OraculoPage() {
     queryFn: () => db.entities.OraculoPalavra.list()
   });
 
-  const { data: pontuacoes = [] } = useQuery({
-    queryKey: ['pontuacoes', "list()"],
-    queryFn: () => db.entities.Pontuacao.list()
+  const { data: bonus = [] } = useQuery({
+    queryKey: ['bonus-manual'],
+    queryFn: () => db.entities.Pontuacao.filter({ tipo: 'bonus_manual' }, '-created_date')
+  });
+
+  const { data: ciclos = [] } = useQuery({
+    queryKey: ['ciclos-trimestrais', "list()"],
+    queryFn: () => db.entities.CicloTrimestral.list()
   });
 
   const { data: apuracoes = [] } = useQuery({
@@ -87,35 +95,35 @@ export default function OraculoPage() {
     }
   });
 
-  // Gerar contexto do colaborador
+  // Contexto do colaborador no CICLO ATIVO, com as contas oficiais: os pontos
+  // são os do ranking (antes vinham da tabela de pontuação do Base44, que
+  // mostrava 3 pontos para quem tinha 79,5) e o CSAT é o do ciclo inteiro.
+  const cicloAtivo = ciclos.find((c) => c.ativo) ?? null;
+
   const gerarContexto = (colaboradorId) => {
-    const pontuacao = pontuacoes.find(p => 
-      p.colaborador_id === colaboradorId && 
-      p.periodo_trimestre === getCurrentTrimester()
-    );
-    
-    const apuracaoRecente = apuracoes
-      .filter(a => a.colaborador_id === colaboradorId)
-      .sort((a, b) => new Date(b.data_apuracao) - new Date(a.data_apuracao))[0];
-    
-    const tratativasColaborador = tratativas.filter(t => t.agente_responsavel_id === colaboradorId);
-    
+    const minhasApuracoes = apuracoes.filter((a) => a.colaborador_id === colaboradorId);
+    const indicadores = indicadoresDoCiclo(minhasApuracoes, cicloAtivo);
+    const pontos = totalNoCiclo({ tratativas, apuracoes, bonus, ciclo: cicloAtivo, colaboradorId });
+    const doCiclo = tratativas.filter((t) => !t.excluida && t.agente_responsavel_id === colaboradorId
+      && ['encerrada', 'aguardando_confirmacao_reabertura'].includes(t.status)
+      && cicloAtivo && tratativaNosCiclo(t, cicloAtivo));
+    const noPrazo = doCiclo.filter((t) => t.encerrado_no_sla === true).length;
+
     const sinais = [];
-    if (apuracaoRecente?.satisfacao_media > 95) {
-      sinais.push('CSAT acima de 95% no último período');
+    if (indicadores.csat?.valor >= 95) sinais.push(`CSAT de ${indicadores.csat.valor.toFixed(1)}% no ciclo — faixa máxima da premiação`);
+    else if (indicadores.csat?.valor >= 85) sinais.push(`CSAT de ${indicadores.csat.valor.toFixed(1)}% no ciclo`);
+    if (doCiclo.length >= 5) {
+      const pct = Math.round((noPrazo / doCiclo.length) * 100);
+      sinais.push(`${pct}% das ${doCiclo.length} tratativas encerradas no prazo`);
     }
-    if (pontuacao?.total_pontos > 20) {
-      sinais.push('Performance destacada no trimestre');
-    }
-    if (tratativasColaborador.filter(t => t.encerrado_no_sla).length > 5) {
-      sinais.push('Boa consistência no cumprimento de SLA');
-    }
+    if (indicadores.performance?.valor >= 100) sinais.push('Todas as ligações atendidas no ciclo');
 
     return {
-      csat_recente: apuracaoRecente?.satisfacao_media || null,
-      tratativas_periodo: tratativasColaborador.length,
-      pontos_trimestre: pontuacao?.total_pontos || 0,
-      sinais_recentes: sinais
+      csat_recente: indicadores.csat?.valor ?? null,
+      tratativas_periodo: doCiclo.length,
+      pontos_trimestre: pontos ?? 0,
+      ciclo_nome: cicloAtivo?.nome ?? null,
+      sinais_recentes: sinais,
     };
   };
 

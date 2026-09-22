@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { diaSP } from '@/lib/relatorios/periodo';
 import { Sun, Moon, BarChart2, TrendingUp, Users, ChevronDown, ChevronUp } from 'lucide-react';
 
 const DIAS_PT = {
@@ -22,6 +23,10 @@ export default function RelatorioProdutividadeTurnos({ escalas, tratativas, cola
       : escalas.filter(e => e.semana_referencia === semanaFiltro);
 
     const resultado = [];
+    // Uma pessoa pode estar nos dois turnos do mesmo dia. As tratativas dela
+    // naquele dia são as mesmas: contam UMA vez nos totais (antes entravam
+    // duas vezes e inflavam tudo).
+    const jaContado = new Set();
     escalasFiltradas.forEach(escala => {
       (escala.turnos || []).forEach(dia => {
         if (dia.cancelado) return;
@@ -29,13 +34,18 @@ export default function RelatorioProdutividadeTurnos({ escalas, tratativas, cola
           (dia[turno] || []).forEach(colab => {
             const dataStr = dia.data;
             const colabEmail = colaboradores.find(c => c.id === colab.colaborador_id)?.email;
+            // Dia em horário de Brasília (o created_date é UTC: às 23h de um
+            // dia em São Paulo já é o dia seguinte em UTC).
             const tratativasDoDia = tratativas.filter(t => {
-              const criado = t.created_date?.split('T')[0];
-              return criado === dataStr && (
+              if (t.excluida || t.status === 'excluida') return false;
+              return diaSP(t.data_registro || t.created_date) === dataStr && (
                 t.agente_responsavel_id === colab.colaborador_id ||
                 (colabEmail && t.created_by === colabEmail)
               );
             });
+            const chaveDia = `${colab.colaborador_id}|${dataStr}`;
+            const contaNosTotais = !jaContado.has(chaveDia);
+            jaContado.add(chaveDia);
             const concluidas = tratativasDoDia.filter(t =>
               ['encerrada', 'aguardando_confirmacao_reabertura'].includes(t.status)
             ).length;
@@ -51,6 +61,7 @@ export default function RelatorioProdutividadeTurnos({ escalas, tratativas, cola
               abertas,
               concluidas,
               total: tratativasDoDia.length,
+              contaNosTotais,
             });
           });
         });
@@ -61,15 +72,16 @@ export default function RelatorioProdutividadeTurnos({ escalas, tratativas, cola
 
   // KPIs globais
   const kpis = useMemo(() => {
-    const totalManha = linhas.filter(l => l.turno === 'manha').reduce((a, l) => a + l.total, 0);
-    const totalTarde = linhas.filter(l => l.turno === 'tarde').reduce((a, l) => a + l.total, 0);
-    const totalGeral = linhas.reduce((a, l) => a + l.total, 0);
-    const totalConcluidas = linhas.reduce((a, l) => a + l.concluidas, 0);
+    const contaveis = linhas.filter(l => l.contaNosTotais);
+    const totalManha = contaveis.filter(l => l.turno === 'manha').reduce((a, l) => a + l.total, 0);
+    const totalTarde = contaveis.filter(l => l.turno === 'tarde').reduce((a, l) => a + l.total, 0);
+    const totalGeral = contaveis.reduce((a, l) => a + l.total, 0);
+    const totalConcluidas = contaveis.reduce((a, l) => a + l.concluidas, 0);
     const taxaConclusao = totalGeral > 0 ? Math.round((totalConcluidas / totalGeral) * 100) : 0;
 
     // Colaborador mais produtivo
     const porColab = {};
-    linhas.forEach(l => {
+    contaveis.forEach(l => {
       if (!porColab[l.colaborador_id]) porColab[l.colaborador_id] = { nome: l.colaborador_nome, total: 0 };
       porColab[l.colaborador_id].total += l.total;
     });
@@ -151,7 +163,7 @@ export default function RelatorioProdutividadeTurnos({ escalas, tratativas, cola
               <Badge className="bg-success-soft text-success border-0 text-xs">Taxa</Badge>
             </div>
             <p className="text-2xl font-bold text-success">{kpis.taxaConclusao}%</p>
-            <p className="text-xs text-success mt-0.5">taxa de conclusão</p>
+            <p className="text-xs text-success mt-0.5">das registradas no turno já estão encerradas</p>
           </CardContent>
         </Card>
 
@@ -188,8 +200,10 @@ export default function RelatorioProdutividadeTurnos({ escalas, tratativas, cola
           {agrupadoPorDia.map(grupo => {
             const key = grupo.data || grupo.dia;
             const aberto = expandidos[key] !== false;
-            const totalDia = [...grupo.manha, ...grupo.tarde].reduce((a, l) => a + l.total, 0);
-            const concluidasDia = [...grupo.manha, ...grupo.tarde].reduce((a, l) => a + l.concluidas, 0);
+            // Quem está nos dois turnos do mesmo dia conta uma vez só.
+            const doDia = [...grupo.manha, ...grupo.tarde].filter(l => l.contaNosTotais);
+            const totalDia = doDia.reduce((a, l) => a + l.total, 0);
+            const concluidasDia = doDia.reduce((a, l) => a + l.concluidas, 0);
             const pct = totalDia > 0 ? Math.round((concluidasDia / totalDia) * 100) : 0;
 
             return (

@@ -362,3 +362,27 @@ no mesmo período, dias para zerar a fila e tempo típico (mediana) por canal.
 volume; dia de apuração importado duas vezes conta uma vez; a aba Ranking lia
 a tabela antiga do Base44 — agora é o ranking oficial, e a rotina que gravava
 nessa tabela saiu.
+
+---
+
+## Escalas ainda apontavam para os ids do Base44 (22/09/2026)
+
+**O que estava quebrado.** A escala guarda a pessoa dentro de um JSON
+(`turnos[].manha[].colaborador_id` e `colaboradores_participantes`), e esses
+ids continuaram sendo os do Base44 depois da migração. O relatório de
+Produtividade por Turno mostrava **0 tratativas para todo mundo, em todos os
+dias** — sem erro nenhum na tela, só zeros. É o mesmo caso das observações
+(migration 15), que já tinha aparecido antes.
+
+**Correção:** `supabase/migrations/21_escalas_com_ids_novos.sql` troca, dentro
+do JSON, cada id antigo pelo id novo (608 referências em 17 escalas). Uma
+varredura em todas as tabelas confirmou que só as escalas tinham o problema.
+
+**No mesmo relatório:** o dia passou a ser comparado em horário de Brasília
+(antes em UTC, o que jogava tratativas do fim do dia para o dia seguinte),
+tratativas excluídas saíram da conta, e quem trabalha nos dois turnos do mesmo
+dia deixou de ter as tratativas contadas duas vezes.
+
+**Oráculo:** o contexto do colaborador (CSAT, tratativas e pontos) vinha da
+tabela de pontuação antiga e de uma apuração solta — mostrava 3 pontos para
+quem tinha 77,5. Agora usa as contas oficiais do ciclo ativo.
