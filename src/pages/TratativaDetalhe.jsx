@@ -392,9 +392,9 @@ export default function TratativaDetalhe({ idExterno = null, embutido = false })
       { data: updateData },
       {
         onSuccess: async () => {
-          // Cálculo automático de pontuação ao encerrar
-          const tratativaAtualizada = { ...tratativa, ...updateData, id: tratativaId };
-          await calcularEAtribuirPontuacao(tratativaAtualizada);
+          // A pontuação é calculada ao vivo (src/lib/pontuacaoCiclo.js) — nada
+          // é gravado. A rotina antiga que somava pontos numa tabela do Base44
+          // saiu em 22/09/2026: gerava um "ranking" paralelo e errado.
           // O custo operacional passou a ser calculado pelo servidor, no
           // gatilho calcula_custo_ao_encerrar (migration 10). O navegador não
           // grava mais: dependia de a lista de colaboradores estar carregada
@@ -523,60 +523,6 @@ export default function TratativaDetalhe({ idExterno = null, embutido = false })
         }
       }
     });
-  };
-
-  // ── Cálculo automático de pontuação ao alterar status via admin ──────────
-  const calcularEAtribuirPontuacao = async (tratativaAtualizada) => {
-    if (!tratativaAtualizada.agente_responsavel_id) return;
-    if (tratativaAtualizada.pontuacao_calculada) return; // já calculada
-
-    const { pontos, detalhes } = calculateTratativaPoints(tratativaAtualizada);
-    if (pontos <= 0) return;
-
-    const trimestre = (() => {
-      const d = new Date();
-      return `${d.getFullYear()}-Q${Math.floor(d.getMonth() / 3) + 1}`;
-    })();
-
-    try {
-      const existentes = await db.entities.Pontuacao.filter({
-        colaborador_id: tratativaAtualizada.agente_responsavel_id,
-        periodo_trimestre: trimestre
-      });
-
-      const novoDetalhe = {
-        tipo: tratativaAtualizada.tipo_tratativa,
-        pontos,
-        descricao: detalhes.map(d => d.tipo).join(', '),
-        data: new Date().toISOString(),
-        tratativa_id: tratativaAtualizada.id
-      };
-
-      if (existentes.length > 0) {
-        const atual = existentes[0];
-        // Evita duplicidade verificando se já existe esta tratativa no detalhamento
-        const jaExiste = (atual.detalhamento || []).some(d => d.tratativa_id === tratativaAtualizada.id);
-        if (!jaExiste) {
-          await db.entities.Pontuacao.update(atual.id, {
-            total_pontos: (atual.total_pontos || 0) + pontos,
-            detalhamento: [...(atual.detalhamento || []), novoDetalhe]
-          });
-        }
-      } else {
-        await db.entities.Pontuacao.create({
-          colaborador_id: tratativaAtualizada.agente_responsavel_id,
-          colaborador_nome: tratativaAtualizada.agente_responsavel_nome,
-          periodo_trimestre: trimestre,
-          total_pontos: pontos,
-          detalhamento: [novoDetalhe]
-        });
-      }
-
-      // Marca como calculada
-      await db.entities.Tratativa.update(tratativaAtualizada.id, { pontuacao_calculada: true });
-    } catch (e) {
-      console.error('Erro ao calcular pontuação:', e);
-    }
   };
 
   const handleExcluir = () => {

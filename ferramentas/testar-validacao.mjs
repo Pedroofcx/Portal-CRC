@@ -26,6 +26,7 @@ import { reaberturaDe, comReaberturaApurada, aberturasNoCiclo, cicloPagaAbertura
 import { extratoDoAgente } from '../src/lib/extratoPontos.js';
 import { calcularDadosConsolidados } from '../src/lib/hanseiDados.js';
 import { desfechoDaContestacao, resumoFinanceiro } from '../src/lib/relatorios/financeiro.js';
+import { pessoasNoPeriodo } from '../src/lib/relatorios/pessoas.js';
 
 let passou = 0;
 let falhou = 0;
@@ -561,6 +562,20 @@ console.log('\n== relatorio financeiro ==');
   checa('devolvido sem a excluida', String(r.custou.devolvido), '50');
   checa('16/09 as 23h (Brasilia) entra no fim 16/09', String(r.custou.custoOperacional), '35');
   checa('risco contado, nota 0 conta', String(r.risco.qtd), '1');
+}
+
+console.log('\n== relatorio de pessoas ==');
+{
+  const colaboradores = [{ id: 'a', nome_completo: 'Ana', papel: 'agente' }, { id: 'g', nome_completo: 'Gestor', papel: 'gestor' }, { id: 'x', nome_completo: 'Saiu', papel: 'agente', ativo: false }];
+  const t = (id, extra) => ({ id, agente_responsavel_id: 'a', tipo_tratativa: 'reclamacao_interna', status: 'encerrada', data_registro: '2026-07-01T12:00:00Z', data_encerramento: '2026-07-02T12:00:00Z', ...extra });
+  const lista = pessoasNoPeriodo({
+    colaboradores,
+    periodo: { inicio: '2026-07-01', fim: '2026-07-31' },
+    tratativas: [t('1', { encerrado_no_sla: true }), t('2', { encerrado_no_sla: false }), t('3', { excluida: true }), t('4', { data_encerramento: '2026-08-02T12:00:00Z' })],
+  });
+  checa('so agentes ativos', lista.map((p) => p.nome).join(','), 'Ana');
+  checa('encerradas no periodo, sem excluida', String(lista[0].encerradas), '2');
+  checa('no prazo = 50%', String(lista[0].pctNoPrazo), '50');
 }
 
 console.log('\n== conferencia de cores (o verificador pega o que deve) ==');

@@ -9,6 +9,7 @@ import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import { Cartao } from '@/components/ui/Cartao';
 import { FiltroPeriodo } from '@/components/relatorios/hub/Pecas';
 import Financeiro from '@/components/relatorios/grupos/Financeiro';
+import Pessoas from '@/components/relatorios/grupos/Pessoas';
 
 /**
  * Relatórios — organizados por PERGUNTA (padrão aprovado por Pedro em
@@ -58,6 +59,7 @@ export default function Relatorios() {
 
   const corpo = {
     financeiro: <Financeiro tratativas={tratativas} periodo={periodo} ehGestor={ehGestor} />,
+    pessoas: <Pessoas tratativas={tratativas} periodo={periodo} ciclos={ciclos} colaboradores={colaboradores} />,
   }[grupo.chave];
 
   return (
