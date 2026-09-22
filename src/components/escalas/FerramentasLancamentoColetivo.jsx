@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import ConfirmDialog from '@/components/ui/ConfirmDialog';
-import { Zap, Trash2 } from 'lucide-react';
+import { Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 const tiposEvento = [
@@ -71,7 +71,6 @@ export default function FerramentasLancamentoColetivo({ colaboradores, equipes, 
     <Card className="border-0 shadow-sm">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-base">
-          <Zap className="w-5 h-5 text-warning" />
           Ferramentas de Lançamento Coletivo
         </CardTitle>
       </CardHeader>

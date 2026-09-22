@@ -109,7 +109,6 @@ export default function ConfigCiclosTrimestral() {
           <div className="flex items-center justify-between flex-wrap gap-3">
             <div>
               <CardTitle className="text-base flex items-center gap-2">
-                <CalendarDays className="w-5 h-5 text-primary" />
                 Ciclos Trimestrais de Premiação
               </CardTitle>
               <p className="text-sm text-muted-foreground mt-1">Configure os períodos de avaliação e meses de pagamento</p>

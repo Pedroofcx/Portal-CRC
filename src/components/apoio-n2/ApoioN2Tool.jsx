@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Headset, CheckCircle2, AlertCircle, ArrowRight, History } from 'lucide-react';
+import { Headset, CheckCircle2, AlertCircle, ArrowRight } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { formatDateSP } from '@/components/utils/helpers';
 import { findNextN2, getPosicaoAtualN2, STATUS_N2_LABELS, TIPO_N2_LABELS } from './rodizioN2Utils';
@@ -372,7 +372,6 @@ export default function ApoioN2Tool() {
             <Card>
               <CardHeader className="pb-3">
                 <CardTitle className="text-sm font-semibold text-foreground flex items-center gap-2">
-                  <History className="w-4 h-4 text-muted-foreground" />
                   Acionamentos N2 Recentes
                 </CardTitle>
               </CardHeader>

@@ -4,7 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { DollarSign, AlertTriangle, Users, Settings } from 'lucide-react';
+import { AlertTriangle, Users, Settings } from 'lucide-react';
 import { calcularTempoEfetivo, calcularCustoOperacional, formatBRL } from '@/components/utils/helpers';
 import AvisoSalarioAusente from '@/components/jornada/AvisoSalarioAusente';
 
@@ -67,7 +67,6 @@ export default function RelatorioImpactoFinanceiro({ tratativas, colaboradores =
     <Card className="border-0 shadow-sm">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <DollarSign className="w-5 h-5 text-destructive" />
           Impacto Financeiro por Etapa da Jornada
         </CardTitle>
         <p className="text-sm text-muted-foreground mt-1">

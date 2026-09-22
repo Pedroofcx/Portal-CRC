@@ -9,7 +9,7 @@ import {
   RadarChart, Radar, PolarGrid, PolarAngleAxis, ResponsiveContainer,
   BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, Cell
 } from 'recharts';
-import { CheckCircle, Clock, Target, MessageSquare, BarChart3, Award, AlertTriangle, Info, Send, Lightbulb, Zap } from 'lucide-react';
+import { CheckCircle, Clock, Target, MessageSquare, BarChart3, Award, AlertTriangle, Info, Send, Lightbulb } from 'lucide-react';
 import { formatDateSP } from '@/components/utils/helpers';
 import { gerarInsights, ACOES_MELHORIA } from './hanseiUtils';
 import { corDaSerie } from '@/lib/cores-grafico';
@@ -236,7 +236,6 @@ export default function HanseiVisualizarDialog({
               <Card className="border-0 shadow-sm border border-primary/25 bg-info-soft/40">
                 <CardHeader className="pb-3">
                   <CardTitle className="text-sm flex items-center gap-2 text-primary">
-                    <Lightbulb className="w-4 h-4 text-primary" />
                     Reflexão Hansei
                   </CardTitle>
                   <p className="text-xs text-primary">Responda com honestidade. Suas respostas orientam sua melhoria contínua.</p>
@@ -279,7 +278,6 @@ export default function HanseiVisualizarDialog({
               <Card className="border-0 shadow-sm border border-warning/25 bg-warning-soft/40">
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm flex items-center gap-2 text-warning">
-                    <Zap className="w-4 h-4 text-warning" />
                     Ação de Melhoria
                   </CardTitle>
                   <p className="text-xs text-warning">Selecione a prática que você vai priorizar no próximo período.</p>
@@ -308,7 +306,7 @@ export default function HanseiVisualizarDialog({
               <Card className="border-0 shadow-sm">
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm flex items-center gap-2">
-                    <MessageSquare className="w-4 h-4" /> Comentário Geral & Sentimento
+                    Comentário Geral & Sentimento
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">

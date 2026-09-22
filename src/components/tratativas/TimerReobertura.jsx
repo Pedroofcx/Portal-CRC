@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { CheckCircle, AlertTriangle, Timer } from 'lucide-react';
+import { CheckCircle, AlertTriangle } from 'lucide-react';
 import { formatDateSP } from '@/components/utils/helpers';
 
 /**
@@ -58,7 +58,6 @@ export default function TimerReobertura({ tratativa, reabertura, onConfirmar, is
     <Card className={`border-0 shadow-sm ${semReabertura ? 'bg-success-soft border-success/25' : urgente ? 'bg-destructive/10 border-destructive/25' : 'bg-warning-soft border-warning/25'}`}>
       <CardHeader>
         <CardTitle className={`flex items-center gap-2 text-base ${semReabertura ? 'text-success' : urgente ? 'text-destructive' : 'text-warning'}`}>
-          <Timer className="w-5 h-5" />
           Timer de Reabertura — 7 dias corridos
         </CardTitle>
       </CardHeader>

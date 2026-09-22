@@ -2,7 +2,7 @@ import React from 'react';
 import { formatDateSP } from '@/components/utils/helpers';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { MessageSquare, Sparkles } from 'lucide-react';
+import { MessageSquare } from 'lucide-react';
 import RichTextViewer from '@/components/ui/RichTextViewer';
 import PainelLateral from '@/components/ui/PainelLateral';
 
@@ -114,7 +114,6 @@ export default function FeedbackModal({ feedback, open, onClose }) {
             <Card className="bg-info-soft border-info/25">
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm flex items-center gap-2">
-                  <Sparkles className="w-4 h-4 text-primary" />
                   Sugestão da IA
                 </CardTitle>
               </CardHeader>

@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Printer, ShieldAlert, Sparkles, ChevronDown, ChevronRight, BookOpen, Building2 } from 'lucide-react';
+import { Printer, ShieldAlert, ChevronDown, ChevronRight } from 'lucide-react';
 import { calcularTempoEfetivo, calcularCustoOperacional, formatBRL, construirContextoComercialIA, calcularReceitaMensalEquivalente, calcularReceitaAnualEquivalente } from '@/components/utils/helpers';
 
 const isEncerradaEfetiva = (t) => !t.excluida && (t.status === 'encerrada' || t.status === 'aguardando_confirmacao_reabertura');
@@ -234,7 +234,6 @@ export default function RelatorioJornadaDiretoria() {
         {/* Seção 1: Glossário Executivo */}
         <div>
           <h3 className="font-bold text-foreground mb-3 text-base border-b border-border pb-1 flex items-center gap-2">
-            <BookOpen className="w-4 h-4" />
             1. Glossário Executivo (O que é o quê)
           </h3>
           <div className="grid sm:grid-cols-2 gap-3">
@@ -334,7 +333,6 @@ export default function RelatorioJornadaDiretoria() {
         {analiseComercial.porPlano.length > 0 && (
           <div>
             <h3 className="font-bold text-foreground mb-3 text-base border-b border-border pb-1 flex items-center gap-2">
-              <Building2 className="w-4 h-4" />
               3. Análise Comercial — Impacto por Plano e Segmento
             </h3>
 
@@ -416,7 +414,6 @@ export default function RelatorioJornadaDiretoria() {
         {/* Seção 4: Sumário Executivo de IA */}
         <div>
           <h3 className="font-bold text-foreground mb-3 text-base border-b border-border pb-1 flex items-center gap-2">
-            <Sparkles className="w-4 h-4" />
             3. Sumário Executivo (IA)
           </h3>
           <div className="bg-muted border border-border rounded-lg p-5">

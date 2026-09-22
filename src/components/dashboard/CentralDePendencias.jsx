@@ -2,7 +2,7 @@ import React, { useMemo, useState } from 'react';
 import * as Primitivo from '@radix-ui/react-dialog';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
-import { Bell, ClipboardCheck, FileText, TrendingUp } from 'lucide-react';
+import { ClipboardCheck } from 'lucide-react';
 import { toast } from 'sonner';
 import db from '@/api/db';
 import { createPageUrl } from '@/utils';
@@ -163,7 +163,6 @@ export default function CentralDePendencias({ colaborador }) {
     responder.mutate(montarResposta(atual.item, respostasAtuais, colaborador));
   };
 
-  let icone = Bell;
   let rotulo = 'Aviso';
   let titulo = '';
   let corpo = null;
@@ -191,7 +190,6 @@ export default function CentralDePendencias({ colaborador }) {
     );
   } else if (atual.tipo === 'pesquisa') {
     const p = atual.item;
-    icone = ClipboardCheck;
     rotulo = 'Pesquisa';
     titulo = p.titulo;
     corpo = (
@@ -219,7 +217,6 @@ export default function CentralDePendencias({ colaborador }) {
     );
   } else if (atual.tipo === 'pop') {
     const p = atual.item;
-    icone = FileText;
     rotulo = p.versao === '1.0' ? 'POP publicado' : `POP — nova versão ${p.versao}`;
     titulo = `${p.codigo} · ${p.titulo}`;
     corpo = (
@@ -257,7 +254,6 @@ export default function CentralDePendencias({ colaborador }) {
     );
   } else {
     const envios = atual.item;
-    icone = TrendingUp;
     rotulo = 'Hansei';
     titulo = `${envios.length} resultado${envios.length === 1 ? '' : 's'} de desempenho para ver`;
     corpo = (
@@ -281,7 +277,6 @@ export default function CentralDePendencias({ colaborador }) {
     );
   }
 
-  const Icone = icone;
   // Aviso e pesquisa não fecham sem resposta — exceto se a gravação falhou.
   const podeFechar = atual.tipo === 'hansei' || falhou;
 
@@ -307,9 +302,6 @@ export default function CentralDePendencias({ colaborador }) {
               </div>
             )}
             <div className="flex items-start gap-3">
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                <Icone className="h-4 w-4" aria-hidden="true" />
-              </span>
               <div className="min-w-0">
                 <p className="text-xs font-medium text-muted-foreground">{rotulo}</p>
                 <Primitivo.Title className="text-lg font-semibold leading-snug text-foreground">{titulo}</Primitivo.Title>

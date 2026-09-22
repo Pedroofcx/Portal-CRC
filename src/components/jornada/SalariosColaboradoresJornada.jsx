@@ -5,7 +5,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { CurrencyInput } from '@/components/ui/CurrencyInput';
-import { Wallet } from 'lucide-react';
+
 import { toast } from 'sonner';
 
 // Painel gestor-only para conferir/editar o salário de cada colaborador,
@@ -29,7 +29,6 @@ export default function SalariosColaboradoresJornada({ colaboradores }) {
     <Card className="border-0 shadow-sm">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Wallet className="w-5 h-5 text-success" />
           Salário dos Colaboradores
         </CardTitle>
         <p className="text-sm text-muted-foreground mt-1">

@@ -13,19 +13,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
-import {
-  Settings,
-  Trash2,
-  Save,
-  Download,
-  Shield,
-  Database,
-  Target,
-  Tag,
-  Trophy,
-  Eye,
-  EyeOff
-} from 'lucide-react';
+import { Settings, Trash2, Save, Download, Shield, Target, Tag, Eye, EyeOff } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import RankingTrimestral from '@/components/dashboard/RankingTrimestral';
 import ConfigSkills from './ConfigSkills';
@@ -359,7 +347,6 @@ export default function Configuracoes() {
             <Card className="border-0 shadow-sm">
               <CardHeader>
                 <CardTitle className="text-base flex items-center gap-2">
-                  <Trophy className="w-5 h-5 text-warning" />
                   Controle do Ranking Trimestral
                 </CardTitle>
                 <p className="text-sm text-muted-foreground mt-1">
@@ -410,7 +397,6 @@ export default function Configuracoes() {
               <div className="flex items-center justify-between">
                 <div>
                   <CardTitle className="text-base flex items-center gap-2">
-                    <Target className="w-5 h-5" />
                     Metas de Performance
                   </CardTitle>
                   <p className="text-sm text-muted-foreground mt-1">
@@ -474,7 +460,6 @@ export default function Configuracoes() {
           <Card className="border-0 shadow-sm border-destructive/25">
             <CardHeader>
               <CardTitle className="text-base flex items-center gap-2 text-destructive">
-                <Trash2 className="w-5 h-5" />
                 Exclusão de Dados do Sistema
               </CardTitle>
               <p className="text-sm text-muted-foreground mt-2">
@@ -552,7 +537,6 @@ export default function Configuracoes() {
             <Card className="border-0 shadow-sm">
               <CardHeader>
                 <CardTitle className="text-base flex items-center gap-2">
-                  <Database className="w-5 h-5" />
                   Backup Completo
                 </CardTitle>
               </CardHeader>
@@ -570,7 +554,6 @@ export default function Configuracoes() {
             <Card className="border-0 shadow-sm">
               <CardHeader>
                 <CardTitle className="text-base flex items-center gap-2">
-                  <Settings className="w-5 h-5" />
                   Backup de Configurações
                 </CardTitle>
               </CardHeader>
@@ -589,7 +572,6 @@ export default function Configuracoes() {
           <Card className="border-0 shadow-sm mt-6">
             <CardHeader>
               <CardTitle className="text-base flex items-center gap-2">
-                <Shield className="w-5 h-5" />
                 Política de Backup
               </CardTitle>
             </CardHeader>

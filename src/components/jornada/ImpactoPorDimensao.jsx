@@ -2,7 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { AlertTriangle, Search } from 'lucide-react';
+import { Search } from 'lucide-react';
 import { agruparImpactoPorDimensao, classificarRisco, calcularToleranciaReais } from './inteligenciaFinanceira';
 import { formatBRL } from '@/components/utils/helpers';
 
@@ -41,7 +41,6 @@ export default function ImpactoPorDimensao({ tratativas, colaboradores, params, 
     <Card className="border-0 shadow-sm">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-base">
-          <AlertTriangle className="w-5 h-5 text-warning" />
           Impacto Financeiro por {dimLabel}
         </CardTitle>
         <p className="text-xs text-muted-foreground">

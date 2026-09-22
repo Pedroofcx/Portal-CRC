@@ -1,7 +1,7 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ListOrdered } from 'lucide-react';
+
 import { formatDateSP } from '@/components/utils/helpers';
 
 export default function FilaVisualizacao({ titulo, participantes, statusLabels }) {
@@ -9,7 +9,6 @@ export default function FilaVisualizacao({ titulo, participantes, statusLabels }
     <Card>
       <CardHeader className="pb-3">
         <CardTitle className="text-sm font-semibold text-foreground flex items-center gap-2">
-          <ListOrdered className="w-4 h-4 text-muted-foreground" />
           Fila de Rodízio — {titulo}
         </CardTitle>
       </CardHeader>

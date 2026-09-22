@@ -5,12 +5,10 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { 
   AlertTriangle, 
-  TrendingUp, 
   CheckCircle, 
   ArrowRight,
   Eye,
-  Zap,
-  Target
+  Zap
 } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import PainelLateral from '@/components/ui/PainelLateral';
@@ -224,12 +222,9 @@ export default function FluxoJornadaVisual({ etapas = [], tratativas = [], _moti
 
       {/* Insights e Oportunidades */}
       <div className="grid lg:grid-cols-3 gap-4">
-        <Card className="border-0 shadow-sm bg-destructive/10">
+        <Card className="border shadow-none">
           <CardContent className="p-4">
             <div className="flex items-start gap-3">
-              <div className="w-10 h-10 bg-destructive/10 rounded-full flex items-center justify-center">
-                <AlertTriangle className="w-5 h-5 text-destructive" />
-              </div>
               <div className="flex-1">
                 <p className="text-sm font-medium text-foreground">Ponto de Maior Atrito</p>
                 <p className="text-lg font-bold text-destructive mt-1">
@@ -243,12 +238,9 @@ export default function FluxoJornadaVisual({ etapas = [], tratativas = [], _moti
           </CardContent>
         </Card>
 
-        <Card className="border-0 shadow-sm bg-info-soft">
+        <Card className="border shadow-none">
           <CardContent className="p-4">
             <div className="flex items-start gap-3">
-              <div className="w-10 h-10 bg-info-soft rounded-full flex items-center justify-center">
-                <Target className="w-5 h-5 text-primary" />
-              </div>
               <div className="flex-1">
                 <p className="text-sm font-medium text-foreground">Taxa Média de SLA</p>
                 <p className="text-lg font-bold text-primary mt-1">
@@ -267,12 +259,9 @@ export default function FluxoJornadaVisual({ etapas = [], tratativas = [], _moti
           </CardContent>
         </Card>
 
-        <Card className="border-0 shadow-sm bg-success-soft">
+        <Card className="border shadow-none">
           <CardContent className="p-4">
             <div className="flex items-start gap-3">
-              <div className="w-10 h-10 bg-success-soft rounded-full flex items-center justify-center">
-                <TrendingUp className="w-5 h-5 text-success" />
-              </div>
               <div className="flex-1">
                 <p className="text-sm font-medium text-foreground">Oportunidade de Melhoria</p>
                 <p className="text-sm font-semibold text-success mt-1">
@@ -417,7 +406,7 @@ export default function FluxoJornadaVisual({ etapas = [], tratativas = [], _moti
               )}
 
               {/* Recomendações */}
-              <Card className="border-0 shadow-sm bg-info-soft">
+              <Card className="border shadow-none">
                 <CardContent className="p-4">
                   <h4 className="font-semibold text-primary mb-3 flex items-center gap-2">
                     <CheckCircle className="w-4 h-4" />

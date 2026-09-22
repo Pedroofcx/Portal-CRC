@@ -183,7 +183,6 @@ export default function RelatorioProdutividadeTurnos({ escalas, tratativas, cola
       ) : (
         <div className="space-y-3">
           <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
-            <BarChart2 className="w-4 h-4 text-primary" />
             Produtividade por Dia
           </h3>
           {agrupadoPorDia.map(grupo => {
@@ -246,9 +245,6 @@ export default function RelatorioProdutividadeTurnos({ escalas, tratativas, cola
                     {/* Manhã */}
                     <div>
                       <div className="flex items-center gap-1.5 mb-3">
-                        <div className="w-6 h-6 bg-warning-soft rounded-lg flex items-center justify-center">
-                          <Sun className="w-3.5 h-3.5 text-warning" />
-                        </div>
                         <span className="text-sm font-semibold text-warning">Manhã</span>
                         <span className="ml-auto text-xs text-warning">
                           {grupo.manha.reduce((a, l) => a + l.total, 0)} tratativas
@@ -291,9 +287,6 @@ export default function RelatorioProdutividadeTurnos({ escalas, tratativas, cola
                     {/* Tarde */}
                     <div>
                       <div className="flex items-center gap-1.5 mb-3">
-                        <div className="w-6 h-6 bg-info-soft rounded-lg flex items-center justify-center">
-                          <Moon className="w-3.5 h-3.5 text-primary" />
-                        </div>
                         <span className="text-sm font-semibold text-primary">Tarde</span>
                         <span className="ml-auto text-xs text-primary">
                           {grupo.tarde.reduce((a, l) => a + l.total, 0)} tratativas

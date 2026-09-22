@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Target, Sparkles } from 'lucide-react';
+import { Sparkles } from 'lucide-react';
 
 const isEncerradaEfetiva = (t) => !t.excluida && (t.status === 'encerrada' || t.status === 'aguardando_confirmacao_reabertura');
 
@@ -64,7 +64,6 @@ export default function MatrizEsforcoImpacto({ tratativas, motivos }) {
     <Card className="border-0 shadow-sm">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Target className="w-5 h-5 text-primary" />
           Matriz de Esforço x Impacto
         </CardTitle>
         <p className="text-sm text-muted-foreground mt-1">

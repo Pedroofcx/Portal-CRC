@@ -144,7 +144,6 @@ export default function LiderTecnicoConfig() {
           <div className="flex items-center justify-between">
             <div>
               <CardTitle className="text-base flex items-center gap-2">
-                <UserCog className="w-5 h-5 text-primary" />
                 Líderes Técnicos — Rodízio
               </CardTitle>
               <p className="text-sm text-muted-foreground mt-1">Gerencie os participantes do rodízio, suas posições e status.</p>

@@ -85,7 +85,6 @@ export default function PDIPage() {
                 <div className="flex items-start justify-between">
                   <div>
                     <CardTitle className="text-xl flex items-center gap-2">
-                      <Target className="w-6 h-6 text-primary" />
                       {pdiAtivo.titulo}
                     </CardTitle>
                     <Badge className="mt-2 bg-success-soft text-success border-success/25">

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent } from '@/components/ui/card';
-import { ThumbsUp, ThumbsDown, FileText, ChevronRight } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
 
 export default function ColaboradorCard({ colaborador, observacoes, pdis, onClick }) {
   const obsDoColab = observacoes.filter(o => o.colaboradores_ids?.includes(colaborador.id));
@@ -50,23 +50,14 @@ export default function ColaboradorCard({ colaborador, observacoes, pdis, onClic
               </div>
 
               <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                <span className="w-5 h-5 bg-success-soft rounded flex items-center justify-center">
-                  <ThumbsUp className="w-3 h-3 text-success" />
-                </span>
                 <span>{positivos} positivo{positivos !== 1 ? 's' : ''}</span>
               </div>
 
               <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                <span className="w-5 h-5 bg-destructive/10 rounded flex items-center justify-center">
-                  <ThumbsDown className="w-3 h-3 text-destructive" />
-                </span>
                 <span>{negativos} negativo{negativos !== 1 ? 's' : ''}</span>
               </div>
 
               <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                <span className="w-5 h-5 bg-info-soft rounded flex items-center justify-center">
-                  <FileText className="w-3 h-3 text-primary" />
-                </span>
                 <span>{pdisAtivos} PDI{pdisAtivos !== 1 ? 's' : ''} ativo{pdisAtivos !== 1 ? 's' : ''}</span>
               </div>
             </div>

@@ -8,9 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import ConfirmDialog from '@/components/ui/ConfirmDialog';
 import RichTextViewer from '@/components/ui/RichTextViewer';
 import { formatDateSP } from '@/components/utils/helpers';
-import {
-  ArrowLeft, Plus, Eye, EyeOff, Trash2, Sparkles, Calendar, User, Filter, MessageSquare
-} from 'lucide-react';
+import { ArrowLeft, Plus, Eye, EyeOff, Trash2, Calendar, User, Filter, MessageSquare } from 'lucide-react';
 import PainelLateral from '@/components/ui/PainelLateral';
 
 export const tipoLabels = {
@@ -306,7 +304,7 @@ export default function HistoricoColaborador({
 
               {(viewObs.sugestao_ia_soft_skills || viewObs.sugestao_ia_hard_skills) && (
                 <Card className="bg-info-soft border-info/25">
-                  <CardHeader className="pb-2 pt-4 px-4"><CardTitle className="text-sm flex items-center gap-2"><Sparkles className="w-4 h-4 text-primary"/>Sugestão da IA</CardTitle></CardHeader>
+                  <CardHeader className="pb-2 pt-4 px-4"><CardTitle className="text-sm flex items-center gap-2">Sugestão da IA</CardTitle></CardHeader>
                   <CardContent className="grid grid-cols-2 gap-4 text-sm px-4 pb-4">
                     {viewObs.sugestao_ia_soft_skills && <div><p className="text-xs font-medium mb-2">Soft Skills</p>{Object.entries(viewObs.sugestao_ia_soft_skills).map(([s,v]) => <div key={s} className="flex justify-between py-0.5"><span className="capitalize text-muted-foreground text-xs">{s.replace('_',' ')}</span><span className="text-xs">{v}/10</span></div>)}</div>}
                     {viewObs.sugestao_ia_hard_skills && <div><p className="text-xs font-medium mb-2">Hard Skills</p>{Object.entries(viewObs.sugestao_ia_hard_skills).map(([s,v]) => <div key={s} className="flex justify-between py-0.5"><span className="capitalize text-muted-foreground text-xs">{s.replace('_',' ')}</span><span className="text-xs">{v}/10</span></div>)}</div>}

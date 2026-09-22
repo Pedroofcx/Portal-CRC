@@ -91,7 +91,6 @@ export default function ImpactoPorPeriodo({ tratativas, colaboradores, params })
       <Card className="border-0 shadow-sm">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base">
-            <TrendingUp className="w-5 h-5 text-primary" />
             Tendência de Impacto e Projeção
           </CardTitle>
           <p className="text-xs text-muted-foreground">

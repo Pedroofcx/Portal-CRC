@@ -12,7 +12,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { StickyNote, X, Plus, Bell, CheckCircle, Clock } from 'lucide-react';
+import { X, Plus, Bell, CheckCircle, Clock } from 'lucide-react';
 import { toast } from 'sonner';
 import ListaResumida from '@/components/ui/ListaResumida';
 
@@ -211,7 +211,6 @@ export default function MinhasAnotacoes({ colaboradorId }) {
         <CardHeader className="pb-2 pt-4 px-4">
           <div className="flex items-center justify-between">
             <CardTitle className="text-sm font-semibold flex items-center gap-2">
-              <StickyNote className="w-4 h-4 text-warning" />
               Minhas Anotações
               {avisosPendentes.length > 0 && (
                 <span className="bg-destructive text-white text-xs font-bold px-1.5 py-0.5 rounded-full leading-none">

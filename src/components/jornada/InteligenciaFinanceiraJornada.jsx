@@ -2,7 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { DollarSign, TrendingUp, ShieldAlert, Brain, Layers } from 'lucide-react';
+import { TrendingUp, ShieldAlert, Brain, Layers } from 'lucide-react';
 import ImpactoPorDimensao from './ImpactoPorDimensao';
 import ImpactoPorPeriodo from './ImpactoPorPeriodo';
 import PerguntasEstrategicas from './PerguntasEstrategicas';
@@ -78,7 +78,6 @@ export default function InteligenciaFinanceiraJornada({ tratativas, colaboradore
       <Card className="border-0 shadow-sm">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base">
-            <DollarSign className="w-5 h-5 text-destructive" />
             Impacto Financeiro Total Consolidado
           </CardTitle>
           <p className="text-xs text-muted-foreground">

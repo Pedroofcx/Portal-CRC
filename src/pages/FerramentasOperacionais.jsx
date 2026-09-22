@@ -10,7 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { Calculator, History, Settings, Save, RefreshCw, Wrench, DollarSign, FileText, AlertCircle, Link2, LifeBuoy, UserCog, Headset } from 'lucide-react';
+import { Calculator, History, Settings, Save, RefreshCw, Wrench, FileText, AlertCircle, Link2, LifeBuoy, UserCog, Headset } from 'lucide-react';
 import ApoioEspecializado from '@/components/ferramentas/apoio/ApoioEspecializado';
 import LiderTecnicoTool from '@/components/lider-tecnico/LiderTecnicoTool';
 import ApoioN2Tool from '@/components/apoio-n2/ApoioN2Tool';
@@ -252,7 +252,6 @@ export default function FerramentasOperacionais() {
               <Card>
                 <CardHeader className="pb-3">
                   <CardTitle className="text-sm font-semibold text-foreground flex items-center gap-2">
-                    <FileText className="w-4 h-4 text-primary" />
                     Bloco 1 — Identificação da Solicitação
                   </CardTitle>
                 </CardHeader>
@@ -315,7 +314,6 @@ export default function FerramentasOperacionais() {
               <Card>
                 <CardHeader className="pb-3">
                   <CardTitle className="text-sm font-semibold text-foreground flex items-center gap-2">
-                    <DollarSign className="w-4 h-4 text-success" />
                     Bloco 2 — Dados Financeiros
                   </CardTitle>
                 </CardHeader>
@@ -444,7 +442,6 @@ export default function FerramentasOperacionais() {
               <Card>
                 <CardHeader className="pb-3">
                   <CardTitle className="text-sm font-semibold text-foreground flex items-center gap-2">
-                    <Settings className="w-4 h-4 text-muted-foreground" />
                     Bloco 3 — Impostos e Descontos
                   </CardTitle>
                 </CardHeader>
@@ -475,7 +472,6 @@ export default function FerramentasOperacionais() {
                 <Card className="border-2 border-primary/25">
                   <CardHeader className="pb-3">
                     <CardTitle className="text-sm flex items-center gap-2">
-                      <Calculator className="w-4 h-4 text-primary" />
                       Resultado em Tempo Real
                     </CardTitle>
                   </CardHeader>
@@ -536,7 +532,6 @@ export default function FerramentasOperacionais() {
           <Card>
             <CardHeader>
               <CardTitle className="text-base flex items-center gap-2">
-                <History className="w-4 h-4 text-primary" />
                 Histórico de Cálculos
                 <Badge variant="outline">{historico.length} registros</Badge>
               </CardTitle>
@@ -562,7 +557,6 @@ export default function FerramentasOperacionais() {
               <Card>
                 <CardHeader>
                   <CardTitle className="text-base flex items-center gap-2">
-                    <Settings className="w-4 h-4 text-primary" />
                     Configurar Percentuais
                   </CardTitle>
                 </CardHeader>
@@ -589,7 +583,6 @@ export default function FerramentasOperacionais() {
               <Card>
                 <CardHeader>
                   <CardTitle className="text-base flex items-center gap-2">
-                    <History className="w-4 h-4 text-muted-foreground" />
                     Log de Alterações
                   </CardTitle>
                 </CardHeader>

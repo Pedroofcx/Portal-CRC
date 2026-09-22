@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { History, Search } from 'lucide-react';
+import { Search } from 'lucide-react';
 import { TIPOS_APOIO, STATUS_APOIO, formatMinutos, getTipoApoioLabel, getStatusInfo } from './constants';
 
 export default function HistoricoApoio({ solicitacoes, onStatusChange }) {
@@ -40,7 +40,6 @@ export default function HistoricoApoio({ solicitacoes, onStatusChange }) {
     <Card>
       <CardHeader>
         <CardTitle className="text-base flex items-center gap-2">
-          <History className="w-4 h-4 text-primary" />
           Histórico de Solicitações
           <Badge variant="outline">{filtradas.length} registro(s)</Badge>
         </CardTitle>

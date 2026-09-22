@@ -26,20 +26,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import {
-  ClipboardList,
-  Play,
-  Pause,
-  CheckCircle,
-  Clock,
-  ExternalLink,
-  History,
-  Award,
-  AlertTriangle,
-  MapPin,
-  Trash2,
-  Snowflake
-} from 'lucide-react';
+import { ClipboardList, Play, Pause, CheckCircle, Clock, ExternalLink, AlertTriangle, MapPin, Trash2, Snowflake } from 'lucide-react';
 import TimerReobertura from '@/components/tratativas/TimerReobertura';
 import { reaberturaDe, comReaberturaApurada } from '@/lib/pontuacaoCiclo';
 import CongelamentoSLA from '@/components/tratativas/CongelamentoSLA';
@@ -1372,7 +1359,6 @@ export default function TratativaDetalhe({ idExterno = null, embutido = false })
             <Card className="border border-warning/25 shadow-none bg-warning-soft">
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-medium text-warning flex items-center gap-2">
-                  <Award className="w-4 h-4" />
                   Pontuação Gerada
                 </CardTitle>
               </CardHeader>
@@ -1407,7 +1393,6 @@ export default function TratativaDetalhe({ idExterno = null, embutido = false })
           <Card className="border shadow-none">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-base">
-                <History className="w-4 h-4" aria-hidden="true" />
                 Histórico
               </CardTitle>
             </CardHeader>

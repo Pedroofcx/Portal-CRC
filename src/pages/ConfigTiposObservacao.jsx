@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
-import { Plus, Trash2, Tag } from 'lucide-react';
+import { Plus, Trash2 } from 'lucide-react';
 
 export default function ConfigTiposObservacao() {
   const [novoTipo, setNovoTipo] = useState({ nome: '', descricao: '', cor: 'hsl(var(--chart-1))' });
@@ -39,7 +39,6 @@ export default function ConfigTiposObservacao() {
     <Card>
       <CardHeader>
         <CardTitle className="text-base flex items-center gap-2">
-          <Tag className="w-5 h-5" />
           Tipos de Observação
         </CardTitle>
       </CardHeader>

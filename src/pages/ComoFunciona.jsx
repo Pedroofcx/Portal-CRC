@@ -322,9 +322,6 @@ export default function ComoFunciona() {
       <Card className="border border-info/25 shadow-none bg-info-soft">
         <CardContent className="py-6">
           <div className="flex items-start gap-4">
-            <div className="w-12 h-12 bg-card text-primary rounded-xl flex items-center justify-center flex-shrink-0">
-              <BookOpen className="w-6 h-6" />
-            </div>
             <div>
               <h3 className="font-bold text-lg mb-2 text-foreground">Boas-vindas ao Guia do Portal CRC</h3>
               <p className="text-muted-foreground text-sm leading-relaxed">
@@ -358,14 +355,10 @@ export default function ComoFunciona() {
         <TabsContent value="gestor" className="space-y-4">
           <div className="grid gap-4">
             {modulosGestor.map((modulo, index) => {
-              const Icon = modulo.icon;
               return (
                 <Card key={index} className="border-0 shadow-sm hover:shadow-sm transition-shadow">
                   <CardHeader className="pb-3">
                     <div className="flex items-start gap-3">
-                      <div className="w-10 h-10 bg-info-soft rounded-lg flex items-center justify-center flex-shrink-0">
-                        <Icon className="w-5 h-5 text-primary" />
-                      </div>
                       <div className="flex-1">
                         <CardTitle className="text-lg font-semibold text-foreground">
                           {modulo.nome}
@@ -395,14 +388,10 @@ export default function ComoFunciona() {
         <TabsContent value="agente" className="space-y-4">
           <div className="grid gap-4">
             {modulosAgente.map((modulo, index) => {
-              const Icon = modulo.icon;
               return (
                 <Card key={index} className="border-0 shadow-sm hover:shadow-sm transition-shadow">
                   <CardHeader className="pb-3">
                     <div className="flex items-start gap-3">
-                      <div className="w-10 h-10 bg-success-soft rounded-lg flex items-center justify-center flex-shrink-0">
-                        <Icon className="w-5 h-5 text-success" />
-                      </div>
                       <div className="flex-1">
                         <CardTitle className="text-lg font-semibold text-foreground">
                           {modulo.nome}
@@ -449,14 +438,10 @@ export default function ComoFunciona() {
 
           <div className="grid gap-4">
             {modulosComuns.map((modulo, index) => {
-              const Icon = modulo.icon;
               return (
                 <Card key={index} className="border-0 shadow-sm hover:shadow-sm transition-shadow">
                   <CardContent className="p-5">
                     <div className="flex items-start gap-3">
-                      <div className="w-10 h-10 bg-info-soft rounded-lg flex items-center justify-center flex-shrink-0">
-                        <Icon className="w-5 h-5 text-primary" />
-                      </div>
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1">
                           <h3 className="font-semibold text-foreground">{modulo.nome}</h3>
@@ -476,9 +461,6 @@ export default function ComoFunciona() {
       <Card className="border-0 shadow-sm bg-warning-soft">
         <CardContent className="p-5">
           <div className="flex items-start gap-3">
-            <div className="w-10 h-10 bg-warning-soft rounded-full flex items-center justify-center flex-shrink-0">
-              <Target className="w-5 h-5 text-warning" />
-            </div>
             <div>
               <h3 className="font-semibold text-warning mb-2">Dica Importante</h3>
               <p className="text-sm text-warning leading-relaxed">

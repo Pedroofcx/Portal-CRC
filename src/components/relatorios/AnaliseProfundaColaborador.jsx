@@ -19,22 +19,7 @@ import {
   Area,
   AreaChart
 } from 'recharts';
-import {
-  TrendingDown,
-  AlertTriangle,
-  CheckCircle,
-  Brain,
-  Heart,
-  Zap,
-  Target,
-  MessageSquare,
-  Award,
-  Activity,
-  Clock,
-  ThumbsDown,
-  AlertCircle,
-  Sparkles
-} from 'lucide-react';
+import { TrendingDown, AlertTriangle, CheckCircle, Brain, Target, MessageSquare, Award, Activity, Clock, ThumbsDown, Sparkles } from 'lucide-react';
 import { formatDateSP } from '@/components/utils/helpers';
 
 export default function AnaliseProfundaColaborador({
@@ -491,7 +476,6 @@ export default function AnaliseProfundaColaborador({
         <Card className="border-0 shadow-sm">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <AlertCircle className="w-5 h-5 text-warning" />
               Alertas Inteligentes
             </CardTitle>
             <CardDescription>Sinais identificados automaticamente que requerem atenção</CardDescription>
@@ -602,7 +586,6 @@ export default function AnaliseProfundaColaborador({
         <Card className="border-0 shadow-sm">
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2">
-              <Heart className="w-5 h-5 text-primary" />
               Indicadores Comportamentais
             </CardTitle>
           </CardHeader>
@@ -705,7 +688,6 @@ export default function AnaliseProfundaColaborador({
         <Card className="border-0 shadow-sm">
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2">
-              <Activity className="w-5 h-5 text-primary" />
               Evolução Temporal de Performance
             </CardTitle>
             <CardDescription>Tendência das últimas {evolucaoPerformance.length} apurações</CardDescription>
@@ -731,7 +713,6 @@ export default function AnaliseProfundaColaborador({
         <Card className="border-0 shadow-sm bg-info-soft">
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2">
-              <Brain className="w-5 h-5 text-primary" />
               Insights Estratégicos (IA)
             </CardTitle>
             <CardDescription>Análise inteligente para tomada de decisão</CardDescription>
@@ -765,7 +746,6 @@ export default function AnaliseProfundaColaborador({
           <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle className="text-base flex items-center gap-2">
-                <Zap className="w-5 h-5 text-primary" />
                 Oráculo CRC — Avaliação Comportamental
               </CardTitle>
               <span className="text-xs text-muted-foreground">

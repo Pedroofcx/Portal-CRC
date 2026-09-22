@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ShieldAlert, Users, DollarSign, Percent } from 'lucide-react';
+import { Users, DollarSign, Percent } from 'lucide-react';
 import { agruparImpactoPorDimensao, classificarRisco, calcularToleranciaReais } from './inteligenciaFinanceira';
 import { formatBRL } from '@/components/utils/helpers';
 
@@ -44,7 +44,6 @@ export default function RiscoCarteira({ tratativas, colaboradores, params }) {
       <Card className="border-0 shadow-sm">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base">
-            <ShieldAlert className="w-5 h-5 text-destructive" />
             Análise de Risco por Carteira
           </CardTitle>
           <p className="text-xs text-muted-foreground">

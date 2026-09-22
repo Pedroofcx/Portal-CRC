@@ -282,4 +282,11 @@ O padrão das telas de leitura passa a ser o da **visão detalhada do ciclo**
   cabeçalho da página (`PageHeader`);
 * nada de cartão de estatística com ícone colorido (`StatCard`) em tela nova.
 
-Aplicado em 22/09/2026 na Minha Performance.
+Aplicado em 22/09/2026 na Minha Performance e, no mesmo dia, no sistema
+inteiro: o `StatCard` deixou de desenhar o ícone (27 cartões de uma vez), 70
+títulos de cartão perderam o ícone e 15 ícones decorativos em quadrado
+colorido saíram (Central de pendências, Jornada, Turnos, Como Funciona,
+Observações). Continuam, porque têm função: números de ordem em círculo
+(fila, posição, passo 1/2), o logo, a tela de entrada, o cabeçalho da página,
+a área de "enviar foto", caixas de seleção e botões de abrir/fechar. Ícone
+dentro de botão e de aba continua, como rótulo do controle.

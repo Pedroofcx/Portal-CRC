@@ -44,7 +44,6 @@ export default function CongelamentoSLA({ tratativa, _user, onCongelar, onDescon
       <Card className="border-0 shadow-sm border-l-4 border-l-blue-400 bg-info-soft">
         <CardHeader className="pb-3">
           <CardTitle className="text-base flex items-center gap-2 text-primary">
-            <Snowflake className="w-5 h-5 text-primary" />
             SLA Congelado — Aguardando Setor Financeiro
           </CardTitle>
         </CardHeader>
@@ -95,7 +94,6 @@ export default function CongelamentoSLA({ tratativa, _user, onCongelar, onDescon
     <Card className="border-0 shadow-sm border-l-4 border-l-slate-300">
       <CardHeader className="pb-3">
         <CardTitle className="text-base flex items-center gap-2 text-foreground">
-          <Snowflake className="w-5 h-5 text-muted-foreground" />
           Aguardar Retorno do Setor Financeiro
         </CardTitle>
       </CardHeader>

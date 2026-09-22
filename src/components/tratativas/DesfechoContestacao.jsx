@@ -5,7 +5,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { CheckCircle, Flag } from 'lucide-react';
+import { CheckCircle } from 'lucide-react';
 import { formatDateSP } from '@/components/utils/helpers';
 
 const DESFECHOS = [
@@ -28,7 +28,6 @@ export default function DesfechoContestacao({ tratativa, onSalvar, isLoading }) 
       <Card className="border-0 shadow-sm bg-success-soft border-l-4 border-l-green-500">
         <CardHeader className="pb-2">
           <CardTitle className="text-base flex items-center gap-2 text-success">
-            <CheckCircle className="w-5 h-5" />
             Desfecho Final Registrado
           </CardTitle>
         </CardHeader>
@@ -58,7 +57,6 @@ export default function DesfechoContestacao({ tratativa, onSalvar, isLoading }) 
     <Card className="border-0 shadow-sm border-l-4 border-l-purple-400 bg-info-soft">
       <CardHeader className="pb-3">
         <CardTitle className="text-base flex items-center gap-2 text-primary">
-          <Flag className="w-5 h-5" />
           Definir Desfecho Final da Contestação
         </CardTitle>
       </CardHeader>

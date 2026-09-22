@@ -173,7 +173,6 @@ export default function ConfigCategoriasTratativa() {
           <div className="flex items-center justify-between">
             <div>
               <CardTitle className="text-base flex items-center gap-2">
-                <Tag className="w-5 h-5" />
                 Categorias de Tratativas
               </CardTitle>
               <p className="text-sm text-muted-foreground mt-1">

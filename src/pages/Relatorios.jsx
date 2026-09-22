@@ -13,16 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import {
-  BarChart3,
-  Download,
-  Clock,
-  AlertTriangle,
-  CheckCircle,
-  ExternalLink,
-  Brain,
-  Handshake
-} from 'lucide-react';
+import { BarChart3, Download, Clock, AlertTriangle, CheckCircle, ExternalLink, Brain } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import AnaliseProfundaColaborador from '@/components/relatorios/AnaliseProfundaColaborador';
@@ -608,7 +599,6 @@ export default function Relatorios() {
           <Card className="border-0 shadow-sm">
             <CardHeader>
               <CardTitle className="text-base flex items-center gap-2">
-                <Handshake className="w-5 h-5 text-primary" />
                 Acordos de Contestação
                 <Badge variant="outline" className="ml-1">{acordosContestacao.length} acordo(s)</Badge>
               </CardTitle>

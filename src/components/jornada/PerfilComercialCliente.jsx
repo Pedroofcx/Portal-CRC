@@ -26,7 +26,6 @@ export default function PerfilComercialCliente({ tratativa }) {
       <Card className="border-0 shadow-sm">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base">
-            <Building2 className="w-5 h-5 text-muted-foreground" />
             Perfil Comercial do Cliente
           </CardTitle>
         </CardHeader>
@@ -48,7 +47,6 @@ export default function PerfilComercialCliente({ tratativa }) {
     <Card className="border-0 shadow-sm bg-success-soft">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-base">
-          <Building2 className="w-5 h-5 text-success" />
           Perfil Comercial do Cliente
           <span className="text-sm font-normal text-muted-foreground ml-2">{tratativa.nome_cliente}</span>
         </CardTitle>

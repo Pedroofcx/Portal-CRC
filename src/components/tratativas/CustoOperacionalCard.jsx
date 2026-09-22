@@ -1,7 +1,7 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { DollarSign, TrendingDown } from 'lucide-react';
+import { TrendingDown } from 'lucide-react';
 import { formatBRL } from '@/components/utils/helpers';
 
 // Restrito: só deve ser renderizado quando o usuário logado é gestor.
@@ -13,7 +13,6 @@ export default function CustoOperacionalCard({ tratativa }) {
     <Card className="border-0 shadow-sm bg-muted superficie-escura text-white">
       <CardHeader className="pb-2">
         <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-          <DollarSign className="w-4 h-4" />
           Impacto Financeiro (restrito)
         </CardTitle>
       </CardHeader>

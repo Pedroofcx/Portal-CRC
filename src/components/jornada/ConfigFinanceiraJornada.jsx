@@ -4,7 +4,7 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import { Settings, Save } from 'lucide-react';
+import { Save } from 'lucide-react';
 
 // Lê o valor de uma chave dentro da lista de Configuracao (chave/valor genérico).
 export function getConfigValor(configuracoes, chave, defaultValor = '') {
@@ -38,7 +38,6 @@ export default function ConfigFinanceiraJornada({ configuracoes, onSalvar, isPen
     <Card className="border-0 shadow-sm">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-base">
-          <Settings className="w-5 h-5 text-muted-foreground" />
           Parâmetros Financeiros da Jornada
         </CardTitle>
         <p className="text-xs text-muted-foreground">

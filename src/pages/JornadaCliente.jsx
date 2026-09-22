@@ -471,7 +471,6 @@ export default function JornadaCliente() {
           <Card className="border-0 shadow-sm bg-destructive/10">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <AlertCircle className="w-5 h-5 text-destructive" />
                 Causas Primárias Mais Recorrentes
               </CardTitle>
             </CardHeader>

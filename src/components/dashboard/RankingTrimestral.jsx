@@ -38,7 +38,6 @@ export default function RankingTrimestral({ colaboradorAtualId, visivel = true }
     <Card className="border-0 shadow-sm">
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-base">
-          <Trophy className="w-5 h-5 text-warning" />
           Ranking do Trimestre
           {cicloAtivo && (
             <Badge className="bg-info-soft text-primary border-info/25 text-xs ml-auto">{cicloAtivo.nome}</Badge>

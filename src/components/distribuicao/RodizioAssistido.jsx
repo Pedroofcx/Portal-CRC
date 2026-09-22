@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { RotateCcw, ChevronDown, ChevronUp, Clock, AlertTriangle, User } from 'lucide-react';
+import { ChevronDown, ChevronUp, Clock, AlertTriangle, User } from 'lucide-react';
 import { TIPOS_CONFIG, sugerirProximoAgente } from './distribuicaoUtils';
 
 export default function RodizioAssistido({ agentesAtivos, distribuicoes }) {
@@ -28,7 +28,6 @@ export default function RodizioAssistido({ agentesAtivos, distribuicoes }) {
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <CardTitle className="text-sm flex items-center gap-2">
-            <RotateCcw className="w-4 h-4 text-primary" />
             Rodízio Assistido CRC
             <Badge className="bg-info-soft text-primary text-xs">Sugestão Visual</Badge>
           </CardTitle>

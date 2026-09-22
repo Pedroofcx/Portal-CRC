@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ReferenceLine } from 'recharts';
-import { TrendingDown, HeartCrack } from 'lucide-react';
+
 import { calcularImpactoFinanceiroDireto, formatBRL } from '@/components/utils/helpers';
 
 const isEncerradaEfetiva = (t) => !t.excluida && (t.status === 'encerrada' || t.status === 'aguardando_confirmacao_reabertura');
@@ -58,7 +58,6 @@ export default function GraficoBenchmarkingJornada({ tratativas, etapasOrdenadas
       <Card className="border-0 shadow-sm">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base">
-            <TrendingDown className="w-5 h-5 text-destructive" />
             Impacto Financeiro Acumulado x Tolerância da Empresa
           </CardTitle>
           <p className="text-xs text-muted-foreground">
@@ -117,7 +116,6 @@ export default function GraficoBenchmarkingJornada({ tratativas, etapasOrdenadas
       <Card className="border-0 shadow-sm">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base">
-            <HeartCrack className="w-5 h-5 text-primary" />
             Taxa de Churn (Cancelamento)
           </CardTitle>
         </CardHeader>

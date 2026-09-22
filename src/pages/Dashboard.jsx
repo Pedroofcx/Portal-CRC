@@ -25,17 +25,7 @@ import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import {
-  ClipboardList,
-  TrendingUp,
-  CheckCircle,
-  AlertCircle,
-  Bell,
-  ArrowRight,
-  Users,
-  Target,
-  Palmtree
-} from 'lucide-react';
+import { ClipboardList, TrendingUp, CheckCircle, AlertCircle, ArrowRight, Users, Target, Palmtree } from 'lucide-react';
 
 
 import { usePontuacaoAgente } from '@/hooks/usePontuacaoAgente';
@@ -385,7 +375,6 @@ export default function Dashboard() {
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-lg font-semibold flex items-center gap-2">
-                  <Bell className="w-5 h-5 text-primary" />
                   Avisos
                 </CardTitle>
                 <Link to={createPageUrl('Avisos')}>

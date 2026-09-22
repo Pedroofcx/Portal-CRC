@@ -153,7 +153,6 @@ export default function AgenteN2Config() {
           <div className="flex items-center justify-between">
             <div>
               <CardTitle className="text-base flex items-center gap-2">
-                <Headset className="w-5 h-5 text-primary" />
                 Agentes N2 — Rodízio
               </CardTitle>
               <p className="text-sm text-muted-foreground mt-1">Gerencie os agentes do Time N2, posições e status. O cadastro não cria usuário no sistema.</p>
