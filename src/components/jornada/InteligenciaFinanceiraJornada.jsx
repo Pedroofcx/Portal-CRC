@@ -35,26 +35,21 @@ export default function InteligenciaFinanceiraJornada({ tratativas, colaboradore
   const [subDim, setSubDim] = useState('plano');
 
   const p = { ...PARAMETROS_PADRAO, ...params };
-  const colabMap = useMemo(() =>
-    (colaboradores || []).reduce((acc, c) => { acc[c.id] = c; return acc; }, {}),
-    [colaboradores]
-  );
 
   // Impacto total consolidado
   const impactoTotal = useMemo(() => {
-    let total = 0, devolvido = 0, custoOp = 0, perdaRec = 0, riscoRep = 0, retrab = 0, faturam = 0;
+    let total = 0, devolvido = 0, custoOp = 0, perdaRec = 0, casosRisco = 0, faturam = 0;
     tratativas.forEach(t => {
-      const imp = calcularImpactoTotal(t, colabMap[t.agente_responsavel_id], p);
+      const imp = calcularImpactoTotal(t);
       total += imp.total;
       devolvido += imp.valorDevolvido;
       custoOp += imp.custoOperacional;
       perdaRec += imp.perdaReceita;
-      riscoRep += imp.riscoReputacional;
-      retrab += imp.custoRetrabalho;
+      casosRisco += imp.casoDeRisco;
       faturam += calcularReceitaAnualEquivalente(t);
     });
-    return { total, devolvido, custoOp, perdaRec, riscoRep, retrab, faturam };
-  }, [tratativas, colabMap, p]);
+    return { total, devolvido, custoOp, perdaRec, casosRisco, faturam };
+  }, [tratativas]);
 
   const toleranciaReais = calcularToleranciaReais(p);
   const riscoGeral = classificarRisco(impactoTotal.total, toleranciaReais);
@@ -81,7 +76,7 @@ export default function InteligenciaFinanceiraJornada({ tratativas, colaboradore
             Impacto Financeiro Total Consolidado
           </CardTitle>
           <p className="text-xs text-muted-foreground">
-            Fórmula: Valor Devolvido + Custo Operacional (horas × custo/hora × encargos) + Perda de Receita + Risco Reputacional + Retrabalho.
+            Impacto = valor devolvido ao cliente + custo operacional (o oficial, dividido pela carga simultânea) + perda de receita informada. Casos de risco reputacional são contados à parte, sem valor em R$.
           </p>
         </CardHeader>
         <CardContent>
@@ -120,12 +115,8 @@ export default function InteligenciaFinanceiraJornada({ tratativas, colaboradore
               <p className="text-lg font-bold text-primary">{formatBRL(impactoTotal.perdaRec)}</p>
             </div>
             <div className="p-3 rounded-lg border border-border bg-card">
-              <p className="text-[11px] text-muted-foreground uppercase">Risco Reputacional</p>
-              <p className="text-lg font-bold text-primary">{formatBRL(impactoTotal.riscoRep)}</p>
-            </div>
-            <div className="p-3 rounded-lg border border-border bg-card">
-              <p className="text-[11px] text-muted-foreground uppercase">Retrabalho</p>
-              <p className="text-lg font-bold text-warning">{formatBRL(impactoTotal.retrab)}</p>
+              <p className="text-[11px] text-muted-foreground uppercase">Casos de risco reputacional</p>
+              <p className="text-lg font-bold text-foreground">{impactoTotal.casosRisco}</p>
             </div>
           </div>
 

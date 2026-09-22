@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { AlertTriangle, Users, Settings } from 'lucide-react';
-import { calcularTempoEfetivo, calcularCustoOperacional, formatBRL } from '@/components/utils/helpers';
+import { minutosDeEsforco, formatBRL } from '@/components/utils/helpers';
 import AvisoSalarioAusente from '@/components/jornada/AvisoSalarioAusente';
 
 const isEncerradaEfetiva = (t) => !t.excluida && (t.status === 'encerrada' || t.status === 'aguardando_confirmacao_reabertura');
@@ -28,15 +28,11 @@ export default function RelatorioImpactoFinanceiro({ tratativas, colaboradores =
     tratativas.filter(isEncerradaEfetiva).forEach((t) => {
       const etapa = t.etapa_jornada_nome || 'Não definida';
       if (!mapa[etapa]) mapa[etapa] = { custoOperacional: 0, devolucaoCliente: 0, perdaReceita: 0, minutosEfetivos: 0, casos: 0 };
-      // Custo operacional recalculado dinamicamente com o salário atual do
-      // colaborador responsável — nunca lê o campo estático do banco.
-      const custoDinamico = isGestor
-        ? calcularCustoOperacional(t, colaboradoresPorId[t.agente_responsavel_id], multiplicadorEncargos, cargaHorariaMensal)
-        : 0;
-      mapa[etapa].custoOperacional += custoDinamico;
+      // Custo operacional OFICIAL (servidor, dividido pela carga simultânea).
+      mapa[etapa].custoOperacional += isGestor ? (parseFloat(t.custo_operacional_reais) || 0) : 0;
       mapa[etapa].devolucaoCliente += parseFloat(t.valor_devolvido_cliente) || 0;
       mapa[etapa].perdaReceita += parseFloat(t.valor_perda_receita) || 0;
-      mapa[etapa].minutosEfetivos += calcularTempoEfetivo(t);
+      mapa[etapa].minutosEfetivos += isGestor ? minutosDeEsforco(t, colaboradoresPorId[t.agente_responsavel_id], multiplicadorEncargos, cargaHorariaMensal) : 0;
       mapa[etapa].casos += 1;
     });
     return Object.entries(mapa)

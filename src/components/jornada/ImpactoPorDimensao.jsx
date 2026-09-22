@@ -44,7 +44,7 @@ export default function ImpactoPorDimensao({ tratativas, colaboradores, params, 
           Impacto Financeiro por {dimLabel}
         </CardTitle>
         <p className="text-xs text-muted-foreground">
-          Cruza devoluções + custo operacional + perda de receita + risco reputacional + retrabalho.
+          Impacto = devoluções + custo operacional oficial + perda de receita. Casos de risco reputacional contados à parte.
           Tolerância da empresa: {formatBRL(toleranciaReais)}.
         </p>
       </CardHeader>
@@ -68,8 +68,7 @@ export default function ImpactoPorDimensao({ tratativas, colaboradores, params, 
                 <th className="p-3 text-right">Devolvido</th>
                 <th className="p-3 text-right">Custo Operac.</th>
                 <th className="p-3 text-right">Perda Receita</th>
-                <th className="p-3 text-right">Risco Reput.</th>
-                <th className="p-3 text-right">Retrabalho</th>
+                <th className="p-3 text-center">Casos de risco</th>
                 <th className="p-3 text-right">Faturam. Ano</th>
                 <th className="p-3 text-right">Impacto Total</th>
                 <th className="p-3 text-center">Risco</th>
@@ -85,8 +84,7 @@ export default function ImpactoPorDimensao({ tratativas, colaboradores, params, 
                     <td className="p-3 text-right text-destructive">{formatBRL(d.valorDevolvido)}</td>
                     <td className="p-3 text-right text-critical">{formatBRL(d.custoOperacional)}</td>
                     <td className="p-3 text-right text-primary">{formatBRL(d.perdaReceita)}</td>
-                    <td className="p-3 text-right text-primary">{formatBRL(d.riscoReputacional)}</td>
-                    <td className="p-3 text-right text-warning">{formatBRL(d.custoRetrabalho)}</td>
+                    <td className="p-3 text-center">{d.casosDeRisco}</td>
                     <td className="p-3 text-right text-muted-foreground">{formatBRL(d.faturamento)}</td>
                     <td className="p-3 text-right font-bold text-foreground">{formatBRL(d.total)}</td>
                     <td className="p-3 text-center">
@@ -106,8 +104,7 @@ export default function ImpactoPorDimensao({ tratativas, colaboradores, params, 
                 <td className="p-3 text-right text-destructive">{formatBRL(dadosFiltrados.reduce((a, d) => a + d.valorDevolvido, 0))}</td>
                 <td className="p-3 text-right text-critical">{formatBRL(dadosFiltrados.reduce((a, d) => a + d.custoOperacional, 0))}</td>
                 <td className="p-3 text-right text-primary">{formatBRL(dadosFiltrados.reduce((a, d) => a + d.perdaReceita, 0))}</td>
-                <td className="p-3 text-right text-primary">{formatBRL(dadosFiltrados.reduce((a, d) => a + d.riscoReputacional, 0))}</td>
-                <td className="p-3 text-right text-warning">{formatBRL(dadosFiltrados.reduce((a, d) => a + d.custoRetrabalho, 0))}</td>
+                <td className="p-3 text-center">{dadosFiltrados.reduce((a, d) => a + d.casosDeRisco, 0)}</td>
                 <td className="p-3 text-right text-muted-foreground">{formatBRL(dadosFiltrados.reduce((a, d) => a + d.faturamento, 0))}</td>
                 <td className="p-3 text-right text-foreground">{formatBRL(dadosFiltrados.reduce((a, d) => a + d.total, 0))}</td>
                 <td className="p-3"></td>

@@ -376,6 +376,20 @@ export function calcularCustoOperacional(tratativa, colaborador, multiplicadorEn
   return Math.round(custoMinuto * minutosReais * 100) / 100;
 }
 
+/**
+ * Minutos de ESFORÇO de uma tratativa, derivados do custo operacional oficial
+ * (custo_operacional_reais, calculado pelo servidor com a divisão pela carga
+ * simultânea — migration 11). Custo ÷ custo do minuto da pessoa. Assim o
+ * tempo e o custo mostrados nos relatórios nunca discordam. 0 sem salário.
+ */
+export function minutosDeEsforco(tratativa, colaborador, multiplicadorEncargos = 1.6, cargaHorariaMensal = 220) {
+  const salario = sanitizeSalario(colaborador?.salario);
+  const custo = parseFloat(tratativa?.custo_operacional_reais) || 0;
+  if (!salario || !custo) return 0;
+  const custoMinuto = ((salario * multiplicadorEncargos) / cargaHorariaMensal) / 60;
+  return custo / custoMinuto;
+}
+
 // Impacto Financeiro Direto = Valor da Devolução + (Horas gastas na tratativa x Custo médio da hora da equipe)
 // custoHoraEquipe é um parâmetro configurável pelo gestor (não depende do salário individual).
 export function calcularImpactoFinanceiroDireto(tratativa, custoHoraEquipe = 0) {

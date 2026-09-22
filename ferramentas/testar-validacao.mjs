@@ -25,6 +25,7 @@ import { calculateCSATPoints, calculateCXPoints, calculateTratativaPoints, situa
 import { reaberturaDe, comReaberturaApurada, aberturasNoCiclo, cicloPagaAbertura, pontosDeTratativasNoCiclo } from '../src/lib/pontuacaoCiclo.js';
 import { extratoDoAgente } from '../src/lib/extratoPontos.js';
 import { calcularDadosConsolidados } from '../src/lib/hanseiDados.js';
+import { desfechoDaContestacao, resumoFinanceiro } from '../src/lib/relatorios/financeiro.js';
 
 let passou = 0;
 let falhou = 0;
@@ -534,6 +535,32 @@ console.log('\n== Hansei: numeros do periodo ==');
   checa('dia com 0% conta (antes sumia): 4 de 8 = 50%', String(d.csat_individual), '50');
   checa('dia reimportado nao duplica: 20 ligacoes atendidas', String(d.ligacoes_atendidas), '20');
   checa('CX agora e lida', String(d.cx_nota_media), '4.5');
+}
+
+console.log('\n== relatorio financeiro ==');
+{
+  const c = (status_resolucao_contestacao, extra = {}) => ({ tipo_tratativa: 'contestacao', status: 'encerrada', data_encerramento: '2026-08-10T15:00:00Z', valor_contestado_inicial: 1000, status_resolucao_contestacao, ...extra });
+  checa('sem acordo: perde tudo', String(desfechoDaContestacao(c('sem_acordo')).perda), '1000');
+  checa('contestou (duplicidade): perda', desfechoDaContestacao(c('contestou_pagamento_duplicidade')).grupo, 'perda');
+  checa('pagou: recuperado, nada perdido', `${desfechoDaContestacao(c('pagou')).perda}/${desfechoDaContestacao(c('pagou')).recuperado}`, '0/1000');
+  checa('cancelou: recuperado', desfechoDaContestacao(c('cancelou_contestacao')).grupo, 'recuperado');
+  checa('acordo: perde so a diferenca', String(desfechoDaContestacao(c('acordo', { valor_contestado_final: 700 })).perda), '300');
+  checa('em aberto: fora das somas', desfechoDaContestacao({ ...c('sem_acordo'), status: 'em_andamento' }).grupo, 'em_andamento');
+  checa('encerrada sem desfecho: fora', desfechoDaContestacao(c(null)).grupo, 'sem_desfecho');
+  const r = resumoFinanceiro([
+    c('sem_acordo'), c('pagou'), c('acordo', { valor_contestado_final: 700 }),
+    { ...c('sem_acordo'), status: 'em_andamento', data_encerramento: null, data_registro: '2026-08-11T12:00:00Z' },
+    { tipo_tratativa: 'reclamacao_interna', status: 'encerrada', data_encerramento: '2026-08-12T12:00:00Z', houve_devolucao_financeira: true, valor_devolvido_cliente: 50, custo_operacional_reais: 20 },
+    { tipo_tratativa: 'reclame_aqui', status: 'encerrada', data_encerramento: '2026-08-12T12:00:00Z', nota_reclame_aqui: 0, custo_operacional_reais: 10 },
+    { tipo_tratativa: 'reclamacao_interna', status: 'encerrada', excluida: true, data_encerramento: '2026-08-12T12:00:00Z', houve_devolucao_financeira: true, valor_devolvido_cliente: 999 },
+    { tipo_tratativa: 'reclamacao_interna', status: 'encerrada', data_encerramento: '2026-09-17T02:00:00Z', custo_operacional_reais: 5 },
+  ], { inicio: '2026-08-01', fim: '2026-09-16' });
+  checa('perda das contestacoes = 1000 + 300', String(r.custou.perdaContestacoes), '1300');
+  checa('recuperado = 1000 (pagou) + 700 (acordo)', String(r.recuperado), '1700');
+  checa('em andamento a parte', `${r.contestacoes.emAndamento.qtd}/${r.contestacoes.emAndamento.valor}`, '1/1000');
+  checa('devolvido sem a excluida', String(r.custou.devolvido), '50');
+  checa('16/09 as 23h (Brasilia) entra no fim 16/09', String(r.custou.custoOperacional), '35');
+  checa('risco contado, nota 0 conta', String(r.risco.qtd), '1');
 }
 
 console.log('\n== conferencia de cores (o verificador pega o que deve) ==');

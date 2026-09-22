@@ -2,11 +2,7 @@
 // Cruza dados do Portal CRC (tratativas), sistema financeiro (valores) e
 // recursos humanos (custo de hora/encargos) para calcular o impacto total.
 
-import {
-  calcularTempoEfetivo,
-  calcularCustoOperacional,
-  calcularReceitaAnualEquivalente,
-} from '@/components/utils/helpers';
+import { calcularReceitaAnualEquivalente } from '../utils/helpers.js';
 
 // ── Benchmarks globais fixos de mercado ──
 export const BENCHMARKS_GLOBAIS = {
@@ -25,54 +21,49 @@ export const PARAMETROS_PADRAO = {
   cargaHorariaMensal: 220,
 };
 
-// ── Risco reputacional estimado por tratativa ──
-// Reclame Aqui / Google Meu Negócio com baixa avaliação geram risco futuro.
-function calcularRiscoReputacional(t) {
-  let risco = 0;
+// ── Caso de risco reputacional (CONTAGEM, não dinheiro) ──
+// Decisão de Pedro em 22/09/2026: o valor em R$ que o Base44 atribuía ao
+// risco (R$ 500, 300, 200 por caso) era inventado e entrava no "impacto
+// total" como se fosse dinheiro. Agora o risco é só contado: devolve o motivo
+// quando a tratativa é um caso de risco, ou null.
+export function motivoDeRisco(t) {
+  if (t.status !== 'encerrada' && t.status !== 'aguardando_confirmacao_reabertura') return null;
   if (t.tipo_tratativa === 'reclame_aqui') {
-    const nota = parseFloat(t.nota_reclame_aqui) || 0;
-    if (nota > 0 && nota < 7) risco += 500;
-    else if (nota >= 7 && nota < 9) risco += 200;
-    if (t.voltaria_fazer_negocio === false) risco += 300;
+    const nota = t.nota_reclame_aqui;
+    if (nota !== null && nota !== undefined && nota !== '' && Number(nota) < 7) return 'Reclame Aqui com nota abaixo de 7';
+    if (t.voltaria_fazer_negocio === false && nota !== null && nota !== undefined && nota !== '') return 'Cliente não voltaria a fazer negócio';
   }
-  if (t.tipo_tratativa === 'google_meu_negocio') {
-    if (!t.reavaliacao_positiva_google) risco += 300;
-    if (!t.exclusao_avaliacao_negativa_google) risco += 200;
+  if (t.tipo_tratativa === 'google_meu_negocio'
+    && !t.reavaliacao_positiva_google && !t.exclusao_avaliacao_negativa_google && !t.inativada_na_plataforma) {
+    return 'Avaliação negativa no Google sem reversão';
   }
-  return risco;
+  return null;
 }
 
-// ── Custo de retrabalho (reabertura = trabalho duplicado) ──
-function calcularCustoRetrabalho(t, custoHora) {
-  if (!t.houve_reabertura) return 0;
-  const minutos = calcularTempoEfetivo(t);
-  return (minutos / 60) * (parseFloat(custoHora) || 0) * 0.5;
-}
-
-// ── Impacto financeiro total de uma tratativa ──
-// Fórmula: valor devolvido + custo operacional + perda de receita + risco reputacional + retrabalho
-export function calcularImpactoTotal(t, colaborador, params) {
-  const p = { ...PARAMETROS_PADRAO, ...params };
+// ── Impacto financeiro de uma tratativa (só dinheiro de verdade) ──
+// devolvido ao cliente + custo operacional + perda de receita informada.
+// O custo operacional é o OFICIAL, calculado pelo servidor com a divisão
+// pela carga simultânea (migration 11, decisoes-de-regra.md, 15/09/2026) —
+// a tela não recalcula mais por conta própria (dava R$ 882 mil contra
+// R$ 197 mil). O "custo de retrabalho" saiu: somava de novo metade das
+// horas da mesma tratativa, que já estão no custo operacional.
+export function calcularImpactoTotal(t) {
   const valorDevolvido = parseFloat(t.valor_devolvido_cliente) || 0;
   const perdaReceita = parseFloat(t.valor_perda_receita) || 0;
-  const riscoReputacional = calcularRiscoReputacional(t);
-  const custoRetrabalho = calcularCustoRetrabalho(t, p.custoHora);
-
-  let custoOperacional;
-  if (colaborador && colaborador.salario) {
-    custoOperacional = calcularCustoOperacional(t, colaborador, p.multiplicadorEncargos, p.cargaHorariaMensal);
-  } else {
-    const minutos = calcularTempoEfetivo(t);
-    custoOperacional = (minutos / 60) * (parseFloat(p.custoHora) || 0);
-  }
-
-  const total = valorDevolvido + custoOperacional + perdaReceita + riscoReputacional + custoRetrabalho;
-  return { valorDevolvido, custoOperacional, perdaReceita, riscoReputacional, custoRetrabalho, total };
+  const custoOperacional = parseFloat(t.custo_operacional_reais) || 0;
+  const risco = motivoDeRisco(t);
+  return {
+    valorDevolvido,
+    custoOperacional,
+    perdaReceita,
+    casoDeRisco: risco ? 1 : 0,
+    motivoDeRisco: risco,
+    total: valorDevolvido + custoOperacional + perdaReceita,
+  };
 }
 
 // ── Agrupa impacto por qualquer dimensão (plano, agente, segmento, motivo) ──
 export function agruparImpactoPorDimensao(tratativas, colaboradores, params, dimKey, labelMap) {
-  const colabMap = (colaboradores || []).reduce((acc, c) => { acc[c.id] = c; return acc; }, {});
   const mapa = {};
 
   tratativas.forEach(t => {
@@ -81,16 +72,15 @@ export function agruparImpactoPorDimensao(tratativas, colaboradores, params, dim
     if (!mapa[key]) {
       mapa[key] = {
         casos: 0, valorDevolvido: 0, custoOperacional: 0, perdaReceita: 0,
-        riscoReputacional: 0, custoRetrabalho: 0, total: 0, faturamento: 0, churns: 0,
+        casosDeRisco: 0, total: 0, faturamento: 0, churns: 0,
       };
     }
-    const imp = calcularImpactoTotal(t, colabMap[t.agente_responsavel_id], params);
+    const imp = calcularImpactoTotal(t);
     mapa[key].casos++;
     mapa[key].valorDevolvido += imp.valorDevolvido;
     mapa[key].custoOperacional += imp.custoOperacional;
     mapa[key].perdaReceita += imp.perdaReceita;
-    mapa[key].riscoReputacional += imp.riscoReputacional;
-    mapa[key].custoRetrabalho += imp.custoRetrabalho;
+    mapa[key].casosDeRisco += imp.casoDeRisco;
     mapa[key].total += imp.total;
     mapa[key].faturamento += calcularReceitaAnualEquivalente(t);
     if (t.teve_churn) mapa[key].churns++;
@@ -102,8 +92,7 @@ export function agruparImpactoPorDimensao(tratativas, colaboradores, params, dim
 }
 
 // ── Agrupa impacto por mês (para tendência e projeção) ──
-export function agruparImpactoPorMes(tratativas, colaboradores, params) {
-  const colabMap = (colaboradores || []).reduce((acc, c) => { acc[c.id] = c; return acc; }, {});
+export function agruparImpactoPorMes(tratativas) {
   const mapa = {};
 
   tratativas.forEach(t => {
@@ -111,7 +100,7 @@ export function agruparImpactoPorMes(tratativas, colaboradores, params) {
     if (!dataRef) return;
     const mes = String(dataRef).slice(0, 7); // YYYY-MM
     if (!mapa[mes]) mapa[mes] = { mes, total: 0, casos: 0, valorDevolvido: 0 };
-    const imp = calcularImpactoTotal(t, colabMap[t.agente_responsavel_id], params);
+    const imp = calcularImpactoTotal(t);
     mapa[mes].total += imp.total;
     mapa[mes].valorDevolvido += imp.valorDevolvido;
     mapa[mes].casos++;
@@ -198,7 +187,7 @@ export function gerarPerguntasEstrategicas(tratativas, colaboradores, params) {
     respostas.push({
       pergunta: 'Qual motivo/produto apresenta maior risco financeiro?',
       resposta: `${pior.key} — impacto R$ ${pior.total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} em ${pior.casos} caso(s)`,
-      detalhe: `Risco reputacional R$ ${pior.riscoReputacional.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} | Retrabalho R$ ${pior.custoRetrabalho.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
+      detalhe: `${pior.casosDeRisco} caso(s) de risco reputacional (avaliação negativa sem reversão)`,
       prioridade: 'alta',
     });
   }

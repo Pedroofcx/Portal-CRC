@@ -5,7 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Printer, ShieldAlert, ChevronDown, ChevronRight } from 'lucide-react';
-import { calcularTempoEfetivo, calcularCustoOperacional, formatBRL, construirContextoComercialIA, calcularReceitaMensalEquivalente, calcularReceitaAnualEquivalente } from '@/components/utils/helpers';
+import { minutosDeEsforco, formatBRL, construirContextoComercialIA, calcularReceitaMensalEquivalente, calcularReceitaAnualEquivalente } from '@/components/utils/helpers';
 
 const isEncerradaEfetiva = (t) => !t.excluida && (t.status === 'encerrada' || t.status === 'aguardando_confirmacao_reabertura');
 const MINUTOS_POR_FTE = 13200;
@@ -47,14 +47,11 @@ export default function RelatorioJornadaDiretoria() {
       const etapa = t.etapa_jornada_nome || 'Não definida';
       if (!mapa[etapa]) mapa[etapa] = { volumetria: 0, custoOperacional: 0, devolucaoCliente: 0, perdaReceita: 0, minutosEfetivos: 0 };
       mapa[etapa].volumetria += 1;
-      // Custo operacional recalculado dinamicamente com o salário atual do
-      // colaborador responsável — nunca lê o campo estático do banco.
-      mapa[etapa].custoOperacional += isGestor
-        ? calcularCustoOperacional(t, colaboradoresPorId[t.agente_responsavel_id])
-        : 0;
+      // Custo operacional OFICIAL (servidor, dividido pela carga simultânea).
+      mapa[etapa].custoOperacional += isGestor ? (parseFloat(t.custo_operacional_reais) || 0) : 0;
       mapa[etapa].devolucaoCliente += parseFloat(t.valor_devolvido_cliente) || 0;
       mapa[etapa].perdaReceita += parseFloat(t.valor_perda_receita) || 0;
-      mapa[etapa].minutosEfetivos += calcularTempoEfetivo(t);
+      mapa[etapa].minutosEfetivos += isGestor ? minutosDeEsforco(t, colaboradoresPorId[t.agente_responsavel_id]) : 0;
     });
     return Object.entries(mapa)
       .map(([etapa, d]) => ({
@@ -68,9 +65,6 @@ export default function RelatorioJornadaDiretoria() {
 
   // Detalhamento de causa raiz (motivos) por etapa
   const causaRaizPorEtapa = useMemo(() => {
-    const colaboradoresPorId = isGestor
-      ? colaboradores.reduce((acc, c) => { acc[c.id] = c; return acc; }, {})
-      : {};
 
     const mapa = {};
     tratativas.filter(isEncerradaEfetiva).forEach((t) => {
@@ -78,9 +72,7 @@ export default function RelatorioJornadaDiretoria() {
       if (!t.motivo_id) return;
       if (!mapa[etapa]) mapa[etapa] = {};
       if (!mapa[etapa][t.motivo_id]) mapa[etapa][t.motivo_id] = { custo: 0, casos: 0 };
-      const custoOperacionalDinamico = isGestor
-        ? calcularCustoOperacional(t, colaboradoresPorId[t.agente_responsavel_id])
-        : 0;
+      const custoOperacionalDinamico = isGestor ? (parseFloat(t.custo_operacional_reais) || 0) : 0;
       mapa[etapa][t.motivo_id].custo +=
         custoOperacionalDinamico +
         (parseFloat(t.valor_devolvido_cliente) || 0) +
@@ -106,16 +98,13 @@ export default function RelatorioJornadaDiretoria() {
   // além de Receita Mensal/Anual envolvida por categoria de reclamação (tipo_tratativa).
   const analiseComercial = useMemo(() => {
     const encerradas = tratativas.filter(isEncerradaEfetiva);
-    const colaboradoresPorId = isGestor
-      ? colaboradores.reduce((acc, c) => { acc[c.id] = c; return acc; }, {})
-      : {};
 
     const porPlano = {};
     const porSegmento = {};
     const receitaPorCategoria = {};
 
     encerradas.forEach(t => {
-      const custoOp = isGestor ? calcularCustoOperacional(t, colaboradoresPorId[t.agente_responsavel_id]) : 0;
+      const custoOp = isGestor ? (parseFloat(t.custo_operacional_reais) || 0) : 0;
       const impacto = custoOp + (parseFloat(t.valor_devolvido_cliente) || 0) + (parseFloat(t.valor_perda_receita) || 0);
 
       // Receitas equivalentes calculadas dinamicamente (modalidade + valor contratado)
