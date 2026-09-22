@@ -2,7 +2,7 @@ import db from '@/api/db';
 import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
-import { formatDateSP, tipoTratativaLabels, statusLabels, calculateTratativaPoints, calcularDiasRestantesReabertura, formatBRL } from '@/components/utils/helpers';
+import { formatDateSP, tipoTratativaLabels, statusLabels, calculateTratativaPoints, calcularDiasRestantesReabertura, formatBRL, situacaoReplicavel } from '@/components/utils/helpers';
 import { CurrencyInput } from '@/components/ui/CurrencyInput';
 import PageHeader from '@/components/ui/PageHeader';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
@@ -1340,7 +1340,7 @@ export default function TratativaDetalhe({ idExterno = null, embutido = false })
           )}
 
           {/* Solução (se encerrada) */}
-          {isEncerrada && tratativa.descricao_solucao && (
+          {(isEncerrada || isAguardandoReabertura) && tratativa.descricao_solucao && (
             <Card className="border-0 shadow-sm">
               <CardHeader>
                 <CardTitle>Solução Aplicada</CardTitle>
@@ -1348,7 +1348,14 @@ export default function TratativaDetalhe({ idExterno = null, embutido = false })
               <CardContent>
                 <p className="text-foreground">{tratativa.descricao_solucao}</p>
                 {tratativa.solucao_replicavel && (
-                  <Badge className="mt-3 bg-info-soft text-primary">Solução Replicável</Badge>
+                  <Badge className="mt-3 bg-info-soft text-primary">
+                    Solução Replicável{{ pendente: ' · aguardando aprovação do gestor', aprovada: ' · aprovada (+0,5)', contestada: ' · contestada' }[situacaoReplicavel(tratativa)] ?? ''}
+                  </Badge>
+                )}
+                {tratativa.solucao_replicavel_parecer && (
+                  <p className="mt-2 text-sm text-muted-foreground">
+                    <span className="font-medium text-foreground">Parecer do gestor:</span> {tratativa.solucao_replicavel_parecer}
+                  </p>
                 )}
               </CardContent>
             </Card>

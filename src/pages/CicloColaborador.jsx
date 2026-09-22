@@ -14,6 +14,7 @@ import ListaResumida from '@/components/ui/ListaResumida';
 import IconeExigencia from '@/components/ciclo/IconeExigencia';
 import { useCicloEquipe } from '@/hooks/useCicloEquipe';
 import { pontosDaFaixa, proximaFaixa } from '@/lib/faixasIndicadores';
+import { detalheCsat } from '@/lib/indicadoresCiclo';
 import { prazoDaTratativa, descreverPrazo } from '@/lib/prazoSla';
 import { acompanhamentoDa, ordenarPorPrazo, situacaoDoPrazo } from '@/lib/cicloEquipe';
 import { primeiroNome } from '@/lib/nomes';
@@ -171,14 +172,13 @@ export default function CicloColaborador() {
   const volumeMinimo = Number(pessoa.avaliacoes.find((a) => a.exigencia.tipo_validacao === 'volume_minimo_canal')?.exigencia.volume_minimo_canal ?? 4);
   const cumpridas = pessoa.avaliacoes.filter((a) => a.status === 'ok').length;
   const { indicadores } = pessoa;
-  const mesPrevia = indicadores.csat?.mes || indicadores.performance?.mes || indicadores.cx?.mes;
 
   const linhaIndicador = (chave, rotulo, dado, formato) => {
     if (!dado) return <Linha key={chave} rotulo={rotulo} detalhe="aguardando apuração" valor="—" />;
     const prox = proximaFaixa(chave, dado.valor);
     const detalhe = [
       formato(dado.valor),
-      chave === 'csat' ? dado.canal : null,
+      chave === 'csat' ? detalheCsat(dado) : null,
       prox ? `${formato(prox.limiar)} vale +${prox.ganho}` : 'faixa máxima',
     ].filter(Boolean).join(' · ');
     return <Linha key={chave} rotulo={rotulo} detalhe={detalhe} valor={pontosDaFaixa(chave, dado.valor)} />;
@@ -229,6 +229,7 @@ export default function CicloColaborador() {
                 valor={fmt(porCanal[c].pontos)}
               />
             ))}
+            <Linha rotulo="Indicadores (CSAT, performance e CX)" valor={fmt(pessoa.pontosIndicadores ?? 0)} />
             <Linha
               rotulo="Tratativas abertas no ciclo"
               detalhe={`${pessoa.aberturas?.length ?? 0} × 0,5`}
@@ -345,7 +346,7 @@ export default function CicloColaborador() {
 
         <div className="space-y-6">
           {/* Indicadores */}
-          <Cartao titulo={`Indicadores — valem até 10 cada${mesPrevia ? ` · prévia de ${mesPrevia}` : ''}`}>
+          <Cartao titulo="Indicadores do ciclo — valem até 10 cada">
             <div className="divide-y divide-border">
               {linhaIndicador('csat', 'CSAT', indicadores.csat, pct)}
               {linhaIndicador('performance', 'Performance', indicadores.performance, pct)}
@@ -462,7 +463,7 @@ export default function CicloColaborador() {
       />
 
       <p className="text-xs text-muted-foreground">
-        Pontos = tratativas encerradas no ciclo + 0,5 por tratativa aberta no ciclo + bônus do gestor, a mesma conta do ranking e do “Meu ciclo” do operador.
+        Pontos = tratativas encerradas no ciclo + 0,5 por tratativa aberta no ciclo + indicadores + bônus do gestor, a mesma conta do ranking e do “Meu ciclo” do operador.
       </p>
     </div>
   );

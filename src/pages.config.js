@@ -49,6 +49,7 @@
  */
 import AnalyticsPreditivo from './pages/AnalyticsPreditivo';
 import AuditoriaPontuacao from './pages/AuditoriaPontuacao';
+import SolucoesReplicaveis from './pages/SolucoesReplicaveis';
 import Apuracao from './pages/Apuracao';
 import Avisos from './pages/Avisos';
 import Cadastro from './pages/Cadastro';
@@ -88,6 +89,7 @@ import __Layout from './Layout.jsx';
 export const PAGES = {
     "AnalyticsPreditivo": AnalyticsPreditivo,
     "AuditoriaPontuacao": AuditoriaPontuacao,
+    "SolucoesReplicaveis": SolucoesReplicaveis,
     "Apuracao": Apuracao,
     "Avisos": Avisos,
     "Cadastro": Cadastro,

@@ -164,6 +164,17 @@
     "solucao_replicavel_valida": {
       "type": "boolean"
     },
+    "solucao_replicavel_parecer": {
+      "type": "string",
+      "description": "Parecer do gestor ao aprovar ou contestar a solução replicável"
+    },
+    "solucao_replicavel_auditada_por_nome": {
+      "type": "string"
+    },
+    "solucao_replicavel_auditada_em": {
+      "type": "string",
+      "format": "date-time"
+    },
     "descricao_solucao": {
       "type": "string"
     },

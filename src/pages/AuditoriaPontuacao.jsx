@@ -74,7 +74,7 @@ export default function AuditoriaPontuacao() {
       let totalPontos = 0;
       const linhas = tratativasDoCiclo.map(t => {
         // Reabertura apurada pelos dados, como no ranking.
-        const { pontos, detalhes } = calculateTratativaPoints(comReaberturaApurada(t, todasTratativas));
+        const { pontos, detalhes } = calculateTratativaPoints(comReaberturaApurada(t, todasTratativas), { ciclo: cicloAtivo });
         totalPontos += pontos;
         return { tratativa: t, pontos, detalhes };
       }).sort((a, b) => b.pontos - a.pontos);

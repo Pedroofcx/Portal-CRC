@@ -21,7 +21,7 @@ import { formatDateSP, dataDoCalendario } from '../src/components/utils/helpers.
 import { getMesReferencia } from '../src/components/ferramentas/apoio/constants.js';
 import { montarBonus, somaDoBonus, ciclosEmOrdem } from '../src/lib/bonusManual.js';
 import { vencidasDaEquipe, situacaoDoPrazo, ordenarPorPrazo, registrosNoCiclo, percentualNoSla, acompanhamentoDa } from '../src/lib/cicloEquipe.js';
-import { calculateCSATPoints, calculateCXPoints, calculateTratativaPoints } from '../src/components/utils/helpers.js';
+import { calculateCSATPoints, calculateCXPoints, calculateTratativaPoints, situacaoReplicavel } from '../src/components/utils/helpers.js';
 import { reaberturaDe, comReaberturaApurada, aberturasNoCiclo, cicloPagaAbertura, pontosDeTratativasNoCiclo } from '../src/lib/pontuacaoCiclo.js';
 
 let passou = 0;
@@ -223,24 +223,31 @@ checa('um dia no singular', descreverPrazo(emH(30), ag), '1 dia');
 checa('varios dias', descreverPrazo(emH(72), ag), '3 dias');
 checa('metade do prazo consumida', String(consumoDoPrazo({ data_registro: emH(-12).toISOString(), sla_atribuido: 24 }, ag)), '0.5');
 
-console.log('\n== indicadores do ciclo (previa) ==');
-const cicloT = { data_inicio: '2026-06-16', data_fim: '2026-09-16' };
-const apur = [
-  { tipo_apuracao: 'telefone', periodo_inicio: '2026-07-01', periodo_fim: '2026-07-31', canal_telefone: { csat: 90, performance: 96 } },
-  { tipo_apuracao: 'telefone', periodo_inicio: '2026-08-01', periodo_fim: '2026-08-31', canal_telefone: { csat: 93, performance: 101 } },
-  { tipo_apuracao: 'chat', periodo_inicio: '2026-08-01', periodo_fim: '2026-08-31', canal_chat: { csat: 70 } },
-  { tipo_apuracao: 'cx', periodo_inicio: '2026-08-01', periodo_fim: '2026-08-31', avaliacao_cx: { nota_media: 4.4 } },
-  { tipo_apuracao: 'telefone', periodo_inicio: '2026-05-01', periodo_fim: '2026-05-31', canal_telefone: { csat: 99, performance: 110 } },
-];
-const ind = indicadoresDoCiclo(apur, cicloT);
-checa('usa o ultimo mes do ciclo', String(ind.csat.valor), '93');
-checa('prefere o CSAT do telefone', ind.csat.canal, 'telefone');
-checa('diz de qual mes veio', ind.csat.mes, 'agosto');
-checa('performance do ultimo mes', String(ind.performance.valor), '101');
-checa('CX do ultimo mes', String(ind.cx.valor), '4.4');
-checa('mes fora do ciclo nao entra', String(indicadoresDoCiclo([apur[4]], cicloT).csat), 'null');
-checa('sem telefone usa o chat', indicadoresDoCiclo([apur[2]], cicloT).csat.canal, 'chat');
-checa('sem ciclo nao ha indicador', String(indicadoresDoCiclo(apur, null).cx), 'null');
+console.log('\n== indicadores do ciclo (ciclo inteiro, dia a dia) ==');
+{
+  const cicloT = { data_inicio: '2026-06-16', data_fim: '2026-09-16' };
+  const tel = (data, lig, at, av, pos) => ({ data, telefone: { total_ligacoes: lig, total_atendidas: at, total_avaliadas: av, total_positivas: pos } });
+  const chat = (data, av, pos) => ({ data, chat: { total_avaliados: av, total_positivos: pos } });
+  const apur = [
+    // julho: importado duas vezes com o dia 10 repetido — vale o mais recente
+    { id: 'a', tipo_apuracao: 'telefone', created_date: '2026-07-20', dados_por_data: [tel('2026-07-10', 10, 10, 10, 9), tel('2026-07-11', 10, 9, 10, 10)] },
+    { id: 'b', tipo_apuracao: 'telefone', created_date: '2026-07-05', dados_por_data: [tel('2026-07-10', 99, 0, 99, 0)] },
+    // dia fora do ciclo nao entra
+    { id: 'c', tipo_apuracao: 'telefone', created_date: '2026-06-20', dados_por_data: [tel('2026-06-15', 50, 0, 50, 0)] },
+    { id: 'd', tipo_apuracao: 'chat', created_date: '2026-08-01', dados_por_data: [chat('2026-07-30', 10, 8)] },
+    { id: 'e', tipo_apuracao: 'cx', periodo_inicio: '2026-08-01', periodo_fim: '2026-08-31', created_date: '2026-09-01', historico_detalhado: [{ data: '2026-08-02', media: 4.4, observacao: 't1' }, { data: '2026-08-03', media: 4.6, observacao: 't2' }] },
+    { id: 'f', tipo_apuracao: 'cx', periodo_inicio: '2026-09-01', periodo_fim: '2026-09-30', created_date: '2026-10-01', historico_detalhado: [{ data: '2026-09-02', media: 1, observacao: 't3' }] },
+  ];
+  const ind = indicadoresDoCiclo(apur, cicloT);
+  checa('CSAT telefone: dias do ciclo, sem duplicar', String(ind.csat.telefone), '95');
+  checa('CSAT = (telefone + chat) / 2', String(ind.csat.valor), '87.5');
+  checa('performance = atendidas / ligacoes', String(ind.performance.valor), '95');
+  checa('CX = media das avaliacoes; setembro fica para o Ciclo 3', String(ind.cx.valor), '4.5');
+  checa('pontos: CSAT 87,5 = 7, performance 95 = 7, CX 4,5 = 10', `${ind.pontos.csat}/${ind.pontos.performance}/${ind.pontos.cx}/${ind.pontos.total}`, '7/7/10/24');
+  checa('so um canal com avaliacao: usa esse canal', String(indicadoresDoCiclo([apur[3]], cicloT).csat.valor), '80');
+  checa('sem apuracao no ciclo: aguardando e 0 ponto', `${indicadoresDoCiclo([apur[2]], cicloT).csat}/${indicadoresDoCiclo([apur[2]], cicloT).pontos.total}`, 'null/0');
+  checa('sem ciclo nao ha indicador', String(indicadoresDoCiclo(apur, null).cx), 'null');
+}
 
 console.log('\n== tela do gestor: vencidas, registros e acompanhamento ==');
 {
@@ -476,6 +483,19 @@ console.log('\n== reabertura apurada pelos dados e 0,5 por abertura ==');
   const mapa = pontosDeTratativasNoCiclo([reg('2026-07-01'), { ...reg('2026-07-02'), status: 'encerrada', data_encerramento: '2026-07-03T12:00:00.000Z', encerrado_no_sla: true, status_reabertura: 'nao_houve' }], ciclo2,
     { encerrada: (t) => t.status === 'encerrada', noCiclo: (t, c) => t.data_encerramento >= c.data_inicio && t.data_encerramento <= `${c.data_fim}T23:59:59` }, depois);
   checa('abertura + encerramento somam para o agente', `${mapa.get('ana').pontosAbertura}+${mapa.get('ana').pontosEncerramento}`, '1+2');
+}
+
+console.log('\n== solucao replicavel: do Ciclo 2 em diante, so com aprovacao ==');
+{
+  const ri = (extra) => ({ tipo_tratativa: 'reclamacao_interna', solucao_replicavel: true, data_encerramento: '2026-07-10T12:00:00.000Z', ...extra });
+  const pts = (t) => String(calculateTratativaPoints(t).pontos);
+  checa('Ciclo 2 pendente: nao conta', pts(ri()), '0');
+  checa('Ciclo 2 aprovada: conta 0,5', pts(ri({ solucao_replicavel_valida: true, solucao_replicavel_auditada: true })), '0.5');
+  checa('Ciclo 2 contestada: nao conta', pts(ri({ solucao_replicavel_valida: false, solucao_replicavel_auditada: true })), '0');
+  checa('Ciclo 1 (antes de 16/06): a marcacao basta', pts(ri({ data_encerramento: '2026-05-10T12:00:00.000Z' })), '0.5');
+  checa('situacao: pendente', situacaoReplicavel(ri()), 'pendente');
+  checa('situacao: contestada', situacaoReplicavel(ri({ solucao_replicavel_valida: false, solucao_replicavel_auditada: true })), 'contestada');
+  checa('outro tipo nao entra na fila', String(situacaoReplicavel(ri({ tipo_tratativa: 'reclame_aqui' }))), 'null');
 }
 
 console.log('\n== conferencia de cores (o verificador pega o que deve) ==');

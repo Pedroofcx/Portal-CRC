@@ -109,8 +109,35 @@ export function inativadaPontua(tratativa) {
   return new Date(tratativa.data_encerramento) >= INATIVADAS_PONTUAM_DESDE;
 }
 
+/**
+ * Solução replicável: do Ciclo 2 em diante (encerradas desde 16/06/2026), o
+ * +0,5 só conta depois da aprovação do gestor (decisão de 22/09/2026). A mesma
+ * data está em pontos_da_tratativa (migration 20).
+ */
+export const REPLICAVEL_EXIGE_APROVACAO_DESDE = new Date('2026-06-16T00:00:00-03:00');
+
+/**
+ * Com o ciclo que está sendo calculado, vale o ciclo (Ciclo 2 em diante) —
+ * assim o dia 16/06, que pertence aos dois ciclos, não muda o Ciclo 1. Sem
+ * ciclo (fila de aprovação, detalhe da tratativa), vale a data.
+ */
+export function replicavelExigeAprovacao(tratativa, ciclo = null) {
+  if (ciclo?.data_inicio) return ciclo.data_inicio >= '2026-06-16';
+  return !!tratativa?.data_encerramento && new Date(tratativa.data_encerramento) >= REPLICAVEL_EXIGE_APROVACAO_DESDE;
+}
+
+/** 'pendente' | 'aprovada' | 'contestada' | null (não marcada, ou Ciclo 1). */
+export function situacaoReplicavel(tratativa) {
+  // O meio ponto só existe na reclamação interna.
+  if (tratativa?.tipo_tratativa !== 'reclamacao_interna') return null;
+  if (!tratativa.solucao_replicavel || !replicavelExigeAprovacao(tratativa)) return null;
+  if (tratativa.solucao_replicavel_valida === true) return 'aprovada';
+  if (tratativa.solucao_replicavel_auditada && tratativa.solucao_replicavel_valida === false) return 'contestada';
+  return 'pendente';
+}
+
 // Calcular pontuação por tipo de tratativa
-export function calculateTratativaPoints(tratativa) {
+export function calculateTratativaPoints(tratativa, { ciclo = null } = {}) {
   let pontos = 0;
   const detalhes = [];
 
@@ -125,9 +152,12 @@ export function calculateTratativaPoints(tratativa) {
       pontos += 1;
       detalhes.push({ tipo: 'Sem reabertura em 7 dias', pontos: 1 });
     }
-    if (tratativa.solucao_replicavel) {
+    // Do Ciclo 2 em diante, o meio ponto só conta depois que o gestor
+    // APROVA (tela Soluções replicáveis). No Ciclo 1 basta a marcação.
+    const exigeAprovacao = replicavelExigeAprovacao(tratativa, ciclo);
+    if (tratativa.solucao_replicavel && (!exigeAprovacao || tratativa.solucao_replicavel_valida === true)) {
       pontos += 0.5;
-      detalhes.push({ tipo: 'Solução replicável', pontos: 0.5 });
+      detalhes.push({ tipo: exigeAprovacao ? 'Solução replicável (aprovada)' : 'Solução replicável', pontos: 0.5 });
     }
   }
 

@@ -5,7 +5,7 @@ import { tipoTratativaLabels } from '@/components/utils/helpers';
 import { useRankingCiclo, posicaoNoRanking } from '@/hooks/useRankingCiclo';
 import { pontosDaFaixa, proximaFaixa } from '@/lib/faixasIndicadores';
 import { avaliarExigencia } from '@/lib/elegibilidade';
-import { indicadoresDoCiclo } from '@/lib/indicadoresCiclo';
+import { indicadoresDoCiclo, detalheCsat } from '@/lib/indicadoresCiclo';
 import { pontosPorSemana, fimDoRitmo } from '@/lib/ritmoSemanal';
 import IconeExigencia from '@/components/ciclo/IconeExigencia';
 import { registrosNoCiclo } from '@/lib/cicloEquipe';
@@ -68,13 +68,14 @@ export default function PainelMeuCiclo({
 }) {
   const agora = useMemo(() => new Date(), []);
 
-  // Apurações só desta pessoa: a lista geral do Dashboard traz as 20 mais
-  // recentes de TODO MUNDO, e as dela podiam simplesmente não vir.
+  // Todas as apurações (a mesma busca do ranking): o ciclo inteiro, não os
+  // últimos meses.
   const { data: apuracoes = [] } = useQuery({
-    queryKey: ['apuracoes-colaborador', colaborador?.id],
-    queryFn: () => db.entities.Apuracao.filter({ colaborador_id: colaborador.id }, '-periodo_fim', 24),
+    queryKey: ['apuracoes-equipe'],
+    queryFn: () => db.entities.Apuracao.list('-periodo_fim'),
     enabled: Boolean(colaborador?.id),
     staleTime: 120000,
+    refetchOnWindowFocus: false,
   });
 
   const { ranking } = useRankingCiclo();
@@ -98,7 +99,10 @@ export default function PainelMeuCiclo({
   }, [detalhamentoPontos]);
   const aberturas = useMemo(() => detalhamentoPontos.filter((d) => d.abertura).length, [detalhamentoPontos]);
 
-  const indicadores = useMemo(() => indicadoresDoCiclo(apuracoes, cicloAtivo), [apuracoes, cicloAtivo]);
+  const indicadores = useMemo(
+    () => indicadoresDoCiclo(apuracoes.filter((a) => a.colaborador_id === colaborador?.id), cicloAtivo),
+    [apuracoes, colaborador?.id, cicloAtivo],
+  );
 
   // Registros por canal no ciclo: conta pelo REGISTRO (data_registro) — a
   // mesma conta da página do gestor (src/lib/cicloEquipe.js).
@@ -133,14 +137,13 @@ export default function PainelMeuCiclo({
     const prox = proximaFaixa(chave, dado.valor);
     const detalhe = [
       formato(dado.valor),
-      chave === 'csat' ? dado.canal : null,
+      chave === 'csat' ? detalheCsat(dado) : null,
       prox ? `${formato(prox.limiar)} vale +${prox.ganho}` : 'faixa máxima',
     ].filter(Boolean).join(' · ');
     return <Linha key={chave} rotulo={rotulo} detalhe={detalhe} valor={pontosDaFaixa(chave, dado.valor)} />;
   };
   const pct = (v) => `${fmt(v)}%`;
   const nota = (v) => Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 2 });
-  const mesPrevia = indicadores.csat?.mes || indicadores.performance?.mes || indicadores.cx?.mes;
 
   return (
     <section className="grid gap-6 rounded-xl border border-border bg-card p-5 lg:grid-cols-[1fr_1.3fr_1fr]">
@@ -196,7 +199,7 @@ export default function PainelMeuCiclo({
           {aberturas > 0 && <Linha rotulo="Tratativas abertas" detalhe={`${aberturas} × 0,5`} valor={fmt(aberturas * 0.5)} />}
           {bonusManual > 0 && <Linha rotulo="Bônus lançado pelo gestor" valor={fmt(bonusManual)} />}
         </Grupo>
-        <Grupo titulo={`Indicadores — valem até 10 cada${mesPrevia ? ` · prévia de ${mesPrevia}` : ''}`}>
+        <Grupo titulo="Indicadores do ciclo — valem até 10 cada">
           {linhaIndicador('csat', 'CSAT', indicadores.csat, pct)}
           {linhaIndicador('performance', 'Performance', indicadores.performance, pct)}
           {linhaIndicador('cx', 'Avaliação CX', indicadores.cx, nota)}

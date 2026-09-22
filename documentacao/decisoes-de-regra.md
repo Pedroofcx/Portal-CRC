@@ -273,3 +273,34 @@ o informativo.
 usado pelo ranking, pelo "Meu ciclo", pela Auditoria de Pontuação e pelo
 detalhe da tratativa. `calculateTratativaPoints` continua olhando uma
 tratativa só.
+
+---
+
+## Solução replicável só com aprovação; indicadores entram no total (22/09/2026)
+
+**Decisões (Pedro):**
+
+1. **Solução replicável.** Do Ciclo 2 em diante, o +0,5 só conta depois que o
+   gestor **aprova**, uma por uma, na tela **Soluções replicáveis** (Admin).
+   Contestar exige parecer, que o agente vê na tratativa. Só o gestor grava a
+   decisão (migration 20). No Ciclo 1 a marcação do agente continua bastando.
+2. **Indicadores entram no total**, do Ciclo 2 em diante:
+   - **CSAT** = (CSAT do telefone + CSAT do chat) ÷ 2, cada canal no ciclo
+     inteiro (positivas ÷ avaliadas). Canal sem nenhuma avaliação fica fora da
+     média, para não punir quem não atendeu por ele;
+   - **Performance** = ligações atendidas (não abandonadas) ÷ ligações;
+   - **Avaliação CX** = média de todas as avaliações do ciclo.
+   Faixas de pontos: `src/lib/faixasIndicadores.js`.
+
+**Como o ciclo é apurado.** Telefone e chat são guardados dia a dia, então o
+ciclo soma exatamente os dias dele; um dia importado duas vezes vale a
+importação mais recente (havia sobreposição em abril). A avaliação CX é por mês
+de apuração e o mês entra no ciclo em que termina.
+
+**"Do Ciclo 2 em diante" é pelo ciclo, não pela data.** O dia 16/06 pertence
+ao Ciclo 1 e ao Ciclo 2; decidir pela data mudaria o Ciclo 1 nesse dia.
+Conferido: o Ciclo 1 ficou idêntico ao anterior.
+
+**Onde vive:** `src/lib/indicadoresCiclo.js`, `situacaoReplicavel` e
+`replicavelExigeAprovacao` em `helpers.js`, `src/pages/SolucoesReplicaveis.jsx`,
+`supabase/migrations/20_replicaveis_e_regras_de_pontos.sql`.

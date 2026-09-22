@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { tratativaNosCiclo } from '@/hooks/usePontuacaoAgente';
 import { STATUS_ENCERRADOS, somaDoBonus } from '@/lib/bonusManual';
 import { pontosDeTratativasNoCiclo } from '@/lib/pontuacaoCiclo';
+import { indicadoresDoCiclo } from '@/lib/indicadoresCiclo';
 
 /**
  * Ranking dos agentes num ciclo — o ativo, ou um já encerrado (histórico).
@@ -14,7 +15,8 @@ import { pontosDeTratativasNoCiclo } from '@/lib/pontuacaoCiclo';
  *
  * Pontos = tratativas encerradas no ciclo (calculateTratativaPoints, com a
  * reabertura apurada pelos dados) + 0,5 por tratativa aberta no ciclo (do
- * Ciclo 2 em diante) + bônus manual que o gestor lança para o ciclo. As
+ * Ciclo 2 em diante) + indicadores (CSAT, performance e avaliação CX, até 10
+ * cada, src/lib/indicadoresCiclo.js) + bônus manual que o gestor lança. As
  * regras que cruzam tratativas moram em src/lib/pontuacaoCiclo.js.
  *
  * Quem entra: os agentes ativos. Num ciclo que não é o ativo, entra também
@@ -57,6 +59,14 @@ export function useRankingCiclo(cicloId = null) {
     refetchOnWindowFocus: false,
   });
 
+  // Apurações de toda a equipe (todas, sem limite): os indicadores entram no total.
+  const { data: apuracoes = [] } = useQuery({
+    queryKey: ['apuracoes-equipe'],
+    queryFn: () => db.entities.Apuracao.list('-periodo_fim'),
+    staleTime: 120000,
+    refetchOnWindowFocus: false,
+  });
+
   const ranking = useMemo(() => {
     if (!ciclo) return [];
     const porAgente = pontosDeTratativasNoCiclo(todasTratativas, ciclo, {
@@ -75,6 +85,7 @@ export function useRankingCiclo(cicloId = null) {
       // dela o ritmo por semana, os pontos por canal e o % no SLA.
       const { itens = [], aberturas = [], pontosEncerramento = 0, pontosAbertura = 0 } = porAgente.get(agente.id) ?? {};
       const pontosCalculados = pontosEncerramento + pontosAbertura;
+      const indicadores = indicadoresDoCiclo(apuracoes.filter((a) => a.colaborador_id === agente.id), ciclo);
       const lancamentos = bonusDoCiclo.filter((b) => b.colaborador_id === agente.id);
       const somaBonus = somaDoBonus(lancamentos);
 
@@ -83,7 +94,9 @@ export function useRankingCiclo(cicloId = null) {
         nome: agente.nome_completo,
         foto: agente.foto_url,
         ativo: agente.ativo !== false,
-        totalPontos: pontosCalculados + somaBonus,
+        totalPontos: pontosCalculados + indicadores.pontos.total + somaBonus,
+        indicadores,
+        pontosIndicadores: indicadores.pontos.total,
         pontosTratativas: pontosCalculados,
         pontosEncerramento,
         pontosAbertura,
@@ -94,7 +107,7 @@ export function useRankingCiclo(cicloId = null) {
         tratativasEncerradas: itens.length,
       };
     }).sort((a, b) => b.totalPontos - a.totalPontos);
-  }, [colaboradores, bonus, todasTratativas, ciclo, cicloAtivo]);
+  }, [colaboradores, bonus, todasTratativas, apuracoes, ciclo, cicloAtivo]);
 
   return { ranking, ciclo, cicloAtivo, ciclos, isLoading };
 }

@@ -3,7 +3,6 @@ import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useRankingCiclo } from '@/hooks/useRankingCiclo';
 import { posicaoNoRanking } from '@/lib/posicaoRanking';
-import { indicadoresDoCiclo } from '@/lib/indicadoresCiclo';
 import { avaliarExigencia } from '@/lib/elegibilidade';
 import { pontosPorSemana, fimDoRitmo } from '@/lib/ritmoSemanal';
 import { PONTOS_POR_ABERTURA } from '@/lib/pontuacaoCiclo';
@@ -40,13 +39,6 @@ export function useCicloEquipe(cicloId = null) {
     refetchOnWindowFocus: false,
   });
 
-  const { data: apuracoes = [] } = useQuery({
-    queryKey: ['apuracoes-equipe'],
-    queryFn: () => db.entities.Apuracao.list('-periodo_fim', 500),
-    staleTime: 120000,
-    refetchOnWindowFocus: false,
-  });
-
   const { data: exigencias = [] } = useQuery({
     queryKey: ['elegibilidades'],
     queryFn: () => db.entities.ElegibilidadePremio.filter({ ativa: true }),
@@ -61,7 +53,7 @@ export function useCicloEquipe(cicloId = null) {
   const retrato = useMemo(() => vencidasDaEquipe(abertas, agora), [abertas, agora]);
 
   const agentes = useMemo(() => ranking.map((r) => {
-    const indicadores = indicadoresDoCiclo(apuracoes.filter((a) => a.colaborador_id === r.id), ciclo);
+    const { indicadores } = r; // calculados no ranking — a mesma conta do total
     const volume = registrosNoCiclo(registros.filter((t) => t.agente_responsavel_id === r.id), ciclo);
     const contexto = {
       csat: indicadores.csat?.valor,
@@ -88,7 +80,7 @@ export function useCicloEquipe(cicloId = null) {
       venceHoje: prazo?.venceHoje ?? 0,
       tratativasAbertas: abertas.filter((t) => t.agente_responsavel_id === r.id && !t.excluida),
     };
-  }), [ranking, apuracoes, registros, exigencias, retrato, abertas, ciclo, agora]);
+  }), [ranking, registros, exigencias, retrato, abertas, ciclo, agora]);
 
   const todasEncerradas = useMemo(() => ranking.flatMap((r) => r.itens), [ranking]);
 

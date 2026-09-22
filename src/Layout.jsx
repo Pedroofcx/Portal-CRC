@@ -32,7 +32,8 @@ import {
   ShieldCheck,
   Wrench,
   PanelLeft,
-  PanelLeftClose
+  PanelLeftClose,
+  Lightbulb,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -88,6 +89,7 @@ const menuItems = [
     items: [
       { name: 'Relatórios', page: 'Relatorios', icon: BarChart3, gestorOnly: true },
       { name: 'Auditoria de Pontuação', page: 'AuditoriaPontuacao', icon: ShieldCheck, gestorOnly: true },
+      { name: 'Soluções replicáveis', page: 'SolucoesReplicaveis', icon: Lightbulb, gestorOnly: true },
       { name: 'Configurações', page: 'Configuracoes', icon: Settings, gestorOnly: true },
     ]
   }

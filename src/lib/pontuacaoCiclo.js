@@ -89,7 +89,7 @@ export function pontosDeTratativasNoCiclo(todas = [], ciclo, { encerrada, noCicl
 
   for (const t of todas) {
     if (t.excluida || !t.agente_responsavel_id || !encerrada(t) || !noCiclo(t, ciclo)) continue;
-    const { pontos, detalhes } = calculateTratativaPoints(comReaberturaApurada(t, todas, agora));
+    const { pontos, detalhes } = calculateTratativaPoints(comReaberturaApurada(t, todas, agora), { ciclo });
     const reg = doAgente(t.agente_responsavel_id);
     reg.itens.push({
       tratativa_id: t.id,
