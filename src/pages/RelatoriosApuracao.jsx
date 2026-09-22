@@ -31,8 +31,8 @@ export default function RelatoriosApuracao() {
   });
 
   const { data: apuracoes = [], isLoading } = useQuery({
-    queryKey: ['apuracoes-completas'],
-    queryFn: () => db.entities.Apuracao.list('-created_date', 200),
+    queryKey: ['apuracoes-equipe'],
+    queryFn: () => db.entities.Apuracao.list('-periodo_fim'),
   });
 
   const colaborador = colaboradores.find(c => c.email === user?.email);
@@ -46,10 +46,14 @@ export default function RelatoriosApuracao() {
       return true;
     });
     const todasAsDatas = [];
-    filtered.forEach(ap => {
+    const vistos = new Set(); // cada dia conta uma vez (a importação mais recente)
+    [...filtered].sort((a, b) => String(b.data_apuracao || b.created_date || '').localeCompare(String(a.data_apuracao || a.created_date || ''))).forEach(ap => {
       (ap.dados_por_data || []).forEach(dia => {
         const dataN = dia.data?.split('T')[0];
         if (!dataN) return;
+        const chaveDia = `${ap.colaborador_id}|${ap.tipo_apuracao}|${dataN}`;
+        if (vistos.has(chaveDia)) return;
+        vistos.add(chaveDia);
         if (filtroDataInicio && dataN < filtroDataInicio) return;
         if (filtroDataFim && dataN > filtroDataFim) return;
         todasAsDatas.push(dia);
@@ -91,14 +95,22 @@ export default function RelatoriosApuracao() {
 
     const agregacao = {};
 
-    dadosFiltrados.forEach(ap => {
+    // Cada dia de cada pessoa em cada canal conta UMA vez: se o mesmo dia foi
+    // importado duas vezes, vale a importação mais recente.
+    const vistos = new Set();
+    const maisRecentes = [...dadosFiltrados].sort((a, b) => String(b.data_apuracao || b.created_date || '').localeCompare(String(a.data_apuracao || a.created_date || '')));
+
+    maisRecentes.forEach(ap => {
       if (!ap.dados_por_data || ap.dados_por_data.length === 0) return;
 
       const colaboradorNome = ap.colaborador_nome;
-      
+
       ap.dados_por_data.forEach(dia => {
         const data = dia.data;
-        
+        const chaveDia = `${ap.colaborador_id}|${ap.tipo_apuracao}|${String(data).slice(0, 10)}`;
+        if (vistos.has(chaveDia)) return;
+        vistos.add(chaveDia);
+
         // Aplicar filtro de data (normalizar para YYYY-MM-DD)
         const dataNormalizada = data.includes('T') ? data.split('T')[0] : data;
         if (filtroDataInicio && dataNormalizada < filtroDataInicio) return;
@@ -197,85 +209,28 @@ export default function RelatoriosApuracao() {
   }, [dadosFiltrados, filtroPeriodo, filtroDataInicio, filtroDataFim]);
 
   // CONSOLIDAÇÃO ESTRATÉGICA
+  // Consolidado do filtro: soma os volumes e só então divide — quem atendeu
+  // mais pesa mais (antes era a média das médias de cada linha).
   const consolidacao = useMemo(() => {
     if (!dadosAgregados.length) return null;
-
-    let totalPerformance = 0;
-    let countPerformance = 0;
-    let totalCSATTelefone = 0;
-    let countCSATTelefone = 0;
-    let totalCSATChat = 0;
-    let countCSATChat = 0;
-    let totalAvaliadosTelefone = 0;
-    let countAvaliadosTelefone = 0;
-    let totalAvaliadosChat = 0;
-    let countAvaliadosChat = 0;
-
+    const t = { lig: 0, at: 0, av: 0, pos: 0 };
+    const c = { chats: 0, av: 0, pos: 0 };
     dadosAgregados.forEach(agg => {
-      if (agg.telefone.total_ligacoes > 0) {
-        totalPerformance += agg.telefone.performance;
-        countPerformance++;
-      }
-      
-      if (agg.telefone.total_avaliadas > 0) {
-        totalCSATTelefone += agg.telefone.csat;
-        countCSATTelefone++;
-      }
-      
-      if (agg.telefone.total_atendidas > 0) {
-        totalAvaliadosTelefone += agg.telefone.percentual_avaliados;
-        countAvaliadosTelefone++;
-      }
-
-      if (agg.chat.total_avaliados > 0) {
-        totalCSATChat += agg.chat.csat;
-        countCSATChat++;
-      }
-      
-      if (agg.chat.total_chats > 0) {
-        totalAvaliadosChat += agg.chat.percentual_avaliados;
-        countAvaliadosChat++;
-      }
+      t.lig += agg.telefone.total_ligacoes; t.at += agg.telefone.total_atendidas;
+      t.av += agg.telefone.total_avaliadas; t.pos += agg.telefone.total_positivas;
+      c.chats += agg.chat.total_chats; c.av += agg.chat.total_avaliados; c.pos += agg.chat.total_positivos;
     });
-
-    const performanceMedia = countPerformance > 0 ? totalPerformance / countPerformance : 0;
-    const csatTelefoneMedia = countCSATTelefone > 0 ? totalCSATTelefone / countCSATTelefone : 0;
-    const csatChatMedia = countCSATChat > 0 ? totalCSATChat / countCSATChat : 0;
-    const avaliadosTelefoneMedia = countAvaliadosTelefone > 0 ? totalAvaliadosTelefone / countAvaliadosTelefone : 0;
-    const avaliadosChatMedia = countAvaliadosChat > 0 ? totalAvaliadosChat / countAvaliadosChat : 0;
-
-    // Satisfação média (todos os canais)
-    let satisfacaoMedia = 0;
-    let countCanais = 0;
-    if (countCSATTelefone > 0) {
-      satisfacaoMedia += csatTelefoneMedia;
-      countCanais++;
-    }
-    if (countCSATChat > 0) {
-      satisfacaoMedia += csatChatMedia;
-      countCanais++;
-    }
-    satisfacaoMedia = countCanais > 0 ? satisfacaoMedia / countCanais : 0;
-
-    // Percentual médio de avaliados
-    let avaliadosMedia = 0;
-    let countAvaliados = 0;
-    if (countAvaliadosTelefone > 0) {
-      avaliadosMedia += avaliadosTelefoneMedia;
-      countAvaliados++;
-    }
-    if (countAvaliadosChat > 0) {
-      avaliadosMedia += avaliadosChatMedia;
-      countAvaliados++;
-    }
-    avaliadosMedia = countAvaliados > 0 ? avaliadosMedia / countAvaliados : 0;
-
+    const pct = (parte, total) => (total > 0 ? (parte / total) * 100 : 0);
+    const csatTelefoneMedia = pct(t.pos, t.av);
+    const csatChatMedia = pct(c.pos, c.av);
+    const canais = [t.av > 0 ? csatTelefoneMedia : null, c.av > 0 ? csatChatMedia : null].filter((v) => v !== null);
+    const avaliados = [t.at > 0 ? pct(t.av, t.at) : null, c.chats > 0 ? pct(c.av, c.chats) : null].filter((v) => v !== null);
     return {
-      performanceMedia,
-      satisfacaoMedia,
-      avaliadosMedia,
+      performanceMedia: pct(t.at, t.lig),
+      satisfacaoMedia: canais.length ? canais.reduce((s2, v) => s2 + v, 0) / canais.length : 0,
+      avaliadosMedia: avaliados.length ? avaliados.reduce((s2, v) => s2 + v, 0) / avaliados.length : 0,
       csatTelefoneMedia,
-      csatChatMedia
+      csatChatMedia,
     };
   }, [dadosAgregados]);
 
