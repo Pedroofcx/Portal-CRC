@@ -46,7 +46,7 @@ function PreviewDados({ dados, colaboradorNome, periodoInicio, periodoFim }) {
           { label: 'SLA', value: slaPct !== null ? `${slaPct}%` : 'N/A', color: (slaPct || 0) >= 80 ? 'text-success' : 'text-destructive' },
           { label: 'Chats', value: dados.chats_atendidos || 0, color: 'text-primary' },
           { label: 'Ligações', value: dados.ligacoes_atendidas || 0, color: 'text-primary' },
-          { label: 'Pontos', value: (dados.pontuacao_trimestre || 0).toFixed(0), color: 'text-critical' },
+          { label: 'Pontos no ciclo', value: dados.pontuacao_trimestre == null ? '—' : Number(dados.pontuacao_trimestre).toLocaleString('pt-BR', { maximumFractionDigits: 1 }), color: 'text-critical' },
         ].map(item => (
           <div key={item.label} className="p-2 bg-card border rounded-lg text-center">
             <p className={`text-xl font-bold ${item.color}`}>{item.value}</p>
@@ -95,7 +95,7 @@ function PreviewDados({ dados, colaboradorNome, periodoInicio, periodoFim }) {
   );
 }
 
-export default function HanseiEnvioDialog({ open, onClose, colaboradores, tratativas, apuracoes, pontuacoes, colaborador, user, onEnviar, isEnviando }) {
+export default function HanseiEnvioDialog({ open, onClose, colaboradores, tratativas, apuracoes, bonus, ciclos, colaborador, user, onEnviar, isEnviando }) {
   const [formData, setFormData] = useState({
     colaborador_id: '',
     periodicidade: 'semanal',
@@ -114,7 +114,7 @@ export default function HanseiEnvioDialog({ open, onClose, colaboradores, tratat
 
   const handlePreview = () => {
     if (!formData.colaborador_id || !formData.periodo_inicio || !formData.periodo_fim) return;
-    const dados = calcularDadosConsolidados(formData.colaborador_id, formData.periodo_inicio, formData.periodo_fim, { tratativas, apuracoes, pontuacoes });
+    const dados = calcularDadosConsolidados(formData.colaborador_id, formData.periodo_inicio, formData.periodo_fim, { tratativas, apuracoes, bonus, ciclos });
     setPreview(dados);
     setShowPreview(true);
   };
@@ -122,7 +122,7 @@ export default function HanseiEnvioDialog({ open, onClose, colaboradores, tratat
   const handleEnviar = () => {
     if (!formData.colaborador_id || !formData.periodo_inicio || !formData.periodo_fim) return;
     const col = colaboradores.find(c => c.id === formData.colaborador_id);
-    const dados = preview || calcularDadosConsolidados(formData.colaborador_id, formData.periodo_inicio, formData.periodo_fim, { tratativas, apuracoes, pontuacoes });
+    const dados = preview || calcularDadosConsolidados(formData.colaborador_id, formData.periodo_inicio, formData.periodo_fim, { tratativas, apuracoes, bonus, ciclos });
     onEnviar({
       colaborador_id: formData.colaborador_id,
       colaborador_nome: col?.nome_completo,

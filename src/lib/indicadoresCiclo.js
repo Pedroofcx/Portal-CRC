@@ -110,7 +110,9 @@ export function indicadoresDoCiclo(apuracoes = [], ciclo) {
   };
   const entraNoTotal = cicloSomaIndicadores(ciclo);
   pontos.total = entraNoTotal ? pontos.csat + pontos.performance + pontos.cx : 0;
-  return { csat, performance, cx, pontos, entraNoTotal };
+  // Volumes do período (dias sem duplicar), para o Hansei e os relatórios.
+  const volumes = { ligacoesAtendidas: somaTel('total_atendidas'), chats: somaChat('total_chats') };
+  return { csat, performance, cx, pontos, entraNoTotal, volumes };
 }
 
 const pctCurto = (v) => `${Number(v).toLocaleString('pt-BR', { maximumFractionDigits: 1 })}%`;

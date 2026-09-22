@@ -22,6 +22,20 @@ export const PRAZO_REABERTURA_DIAS = 7;
 export const PONTOS_POR_ABERTURA = 0.5;
 export const ABERTURA_PONTUA_DESDE = '2026-06-16'; // início do Ciclo 2
 
+/**
+ * A tratativa está no ciclo? Pelo encerramento (ou pelo registro, se ainda
+ * não encerrou), no horário de quem calcula.
+ */
+export function tratativaNosCiclo(tratativa, ciclo) {
+  if (!ciclo) return false;
+  const dataRef = tratativa.data_encerramento || tratativa.data_registro;
+  if (!dataRef) return false;
+  const data = new Date(dataRef);
+  const inicio = new Date(ciclo.data_inicio + 'T00:00:00');
+  const fim = new Date(ciclo.data_fim + 'T23:59:59');
+  return data >= inicio && data <= fim;
+}
+
 const clienteDe = (t) => String(t?.id_base_cliente ?? '').trim();
 const ms = (v) => (v ? new Date(v).getTime() : NaN);
 

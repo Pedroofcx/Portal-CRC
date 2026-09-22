@@ -7,19 +7,9 @@ import { pontosDeTratativasNoCiclo, PONTOS_POR_ABERTURA } from '@/lib/pontuacaoC
 import { indicadoresDoCiclo } from '@/lib/indicadoresCiclo';
 import { extratoDoAgente } from '@/lib/extratoPontos';
 
-/**
- * Verifica se uma tratativa está dentro do período de um ciclo trimestral.
- * Usa data_encerramento (ou data_registro como fallback).
- */
-export function tratativaNosCiclo(tratativa, ciclo) {
-  if (!ciclo) return false;
-  const dataRef = tratativa.data_encerramento || tratativa.data_registro;
-  if (!dataRef) return false;
-  const data = new Date(dataRef);
-  const inicio = new Date(ciclo.data_inicio + 'T00:00:00');
-  const fim = new Date(ciclo.data_fim + 'T23:59:59');
-  return data >= inicio && data <= fim;
-}
+import { tratativaNosCiclo } from '@/lib/pontuacaoCiclo';
+
+export { tratativaNosCiclo };
 
 /**
  * Pontuação do agente no ciclo ativo — a MESMA conta do ranking

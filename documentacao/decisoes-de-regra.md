@@ -311,3 +311,22 @@ Conferido: o Ciclo 1 ficou idêntico ao anterior.
 - **performance:** 100% das ligações atendidas = 10 pts; 90% a 99% = 7 pts;
   abaixo de 90% não pontua (o documento dizia 95%);
 - **critério de desempate:** ainda não definido.
+
+---
+
+## Hansei — números com as regras da premiação, e os enviados recalculados (22/09/2026)
+
+**O que estava errado** (conta herdada do Base44): CSAT = média dos CSATs de
+cada dia, **pulando os dias com 0%** (Ana: 91,7% no Hansei, 64,9% de verdade);
+dia importado duas vezes contava duas vezes; a avaliação CX nunca era lida;
+os "pontos do trimestre" vinham da tabela antiga do Base44.
+
+**Agora** (`src/lib/hanseiDados.js`): CSAT, performance e CX com a mesma conta
+da premiação (`indicadoresDoCiclo`) aplicada ao período do Hansei; pontos =
+os acumulados no ciclo até o último dia do período (mesma conta do ranking);
+período antes do Ciclo 1 fica sem pontos ("—"). Os alertas do Hansei usam as
+faixas do POP 11 (CSAT 85/90/95, performance 90/100), não mais metas soltas.
+
+**Decisão de Pedro:** recalcular os já enviados. Feito em 22/09/2026 com
+`node ferramentas/recalcular-hansei.mjs --gravar` — 23 de 23; só
+`dados_consolidados` mudou (comentário, envio e visualização ficaram).

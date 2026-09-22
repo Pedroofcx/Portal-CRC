@@ -57,7 +57,7 @@ export default function HanseiVisualizarDialog({
     { subject: 'CSAT', value: Math.min(d.csat_individual || 0, 100) },
     { subject: 'SLA', value: slaPct },
     { subject: 'Volume', value: Math.min(((d.tratativas_solucionadas || 0) / Math.max(d.tratativas_total || 1, 1)) * 100, 100) },
-    { subject: 'CX', value: ((d.cx_nota_media || 0) / 10) * 100 },
+    { subject: 'CX', value: ((d.cx_nota_media || 0) / 5) * 100 },
     { subject: 'Pontuação', value: Math.min((d.pontuacao_trimestre || 0) / 10, 100) },
   ];
 
@@ -118,7 +118,7 @@ export default function HanseiVisualizarDialog({
               { icon: CheckCircle, label: 'SLA Cumprido', value: slaPct ? `${slaPct}%` : 'N/A', color: slaPct >= 80 ? 'text-success' : 'text-destructive', bg: slaPct >= 80 ? 'bg-success-soft' : 'bg-destructive/10' },
               { icon: MessageSquare, label: 'Chats', value: d.chats_atendidos || 0, color: 'text-primary', bg: 'bg-info-soft' },
               { icon: BarChart3, label: 'Ligações', value: d.ligacoes_atendidas || 0, color: 'text-primary', bg: 'bg-info-soft' },
-              { icon: Award, label: 'Pontos/Trim.', value: (d.pontuacao_trimestre || 0).toFixed(0), color: 'text-critical', bg: 'bg-critical-soft' },
+              { icon: Award, label: 'Pontos no ciclo', value: d.pontuacao_trimestre == null ? '—' : Number(d.pontuacao_trimestre).toLocaleString('pt-BR', { maximumFractionDigits: 1 }), color: 'text-critical', bg: 'bg-critical-soft' },
             ].map(item => (
               <div key={item.label} className={`p-3 rounded-xl ${item.bg}`}>
                 <div className="flex items-center gap-1 mb-1">

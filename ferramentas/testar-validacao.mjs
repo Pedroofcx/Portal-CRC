@@ -24,6 +24,7 @@ import { vencidasDaEquipe, situacaoDoPrazo, ordenarPorPrazo, registrosNoCiclo, p
 import { calculateCSATPoints, calculateCXPoints, calculateTratativaPoints, situacaoReplicavel } from '../src/components/utils/helpers.js';
 import { reaberturaDe, comReaberturaApurada, aberturasNoCiclo, cicloPagaAbertura, pontosDeTratativasNoCiclo } from '../src/lib/pontuacaoCiclo.js';
 import { extratoDoAgente } from '../src/lib/extratoPontos.js';
+import { calcularDadosConsolidados } from '../src/lib/hanseiDados.js';
 
 let passou = 0;
 let falhou = 0;
@@ -518,6 +519,21 @@ console.log('\n== extrato de pontos do agente ==');
   checa('a caminho: sem reabertura com data', ex.aCaminho.find((a) => a.titulo.startsWith('Sem reabertura')).detalhe, 'Conta a partir de 17/09');
   checa('a caminho: replicavel pendente', String(ex.aCaminho.some((a) => a.titulo.startsWith('Solução replicável ·') && a.pontos === 0.5)), 'true');
   checa('contestada mostra o parecer', ex.aCaminho.find((a) => a.tom === 'negado').detalhe, 'Falta a causa raiz.');
+}
+
+console.log('\n== Hansei: numeros do periodo ==');
+{
+  const tel = (data, av, pos, lig = 10, at = 10) => ({ data, telefone: { total_ligacoes: lig, total_atendidas: at, total_avaliadas: av, total_positivas: pos } });
+  const apur = [
+    { id: 'a', colaborador_id: 'ana', tipo_apuracao: 'telefone', created_date: '2026-04-20', dados_por_data: [tel('2026-04-06', 4, 4), tel('2026-04-07', 4, 0)] },
+    // reimportação do dia 06 (mais antiga): não pode contar de novo
+    { id: 'b', colaborador_id: 'ana', tipo_apuracao: 'telefone', created_date: '2026-04-10', dados_por_data: [tel('2026-04-06', 4, 4)] },
+    { id: 'c', colaborador_id: 'ana', tipo_apuracao: 'cx', periodo_inicio: '2026-04-01', periodo_fim: '2026-04-30', created_date: '2026-05-01', dados_por_data: [{ data: '2026-03-10', chat: null, telefone: null }], historico_detalhado: [{ data: '2026-03-10', media: 4, observacao: 't1' }, { data: '2026-03-11', media: 5, observacao: 't2' }] },
+  ];
+  const d = calcularDadosConsolidados('ana', '2026-04-01', '2026-04-30', { tratativas: [], apuracoes: apur, bonus: [], ciclos: [] });
+  checa('dia com 0% conta (antes sumia): 4 de 8 = 50%', String(d.csat_individual), '50');
+  checa('dia reimportado nao duplica: 20 ligacoes atendidas', String(d.ligacoes_atendidas), '20');
+  checa('CX agora e lida', String(d.cx_nota_media), '4.5');
 }
 
 console.log('\n== conferencia de cores (o verificador pega o que deve) ==');
