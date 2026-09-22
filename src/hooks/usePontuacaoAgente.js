@@ -2,8 +2,8 @@ import db from '@/api/db';
 import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 
-import { calculateTratativaPoints } from '@/components/utils/helpers';
-import { somaDoBonus } from '@/lib/bonusManual';
+import { STATUS_ENCERRADOS, somaDoBonus } from '@/lib/bonusManual';
+import { pontosDeTratativasNoCiclo, PONTOS_POR_ABERTURA } from '@/lib/pontuacaoCiclo';
 
 /**
  * Verifica se uma tratativa está dentro do período de um ciclo trimestral.
@@ -20,9 +20,8 @@ export function tratativaNosCiclo(tratativa, ciclo) {
 }
 
 /**
- * Hook centralizado para pontuação de agente.
- * Fonte única de verdade: calcula pontos APENAS das tratativas
- * encerradas dentro do ciclo trimestral ativo.
+ * Pontuação do agente no ciclo ativo — a MESMA conta do ranking
+ * (src/lib/pontuacaoCiclo.js): encerradas no ciclo, 0,5 por abertura e bônus.
  */
 export function usePontuacaoAgente(colaboradorId) {
   // Ciclo trimestral ativo — fonte de verdade para o período
@@ -36,48 +35,55 @@ export function usePontuacaoAgente(colaboradorId) {
 
   const cicloAtivo = useMemo(() => ciclos.find(c => c.ativo) || null, [ciclos]);
 
-  // Query dedicada — busca todas as tratativas do agente
-  const { data: tratativasRaw = [], isLoading: loadingTratativas } = useQuery({
-    queryKey: ['tratativas-encerradas-pontuacao', colaboradorId],
-    queryFn: () =>
-      db.entities.Tratativa.filter(
-        { agente_responsavel_id: colaboradorId },
-        '-data_encerramento',
-        500
-      ),
+  // TODAS as tratativas, abertas também — mesma busca do ranking e da tela
+  // de Tratativas. A abertura vale 0,5 e a reabertura é descoberta por uma
+  // tratativa nova do mesmo cliente, que pode ser de outro agente.
+  const { data: todas = [], isLoading: loadingTratativas } = useQuery({
+    queryKey: ['tratativas', "list('-created_date')"],
+    queryFn: () => db.entities.Tratativa.list('-created_date'),
     enabled: !!colaboradorId,
     staleTime: 60000,
     gcTime: 300000,
     refetchOnWindowFocus: false,
   });
 
-  // Filtra: encerradas/aguardando + DENTRO do ciclo ativo
-  const tratativasEncerradas = useMemo(() => {
-    if (!cicloAtivo) return [];
-    return (tratativasRaw || []).filter(t =>
-      (t.status === 'encerrada' || t.status === 'aguardando_confirmacao_reabertura') &&
-      !t.excluida &&
-      tratativaNosCiclo(t, cicloAtivo)
-    );
-  }, [tratativasRaw, cicloAtivo]);
+  const minhas = useMemo(() => {
+    if (!cicloAtivo || !colaboradorId) return null;
+    return pontosDeTratativasNoCiclo(todas, cicloAtivo, {
+      encerrada: (t) => STATUS_ENCERRADOS.includes(t.status),
+      noCiclo: tratativaNosCiclo,
+    }).get(colaboradorId) ?? { itens: [], aberturas: [], pontosEncerramento: 0, pontosAbertura: 0 };
+  }, [todas, cicloAtivo, colaboradorId]);
 
-  // Calcula pontos exclusivamente das tratativas dentro do ciclo
+  const tratativasEncerradas = useMemo(() => {
+    const ids = new Set((minhas?.itens ?? []).map((i) => i.tratativa_id));
+    return todas.filter((t) => ids.has(t.id));
+  }, [todas, minhas]);
+
+  // Detalhamento: cada regra de cada tratativa encerrada, e cada abertura
+  // (marcada com `abertura: true`, para não cair na conta de um canal).
   const { pontosCalculados, detalhamentoPontos } = useMemo(() => {
-    let pontos = 0;
-    const detalhamento = [];
-    tratativasEncerradas.forEach((t) => {
-      const { pontos: pts, detalhes } = calculateTratativaPoints(t);
-      pontos += pts;
-      detalhes.forEach(d => detalhamento.push({
+    if (!minhas) return { pontosCalculados: 0, detalhamentoPontos: [] };
+    const detalhamento = [
+      ...minhas.itens.flatMap((i) => i.detalhes.map((d) => ({
         ...d,
-        tratativa_id: t.id,
-        nome_cliente: t.nome_cliente,
-        tipo_tratativa: t.tipo_tratativa,
-        data_encerramento: t.data_encerramento,
-      }));
-    });
-    return { pontosCalculados: pontos, detalhamentoPontos: detalhamento };
-  }, [tratativasEncerradas]);
+        tratativa_id: i.tratativa_id,
+        nome_cliente: i.nome_cliente,
+        tipo_tratativa: i.tipo_tratativa,
+        data_encerramento: i.data_encerramento,
+      }))),
+      ...minhas.aberturas.map((a) => ({
+        tipo: 'Abertura de tratativa',
+        pontos: PONTOS_POR_ABERTURA,
+        abertura: true,
+        tratativa_id: a.tratativa_id,
+        nome_cliente: a.nome_cliente,
+        tipo_tratativa: a.tipo_tratativa,
+        data_encerramento: a.data_registro,
+      })),
+    ];
+    return { pontosCalculados: minhas.pontosEncerramento + minhas.pontosAbertura, detalhamentoPontos: detalhamento };
+  }, [minhas]);
 
   // Bônus manual: todos os lançamentos do gestor para a pessoa no ciclo
   // (migration 17) — a mesma consulta e a mesma soma do ranking.

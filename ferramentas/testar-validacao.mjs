@@ -22,6 +22,7 @@ import { getMesReferencia } from '../src/components/ferramentas/apoio/constants.
 import { montarBonus, somaDoBonus, ciclosEmOrdem } from '../src/lib/bonusManual.js';
 import { vencidasDaEquipe, situacaoDoPrazo, ordenarPorPrazo, registrosNoCiclo, percentualNoSla, acompanhamentoDa } from '../src/lib/cicloEquipe.js';
 import { calculateCSATPoints, calculateCXPoints, calculateTratativaPoints } from '../src/components/utils/helpers.js';
+import { reaberturaDe, comReaberturaApurada, aberturasNoCiclo, cicloPagaAbertura, pontosDeTratativasNoCiclo } from '../src/lib/pontuacaoCiclo.js';
 
 let passou = 0;
 let falhou = 0;
@@ -451,6 +452,30 @@ console.log('\n== inativadas (RA e GMN) pontuam so a partir do Ciclo 3 ==');
   checa('sem a marcacao nao pontua', pts({ tipo_tratativa: 'reclame_aqui', data_encerramento: '2026-09-20T12:00:00.000Z' }), '0');
   checa('outro tipo com a marcacao nao pontua', pts({ tipo_tratativa: 'contestacao', inativada_na_plataforma: true, data_encerramento: '2026-09-20T12:00:00.000Z' }), '0');
   checa('aparece no detalhamento', calculateTratativaPoints({ ...ra, data_encerramento: '2026-09-20T12:00:00.000Z' }).detalhes[0].tipo, 'Reclamação inativada');
+}
+
+console.log('\n== reabertura apurada pelos dados e 0,5 por abertura ==');
+{
+  const ri = { id: 'a', tipo_tratativa: 'reclamacao_interna', id_base_cliente: '506107  ', data_encerramento: '2026-08-01T12:00:00.000Z', status_reabertura: 'aguardando', agente_responsavel_id: 'ana', status: 'encerrada', encerrado_no_sla: true, data_registro: '2026-07-31T12:00:00.000Z' };
+  const nova = (dias, extra = {}) => ({ id: `n${dias}`, tipo_tratativa: 'reclame_aqui', id_base_cliente: '506107', data_registro: new Date(Date.parse(ri.data_encerramento) + dias * 864e5).toISOString(), agente_responsavel_id: 'bia', status: 'em_andamento', ...extra });
+  const depois = new Date('2026-09-01T00:00:00Z');
+  checa('nova tratativa do cliente no 6o dia, com outro agente: reabriu', reaberturaDe(ri, [ri, nova(6)], depois).situacao, 'reabriu');
+  checa('no 8o dia: nao conta como reabertura', reaberturaDe(ri, [ri, nova(8)], depois).situacao, 'nao_houve');
+  checa('nova tratativa excluida nao conta', reaberturaDe(ri, [ri, nova(3, { excluida: true })], depois).situacao, 'nao_houve');
+  checa('dentro dos 7 dias sem nada: aguardando', reaberturaDe(ri, [ri], new Date('2026-08-05T00:00:00Z')).situacao, 'aguardando');
+  checa('7 dias sem nada: +1 sem ninguem confirmar', String(calculateTratativaPoints(comReaberturaApurada(ri, [ri], depois)).pontos), '2');
+  checa('reabriu: perde o +1', String(calculateTratativaPoints(comReaberturaApurada(ri, [ri, nova(2)], depois)).pontos), '1');
+  checa('gestor marcou que voltou por outro canal: vale', reaberturaDe({ ...ri, status_reabertura: 'cliente_reabriu' }, [ri], depois).situacao, 'reabriu');
+
+  const ciclo1 = { data_inicio: '2026-03-14', data_fim: '2026-06-16' };
+  const ciclo2 = { data_inicio: '2026-06-16', data_fim: '2026-09-16' };
+  const reg = (d, extra = {}) => ({ id: d, agente_responsavel_id: 'ana', data_registro: `${d}T15:00:00.000Z`, status: 'em_andamento', tipo_tratativa: 'reclamacao_interna', ...extra });
+  checa('Ciclo 2 paga abertura', String(cicloPagaAbertura(ciclo2)), 'true');
+  checa('Ciclo 1 nao muda', String(aberturasNoCiclo([reg('2026-06-16')], ciclo1).length), '0');
+  checa('abertas no Ciclo 2 contam, excluida nao', String(aberturasNoCiclo([reg('2026-07-01'), reg('2026-08-01'), reg('2026-08-02', { excluida: true }), reg('2026-10-01')], ciclo2).length), '2');
+  const mapa = pontosDeTratativasNoCiclo([reg('2026-07-01'), { ...reg('2026-07-02'), status: 'encerrada', data_encerramento: '2026-07-03T12:00:00.000Z', encerrado_no_sla: true, status_reabertura: 'nao_houve' }], ciclo2,
+    { encerrada: (t) => t.status === 'encerrada', noCiclo: (t, c) => t.data_encerramento >= c.data_inicio && t.data_encerramento <= `${c.data_fim}T23:59:59` }, depois);
+  checa('abertura + encerramento somam para o agente', `${mapa.get('ana').pontosAbertura}+${mapa.get('ana').pontosEncerramento}`, '1+2');
 }
 
 console.log('\n== conferencia de cores (o verificador pega o que deve) ==');

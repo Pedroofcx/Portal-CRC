@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 
 import { calculateTratativaPoints } from '@/components/utils/helpers';
 import { tratativaNosCiclo } from '@/hooks/usePontuacaoAgente';
+import { comReaberturaApurada, aberturasNoCiclo, PONTOS_POR_ABERTURA } from '@/lib/pontuacaoCiclo';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import PageHeader from '@/components/ui/PageHeader';
@@ -43,8 +44,9 @@ export default function AuditoriaPontuacao() {
   const cicloAtivo = useMemo(() => ciclos.find(c => c.ativo) || null, [ciclos]);
 
   const { data: todasTratativas = [], isLoading } = useQuery({
-    queryKey: ['tratativas-auditoria'],
-    queryFn: () => db.entities.Tratativa.filter({}, '-data_encerramento', 1000),
+    // Todas (não as últimas 1000), a mesma busca do ranking.
+    queryKey: ['tratativas', "list('-created_date')"],
+    queryFn: () => db.entities.Tratativa.list('-created_date'),
     staleTime: 60000,
   });
 
@@ -71,15 +73,22 @@ export default function AuditoriaPontuacao() {
 
       let totalPontos = 0;
       const linhas = tratativasDoCiclo.map(t => {
-        const { pontos, detalhes } = calculateTratativaPoints(t);
+        // Reabertura apurada pelos dados, como no ranking.
+        const { pontos, detalhes } = calculateTratativaPoints(comReaberturaApurada(t, todasTratativas));
         totalPontos += pontos;
         return { tratativa: t, pontos, detalhes };
       }).sort((a, b) => b.pontos - a.pontos);
+
+      // 0,5 por tratativa aberta no ciclo (do Ciclo 2 em diante).
+      const aberturas = aberturasNoCiclo(todasTratativas, cicloAtivo)
+        .filter(t => t.agente_responsavel_id === agente.id && tiposFiltro.includes(t.tipo_tratativa)).length;
+      totalPontos += aberturas * PONTOS_POR_ABERTURA;
 
       return {
         agente,
         totalPontos,
         linhas,
+        aberturas,
         totalTratativas: tratativasDoCiclo.length,
         foraDosCiclo: tratativasForaDoCiclo.length,
         semPontos: linhas.filter(l => l.pontos === 0).length,
@@ -224,6 +233,7 @@ export default function AuditoriaPontuacao() {
                     <p className="font-semibold text-foreground">{item.agente.nome_completo}</p>
                     <p className="text-xs text-muted-foreground">
                       {item.totalTratativas} tratativas no ciclo
+                      {item.aberturas > 0 && ` · ${item.aberturas} abertas (+${String(item.aberturas * PONTOS_POR_ABERTURA).replace('.', ',')} pts)`}
                       {item.foraDosCiclo > 0 && (
                         <span className="text-destructive ml-2">· {item.foraDosCiclo} fora do ciclo (não contabilizadas)</span>
                       )}

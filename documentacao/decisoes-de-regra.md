@@ -246,3 +246,30 @@ disso, só o gestor corrige.
 `src/components/utils/helpers.js`; `pontos_da_tratativa` e o congelamento em
 `supabase/migrations/19_inativadas_pontuam.sql`. Os POPs 04, 05 e 11 já trazem
 o informativo.
+
+---
+
+## Pontuação — reabertura apurada pelos dados, 0,5 por abertura, ritmo manual (22/09/2026)
+
+**Decisões (Pedro):**
+
+1. **Reabertura.** O +1 "sem reabertura" da reclamação interna é perdido se o
+   **mesmo cliente** (id da base) abrir **qualquer nova tratativa**, com
+   qualquer agente, em até **7 dias corridos** depois do encerramento no
+   Portal. Passados os 7 dias sem nova abertura, o ponto conta sozinho — antes
+   ele dependia de alguém clicar em "confirmar", e 6 tratativas do Ciclo 2
+   estavam paradas esperando isso. O gestor ainda pode registrar que o cliente
+   voltou por um canal que não virou tratativa.
+2. **Abertura.** Cada tratativa aberta no Portal vale **0,5 ponto** para o
+   agente responsável, no ciclo em que foi registrada. Vale do **Ciclo 2 em
+   diante** (ciclos que começam em 16/06/2026 ou depois) e recalcula o Ciclo 2.
+   Tratativa excluída não conta.
+3. **Ritmo (comentário a cada 36h úteis).** A atualização é feita no Zendesk; a
+   gestão confere o histórico e lança como bônus manual. A tela de bônus tem um
+   atalho com as faixas 10 / 7 / 4.
+4. **Contestação:** o total possível é **2,5**, não 3,5 (erro do documento).
+
+**Onde vive:** `src/lib/pontuacaoCiclo.js` (regras que cruzam tratativas),
+usado pelo ranking, pelo "Meu ciclo", pela Auditoria de Pontuação e pelo
+detalhe da tratativa. `calculateTratativaPoints` continua olhando uma
+tratativa só.

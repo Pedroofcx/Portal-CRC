@@ -6,6 +6,7 @@ import { posicaoNoRanking } from '@/lib/posicaoRanking';
 import { indicadoresDoCiclo } from '@/lib/indicadoresCiclo';
 import { avaliarExigencia } from '@/lib/elegibilidade';
 import { pontosPorSemana, fimDoRitmo } from '@/lib/ritmoSemanal';
+import { PONTOS_POR_ABERTURA } from '@/lib/pontuacaoCiclo';
 import { STATUS_FECHADOS, vencidasDaEquipe, registrosNoCiclo, percentualNoSla } from '@/lib/cicloEquipe';
 
 /**
@@ -75,7 +76,8 @@ export function useCicloEquipe(cicloId = null) {
     return {
       ...r,
       posicao: posicaoNoRanking(ranking, r.id),
-      semanas: pontosPorSemana(r.itens, fimDoRitmo(ciclo, agora), 6),
+      // Aberturas entram no ritmo na semana em que foram registradas.
+      semanas: pontosPorSemana([...r.itens, ...(r.aberturas ?? []).map((ab) => ({ pontos: PONTOS_POR_ABERTURA, data_encerramento: ab.data_registro }))], fimDoRitmo(ciclo, agora), 6),
       noSla: percentualNoSla(r.itens),
       indicadores,
       volume,

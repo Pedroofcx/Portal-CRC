@@ -562,7 +562,7 @@ O papel de Facilitador Interno tem caráter formativo, preventivo e de desenvolv
       { rotulo: 'Reclamação interna', valor: 'até 2,5 pts' },
       { rotulo: 'Reclame Aqui', valor: 'até 3,5 pts' },
       { rotulo: 'Google Meu Negócio', valor: '1 a 2 pts' },
-      { rotulo: 'Contestação de compra', valor: 'até 3,5 pts' },
+      { rotulo: 'Contestação de compra', valor: 'até 2,5 pts' },
       { rotulo: 'Mínimo por canal', valor: '4 registros no trimestre' },
     ],
     fluxo_operacional: `## Princípios gerais
@@ -571,7 +571,7 @@ A pontuação é individual e acumulada ao longo do ciclo. Ao fim do ciclo, a ge
 ## Pontuação por tipo de tratativa
 **Reclamações internas**
 - Encerramento dentro do SLA: **1 ponto**.
-- Encerramento no SLA e sem reabertura do ticket em até 7 dias: **+1 ponto**.
+- Sem reabertura: **+1 ponto** quando o mesmo cliente **não abre nenhuma nova tratativa** no Portal CRC, com qualquer agente, em até **7 dias corridos** contados do encerramento. Se ele abrir no 6º dia, o ponto não conta; passado o 7º dia sem nova abertura, o ponto conta. O Portal apura sozinho.
 - Solução replicável, com causa raiz documentada no ticket: **+0,5 ponto**. A causa raiz deve estar claramente registrada para validação.
 - Total possível por tratativa: **2,5 pontos**.
 
@@ -586,7 +586,7 @@ A pontuação é individual e acumulada ao longo do ciclo. Ao fim do ciclo, a ge
 
 **Contestação de compra** (pelo desfecho)
 - Cancelamento da contestação, pagamento integral ou acordo com custo reduzido: **2,5 pontos**.
-- Total possível ao fim da tratativa: **3,5 pontos**.
+- Total possível ao fim da tratativa: **2,5 pontos**.
 
 ## Indicadores de qualidade e performance
 Apurados mensalmente e consolidados no fechamento do ciclo.
@@ -595,12 +595,12 @@ Apurados mensalmente e consolidados no fechamento do ciclo.
 - **Avaliação de atendimento (quinzenal):** todas as avaliações do trimestre com nota 4,5 ou mais = **10 pts**; média entre 4,3 e 4,4 = **4 pts**; média 4,2 = **1 pt**; abaixo de 4,2 não pontua.
 
 ## Bônus de ritmo operacional — atualização de tickets
-Todo ticket ativo deve ter comentário interno atualizado **a cada 36 horas úteis**, contendo obrigatoriamente: status atual da tratativa, próximo passo definido e dependência ou risco, quando houver. Comentários genéricos, sem avanço real, não contam. O FI pode apoiar o agente e lembrá-lo do comentário.
+Todo ticket ativo deve ter comentário interno atualizado **a cada 36 horas úteis**, contendo obrigatoriamente: status atual da tratativa, próximo passo definido e dependência ou risco, quando houver. Comentários genéricos, sem avanço real, não contam. O FI pode apoiar o agente e lembrá-lo do comentário. A atualização acontece no Zendesk: a gestão confere o histórico dos tickets e lança o bônus no Portal.
 - 95% ou mais dos tickets atualizados no prazo: **10 pts**.
 - 90% a 94%: **7 pts**. 85% a 89%: **4 pts**. Abaixo de 85%: não pontua.
 
 ## Tratativas prolongadas
-Tratativas que passam de um ciclo não prejudicam o agente. **Cada abertura de ticket no Portal CRC gera 0,5 ponto**, no ciclo em que começou; a pontuação do encerramento vale no ciclo em que o caso é concluído, independentemente da data de início.`,
+Tratativas que passam de um ciclo não prejudicam o agente. **Cada abertura de ticket no Portal CRC gera 0,5 ponto** para o agente responsável, no ciclo em que foi registrada (regra aplicada do Ciclo 2 em diante); a pontuação do encerramento vale no ciclo em que o caso é concluído, independentemente da data de início.`,
     criterio_qualidade: `## Regras gerais e auditoria
 - A pontuação é individual e vale exclusivamente para o ciclo de apuração.
 - A liderança pode fazer auditorias amostrais dos tickets para validar a qualidade das tratativas e dos comentários internos; o descumprimento dos critérios pode levar à perda parcial ou total dos pontos do item.

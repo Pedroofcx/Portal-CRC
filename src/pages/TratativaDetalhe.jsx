@@ -41,6 +41,7 @@ import {
   Snowflake
 } from 'lucide-react';
 import TimerReobertura from '@/components/tratativas/TimerReobertura';
+import { reaberturaDe, comReaberturaApurada } from '@/lib/pontuacaoCiclo';
 import CongelamentoSLA from '@/components/tratativas/CongelamentoSLA';
 import DesfechoContestacao from '@/components/tratativas/DesfechoContestacao';
 import MonetizacaoAtritoForm from '@/components/tratativas/MonetizacaoAtritoForm';
@@ -147,6 +148,16 @@ export default function TratativaDetalhe({ idExterno = null, embutido = false })
     queryFn: () => db.entities.Tratativa.filter({ id: tratativaId }),
     select: (data) => data[0],
     enabled: !!tratativaId,
+  });
+
+  // Reclamação interna: a reabertura é descoberta por uma tratativa nova do
+  // mesmo cliente em até 7 dias (src/lib/pontuacaoCiclo.js). Mesma busca da
+  // lista de Tratativas — normalmente já está em cache.
+  const { data: todasTratativas = [] } = useQuery({
+    queryKey: ['tratativas', "list('-created_date')"],
+    queryFn: () => db.entities.Tratativa.list('-created_date'),
+    enabled: tratativa?.tipo_tratativa === 'reclamacao_interna',
+    staleTime: 60000,
   });
 
   const colaborador = colaboradores.find(c => c.email === user?.email);
@@ -612,7 +623,8 @@ export default function TratativaDetalhe({ idExterno = null, embutido = false })
   };
 
   // Calcular pontuação (preview)
-  const pontosPreview = isEncerrada ? calculateTratativaPoints(tratativa) : null;
+  const reabertura = reaberturaDe(tratativa, todasTratativas);
+  const pontosPreview = isEncerrada ? calculateTratativaPoints(comReaberturaApurada(tratativa, todasTratativas)) : null;
 
   return (
     <div className="space-y-6">
@@ -897,13 +909,14 @@ export default function TratativaDetalhe({ idExterno = null, embutido = false })
           {/* Timer de Reabertura — componente dedicado */}
           <TimerReobertura
             tratativa={tratativa}
+            reabertura={reabertura}
             onConfirmar={(houveReabertura) => setConfirmDialog({
               open: true,
               action: () => handleConfirmarReabertura(houveReabertura),
-              title: houveReabertura ? 'Cliente Reabriu a Reclamação' : 'Confirmar: Sem Reabertura',
+              title: houveReabertura ? 'Cliente voltou a reclamar' : 'Concluir o acompanhamento',
               description: houveReabertura
-                ? 'Confirma que o cliente abriu um novo ticket relacionado a esta tratativa? Você não receberá o ponto de "Sem reabertura em 7 dias".'
-                : 'Confirma que não houve reabertura nos últimos 7 dias? Você receberá +1 ponto adicional na pontuação desta tratativa.'
+                ? 'Use quando o cliente voltou por um canal que não virou tratativa no Portal. O ponto de "sem reabertura" deixa de contar.'
+                : 'Os 7 dias passaram sem nova tratativa do cliente. A tratativa passa para Encerrada; o +1 já está contado.'
             })}
             isLoading={updateMutation.isPending}
           />

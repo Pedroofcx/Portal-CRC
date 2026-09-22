@@ -28,7 +28,13 @@ function calcularTimer(dataEncerramento) {
   };
 }
 
-export default function TimerReobertura({ tratativa, onConfirmar, isLoading }) {
+/**
+ * Acompanhamento dos 7 dias depois do encerramento de uma reclamação interna.
+ * A reabertura é apurada pelos dados (reaberturaDe, src/lib/pontuacaoCiclo.js):
+ * nova tratativa do mesmo cliente no prazo, com qualquer agente. O botão só
+ * move a tratativa para Encerrada — o ponto não depende dele.
+ */
+export default function TimerReobertura({ tratativa, reabertura, onConfirmar, isLoading }) {
   const [timer, setTimer] = useState(() => calcularTimer(tratativa?.data_encerramento));
 
   useEffect(() => {
@@ -43,12 +49,15 @@ export default function TimerReobertura({ tratativa, onConfirmar, isLoading }) {
   if (!timer) return null;
 
   const expirou = timer.expirou;
+  const reabriuPor = reabertura?.situacao === 'reabriu' ? reabertura.por : null;
+  // Verde só quando o prazo passou E o cliente não voltou.
+  const semReabertura = expirou && reabertura?.situacao !== 'reabriu';
   const urgente = !expirou && timer.dias <= 1;
 
   return (
-    <Card className={`border-0 shadow-sm ${expirou ? 'bg-success-soft border-success/25' : urgente ? 'bg-destructive/10 border-destructive/25' : 'bg-warning-soft border-warning/25'}`}>
+    <Card className={`border-0 shadow-sm ${semReabertura ? 'bg-success-soft border-success/25' : urgente ? 'bg-destructive/10 border-destructive/25' : 'bg-warning-soft border-warning/25'}`}>
       <CardHeader>
-        <CardTitle className={`flex items-center gap-2 text-base ${expirou ? 'text-success' : urgente ? 'text-destructive' : 'text-warning'}`}>
+        <CardTitle className={`flex items-center gap-2 text-base ${semReabertura ? 'text-success' : urgente ? 'text-destructive' : 'text-warning'}`}>
           <Timer className="w-5 h-5" />
           Timer de Reabertura — 7 dias corridos
         </CardTitle>
@@ -58,13 +67,13 @@ export default function TimerReobertura({ tratativa, onConfirmar, isLoading }) {
         <div>
           <div className="flex justify-between text-xs mb-1">
             <span className="text-muted-foreground">Encerrado em {formatDateSP(tratativa.data_encerramento, 'DD/MM/YYYY HH:mm')}</span>
-            <span className={`font-medium ${expirou ? 'text-success' : urgente ? 'text-destructive' : 'text-warning'}`}>
+            <span className={`font-medium ${semReabertura ? 'text-success' : urgente ? 'text-destructive' : 'text-warning'}`}>
               {timer.percentual}%
             </span>
           </div>
           <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
             <div
-              className={`h-full rounded-full transition-all ${expirou ? 'bg-success' : urgente ? 'bg-destructive' : 'bg-warning'}`}
+              className={`h-full rounded-full transition-all ${semReabertura ? 'bg-success' : urgente ? 'bg-destructive' : 'bg-warning'}`}
               style={{ width: `${timer.percentual}%` }}
             />
           </div>
@@ -77,9 +86,8 @@ export default function TimerReobertura({ tratativa, onConfirmar, isLoading }) {
               <CheckCircle className="w-10 h-10 text-success mx-auto mb-2" />
               <p className="font-semibold text-success">Período de 7 dias concluído</p>
               <p className="text-xs text-muted-foreground mt-1">
-                Prazo encerrado em {formatDateSP(timer.dataLimite, 'DD/MM/YYYY')}. Confirme o status abaixo.
+                Prazo encerrado em {formatDateSP(timer.dataLimite, 'DD/MM/YYYY')}.
               </p>
-              <Badge className="mt-2 bg-success-soft text-success">Pronto para confirmação</Badge>
             </>
           ) : (
             <>
@@ -99,32 +107,45 @@ export default function TimerReobertura({ tratativa, onConfirmar, isLoading }) {
           )}
         </div>
 
+        {/* O que os dados dizem — o ponto não depende de ninguém confirmar */}
+        {reabriuPor ? (
+          <div className="rounded-lg border border-destructive/25 bg-destructive/10 p-3 text-sm text-destructive">
+            O cliente abriu outra tratativa em {formatDateSP(reabriuPor.data_registro, 'DD/MM/YYYY HH:mm')}
+            {reabriuPor.agente_responsavel_nome ? ` (com ${reabriuPor.agente_responsavel_nome})` : ''}, dentro dos 7 dias.
+            O +1 de "sem reabertura" não conta.
+          </div>
+        ) : reabertura?.situacao === 'reabriu' ? (
+          <p className="text-sm text-destructive">Registrado que o cliente voltou a reclamar. O +1 de "sem reabertura" não conta.</p>
+        ) : (
+          <p className="text-sm text-muted-foreground">
+            {expirou
+              ? 'Nenhuma nova tratativa do cliente em 7 dias: o +1 já está contado.'
+              : 'Nenhuma nova tratativa do cliente até agora. Se ele abrir outra até o fim do prazo, com qualquer agente, o +1 não conta.'}
+          </p>
+        )}
+
         {/* Ações */}
         <div className="space-y-2">
-          <Button
-            onClick={() => onConfirmar(true)}
-            variant="outline"
-            className="w-full border-destructive/25 text-destructive hover:bg-destructive/10"
-            disabled={isLoading}
-          >
-            <AlertTriangle className="w-4 h-4 mr-2" />
-            Cliente Reabriu a Reclamação
-          </Button>
-
-          <Button
-            onClick={() => onConfirmar(false)}
-            className={`w-full ${expirou ? 'bg-success hover:bg-success/90' : 'bg-muted hover:bg-muted cursor-default'}`}
-            disabled={isLoading || !expirou}
-            title={!expirou ? `Disponível após ${formatDateSP(timer.dataLimite, 'DD/MM/YYYY')}` : undefined}
-          >
-            <CheckCircle className="w-4 h-4 mr-2" />
-            {expirou ? 'Confirmar: Sem Reabertura (+1 pt)' : `Aguardando prazo de 7 dias`}
-          </Button>
-
-          {!expirou && (
-            <p className="text-xs text-center text-muted-foreground">
-              O botão de confirmação será liberado automaticamente após {formatDateSP(timer.dataLimite, 'DD/MM/YYYY')}
-            </p>
+          {!reabriuPor && reabertura?.situacao !== 'reabriu' && (
+            <Button
+              onClick={() => onConfirmar(true)}
+              variant="outline"
+              className="w-full border-destructive/25 text-destructive hover:bg-destructive/10"
+              disabled={isLoading}
+            >
+              <AlertTriangle className="w-4 h-4 mr-2" />
+              Cliente voltou por outro canal
+            </Button>
+          )}
+          {(expirou || reabriuPor) && (
+            <Button
+              onClick={() => onConfirmar(!!reabriuPor)}
+              className="w-full"
+              disabled={isLoading}
+            >
+              <CheckCircle className="w-4 h-4 mr-2" />
+              Concluir e passar para Encerrada
+            </Button>
           )}
         </div>
       </CardContent>

@@ -229,6 +229,11 @@ export default function CicloColaborador() {
                 valor={fmt(porCanal[c].pontos)}
               />
             ))}
+            <Linha
+              rotulo="Tratativas abertas no ciclo"
+              detalhe={`${pessoa.aberturas?.length ?? 0} × 0,5`}
+              valor={fmt(pessoa.pontosAbertura ?? 0)}
+            />
             <Linha rotulo="Bônus lançado pelo gestor" valor={fmt(pessoa.bonus)} />
             <Linha rotulo="Total" valor={fmt(pessoa.totalPontos)} forte />
           </div>
@@ -457,7 +462,7 @@ export default function CicloColaborador() {
       />
 
       <p className="text-xs text-muted-foreground">
-        Pontos = tratativas encerradas no ciclo + bônus do gestor, a mesma conta do ranking e do “Meu ciclo” do operador.
+        Pontos = tratativas encerradas no ciclo + 0,5 por tratativa aberta no ciclo + bônus do gestor, a mesma conta do ranking e do “Meu ciclo” do operador.
       </p>
     </div>
   );

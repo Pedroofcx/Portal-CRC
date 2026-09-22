@@ -90,11 +90,13 @@ export default function PainelMeuCiclo({
   const porCanal = useMemo(() => {
     const soma = Object.fromEntries(CANAIS.map((c) => [c, 0]));
     detalhamentoPontos.forEach((d) => {
+      if (d.abertura) return; // aberturas têm linha própria
       const canal = canalDe(d.tipo_tratativa);
       if (canal in soma) soma[canal] += Number(d.pontos) || 0;
     });
     return soma;
   }, [detalhamentoPontos]);
+  const aberturas = useMemo(() => detalhamentoPontos.filter((d) => d.abertura).length, [detalhamentoPontos]);
 
   const indicadores = useMemo(() => indicadoresDoCiclo(apuracoes, cicloAtivo), [apuracoes, cicloAtivo]);
 
@@ -191,6 +193,7 @@ export default function PainelMeuCiclo({
       <div className="space-y-4">
         <Grupo titulo="De onde vieram — tratativas">
           {CANAIS.map((c) => <Linha key={c} rotulo={tipoTratativaLabels[c]} valor={fmt(porCanal[c])} />)}
+          {aberturas > 0 && <Linha rotulo="Tratativas abertas" detalhe={`${aberturas} × 0,5`} valor={fmt(aberturas * 0.5)} />}
           {bonusManual > 0 && <Linha rotulo="Bônus lançado pelo gestor" valor={fmt(bonusManual)} />}
         </Grupo>
         <Grupo titulo={`Indicadores — valem até 10 cada${mesPrevia ? ` · prévia de ${mesPrevia}` : ''}`}>

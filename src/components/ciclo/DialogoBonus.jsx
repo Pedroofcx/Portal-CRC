@@ -30,6 +30,15 @@ const REGRAS = {
 };
 
 const VAZIO = { pessoaId: '', pontos: '', descricao: '' };
+
+// Bônus de ritmo (POP 11): a gestão confere no Zendesk se os tickets tiveram
+// comentário interno a cada 36h úteis e lança a faixa. O atalho só preenche
+// pontos e motivo — dá para ajustar antes de lançar.
+const FAIXAS_RITMO = [
+  { pontos: '10', rotulo: '95% ou mais', motivo: 'Bônus de ritmo: 95% ou mais dos tickets atualizados a cada 36h úteis (conferido no Zendesk).' },
+  { pontos: '7', rotulo: '90% a 94%', motivo: 'Bônus de ritmo: 90% a 94% dos tickets atualizados a cada 36h úteis (conferido no Zendesk).' },
+  { pontos: '4', rotulo: '85% a 89%', motivo: 'Bônus de ritmo: 85% a 89% dos tickets atualizados a cada 36h úteis (conferido no Zendesk).' },
+];
 const dataCurta = (iso) => (iso ? `${iso.slice(8, 10)}/${iso.slice(5, 7)}/${iso.slice(0, 4)}` : '');
 
 export default function DialogoBonus({ open, onOpenChange, ciclo, pessoas = [], pessoaFixa = null, gestor, agora = new Date() }) {
@@ -114,6 +123,24 @@ export default function DialogoBonus({ open, onOpenChange, ciclo, pessoas = [], 
               </Select>
             </CampoFormulario>
           )}
+
+          <div className="space-y-1.5">
+            <p className="text-sm font-medium text-foreground">Bônus de ritmo (atalho)</p>
+            <div className="flex flex-wrap gap-2">
+              {FAIXAS_RITMO.map((f) => (
+                <Button
+                  key={f.pontos}
+                  type="button"
+                  size="sm"
+                  variant={form.pontos === f.pontos && form.descricao === f.motivo ? 'default' : 'outline'}
+                  onClick={() => { mudar('pontos', f.pontos); mudar('descricao', f.motivo); }}
+                >
+                  {f.rotulo} · {f.pontos} pts
+                </Button>
+              ))}
+            </div>
+            <p className="text-xs text-muted-foreground">Abaixo de 85% não pontua. Para outro bônus, preencha os campos abaixo.</p>
+          </div>
 
           <CampoFormulario
             id="bonus-pontos"
