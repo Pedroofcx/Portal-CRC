@@ -39,12 +39,12 @@ alter table public.tratativa_base
 -- ------------------------------------------------------------------
 -- ===================== tratativa =====================
 
-do $
+do $$
 begin
   if to_regclass('public.tratativa_base') is null then
     alter table public."tratativa" rename to "tratativa_base";
   end if;
-end $;
+end $$;
 
 drop view if exists public."tratativa";
 
@@ -148,7 +148,7 @@ revoke all on public."tratativa" from anon;
 grant select, insert, update, delete on public."tratativa" to authenticated;
 
 create or replace function public."tratativa_gravar"()
-returns trigger language plpgsql security invoker as $
+returns trigger language plpgsql security invoker as $$
 declare b public."tratativa_base"%rowtype;
 begin
   if tg_op = 'INSERT' then
@@ -257,7 +257,7 @@ begin
     return old;
   end if;
   return null;
-end $;
+end $$;
 
 drop trigger if exists "tratativa_ins" on public."tratativa";
 drop trigger if exists "tratativa_upd" on public."tratativa";
