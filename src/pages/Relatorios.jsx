@@ -10,6 +10,7 @@ import { Cartao } from '@/components/ui/Cartao';
 import { FiltroPeriodo } from '@/components/relatorios/hub/Pecas';
 import Financeiro from '@/components/relatorios/grupos/Financeiro';
 import Pessoas from '@/components/relatorios/grupos/Pessoas';
+import Operacao from '@/components/relatorios/grupos/Operacao';
 
 /**
  * Relatórios — organizados por PERGUNTA (padrão aprovado por Pedro em
@@ -58,6 +59,7 @@ export default function Relatorios() {
   }
 
   const corpo = {
+    operacao: <Operacao tratativas={tratativas} periodo={periodo} />,
     financeiro: <Financeiro tratativas={tratativas} periodo={periodo} ehGestor={ehGestor} />,
     pessoas: <Pessoas tratativas={tratativas} periodo={periodo} ciclos={ciclos} colaboradores={colaboradores} />,
   }[grupo.chave];

@@ -27,6 +27,7 @@ import { extratoDoAgente } from '../src/lib/extratoPontos.js';
 import { calcularDadosConsolidados } from '../src/lib/hanseiDados.js';
 import { desfechoDaContestacao, resumoFinanceiro } from '../src/lib/relatorios/financeiro.js';
 import { pessoasNoPeriodo } from '../src/lib/relatorios/pessoas.js';
+import { filaDeHoje, entradaESaida, tempoPorCanal } from '../src/lib/relatorios/operacao.js';
 
 let passou = 0;
 let falhou = 0;
@@ -576,6 +577,23 @@ console.log('\n== relatorio de pessoas ==');
   checa('so agentes ativos', lista.map((p) => p.nome).join(','), 'Ana');
   checa('encerradas no periodo, sem excluida', String(lista[0].encerradas), '2');
   checa('no prazo = 50%', String(lista[0].pctNoPrazo), '50');
+}
+
+console.log('\n== relatorio de operacao ==');
+{
+  const agora = new Date('2026-09-10T12:00:00Z');
+  const aberta = (id, horasAtras, sla = 24, extra = {}) => ({ id, status: 'em_andamento', sla_atribuido: sla, data_registro: new Date(agora - horasAtras * 36e5).toISOString(), agente_responsavel_nome: 'Ana', ...extra });
+  const fila = filaDeHoje([aberta('a', 30), aberta('b', 10), aberta('c', 1, 72), { ...aberta('d', 50), status: 'aguardando_confirmacao_reabertura' }, { ...aberta('e', 50), excluida: true }], agora);
+  checa('fila so com abertas de verdade', String(fila.total), '3');
+  checa('vencida, vence em 24h, no prazo', `${fila.vencidas}/${fila.vence24h}/${fila.noPrazo}`, '1/1/1');
+  const enc = (id, dia, extra = {}) => ({ id, status: 'encerrada', data_registro: `${dia}T12:00:00Z`, data_encerramento: `${dia}T15:00:00Z`, ...extra });
+  const es = entradaESaida([enc('1', '2026-09-01'), enc('2', '2026-09-02'), aberta('a', 30), aberta('b', 10)], { inicio: '2026-09-01', fim: '2026-09-30' }, agora);
+  checa('periodo que nao acabou conta so ate hoje: 10 dias', String(es.dias), '10');
+  checa('mesmo periodo para entrada e saida', `${es.entraram}/${es.sairam}`, '4/2');
+  checa('dias para zerar = 2 abertas / 0,2 por dia', String(es.diasParaZerar), '10');
+  const tc = tempoPorCanal([1, 2, 3, 100].map((h, i) => enc(String(i), '2026-09-05', { tipo_tratativa: 'reclame_aqui', tempo_total_minutos: h * 60, encerrado_no_sla: h < 24 })), { inicio: '2026-09-01', fim: '2026-09-30' });
+  checa('mediana nao e puxada pelo caso de 100h', String(tc[0].medianaHoras), '2.5');
+  checa('% no prazo', String(tc[0].pctNoPrazo), '75');
 }
 
 console.log('\n== conferencia de cores (o verificador pega o que deve) ==');
