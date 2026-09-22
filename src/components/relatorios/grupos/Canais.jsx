@@ -1,8 +1,11 @@
 import React, { useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Download } from 'lucide-react';
+import { createPageUrl } from '@/utils';
 import { Button } from '@/components/ui/button';
 import { formatDateSP, tipoTratativaLabels, statusLabels } from '@/components/utils/helpers';
 import { Cartao, Linha } from '@/components/ui/Cartao';
+import TabelaResumida from '@/components/ui/TabelaResumida';
 import { resumoDoCanal } from '@/lib/relatorios/canais';
 import { ComoCalculamos, Pergunta, periodoPorExtenso, brl, baixarCSV } from '@/components/relatorios/hub/Pecas';
 
@@ -20,6 +23,9 @@ const ABAS = [
 const CAUSAS = { processo: 'Processo', produto_sistema: 'Produto / Sistema', comunicacao: 'Comunicação', expectativa_cliente: 'Expectativa do cliente', operacao_interna: 'Operação interna', terceiro: 'Terceiro' };
 const pct = (v) => (v === null || v === undefined ? '—' : `${Math.round(v)}%`);
 const nota = (v) => (v === null || v === undefined ? '—' : Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 2 }));
+const MESES = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
+const mesCurto = (m) => `${MESES[Number(m.slice(5, 7)) - 1]}/${m.slice(2, 4)}`;
+const PRIORIDADES = { baixa: 'Baixa', media: 'Média', alta: 'Alta', critica: 'Crítica' };
 const horas = (h) => (h === null || h === undefined ? '—' : h < 48 ? `${Math.round(h)}h` : `${Math.round(h / 24)} dias`);
 
 function Lista({ titulo, itens, rotular = (x) => x }) {
@@ -121,12 +127,62 @@ export default function Canais({ tratativas, periodo }) {
         </Cartao>
 
         <div className="space-y-6">
+          <Cartao titulo="Mês a mês">
+            {r.meses.length === 0 ? (
+              <p className="text-sm text-muted-foreground">Nada no período.</p>
+            ) : (
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-border text-xs text-muted-foreground">
+                    <th className="py-2 text-left font-medium">Mês</th>
+                    <th className="py-2 text-right font-medium">Entraram</th>
+                    <th className="py-2 text-right font-medium">Encerradas</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {r.meses.map((m) => (
+                    <tr key={m.mes} className="h-9 border-b border-border last:border-0">
+                      <td className="text-foreground">{mesCurto(m.mes)}</td>
+                      <td className="text-right tabular-nums">{m.entraram}</td>
+                      <td className="text-right tabular-nums">{m.encerradas}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </Cartao>
           <Lista titulo="Motivos que mais aparecem" itens={r.motivos} />
+          <Lista titulo="Prioridade das encerradas" itens={r.prioridades} rotular={(p) => PRIORIDADES[p] ?? p} />
+          <Lista titulo="Clientes que apareceram mais de uma vez" itens={r.clientes} />
           {aba === 'reclamacao_interna' && <Lista titulo="Causa primária" itens={r.causas} rotular={(c) => CAUSAS[c] ?? c} />}
           {(aba === 'reclame_aqui' || aba === 'contestacao') && <Lista titulo="Categorias" itens={r.categorias} />}
           {aba === 'outros' && <Lista titulo="Tipos" itens={r.porTipo} rotular={(t) => tipoTratativaLabels[t] ?? t} />}
         </div>
       </div>
+
+      <Cartao titulo="As encerradas do canal no período" extra={<span className="text-xs text-muted-foreground">{r.itens.length} tratativas</span>}>
+        {r.itens.length === 0 ? (
+          <p className="text-sm text-muted-foreground">Nenhuma tratativa encerrada no período.</p>
+        ) : (
+          <TabelaResumida
+            linhas={[...r.itens].sort((a, b) => String(b.data_encerramento).localeCompare(String(a.data_encerramento)))}
+            chaveDaLinha={(t) => t.id}
+            rotuloDetalhe="Ver os detalhes da tratativa"
+            limite={12}
+            rotulo="tratativas"
+            colunas={[
+              { chave: 'id', rotulo: 'Tratativa', alinhar: 'esquerda', principal: true, valor: (t) => <Link to={`${createPageUrl('TratativaDetalhe')}?id=${t.id}`} className="hover:underline" onClick={(e) => e.stopPropagation()}>{[t.id_interno, t.nome_cliente].filter(Boolean).join(' · ')}</Link> },
+              { chave: 'agente', rotulo: 'Agente', principal: true, valor: (t) => t.agente_responsavel_nome || '—' },
+              { chave: 'enc', rotulo: 'Encerrada', principal: true, valor: (t) => formatDateSP(t.data_encerramento, 'DD/MM/YYYY') },
+              { chave: 'prazo', rotulo: 'No prazo', principal: true, valor: (t) => (t.encerrado_no_sla ? 'sim' : 'não') },
+              { chave: 'motivo', rotulo: 'Motivo', valor: (t) => t.motivo_nome || '—' },
+              { chave: 'reg', rotulo: 'Registrada em', valor: (t) => formatDateSP(t.data_registro, 'DD/MM/YYYY') },
+              { chave: 'tempo', rotulo: 'Tempo até encerrar', valor: (t) => horas(Number(t.tempo_total_minutos) / 60) },
+              { chave: 'dev', rotulo: 'Devolução ao cliente', valor: (t) => (t.houve_devolucao_financeira ? brl(t.valor_devolvido_cliente) : '—') },
+            ]}
+          />
+        )}
+      </Cartao>
     </div>
   );
 }

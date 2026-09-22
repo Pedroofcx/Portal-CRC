@@ -48,6 +48,29 @@ export function resumoDoCanal(tratativas = [], tipo, periodo = {}, agora = new D
     itens: encerradas,
   };
 
+  // Mês a mês do canal, prioridades e clientes que mais aparecem.
+  base.meses = (() => {
+    const m = {};
+    for (const t of doTipo) {
+      const reg = String(t.data_registro || t.created_date || '').slice(0, 7);
+      if (reg && noPeriodo(t.data_registro || t.created_date, periodo)) { m[reg] ||= { mes: reg, entraram: 0, encerradas: 0 }; m[reg].entraram += 1; }
+      const enc = String(t.data_encerramento || '').slice(0, 7);
+      if (enc && ENCERRADA.includes(t.status) && noPeriodo(t.data_encerramento, periodo)) { m[enc] ||= { mes: enc, entraram: 0, encerradas: 0 }; m[enc].encerradas += 1; }
+    }
+    return Object.values(m).sort((x, y) => x.mes.localeCompare(y.mes));
+  })();
+  base.prioridades = contar(encerradas, (t) => t.prioridade);
+  base.clientes = (() => {
+    const m = {};
+    for (const t of encerradas) {
+      const id = String(t.id_base_cliente ?? '').trim();
+      if (!id) continue;
+      m[id] ||= { nome: t.nome_cliente || `Cliente ${id}`, qtd: 0 };
+      m[id].qtd += 1;
+    }
+    return Object.values(m).filter((c) => c.qtd > 1).sort((a2, b2) => b2.qtd - a2.qtd).slice(0, 6);
+  })();
+
   if (tipo === 'reclamacao_interna') {
     const reab = encerradas.map((t) => reaberturaDe(t, tratativas, agora).situacao);
     const decididas = reab.filter((s) => s === 'reabriu' || s === 'nao_houve');

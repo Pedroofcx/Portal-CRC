@@ -12,6 +12,8 @@ import { ComoCalculamos, Pergunta, periodoPorExtenso, brl } from '@/components/r
  * Relatórios › Jornada do cliente — onde o cliente sofre: etapas, motivos e
  * clientes que voltam a reclamar. Contas em src/lib/relatorios/jornada.js.
  */
+const CAUSAS = { processo: 'Processo', produto_sistema: 'Produto / Sistema', comunicacao: 'Comunicação', expectativa_cliente: 'Expectativa do cliente', operacao_interna: 'Operação interna', terceiro: 'Terceiro', 'Não definido': 'Não definido' };
+
 export default function Jornada({ tratativas, periodo, ehGestor }) {
   const j = useMemo(() => resumoJornada(tratativas, periodo), [tratativas, periodo]);
   const custo = (v) => (ehGestor ? brl(v) : '—');
@@ -37,6 +39,8 @@ export default function Jornada({ tratativas, periodo, ehGestor }) {
               { chave: 'custo', rotulo: 'Custo', alinhar: 'direita', principal: true, valor: (e) => custo(e.custo) },
               { chave: 'motivos', rotulo: 'Motivos que mais aparecem', valor: (e) => e.motivos.map((m) => `${m.nome} (${m.casos})`).join(' · ') || '—' },
               { chave: 'medio', rotulo: 'Custo médio por caso', valor: (e) => custo(e.casos ? e.custo / e.casos : 0) },
+              { chave: 'canais', rotulo: 'Canais', valor: (e) => e.canais.map((c) => `${tipoTratativaLabels[c.nome] ?? c.nome}: ${c.casos}`).join(' · ') },
+              { chave: 'prazo', rotulo: 'Encerradas no prazo', valor: (e) => `${e.noPrazo} de ${e.casos}` },
             ]}
           />
         )}
@@ -47,7 +51,25 @@ export default function Jornada({ tratativas, periodo, ehGestor }) {
         </ComoCalculamos>
       </Cartao>
 
-      <div className="grid items-start gap-6 lg:grid-cols-2">
+      <div className="grid items-start gap-6 lg:grid-cols-3">
+        <Cartao titulo="Causa primária dos casos">
+          {j.causas.length === 0 ? (
+            <p className="text-sm text-muted-foreground">Nenhuma causa registrada no período.</p>
+          ) : (
+            <div className="divide-y divide-border">
+              {j.causas.map((c) => (
+                <div key={c.nome} className="flex items-center justify-between gap-3 py-2 text-sm">
+                  <span className="min-w-0 text-foreground">{CAUSAS[c.nome] ?? c.nome}<span className="block text-xs text-muted-foreground">{custo(c.custo)}</span></span>
+                  <span className="shrink-0 font-semibold tabular-nums">{c.casos}</span>
+                </div>
+              ))}
+            </div>
+          )}
+          <ComoCalculamos>
+            <p>A causa primária é o que o agente marca no encerramento: processo, produto/sistema, comunicação, expectativa do cliente, operação interna ou terceiro.</p>
+          </ComoCalculamos>
+        </Cartao>
+
         <Cartao titulo="Motivos que mais se repetem">
           <ListaResumida
             className="divide-y divide-border"

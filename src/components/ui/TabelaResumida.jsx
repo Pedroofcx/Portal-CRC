@@ -15,9 +15,14 @@ import { ChevronDown, ChevronRight } from 'lucide-react';
  */
 const ALINHAR = { esquerda: 'text-left', centro: 'text-center', direita: 'text-right' };
 
-export default function TabelaResumida({ colunas, linhas, chaveDaLinha = (_, i) => i, rotuloDetalhe = 'Ver todos os números' }) {
+export default function TabelaResumida({ colunas, linhas, chaveDaLinha = (_, i) => i, rotuloDetalhe = 'Ver todos os números', limite = null, rotulo = 'linhas' }) {
   const [abertas, setAbertas] = useState(() => new Set());
+  const [tudo, setTudo] = useState(false);
   const principais = colunas.filter((c) => c.principal);
+  // Tabela longa é resumo: mostra as primeiras e abre o resto na própria
+  // página (regras-ui-ux.md, seção 9 — nada de rolagem dentro do card).
+  const visiveis = limite && !tudo ? linhas.slice(0, limite) : linhas;
+  const sobra = limite ? linhas.length - limite : 0;
   const detalhe = colunas.filter((c) => !c.principal);
   const temDetalhe = detalhe.length > 0;
 
@@ -38,7 +43,7 @@ export default function TabelaResumida({ colunas, linhas, chaveDaLinha = (_, i) 
         </tr>
       </thead>
       <tbody>
-        {linhas.map((linha, i) => {
+        {visiveis.map((linha, i) => {
           const chave = chaveDaLinha(linha, i);
           const aberta = abertas.has(chave);
           return (
@@ -82,6 +87,17 @@ export default function TabelaResumida({ colunas, linhas, chaveDaLinha = (_, i) 
           );
         })}
       </tbody>
+      {sobra > 0 && (
+        <tfoot>
+          <tr>
+            <td colSpan={principais.length + (temDetalhe ? 1 : 0)} className="pt-2">
+              <button type="button" onClick={() => setTudo((a) => !a)} className="text-sm font-medium text-primary hover:underline">
+                {tudo ? 'Mostrar menos' : `Mostrar mais ${sobra} ${rotulo}`}
+              </button>
+            </td>
+          </tr>
+        </tfoot>
+      )}
     </table>
   );
 }

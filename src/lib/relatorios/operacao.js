@@ -128,3 +128,101 @@ export function tempoPorCanal(tratativas = [], periodo = {}) {
     p90Horas: percentil(g.horas, 0.9),
   })).sort((a, b) => b.qtd - a.qtd);
 }
+
+/** Série de entrada × saída por dia, semana ou mês, com o acumulado da fila. */
+export function serie(tratativas = [], periodo = {}, granularidade = 'semana') {
+  const chaveDe = (dia) => {
+    if (granularidade === 'dia') return dia;
+    if (granularidade === 'mes') return dia.slice(0, 7);
+    const d = new Date(`${dia}T12:00:00Z`);
+    d.setUTCDate(d.getUTCDate() - ((d.getUTCDay() + 6) % 7));
+    return d.toISOString().slice(0, 10);
+  };
+  const pontos = {};
+  const somar = (valor, campo) => {
+    const dia = diaSP(valor);
+    if (!dia || !noPeriodo(dia, periodo)) return;
+    const k = chaveDe(dia);
+    pontos[k] ||= { chave: k, entraram: 0, sairam: 0 };
+    pontos[k][campo] += 1;
+  };
+  for (const t of tratativas) {
+    if (t.excluida || t.status === 'excluida') continue;
+    somar(t.data_registro || t.created_date, 'entraram');
+    if (ENCERRADA(t)) somar(t.data_encerramento, 'sairam');
+  }
+  let acumulado = 0;
+  return Object.values(pontos).sort((a, b) => a.chave.localeCompare(b.chave)).map((p) => {
+    acumulado += p.entraram - p.sairam;
+    return { ...p, saldo: p.entraram - p.sairam, acumulado };
+  });
+}
+
+/** Produtividade de cada agente no período (quem encerra quanto, e como). */
+export function produtividade(tratativas = [], periodo = {}, agora = new Date()) {
+  const dias = diasDoPeriodo(periodo, agora) || 1;
+  const abertasPorAgente = {};
+  for (const t of tratativas.filter(ABERTA)) {
+    const nome = t.agente_responsavel_nome || 'Sem agente';
+    abertasPorAgente[nome] = (abertasPorAgente[nome] || 0) + 1;
+  }
+  const porAgente = {};
+  for (const t of tratativas) {
+    if (!ENCERRADA(t) || t.excluida || !noPeriodo(t.data_encerramento, periodo)) continue;
+    const nome = t.agente_responsavel_nome || 'Sem agente';
+    porAgente[nome] ||= { nome, encerradas: 0, noPrazo: 0, horas: [], porCanal: {} };
+    const a = porAgente[nome];
+    a.encerradas += 1;
+    if (t.encerrado_no_sla === true) a.noPrazo += 1;
+    if (Number(t.tempo_total_minutos) > 0) a.horas.push(Number(t.tempo_total_minutos) / 60);
+    a.porCanal[t.tipo_tratativa] = (a.porCanal[t.tipo_tratativa] || 0) + 1;
+  }
+  const mediana = (l) => { if (!l.length) return null; const s = [...l].sort((x, y) => x - y); const m = Math.floor(s.length / 2); return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2; };
+  return Object.values(porAgente).map((a) => ({
+    nome: a.nome,
+    encerradas: a.encerradas,
+    porDia: a.encerradas / dias,
+    pctNoPrazo: a.encerradas ? (a.noPrazo / a.encerradas) * 100 : null,
+    medianaHoras: mediana(a.horas),
+    abertasAgora: abertasPorAgente[a.nome] || 0,
+    porCanal: a.porCanal,
+  })).sort((x, y) => y.encerradas - x.encerradas);
+}
+
+/** Idade da fila: há quanto tempo as abertas estão esperando. */
+export function idadeDaFila(tratativas = [], agora = new Date()) {
+  const abertas = tratativas.filter(ABERTA);
+  const idades = abertas.map((t) => (agora - new Date(t.data_registro || t.created_date)) / (24 * HORA)).filter((d) => Number.isFinite(d));
+  const faixa = (min, max) => abertas.filter((t) => {
+    const prazo = prazoDaTratativa(t);
+    if (!prazo || prazo >= agora) return false;
+    const atraso = (agora - prazo) / (24 * HORA);
+    return atraso >= min && (max === null || atraso < max);
+  }).length;
+  const ordenadas = [...idades].sort((a, b) => a - b);
+  return {
+    medianaDias: ordenadas.length ? ordenadas[Math.floor(ordenadas.length / 2)] : null,
+    maisAntigaDias: ordenadas.length ? ordenadas[ordenadas.length - 1] : null,
+    atraso: { ate1: faixa(0, 1), de1a7: faixa(1, 7), de8a30: faixa(7, 30), mais30: faixa(30, null) },
+  };
+}
+
+/** Avisos do período — só o que tem número por trás. */
+export function avisosDaOperacao({ fila, es, tempos = [], produtividade: prod = [] }) {
+  const avisos = [];
+  if (fila.total > 0 && fila.vencidas / fila.total >= 0.5) {
+    avisos.push({ tom: 'critico', texto: `${fila.vencidas} das ${fila.total} tratativas abertas já passaram do prazo.`, acao: 'Comece pelas mais antigas: elas estão na lista ao lado.' });
+  }
+  if (es.saldo > 0) {
+    avisos.push({ tom: 'atencao', texto: `Entraram ${es.saldo} tratativas a mais do que saíram no período.`, acao: 'A fila cresce enquanto isso se mantiver.' });
+  }
+  const ruins = tempos.filter((t) => t.pctNoPrazo !== null && t.pctNoPrazo < 50);
+  if (ruins.length) {
+    avisos.push({ tom: 'atencao', texto: `Menos da metade encerrou no prazo em: ${ruins.map((t) => t.tipo).join(', ')}.`, acao: 'Vale rever o prazo do tipo ou a rotina de acompanhamento.' });
+  }
+  const sobrecarregado = [...prod].sort((a, b) => b.abertasAgora - a.abertasAgora)[0];
+  if (sobrecarregado && sobrecarregado.abertasAgora >= 10) {
+    avisos.push({ tom: 'atencao', texto: `${sobrecarregado.nome} está com ${sobrecarregado.abertasAgora} tratativas abertas.`, acao: 'Considere redistribuir parte da fila.' });
+  }
+  return avisos;
+}

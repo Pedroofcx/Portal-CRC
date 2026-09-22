@@ -4,6 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ciclosEmOrdem } from '@/lib/bonusManual';
+import { ATALHOS, intervaloDoAtalho } from '@/lib/relatorios/periodo';
 
 /**
  * Peças comuns dos relatórios (padrão aprovado em 22/09/2026): a pergunta que
@@ -42,42 +43,44 @@ export function Pergunta({ pergunta, explicacao }) {
 const dataCurta = (iso) => (iso ? `${iso.slice(8, 10)}/${iso.slice(5, 7)}/${iso.slice(0, 4)}` : '');
 
 /**
- * Período: um ciclo da premiação ou datas escolhidas. `valor` =
- * { chave: cicloId | 'personalizado', inicio, fim }.
+ * Período: as datas mandam, e sempre dá para digitá-las. Os atalhos (últimos
+ * 30 dias, este mês…) e os ciclos da premiação só preenchem as datas — o
+ * relatório nunca fica preso a um ciclo (decisão de Pedro, 22/09/2026).
+ * `valor` = { chave, inicio, fim }.
  */
 export function FiltroPeriodo({ ciclos = [], valor, onChange }) {
   const lista = ciclosEmOrdem(ciclos);
   const escolher = (chave) => {
-    if (chave === 'personalizado') { onChange({ ...valor, chave }); return; }
+    const atalho = intervaloDoAtalho(chave);
+    if (atalho) { onChange({ chave, ...atalho }); return; }
     const c = lista.find((x) => x.id === chave);
     if (c) onChange({ chave, inicio: c.data_inicio, fim: c.data_fim });
   };
+  const mudarData = (campo, v) => onChange({ ...valor, chave: 'personalizado', [campo]: v });
   return (
     <div className="flex flex-wrap items-end gap-3">
       <div className="space-y-1">
-        <Label htmlFor="rel-periodo" className="text-xs">Período</Label>
+        <Label htmlFor="rel-inicio" className="text-xs">De</Label>
+        <Input id="rel-inicio" type="date" className="w-40 min-w-0" value={valor.inicio || ''} onChange={(e) => mudarData('inicio', e.target.value)} />
+      </div>
+      <div className="space-y-1">
+        <Label htmlFor="rel-fim" className="text-xs">Até</Label>
+        <Input id="rel-fim" type="date" className="w-40 min-w-0" value={valor.fim || ''} onChange={(e) => mudarData('fim', e.target.value)} />
+      </div>
+      <div className="space-y-1">
+        <Label htmlFor="rel-atalho" className="text-xs">Atalhos</Label>
         <Select value={valor.chave} onValueChange={escolher}>
-          <SelectTrigger id="rel-periodo" className="w-72 max-w-full"><SelectValue /></SelectTrigger>
+          <SelectTrigger id="rel-atalho" className="w-56 max-w-full"><SelectValue placeholder="Escolher" /></SelectTrigger>
           <SelectContent>
+            {ATALHOS.map((a) => <SelectItem key={a.chave} value={a.chave}>{a.rotulo}</SelectItem>)}
+            {lista.length > 0 && <SelectItem value="separador" disabled>— ciclos da premiação —</SelectItem>}
             {lista.map((c) => (
               <SelectItem key={c.id} value={c.id}>{c.nome} · {dataCurta(c.data_inicio).slice(0, 5)} a {dataCurta(c.data_fim).slice(0, 5)}</SelectItem>
             ))}
-            <SelectItem value="personalizado">Escolher as datas</SelectItem>
+            <SelectItem value="personalizado" disabled={valor.chave !== 'personalizado'}>Datas escolhidas</SelectItem>
           </SelectContent>
         </Select>
       </div>
-      {valor.chave === 'personalizado' && (
-        <>
-          <div className="space-y-1">
-            <Label htmlFor="rel-inicio" className="text-xs">De</Label>
-            <Input id="rel-inicio" type="date" className="w-40 min-w-0" value={valor.inicio || ''} onChange={(e) => onChange({ ...valor, inicio: e.target.value })} />
-          </div>
-          <div className="space-y-1">
-            <Label htmlFor="rel-fim" className="text-xs">Até</Label>
-            <Input id="rel-fim" type="date" className="w-40 min-w-0" value={valor.fim || ''} onChange={(e) => onChange({ ...valor, fim: e.target.value })} />
-          </div>
-        </>
-      )}
     </div>
   );
 }

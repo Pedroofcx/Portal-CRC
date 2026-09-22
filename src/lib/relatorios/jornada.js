@@ -32,6 +32,8 @@ export function resumoJornada(tratativas = [], periodo = {}) {
     .map((e) => ({
       ...e,
       motivos: agrupar(e.itens, (t) => t.motivo_nome).sort((a, b) => b.casos - a.casos).slice(0, 3).map(({ nome, casos }) => ({ nome, casos })),
+      canais: agrupar(e.itens, (t) => t.tipo_tratativa).sort((a, b) => b.casos - a.casos).map(({ nome, casos }) => ({ nome, casos })),
+      noPrazo: e.itens.filter((t) => t.encerrado_no_sla === true).length,
     }))
     .sort((a, b) => b.custo - a.custo);
 
@@ -55,8 +57,13 @@ export function resumoJornada(tratativas = [], periodo = {}) {
     .map((c) => ({ ...c, tipos: [...c.tipos] }))
     .sort((a, b) => b.qtd - a.qtd);
 
+  const causas = agrupar(encerradas, (t) => t.causa_primaria)
+    .map(({ nome, casos, custo }) => ({ nome, casos, custo }))
+    .sort((a, b) => b.casos - a.casos);
+
   return {
     encerradas: encerradas.length,
+    causas,
     custoTotal: encerradas.reduce((s, t) => s + custoDoCaso(t), 0),
     semEtapa: encerradas.filter((t) => !t.etapa_jornada_nome).length,
     etapas,

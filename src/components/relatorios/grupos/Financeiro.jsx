@@ -1,21 +1,34 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { formatDateSP, tipoTratativaLabels } from '@/components/utils/helpers';
+import { Button } from '@/components/ui/button';
 import { Cartao, Linha } from '@/components/ui/Cartao';
 import TabelaResumida from '@/components/ui/TabelaResumida';
-import { resumoFinanceiro, EXPLICACAO_DO_GRUPO } from '@/lib/relatorios/financeiro';
+import { resumoFinanceiro, financeiroPorMes, financeiroPorDimensao, EXPLICACAO_DO_GRUPO } from '@/lib/relatorios/financeiro';
 import { ComoCalculamos, Pergunta, brl, periodoPorExtenso } from '@/components/relatorios/hub/Pecas';
 
 /**
  * Relatórios › Financeiro — quanto custou e quanto recuperamos.
  * As contas moram em src/lib/relatorios/financeiro.js (testadas).
  */
+const MESES = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
+const mesCurto = (m) => `${MESES[Number(m.slice(5, 7)) - 1]}/${m.slice(2, 4)}`;
+const DIMENSOES = [
+  { chave: 'agente_responsavel_nome', rotulo: 'Por agente' },
+  { chave: 'plano_cliente', rotulo: 'Por plano' },
+  { chave: 'segmento_cliente', rotulo: 'Por segmento' },
+  { chave: 'motivo_nome', rotulo: 'Por motivo' },
+];
+
 const linkDa = (t) => `${createPageUrl('TratativaDetalhe')}?id=${t.id}`;
 const nomeDa = (t) => [t.id_interno, t.nome_cliente].filter(Boolean).join(' · ') || 'Tratativa';
 
 export default function Financeiro({ tratativas, periodo, ehGestor }) {
+  const [dimensao, setDimensao] = useState('agente_responsavel_nome');
   const r = useMemo(() => resumoFinanceiro(tratativas, periodo), [tratativas, periodo]);
+  const meses = useMemo(() => financeiroPorMes(tratativas, periodo), [tratativas, periodo]);
+  const porDimensao = useMemo(() => financeiroPorDimensao(tratativas, periodo, dimensao), [tratativas, periodo, dimensao]);
   const canais = Object.entries(r.custoPorCanal).sort((a, b) => b[1] - a[1]);
 
   return (
@@ -82,6 +95,66 @@ export default function Financeiro({ tratativas, periodo, ehGestor }) {
             <p><strong>Recuperado</strong> — o cliente pagou, ou cancelou a contestação: nada perdido.</p>
             <p><strong>Em andamento</strong> — ainda sem desfecho: aparece aqui, mas fica fora das somas até encerrar.</p>
           </ComoCalculamos>
+        </Cartao>
+      </div>
+
+      <div className="grid items-start gap-6 xl:grid-cols-5">
+        <Cartao titulo="Mês a mês" className="xl:col-span-2">
+          {meses.length === 0 ? (
+            <p className="text-sm text-muted-foreground">Nada encerrado no período.</p>
+          ) : (
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-border text-xs text-muted-foreground">
+                  <th className="py-2 text-left font-medium">Mês</th>
+                  <th className="py-2 text-right font-medium">Casos</th>
+                  <th className="py-2 text-right font-medium">Custou</th>
+                  <th className="py-2 text-right font-medium">Recuperado</th>
+                </tr>
+              </thead>
+              <tbody>
+                {meses.map((m) => (
+                  <tr key={m.mes} className="h-10 border-b border-border last:border-0">
+                    <td className="text-foreground">{mesCurto(m.mes)}</td>
+                    <td className="text-right tabular-nums">{m.casos}</td>
+                    <td className="text-right tabular-nums">{brl(ehGestor ? m.total : m.total - m.custoOperacional)}</td>
+                    <td className="text-right tabular-nums">{brl(m.recuperado)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </Cartao>
+
+        <Cartao
+          titulo="Onde o dinheiro foi"
+          className="xl:col-span-3"
+          extra={(
+            <div className="flex flex-wrap gap-1">
+              {DIMENSOES.map((d) => (
+                <Button key={d.chave} size="sm" variant={dimensao === d.chave ? 'default' : 'outline'} onClick={() => setDimensao(d.chave)}>{d.rotulo}</Button>
+              ))}
+            </div>
+          )}
+        >
+          {porDimensao.length === 0 ? (
+            <p className="text-sm text-muted-foreground">Nada encerrado no período.</p>
+          ) : (
+            <TabelaResumida
+              linhas={porDimensao.slice(0, 12)}
+              chaveDaLinha={(d) => d.nome}
+              rotuloDetalhe="Ver a composição"
+              colunas={[
+                { chave: 'nome', rotulo: DIMENSOES.find((d) => d.chave === dimensao)?.rotulo.replace('Por ', '') ?? '', alinhar: 'esquerda', principal: true, valor: (d) => d.nome },
+                { chave: 'casos', rotulo: 'Casos', principal: true, valor: (d) => d.casos },
+                { chave: 'total', rotulo: 'Custou', alinhar: 'direita', principal: true, valor: (d) => brl(ehGestor ? d.total : d.total - d.custoOperacional) },
+                { chave: 'dev', rotulo: 'Devolvido ao cliente', valor: (d) => brl(d.devolvido) },
+                { chave: 'perda', rotulo: 'Perdido em contestações', valor: (d) => brl(d.perda) },
+                { chave: 'custo', rotulo: 'Tempo da equipe', valor: (d) => (ehGestor ? brl(d.custoOperacional) : '—') },
+                { chave: 'rec', rotulo: 'Recuperado', valor: (d) => brl(d.recuperado) },
+              ]}
+            />
+          )}
         </Cartao>
       </div>
 

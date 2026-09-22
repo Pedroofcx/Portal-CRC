@@ -17,7 +17,7 @@
  *
  * RISCO REPUTACIONAL: só contado (casos), nunca somado em R$.
  */
-import { noPeriodo, dataDeReferencia } from './periodo.js';
+import { noPeriodo, dataDeReferencia, diaSP } from './periodo.js';
 import { motivoDeRisco } from '../../components/jornada/inteligenciaFinanceira.js';
 
 const ENCERRADA = ['encerrada', 'aguardando_confirmacao_reabertura'];
@@ -135,4 +135,53 @@ export function resumoFinanceiro(tratativas = [], periodo = {}) {
     custoPorCanal,
     risco: { qtd: riscos.length, porMotivo: riscoPorMotivo, itens: riscos },
   };
+}
+
+/** Mês a mês: o que custou e o que foi recuperado. */
+export function financeiroPorMes(tratativas = [], periodo = {}) {
+  const meses = {};
+  const somar = (mes, campo, valor) => {
+    meses[mes] ||= { mes, devolvido: 0, perdaContestacoes: 0, custoOperacional: 0, perdaReceita: 0, recuperado: 0, casos: 0 };
+    meses[mes][campo] += valor;
+  };
+  for (const t of tratativas) {
+    if (!valida(t) || !ENCERRADA.includes(t.status) || !noPeriodo(t.data_encerramento, periodo)) continue;
+    const mes = String(diaSP(t.data_encerramento)).slice(0, 7);
+    somar(mes, 'casos', 1);
+    somar(mes, 'custoOperacional', num(t.custo_operacional_reais));
+    somar(mes, 'perdaReceita', num(t.valor_perda_receita));
+    if (t.tipo_tratativa === 'contestacao') {
+      const d = desfechoDaContestacao(t);
+      somar(mes, 'perdaContestacoes', d.perda);
+      somar(mes, 'recuperado', d.recuperado);
+    } else if (t.houve_devolucao_financeira) {
+      somar(mes, 'devolvido', num(t.valor_devolvido_cliente));
+    }
+  }
+  return Object.values(meses)
+    .map((m) => ({ ...m, total: m.devolvido + m.perdaContestacoes + m.custoOperacional + m.perdaReceita }))
+    .sort((a, b) => a.mes.localeCompare(b.mes));
+}
+
+/** Quanto custou por agente, por plano e por segmento do cliente. */
+export function financeiroPorDimensao(tratativas = [], periodo = {}, campo = 'agente_responsavel_nome') {
+  const mapa = {};
+  for (const t of tratativas) {
+    if (!valida(t) || !ENCERRADA.includes(t.status) || !noPeriodo(t.data_encerramento, periodo)) continue;
+    const k = t[campo] || 'Não informado';
+    mapa[k] ||= { nome: k, casos: 0, devolvido: 0, perda: 0, custoOperacional: 0, recuperado: 0 };
+    const m = mapa[k];
+    m.casos += 1;
+    m.custoOperacional += num(t.custo_operacional_reais);
+    if (t.tipo_tratativa === 'contestacao') {
+      const d = desfechoDaContestacao(t);
+      m.perda += d.perda;
+      m.recuperado += d.recuperado;
+    } else if (t.houve_devolucao_financeira) {
+      m.devolvido += num(t.valor_devolvido_cliente);
+    }
+  }
+  return Object.values(mapa)
+    .map((m) => ({ ...m, total: m.devolvido + m.perda + m.custoOperacional }))
+    .sort((a, b) => b.total - a.total);
 }

@@ -1,5 +1,5 @@
 import db from '@/api/db';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { BarChart3 } from 'lucide-react';
@@ -8,6 +8,7 @@ import PageHeader from '@/components/ui/PageHeader';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import { Cartao } from '@/components/ui/Cartao';
 import { FiltroPeriodo } from '@/components/relatorios/hub/Pecas';
+import { intervaloDoAtalho } from '@/lib/relatorios/periodo';
 import Financeiro from '@/components/relatorios/grupos/Financeiro';
 import Pessoas from '@/components/relatorios/grupos/Pessoas';
 import Operacao from '@/components/relatorios/grupos/Operacao';
@@ -47,12 +48,8 @@ export default function Relatorios() {
   const eu = colaboradores.find((c) => c.email?.toLowerCase() === user?.email?.toLowerCase());
   const ehGestor = eu?.papel === 'gestor';
 
-  // Período padrão: o ciclo ativo da premiação.
-  const [periodo, setPeriodo] = useState({ chave: '', inicio: '', fim: '' });
-  const cicloAtivo = useMemo(() => ciclos.find((c) => c.ativo) ?? null, [ciclos]);
-  useEffect(() => {
-    if (!periodo.chave && cicloAtivo) setPeriodo({ chave: cicloAtivo.id, inicio: cicloAtivo.data_inicio, fim: cicloAtivo.data_fim });
-  }, [cicloAtivo, periodo.chave]);
+  // Período padrão: os últimos 90 dias. O ciclo é só um atalho, não uma prisão.
+  const [periodo, setPeriodo] = useState(() => ({ chave: 'ultimos90', ...intervaloDoAtalho('ultimos90') }));
 
   const irPara = (chave) => navigate({ search: `?grupo=${chave}` }, { replace: true });
 
