@@ -85,3 +85,18 @@ export function FiltroPeriodo({ ciclos = [], valor, onChange }) {
 export const brl = (v) => Number(v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 export const periodoPorExtenso = ({ inicio, fim } = {}) =>
   inicio && fim ? `de ${dataCurta(inicio)} a ${dataCurta(fim)}` : inicio ? `desde ${dataCurta(inicio)}` : fim ? `até ${dataCurta(fim)}` : 'em todo o período';
+
+/**
+ * Baixa um CSV que abre certo no Excel: cada campo entre aspas (nome com
+ * vírgula não quebra mais a coluna), separador ";" e BOM para os acentos.
+ */
+export function baixarCSV(nomeArquivo, cabecalho, linhas) {
+  const campo = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;
+  const texto = [cabecalho, ...linhas].map((l) => l.map(campo).join(';')).join('\r\n');
+  const url = URL.createObjectURL(new Blob([`﻿${texto}`], { type: 'text/csv;charset=utf-8;' }));
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = nomeArquivo;
+  a.click();
+  URL.revokeObjectURL(url);
+}

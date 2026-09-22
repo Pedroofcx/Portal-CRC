@@ -28,6 +28,7 @@ import { calcularDadosConsolidados } from '../src/lib/hanseiDados.js';
 import { desfechoDaContestacao, resumoFinanceiro } from '../src/lib/relatorios/financeiro.js';
 import { pessoasNoPeriodo } from '../src/lib/relatorios/pessoas.js';
 import { filaDeHoje, entradaESaida, tempoPorCanal } from '../src/lib/relatorios/operacao.js';
+import { resumoDoCanal } from '../src/lib/relatorios/canais.js';
 
 let passou = 0;
 let falhou = 0;
@@ -594,6 +595,20 @@ console.log('\n== relatorio de operacao ==');
   const tc = tempoPorCanal([1, 2, 3, 100].map((h, i) => enc(String(i), '2026-09-05', { tipo_tratativa: 'reclame_aqui', tempo_total_minutos: h * 60, encerrado_no_sla: h < 24 })), { inicio: '2026-09-01', fim: '2026-09-30' });
   checa('mediana nao e puxada pelo caso de 100h', String(tc[0].medianaHoras), '2.5');
   checa('% no prazo', String(tc[0].pctNoPrazo), '75');
+}
+
+console.log('\n== relatorio de canais ==');
+{
+  const ra = (nota, extra = {}) => ({ tipo_tratativa: 'reclame_aqui', status: 'encerrada', data_encerramento: '2026-08-10T15:00:00Z', nota_reclame_aqui: nota, ...extra });
+  const r = resumoDoCanal([ra(10, { voltaria_fazer_negocio: true }), ra(0), ra(8), ra(null)], 'reclame_aqui', { inicio: '2026-08-01', fim: '2026-08-31' });
+  checa('nota media conta a nota 0: (10+0+8)/3 = 6', String(r.notaMedia), '6');
+  checa('sem nota fica fora da media', `${r.avaliadas}/${r.semNota}`, '3/1');
+  checa('faixas de nota', `${r.notas.ate6}/${r.notas.de7a8}/${r.notas.dez}`, '1/1/1');
+  const c = resumoDoCanal([
+    { tipo_tratativa: 'contestacao', status: 'encerrada', data_encerramento: '2026-08-10T15:00:00Z', status_resolucao_contestacao: 'contestou_prazo_cancelamento', valor_contestado_inicial: 10 },
+    { tipo_tratativa: 'contestacao', status: 'em_andamento', data_registro: '2026-08-10T15:00:00Z' },
+  ], 'contestacao', { inicio: '2026-08-01', fim: '2026-08-31' });
+  checa('contestou aparece como perda', `${c.perdidas}/${c.emAndamento}`, '1/1');
 }
 
 console.log('\n== conferencia de cores (o verificador pega o que deve) ==');
