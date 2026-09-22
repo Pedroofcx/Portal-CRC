@@ -304,3 +304,10 @@ Conferido: o Ciclo 1 ficou idêntico ao anterior.
 **Onde vive:** `src/lib/indicadoresCiclo.js`, `situacaoReplicavel` e
 `replicavelExigeAprovacao` em `helpers.js`, `src/pages/SolucoesReplicaveis.jsx`,
 `supabase/migrations/20_replicaveis_e_regras_de_pontos.sql`.
+
+**Confirmado por Pedro (22/09/2026):**
+- o +1 "sem reabertura" **não exige** encerramento no prazo — quem encerrou
+  fora do prazo e o cliente não voltou em 7 dias ganha o ponto;
+- **performance:** 100% das ligações atendidas = 10 pts; 90% a 99% = 7 pts;
+  abaixo de 90% não pontua (o documento dizia 95%);
+- **critério de desempate:** ainda não definido.

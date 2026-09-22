@@ -99,13 +99,14 @@ export function pontosDeTratativasNoCiclo(todas = [], ciclo, { encerrada, noCicl
       data_encerramento: t.data_encerramento,
       encerrado_no_sla: t.encerrado_no_sla,
       nome_cliente: t.nome_cliente,
+      id_interno: t.id_interno,
     });
     reg.pontosEncerramento += pontos;
   }
 
   for (const t of aberturasNoCiclo(todas, ciclo)) {
     const reg = doAgente(t.agente_responsavel_id);
-    reg.aberturas.push({ tratativa_id: t.id, data_registro: t.data_registro, tipo_tratativa: t.tipo_tratativa, nome_cliente: t.nome_cliente });
+    reg.aberturas.push({ tratativa_id: t.id, data_registro: t.data_registro, tipo_tratativa: t.tipo_tratativa, nome_cliente: t.nome_cliente, id_interno: t.id_interno });
     reg.pontosAbertura += PONTOS_POR_ABERTURA;
   }
   return porAgente;

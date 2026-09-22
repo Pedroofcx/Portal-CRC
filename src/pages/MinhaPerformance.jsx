@@ -28,6 +28,7 @@ import { createPageUrl } from '@/utils';
 import PDIModal from '@/components/performance/PDIModal';
 import FeedbackModal from '@/components/performance/FeedbackModal';
 import EmptyPerformanceState from '@/components/performance/EmptyPerformanceState';
+import ExtratoPontos from '@/components/performance/ExtratoPontos';
 import ListaResumida from '@/components/ui/ListaResumida';
 
 export default function MinhaPerformance() {
@@ -71,9 +72,7 @@ export default function MinhaPerformance() {
 
   const {
     totalPontos: totalPontosAgente,
-    pontosCalculados,
-    pontuacaoSalva: _minhaPontuacao,
-    detalhamentoPontos,
+    extrato,
     tratativasEncerradas,
     trimestre,
     isLoading: loadingPontuacao,
@@ -168,7 +167,7 @@ export default function MinhaPerformance() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
           title="Pontuação Total"
-          value={totalPontosAgente.toFixed(1)}
+          value={totalPontosAgente.toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}
           subtitle={`pts no ${trimestre}`}
           icon={Trophy}
           color="amber"
@@ -196,17 +195,18 @@ export default function MinhaPerformance() {
       </div>
 
       <div className="grid lg:grid-cols-3 gap-6">
-        {/* Detalhamento de Pontos */}
+        {/* Extrato de pontos: cada ponto com o motivo, e o que está a caminho */}
         <Card className="lg:col-span-2 border-0 shadow-sm">
           <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle className="flex items-center gap-2">
                 <Star className="w-5 h-5 text-warning" />
-                Detalhamento de Pontos - {trimestre}
+                Extrato de pontos · {trimestre}
               </CardTitle>
-              <button 
+              <button
                 onClick={() => setDetalhamentoExpanded(!detalhamentoExpanded)}
                 className="p-2 hover:bg-muted rounded-lg transition-colors"
+                aria-label={detalhamentoExpanded ? 'Recolher extrato' : 'Abrir extrato'}
               >
                 {detalhamentoExpanded ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
               </button>
@@ -215,48 +215,11 @@ export default function MinhaPerformance() {
           <CardContent>
             {!detalhamentoExpanded ? (
               <div className="text-center py-4 text-muted-foreground">
-                <p className="text-sm">Clique para expandir o detalhamento</p>
-                <p className="text-2xl font-bold text-warning mt-2">{pontosCalculados.toFixed(1)} pts</p>
-              </div>
-            ) : detalhamentoPontos.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
-                <Award className="w-10 h-10 mx-auto mb-2 opacity-50" />
-                <p>Nenhuma pontuação registrada neste trimestre</p>
-                <p className="text-sm mt-1">Encerre tratativas para acumular pontos</p>
+                <p className="text-sm">Clique para abrir o extrato</p>
+                <p className="text-2xl font-bold text-foreground mt-2">{totalPontosAgente.toFixed(1)} pts</p>
               </div>
             ) : (
-              <div>
-                <ListaResumida
-                  className="space-y-3"
-                  limite={6}
-                  rotulo="pontos"
-                  itens={detalhamentoPontos}
-                  renderItem={(item, index) => (
-                  <div key={index} className="flex items-center justify-between p-3 bg-muted rounded-lg hover:bg-muted transition-colors">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 bg-warning-soft rounded-full flex items-center justify-center flex-shrink-0">
-                        <Star className="w-4 h-4 text-warning" />
-                      </div>
-                      <div>
-                        <p className="font-medium text-foreground text-sm">{item.tipo}</p>
-                        <p className="text-xs text-muted-foreground">
-                          Tratativa #{item.tratativa_id?.substring(0, 8)}
-                        </p>
-                      </div>
-                    </div>
-                    <Badge className="bg-warning-soft text-warning border-warning/25">
-                      +{item.pontos} pts
-                    </Badge>
-                  </div>
-                  )}
-                />
-                {/* O total era "sticky" no rodapé de uma caixa que rolava; sem
-                    rolagem, é simplesmente a última linha. */}
-                <div className="flex justify-between items-center pt-4 border-t mt-4">
-                  <span className="font-semibold text-foreground">Total de Pontos</span>
-                  <span className="text-2xl font-bold text-warning">{pontosCalculados.toFixed(1)}</span>
-                </div>
-              </div>
+              <ExtratoPontos extrato={extrato} />
             )}
           </CardContent>
         </Card>

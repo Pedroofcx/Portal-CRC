@@ -5,6 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import { STATUS_ENCERRADOS, somaDoBonus } from '@/lib/bonusManual';
 import { pontosDeTratativasNoCiclo, PONTOS_POR_ABERTURA } from '@/lib/pontuacaoCiclo';
 import { indicadoresDoCiclo } from '@/lib/indicadoresCiclo';
+import { extratoDoAgente } from '@/lib/extratoPontos';
 
 /**
  * Verifica se uma tratativa está dentro do período de um ciclo trimestral.
@@ -97,10 +98,11 @@ export function usePontuacaoAgente(colaboradorId) {
     refetchOnWindowFocus: false,
   });
 
-  const bonusManual = useMemo(() => {
-    if (!colaboradorId || !cicloAtivo) return 0;
-    return somaDoBonus(lancamentos.filter(p => p.colaborador_id === colaboradorId && p.ciclo_id === cicloAtivo.id));
+  const meusLancamentos = useMemo(() => {
+    if (!colaboradorId || !cicloAtivo) return [];
+    return lancamentos.filter(p => p.colaborador_id === colaboradorId && p.ciclo_id === cicloAtivo.id);
   }, [lancamentos, colaboradorId, cicloAtivo]);
+  const bonusManual = somaDoBonus(meusLancamentos);
 
   // Indicadores do ciclo (CSAT, performance, avaliação CX) — mesma busca e
   // mesma conta do ranking.
@@ -118,6 +120,12 @@ export function usePontuacaoAgente(colaboradorId) {
 
   const totalPontos = pontosCalculados + indicadores.pontos.total + bonusManual;
 
+  // Extrato: cada ponto com o motivo, e o que ainda está a caminho.
+  const extrato = useMemo(
+    () => extratoDoAgente({ registro: minhas, indicadores, lancamentos: meusLancamentos, todas }),
+    [minhas, indicadores, meusLancamentos, todas],
+  );
+
   const trimestre = cicloAtivo?.nome ?? 'Ciclo Atual';
 
   return {
@@ -125,6 +133,7 @@ export function usePontuacaoAgente(colaboradorId) {
     pontosCalculados,
     bonusManual,
     indicadores,
+    extrato,
     detalhamentoPontos,
     tratativasEncerradas,
     cicloAtivo,

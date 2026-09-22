@@ -239,7 +239,9 @@ export const tipoTratativaLabels = {
   reclamacao_interna: 'Reclamação Interna',
   reclame_aqui: 'Reclame Aqui',
   google_meu_negocio: 'Google Meu Negócio',
-  contestacao: 'Contestação'
+  contestacao: 'Contestação',
+  administrativas: 'Administrativa',
+  procon: 'Procon'
 };
 
 // Labels para prioridades

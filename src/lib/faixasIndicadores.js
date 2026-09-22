@@ -12,8 +12,8 @@
 export const FAIXAS = {
   // CSAT mensal consolidado: 85–89% = 7, 90–94% = 9, >= 95% = 10.
   csat: [{ min: 95, pontos: 10 }, { min: 90, pontos: 9 }, { min: 85, pontos: 7 }],
-  // Performance sobre a meta: >= 100% = 10, >= 95% = 7.
-  performance: [{ min: 100, pontos: 10 }, { min: 95, pontos: 7 }],
+  // Performance (ligações atendidas ÷ recebidas): 100% = 10, 90% a 99% = 7 (Pedro, 22/09/2026).
+  performance: [{ min: 100, pontos: 10 }, { min: 90, pontos: 7 }],
   // Avaliação quinzenal (média): >= 4,5 = 10, 4,3–4,4 = 4, 4,2 = 1.
   cx: [{ min: 4.5, pontos: 10 }, { min: 4.3, pontos: 4 }, { min: 4.2, pontos: 1 }],
 };

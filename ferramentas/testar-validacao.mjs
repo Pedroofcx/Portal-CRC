@@ -23,6 +23,7 @@ import { montarBonus, somaDoBonus, ciclosEmOrdem } from '../src/lib/bonusManual.
 import { vencidasDaEquipe, situacaoDoPrazo, ordenarPorPrazo, registrosNoCiclo, percentualNoSla, acompanhamentoDa } from '../src/lib/cicloEquipe.js';
 import { calculateCSATPoints, calculateCXPoints, calculateTratativaPoints, situacaoReplicavel } from '../src/components/utils/helpers.js';
 import { reaberturaDe, comReaberturaApurada, aberturasNoCiclo, cicloPagaAbertura, pontosDeTratativasNoCiclo } from '../src/lib/pontuacaoCiclo.js';
+import { extratoDoAgente } from '../src/lib/extratoPontos.js';
 
 let passou = 0;
 let falhou = 0;
@@ -162,14 +163,14 @@ checa('CSAT 84,9 nao pontua', String(pontosDaFaixa('csat', 84.9)), '0');
 checa('CSAT 85 vale 7', String(pontosDaFaixa('csat', 85)), '7');
 checa('CSAT 92 vale 9', String(pontosDaFaixa('csat', 92)), '9');
 checa('CSAT 95 vale 10', String(pontosDaFaixa('csat', 95)), '10');
-checa('performance 94,9 nao pontua', String(pontosDaFaixa('performance', 94.9)), '0');
-checa('performance 97 vale 7', String(pontosDaFaixa('performance', 97)), '7');
+checa('performance 89,9 nao pontua', String(pontosDaFaixa('performance', 89.9)), '0');
+checa('performance 90 vale 7', String(pontosDaFaixa('performance', 90)), '7');
 checa('CX 4,2 vale 1', String(pontosDaFaixa('cx', 4.2)), '1');
 checa('CX 4,4 vale 4', String(pontosDaFaixa('cx', 4.4)), '4');
 checa('sem valor nao pontua', String(pontosDaFaixa('csat', null)), '0');
 checa('proxima do CSAT 92 e 95 com +1', JSON.stringify(proximaFaixa('csat', 92)), '{"limiar":95,"pontos":10,"ganho":1}');
 checa('proxima do CX 4,4 e 4,5 com +6', JSON.stringify(proximaFaixa('cx', 4.4)), '{"limiar":4.5,"pontos":10,"ganho":6}');
-checa('proxima abaixo do minimo e a primeira faixa', JSON.stringify(proximaFaixa('performance', 80)), '{"limiar":95,"pontos":7,"ganho":7}');
+checa('proxima abaixo do minimo e a primeira faixa', JSON.stringify(proximaFaixa('performance', 80)), '{"limiar":90,"pontos":7,"ganho":7}');
 checa('na faixa maxima nao ha proxima', String(proximaFaixa('csat', 97)), 'null');
 checa('helpers antigos leem a mesma fonte', String(calculateCSATPoints(90) + calculateCXPoints(4.5)), '19');
 
@@ -496,6 +497,27 @@ console.log('\n== solucao replicavel: do Ciclo 2 em diante, so com aprovacao =='
   checa('situacao: pendente', situacaoReplicavel(ri()), 'pendente');
   checa('situacao: contestada', situacaoReplicavel(ri({ solucao_replicavel_valida: false, solucao_replicavel_auditada: true })), 'contestada');
   checa('outro tipo nao entra na fila', String(situacaoReplicavel(ri({ tipo_tratativa: 'reclame_aqui' }))), 'null');
+}
+
+console.log('\n== extrato de pontos do agente ==');
+{
+  const ciclo2 = { data_inicio: '2026-06-16', data_fim: '2026-09-16' };
+  const agora = new Date('2026-09-14T12:00:00Z');
+  const t1 = { id: 't1', id_interno: 'TRT-1', nome_cliente: 'Ana', tipo_tratativa: 'reclamacao_interna', status: 'aguardando_confirmacao_reabertura', agente_responsavel_id: 'ag', id_base_cliente: '1', data_registro: '2026-09-09T12:00:00Z', data_encerramento: '2026-09-10T12:00:00Z', encerrado_no_sla: true, solucao_replicavel: true };
+  const t2 = { id: 't2', id_interno: 'TRT-2', nome_cliente: 'Bia', tipo_tratativa: 'reclamacao_interna', status: 'encerrada', agente_responsavel_id: 'ag', id_base_cliente: '2', data_registro: '2026-07-01T12:00:00Z', data_encerramento: '2026-07-02T12:00:00Z', encerrado_no_sla: false, solucao_replicavel: true, solucao_replicavel_auditada: true, solucao_replicavel_valida: false, solucao_replicavel_parecer: 'Falta a causa raiz.' };
+  const todas = [t1, t2];
+  const registro = pontosDeTratativasNoCiclo(todas, ciclo2, { encerrada: (t) => ['encerrada', 'aguardando_confirmacao_reabertura'].includes(t.status), noCiclo: () => true }, agora).get('ag');
+  const indicadores = { csat: { valor: 92 }, performance: null, cx: null, pontos: { csat: 9, performance: 0, cx: 0, total: 9 }, entraNoTotal: true };
+  const ex = extratoDoAgente({ registro, indicadores, lancamentos: [{ total_pontos: 7, descricao: 'Ritmo', created_date: '2026-09-01' }], todas, agora });
+  const grupo = (c) => ex.grupos.find((g) => g.chave === c);
+  checa('encerradas: t1 SLA +1 (reabertura aguardando); t2 fora do prazo mas sem reabertura +1', String(grupo('tratativas').subtotal), '2');
+  checa('aberturas: 2 x 0,5', String(grupo('aberturas').subtotal), '1');
+  checa('indicadores somam', String(grupo('indicadores').subtotal), '9');
+  checa('bonus entra', String(grupo('bonus').subtotal), '7');
+  checa('total = soma dos grupos', String(ex.total), '19');
+  checa('a caminho: sem reabertura com data', ex.aCaminho.find((a) => a.titulo.startsWith('Sem reabertura')).detalhe, 'Conta a partir de 17/09');
+  checa('a caminho: replicavel pendente', String(ex.aCaminho.some((a) => a.titulo.startsWith('Solução replicável ·') && a.pontos === 0.5)), 'true');
+  checa('contestada mostra o parecer', ex.aCaminho.find((a) => a.tom === 'negado').detalhe, 'Falta a causa raiz.');
 }
 
 console.log('\n== conferencia de cores (o verificador pega o que deve) ==');

@@ -594,7 +594,7 @@ Apurados mensalmente e consolidados no ciclo inteiro, a partir das apurações d
 - **Performance** = ligações atendidas (não abandonadas) ÷ ligações recebidas.
 - **Avaliação de atendimento** = média de todas as avaliações do ciclo.
 - **CSAT mensal:** 85% a 89% = **7 pts**; 90% a 94% = **9 pts**; 95% ou mais = **10 pts**.
-- **Performance de atendimento:** atingir ou superar a meta trimestral = **10 pts**; pelo menos 95% da meta = **7 pts**; abaixo de 95% não pontua.
+- **Performance de atendimento:** 100% das ligações atendidas = **10 pts**; de 90% a 99% = **7 pts**; abaixo de 90% não pontua.
 - **Avaliação de atendimento (quinzenal):** todas as avaliações do trimestre com nota 4,5 ou mais = **10 pts**; média entre 4,3 e 4,4 = **4 pts**; média 4,2 = **1 pt**; abaixo de 4,2 não pontua.
 
 ## Bônus de ritmo operacional — atualização de tickets
