@@ -88,8 +88,8 @@ const menuItems = [
     section: 'Admin',
     items: [
       { name: 'Relatórios', page: 'Relatorios', icon: BarChart3, gestorOnly: true },
-      { name: 'Auditoria de Pontuação', page: 'AuditoriaPontuacao', icon: ShieldCheck, gestorOnly: true },
       { name: 'Soluções replicáveis', page: 'SolucoesReplicaveis', icon: Lightbulb, gestorOnly: true },
+      { name: 'Auditoria de Pontuação', page: 'AuditoriaPontuacao', icon: ShieldCheck, gestorOnly: true },
       { name: 'Configurações', page: 'Configuracoes', icon: Settings, gestorOnly: true },
     ]
   }
