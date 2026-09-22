@@ -572,7 +572,7 @@ A pontuação é individual e acumulada ao longo do ciclo. Ao fim do ciclo, a ge
 **Reclamações internas**
 - Encerramento dentro do SLA: **1 ponto**.
 - Sem reabertura: **+1 ponto** quando o mesmo cliente **não abre nenhuma nova tratativa** no Portal CRC, com qualquer agente, em até **7 dias corridos** contados do encerramento. Se ele abrir no 6º dia, o ponto não conta; passado o 7º dia sem nova abertura, o ponto conta. O Portal apura sozinho.
-- Solução replicável, com causa raiz documentada no ticket: **+0,5 ponto**. A causa raiz deve estar claramente registrada para validação.
+- Solução replicável, com causa raiz documentada no ticket: **+0,5 ponto**, que só conta depois da **aprovação do gestor** no Portal. Se contestada, o parecer do gestor aparece na tratativa.
 - Total possível por tratativa: **2,5 pontos**.
 
 **Reclame Aqui** (pela nota final do consumidor)
@@ -589,7 +589,10 @@ A pontuação é individual e acumulada ao longo do ciclo. Ao fim do ciclo, a ge
 - Total possível ao fim da tratativa: **2,5 pontos**.
 
 ## Indicadores de qualidade e performance
-Apurados mensalmente e consolidados no fechamento do ciclo.
+Apurados mensalmente e consolidados no ciclo inteiro, a partir das apurações do Portal.
+- **CSAT** = (CSAT do telefone + CSAT do chat) ÷ 2. Canal sem nenhuma avaliação no ciclo fica fora da média.
+- **Performance** = ligações atendidas (não abandonadas) ÷ ligações recebidas.
+- **Avaliação de atendimento** = média de todas as avaliações do ciclo.
 - **CSAT mensal:** 85% a 89% = **7 pts**; 90% a 94% = **9 pts**; 95% ou mais = **10 pts**.
 - **Performance de atendimento:** atingir ou superar a meta trimestral = **10 pts**; pelo menos 95% da meta = **7 pts**; abaixo de 95% não pontua.
 - **Avaliação de atendimento (quinzenal):** todas as avaliações do trimestre com nota 4,5 ou mais = **10 pts**; média entre 4,3 e 4,4 = **4 pts**; média 4,2 = **1 pt**; abaixo de 4,2 não pontua.
