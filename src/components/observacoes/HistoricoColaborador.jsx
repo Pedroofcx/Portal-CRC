@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 import PainelLateral from '@/components/ui/PainelLateral';
 
-const tipoLabels = {
+export const tipoLabels = {
   observacao_diaria: 'Observação Diária',
   feedback_positivo: 'Feedback Positivo',
   feedback_regular: 'Feedback Regular',

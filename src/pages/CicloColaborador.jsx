@@ -18,6 +18,7 @@ import { detalheCsat } from '@/lib/indicadoresCiclo';
 import { prazoDaTratativa, descreverPrazo } from '@/lib/prazoSla';
 import { acompanhamentoDa, ordenarPorPrazo, situacaoDoPrazo } from '@/lib/cicloEquipe';
 import { primeiroNome } from '@/lib/nomes';
+import { Cartao, Linha } from '@/components/ui/Cartao';
 
 /**
  * Visão detalhada de uma pessoa no ciclo — aberta pelo gestor a partir do
@@ -35,32 +36,6 @@ const fmt = (n) => Number(n || 0).toLocaleString('pt-BR', { minimumFractionDigit
 const dataCurta = (iso) => (iso ? `${String(iso).slice(8, 10)}/${String(iso).slice(5, 7)}` : '—');
 const pct = (v) => `${Number(v).toLocaleString('pt-BR', { maximumFractionDigits: 1 })}%`;
 const nota = (v) => Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 2 });
-
-function Cartao({ titulo, extra, children, className = '' }) {
-  return (
-    <section className={`rounded-xl border border-border bg-card p-5 ${className}`}>
-      {titulo && (
-        <div className="mb-3 flex items-baseline justify-between gap-3">
-          <h2 className="text-sm font-semibold text-foreground">{titulo}</h2>
-          {extra}
-        </div>
-      )}
-      {children}
-    </section>
-  );
-}
-
-function Linha({ rotulo, detalhe, valor, forte }) {
-  return (
-    <div className={`flex items-center justify-between gap-3 py-2 text-sm ${forte ? 'font-bold' : ''}`}>
-      <span className="min-w-0 text-foreground">
-        {rotulo}
-        {detalhe && <span className="block text-xs font-normal text-muted-foreground">{detalhe}</span>}
-      </span>
-      <span className="shrink-0 font-semibold tabular-nums text-foreground">{valor}</span>
-    </div>
-  );
-}
 
 export default function CicloColaborador() {
   const { search } = useLocation();

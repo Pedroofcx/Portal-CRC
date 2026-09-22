@@ -263,3 +263,23 @@ para os fluxos que já são passo a passo (a Apuração).
 
 `scrollbar-width: thin`, cinza translúcido sobre trilho transparente, no
 sistema inteiro (src/index.css).
+
+### Sem "cara de IA": leitura em texto e número (decidido em 22/09/2026)
+
+Pedro rejeitou a Minha Performance antiga: grade de cartões com ícone em
+círculo colorido, barras de progresso decorativas e blocos coloridos por
+categoria. É o visual genérico de painel gerado, e não diz nada que o número
+já não diga.
+
+O padrão das telas de leitura passa a ser o da **visão detalhada do ciclo**
+(`CicloColaborador`), com as peças `Cartao` e `Linha` de
+`src/components/ui/Cartao.jsx`:
+
+* cartão branco com título curto em texto, sem ícone;
+* o número principal grande, e os demais em linhas **rótulo à esquerda, valor
+  à direita**, com o detalhe em cinza embaixo do rótulo;
+* ícone só onde ele é o próprio controle (menu, fechar, abrir) ou no
+  cabeçalho da página (`PageHeader`);
+* nada de cartão de estatística com ícone colorido (`StatCard`) em tela nova.
+
+Aplicado em 22/09/2026 na Minha Performance.

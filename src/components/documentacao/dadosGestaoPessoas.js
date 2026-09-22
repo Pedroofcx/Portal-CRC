@@ -128,7 +128,6 @@ export const modulosGestaoPessoas = [
     fluxo: 'Identifica o colaborador logado (por email) → usePontuacaoAgente recalcula pontos a partir de suas Tratativas → busca Apuracao, Observacao, PDI e HanseiEnvio do colaborador → exibe StatCards + detalhamento expansível + links para PDIs e feedbacks.',
     campos_chave: [
       { campo: 'usePontuacaoAgente', descricao: 'Hook que recalcula pontuação ao vivo (calculateTratativaPoints) — mesma fonte de verdade do Ranking e da Auditoria, garantindo consistência.' },
-      { campo: 'EmptyPerformanceState', descricao: 'Estado vazio amigável quando o colaborador ainda não tem tratativas/apurações no período.' },
     ],
     regras_negocio: ['O colaborador vê apenas seus próprios dados (filtro por colaborador_id) — não há RLS no banco, o filtro é no cliente.', 'Gestores acessam sua própria performance também (não é painel de gestão de outros).'],
     integracoes: ['Tratativa (pontuação), Apuracao (CSAT/performance), Observacao (feedbacks recebidos), PDI (planos ativos), HanseiEnvio (reflexões recebidas).'],
