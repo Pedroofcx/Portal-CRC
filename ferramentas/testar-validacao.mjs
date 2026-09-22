@@ -30,6 +30,7 @@ import { pessoasNoPeriodo } from '../src/lib/relatorios/pessoas.js';
 import { filaDeHoje, entradaESaida, tempoPorCanal } from '../src/lib/relatorios/operacao.js';
 import { resumoDoCanal } from '../src/lib/relatorios/canais.js';
 import { resumoQualidade } from '../src/lib/relatorios/qualidade.js';
+import { resumoJornada } from '../src/lib/relatorios/jornada.js';
 
 let passou = 0;
 let falhou = 0;
@@ -625,6 +626,19 @@ console.log('\n== relatorio de qualidade ==');
   checa('equipe ponderada: 9 de 10 = 90% (media de medias daria 50%)', String(q.equipe.csatTelefone), '90');
   checa('agosto fora do periodo', String(q.meses.length), '1');
   checa('por pessoa', q.pessoas.map((p) => `${p.nome}:${p.csatTelefone}`).join(','), 'Ana:0,Bia:100');
+}
+
+console.log('\n== relatorio da jornada ==');
+{
+  const t = (extra) => ({ status: 'encerrada', data_registro: '2026-08-01T12:00:00Z', data_encerramento: '2026-08-02T12:00:00Z', ...extra });
+  const j = resumoJornada([
+    t({ etapa_jornada_nome: 'Uso', motivo_nome: 'Erro', custo_operacional_reais: 100, houve_devolucao_financeira: true, valor_devolvido_cliente: 50, id_base_cliente: '1' }),
+    t({ etapa_jornada_nome: 'Uso', motivo_nome: 'Erro', custo_operacional_reais: 10, id_base_cliente: '1 ' }),
+    t({ etapa_jornada_nome: 'Cobrança', motivo_nome: 'Boleto', custo_operacional_reais: 20, id_base_cliente: '2' }),
+    t({ etapa_jornada_nome: 'Uso', excluida: true, custo_operacional_reais: 999 }),
+  ], { inicio: '2026-08-01', fim: '2026-08-31' });
+  checa('etapa mais cara primeiro, custo oficial + devolvido', `${j.etapas[0].nome}:${j.etapas[0].custo}`, 'Uso:160');
+  checa('cliente recorrente pelo id (com espaco)', `${j.recorrentes.length}:${j.recorrentes[0]?.qtd}`, '1:2');
 }
 
 console.log('\n== conferencia de cores (o verificador pega o que deve) ==');

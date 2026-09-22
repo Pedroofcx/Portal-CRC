@@ -13,6 +13,7 @@ import Pessoas from '@/components/relatorios/grupos/Pessoas';
 import Operacao from '@/components/relatorios/grupos/Operacao';
 import Canais from '@/components/relatorios/grupos/Canais';
 import Qualidade from '@/components/relatorios/grupos/Qualidade';
+import Jornada from '@/components/relatorios/grupos/Jornada';
 
 /**
  * Relatórios — organizados por PERGUNTA (padrão aprovado por Pedro em
@@ -65,6 +66,7 @@ export default function Relatorios() {
     canais: <Canais tratativas={tratativas} periodo={periodo} />,
     qualidade: <Qualidade periodo={periodo} colaboradores={colaboradores} />,
     financeiro: <Financeiro tratativas={tratativas} periodo={periodo} ehGestor={ehGestor} />,
+    jornada: <Jornada tratativas={tratativas} periodo={periodo} ehGestor={ehGestor} />,
     pessoas: <Pessoas tratativas={tratativas} periodo={periodo} ciclos={ciclos} colaboradores={colaboradores} />,
   }[grupo.chave];
 

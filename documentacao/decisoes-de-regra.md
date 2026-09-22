@@ -330,3 +330,35 @@ faixas do POP 11 (CSAT 85/90/95, performance 90/100), não mais metas soltas.
 **Decisão de Pedro:** recalcular os já enviados. Feito em 22/09/2026 com
 `node ferramentas/recalcular-hansei.mjs --gravar` — 23 de 23; só
 `dados_consolidados` mudou (comentário, envio e visualização ficaram).
+
+---
+
+## Relatórios organizados por pergunta, e as contas refeitas (22/09/2026)
+
+**Decisão (Pedro):** uma página de Relatórios com seis grupos, cada um
+respondendo a uma pergunta, com "Como calculamos" em português:
+Operação, Canais, Qualidade, Pessoas e premiação, Financeiro, Jornada do
+cliente. As contas moram em `src/lib/relatorios/*.js` (testadas).
+
+**Contestação — o que é perda (decisão A):** perda = sem acordo, sem contato,
+contestou (prazo de cancelamento ou duplicidade); acordo = perde só a
+diferença inicial − acordado; recuperado = pagou ou cancelou; em andamento
+fica fora das somas.
+
+**Risco reputacional (decisão B):** sai da soma em R$; vira contagem de casos.
+O "custo de retrabalho" também saiu (somava de novo metade das horas da
+mesma tratativa).
+
+**Custo operacional:** todas as telas usam o valor oficial do servidor
+(dividido pela carga simultânea); o módulo financeiro recalculava sem essa
+divisão e mostrava R$ 882 mil contra R$ 197 mil.
+
+**Analytics Preditivo → grupo Operação:** saíram "risco de SLA" (dava 130%),
+saturação, simulações e o texto "CMMI"; ficaram fila de hoje, entrada × saída
+no mesmo período, dias para zerar a fila e tempo típico (mediana) por canal.
+
+**Outras correções:** nota média do Reclame Aqui conta as notas 0; filtro
+"até" inclui o último dia (horário de Brasília); CSAT da equipe ponderado pelo
+volume; dia de apuração importado duas vezes conta uma vez; a aba Ranking lia
+a tabela antiga do Base44 — agora é o ranking oficial, e a rotina que gravava
+nessa tabela saiu.

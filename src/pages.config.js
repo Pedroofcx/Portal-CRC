@@ -47,7 +47,6 @@
  *
  * The mainPage value must match a key in the PAGES object exactly.
  */
-import AnalyticsPreditivo from './pages/AnalyticsPreditivo';
 import AuditoriaPontuacao from './pages/AuditoriaPontuacao';
 import SolucoesReplicaveis from './pages/SolucoesReplicaveis';
 import Apuracao from './pages/Apuracao';
@@ -78,7 +77,7 @@ import Pesquisas from './pages/Pesquisas';
 import PlanoSetorial from './pages/PlanoSetorial';
 import Relatorios from './pages/Relatorios';
 import RelatoriosApuracao from './pages/RelatoriosApuracao';
-import RelatoriosTratativas from './pages/RelatoriosTratativas';
+import { redirecionarPara } from './components/relatorios/hub/Redirecionar';
 import TratativaDetalhe from './pages/TratativaDetalhe';
 import Tratativas from './pages/Tratativas';
 import Turnos from './pages/Turnos';
@@ -87,7 +86,7 @@ import FerramentasOperacionais from './pages/FerramentasOperacionais';
 import __Layout from './Layout.jsx';
 
 export const PAGES = {
-    "AnalyticsPreditivo": AnalyticsPreditivo,
+    "AnalyticsPreditivo": redirecionarPara('operacao'),
     "AuditoriaPontuacao": AuditoriaPontuacao,
     "SolucoesReplicaveis": SolucoesReplicaveis,
     "Apuracao": Apuracao,
@@ -118,7 +117,7 @@ export const PAGES = {
     "PlanoSetorial": PlanoSetorial,
     "Relatorios": Relatorios,
     "RelatoriosApuracao": RelatoriosApuracao,
-    "RelatoriosTratativas": RelatoriosTratativas,
+    "RelatoriosTratativas": redirecionarPara('canais'),
     "TratativaDetalhe": TratativaDetalhe,
     "Tratativas": Tratativas,
     "Turnos": Turnos,
