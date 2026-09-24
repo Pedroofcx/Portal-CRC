@@ -14,6 +14,8 @@ import { posicaoNoRanking } from '../src/lib/posicaoRanking.js';
 import { prazoDaTratativa, descreverPrazo, consumoDoPrazo } from '../src/lib/prazoSla.js';
 import { indicadoresDoCiclo } from '../src/lib/indicadoresCiclo.js';
 import { conferirLinha } from './conferir-cores.mjs';
+import { turnoDoHorario } from '../src/lib/escalas.js';
+import { produtividadePorTurno } from '../src/lib/relatorios/turnos.js';
 import { diasCorridos, saldoDoCiclo, situacaoDoCiclo, cicloParaAData, deFeriasEm, lotacaoNoPeriodo, conferirPedido, fragmentoDoPedido, proximasFerias } from '../src/lib/ferias.js';
 import { situacaoDaPesquisa, quemRespondeu, resultadoDasPerguntas, resumoDaPesquisa, montarParticipacao } from '../src/lib/pesquisas.js';
 import { segundaDaSemana, semanaDeReferencia, diasDaSemana, trabalhoDaSemana, trabalhoDe, montarSemanaDeTrabalho, avisosDoTrabalho, montarTurnosDaSemana, meuDiaNoTurno, equilibrioDoAtendimento, estadoNoTurno, definirEstado, proximoEstado, inverterDia, copiarDia, trabalhandoNaMetade } from '../src/lib/escalas.js';
@@ -917,6 +919,56 @@ console.log('\n== ferias (saldo, vencimento e pedido) ==');
   const frag = fragmentoDoPedido({ id: 's9', data_inicio: '2026-11-05', data_fim: '2026-11-19', venda_dias: 5 });
   checa('fragmento leva dias e abono', `${frag.dias}/${frag.abono_dias}/${frag.status}`, '15/5/aprovado');
   checa('proximas ferias so as aprovadas em pe', proximasFerias(solicitacoes, hoje).map((s) => s.colaborador_nome).join(','), 'Ana');
+}
+
+console.log('\n== produtividade por turno ==');
+{
+  checa('08:00 e manha', turnoDoHorario('08:00'), 'manha');
+  checa('11:59 ainda e manha', turnoDoHorario('11:59'), 'manha');
+  checa('12:00 ja e tarde', turnoDoHorario('12:00'), 'tarde');
+  checa('18:00 e tarde', turnoDoHorario('18:00'), 'tarde');
+  checa('aceita segundos', turnoDoHorario('09:30:00'), 'manha');
+  checa('sem horario nao chuta', String(turnoDoHorario('')), 'null');
+
+  const periodo = { inicio: '2026-09-21', fim: '2026-09-25' };
+  const colaboradores = [{ id: 'c1', nome_completo: 'Ana', email: 'ana@x.com' }, { id: 'c2', nome_completo: 'Bia', email: 'bia@x.com' }];
+  // 12:00 em Sao Paulo = 15:00 UTC; 09:00 SP = 12:00 UTC.
+  const t = (id, dono, horaUtc, status = 'encerrada') => ({
+    id, agente_responsavel_id: dono, status,
+    data_registro: `2026-09-22T${horaUtc}:00:00Z`,
+  });
+  const tratativas = [
+    t('t1', 'c1', '12'), // 09h SP — manha
+    t('t2', 'c1', '13', 'em_andamento'), // 10h SP — manha
+    t('t3', 'c2', '18'), // 15h SP — tarde
+    t('t4', 'c2', '20'), // 17h SP — tarde
+    { ...t('t5', 'c1', '12'), excluida: true },
+    { ...t('t6', 'c1', '12'), data_registro: '2026-10-01T12:00:00Z' }, // fora do periodo
+  ];
+  const escalas = [{
+    semana_referencia: '2026-W39',
+    turnos: [{
+      dia: 'terca', data: '2026-09-22', cancelado: false,
+      manha: [{ colaborador_id: 'c1', colaborador_nome: 'Ana' }],
+      analisa_manha: [{ colaborador_id: 'c2', colaborador_nome: 'Bia' }],
+      tarde: [{ colaborador_id: 'c2', colaborador_nome: 'Bia' }],
+      analisa_tarde: [],
+    }],
+  }];
+
+  const r = produtividadePorTurno({ escalas, tratativas, colaboradores, periodo });
+  checa('conta pelo horario, nao pela escala', `${r.manha.tratativas}/${r.tarde.tratativas}`, '2/2');
+  checa('excluida e fora do periodo ficam de fora', String(r.total), '4');
+  checa('encerradas da manha', String(r.manha.encerradas), '1');
+  checa('quantos estavam escalados de manha', String(r.manha.escalados), '2');
+  checa('e de tarde', String(r.tarde.escalados), '1');
+  checa('tratativas por pessoa escalada na tarde', String(r.tarde.porPessoaEscalada), '2');
+  checa('parte da manha', String(Math.round(r.parteDaManha)), '50');
+  checa('por pessoa: Ana so de manha', r.pessoas.map((p) => `${p.nome}:${p.manha}/${p.tarde}`).join(','), 'Ana:2/0,Bia:0/2');
+  checa('serie por dia', `${r.dias[0].data}:${r.dias[0].manha}/${r.dias[0].tarde}`, '2026-09-22:2/2');
+  checa('dia cancelado nao conta escalado', String(produtividadePorTurno({
+    escalas: [{ turnos: [{ ...escalas[0].turnos[0], cancelado: true }] }], tratativas, colaboradores, periodo,
+  }).manha.escalados), '0');
 }
 
 console.log('\n== conferencia de cores (o verificador pega o que deve) ==');

@@ -511,3 +511,27 @@ aparece como fora naquela metade. Nada foi reescrito.
 
 **No relatório de produtividade**, a metade do dia passou a contar quem
 atendeu *e* quem analisou tickets: antes, quem só analisava não aparecia.
+
+---
+
+## O turno vem do relógio, e a produtividade mudou de lugar (24/09/2026)
+
+**Turno automático na distribuição.** Em "+ Nova Atribuição" o turno era um
+campo para escolher à mão, ao lado do horário — dava para registrar 09:15 e
+marcar "tarde", e aí o relatório contava o contrário do que tinha acontecido.
+Agora o turno sai do horário: **até 11:59 é manhã, das 12:00 em diante é
+tarde** (o expediente vai das 08:00 às 18:00). O campo continua sendo gravado,
+só deixou de ser escolhível.
+
+**Produtividade por turno saiu de Escalas e foi para Relatórios.** Pedro:
+*"esta que deve ficar em relatórios e desvincular de escalas"*. Faz sentido:
+**Escalas planeja, Relatórios mede**. O bloco agora vive no grupo Operação e
+obedece ao filtro de período dos relatórios, em vez do seletor de semana que
+só existia ali dentro.
+
+**A conta ficou mais honesta.** Antes, toda tratativa do dia era contada nos
+dois turnos em que a pessoa estava escalada, e a escala decidia o turno. Agora
+o turno da tratativa vem do **horário em que ela foi registrada** — o número
+não muda quando a escala é editada depois. A escala entra só para dizer
+**quantas pessoas estavam de pé em cada metade do dia**, o que permite ler
+volume por pessoa escalada.

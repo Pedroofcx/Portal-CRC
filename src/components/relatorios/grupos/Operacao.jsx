@@ -11,6 +11,7 @@ import { descreverPrazo } from '@/lib/prazoSla';
 import { filaDeHoje, entradaESaida, serie, tempoPorCanal, produtividade, idadeDaFila, avisosDaOperacao, diagnosticoDeCarga } from '@/lib/relatorios/operacao';
 import { SERIE_GRAFICO, CORES_GRAFICO } from '@/lib/cores-grafico';
 import { ComoCalculamos, Pergunta, periodoPorExtenso } from '@/components/relatorios/hub/Pecas';
+import ProdutividadePorTurno from '@/components/relatorios/grupos/ProdutividadePorTurno';
 
 /**
  * Relatórios › Operação — a fila, o ritmo de entrada e saída, a produtividade
@@ -32,7 +33,7 @@ const VEREDITO = {
   da_conta: { titulo: 'Não: o time está dando conta', tom: 'text-success' },
 };
 
-export default function Operacao({ tratativas, periodo, apuracoes = [], colaboradores = [] }) {
+export default function Operacao({ tratativas, periodo, apuracoes = [], colaboradores = [], escalasTurno = [] }) {
   const agora = useMemo(() => new Date(), []);
   const [granularidade, setGranularidade] = useState('semana');
 
@@ -282,6 +283,13 @@ export default function Operacao({ tratativas, periodo, apuracoes = [], colabora
           </ComoCalculamos>
         </Cartao>
       </div>
+
+      <ProdutividadePorTurno
+        tratativas={tratativas}
+        escalas={escalasTurno}
+        colaboradores={colaboradores}
+        periodo={periodo}
+      />
 
       <Cartao titulo="Governança: de onde vem cada número">
         <div className="grid gap-4 text-sm text-muted-foreground lg:grid-cols-2">

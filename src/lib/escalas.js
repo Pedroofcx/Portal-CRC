@@ -269,6 +269,24 @@ export function meuDiaNoTurno(diaTurno, colaboradorId) {
   return { manha, tarde };
 }
 
+/**
+ * O turno de um horário: das 08:00 às 11:59 é manhã, das 12:00 às 18:00 é
+ * tarde (regra do CRC, Pedro 24/09/2026). Fora do expediente, o meio-dia
+ * continua sendo a divisa — antes das 12h vale manhã, depois vale tarde.
+ * Aceita "09:30", "09:30:00" e Date.
+ */
+export function turnoDoHorario(horario) {
+  if (!horario) return null;
+  const texto = horario instanceof Date
+    ? horario.toLocaleTimeString('pt-BR', { timeZone: 'America/Sao_Paulo', hour12: false })
+    : String(horario);
+  const hora = Number(texto.slice(0, 2));
+  if (Number.isNaN(hora)) return null;
+  return hora < 12 ? 'manha' : 'tarde';
+}
+
+export const ROTULO_TURNO = { manha: 'Manhã', tarde: 'Tarde' };
+
 /** Quem trabalha em cada metade do dia (atendendo ou analisando). */
 export function trabalhandoNaMetade(dia, metade) {
   const m = metadeDe(metade);

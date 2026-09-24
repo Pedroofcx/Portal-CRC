@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertTriangle, RotateCcw, User } from 'lucide-react';
 import { TIPOS_CONFIG, PRIORIDADE_CONFIG, sugerirProximoAgente } from './distribuicaoUtils';
+import { turnoDoHorario, ROTULO_TURNO } from '@/lib/escalas';
 import PainelLateral, { RodapeFixo } from '@/components/ui/PainelLateral';
 
 // Usar fuso SP para não criar atribuição com data de ontem (ex: 23h SP = dia seguinte UTC)
@@ -20,7 +21,7 @@ function horaAgora() {
 export default function DialogNovaAtribuicao({ open, onClose, onSalvar, agentes, distribuicoes, isPending }) {
   const [form, setForm] = useState({
     agente_id: '', ticket_id: '', tipo_tratativa: '', prioridade: 'media',
-    turno: 'manha', data_atribuicao: hoje(), horario_atribuicao: horaAgora(), observacao: '',
+    data_atribuicao: hoje(), horario_atribuicao: horaAgora(), observacao: '',
   });
   const [overrideConfirmado, setOverrideConfirmado] = useState(false);
   const [justificativaOverride, setJustificativaOverride] = useState('');
@@ -48,17 +49,23 @@ export default function DialogNovaAtribuicao({ open, onClose, onSalvar, agentes,
     return doAgenteTipo[0] || null;
   }, [form.agente_id, form.tipo_tratativa, distribuicoes]);
 
+  // O turno sai do horário da atribuição (08:00–11:59 manhã, 12:00 em diante
+  // tarde). Ele alimenta o relatório de produtividade por turno, e escolher à
+  // mão fazia a conta sair diferente do horário registrado.
+  const turno = turnoDoHorario(form.horario_atribuicao);
+
   const handleSalvar = () => {
     if (!form.agente_id || !form.ticket_id || !form.tipo_tratativa) return;
     onSalvar({
       ...form,
+      turno,
       override_rodizio: ehOverride && overrideConfirmado,
       justificativa_override: ehOverride ? justificativaOverride : '',
       agente_sugerido_id: sugestao?.sugerido?.id || '',
       agente_sugerido_nome: sugestao?.sugerido?.nome_completo || '',
     });
     // Reset
-    setForm({ agente_id: '', ticket_id: '', tipo_tratativa: '', prioridade: 'media', turno: 'manha', data_atribuicao: hoje(), horario_atribuicao: horaAgora(), observacao: '' });
+    setForm({ agente_id: '', ticket_id: '', tipo_tratativa: '', prioridade: 'media', data_atribuicao: hoje(), horario_atribuicao: horaAgora(), observacao: '' });
     setOverrideConfirmado(false);
     setJustificativaOverride('');
   };
@@ -162,7 +169,7 @@ export default function DialogNovaAtribuicao({ open, onClose, onSalvar, agentes,
             <Input value={form.ticket_id} onChange={e => f('ticket_id', e.target.value)} placeholder="Ex: 975357" className="mt-1 font-mono" />
           </div>
 
-          {/* Prioridade e turno */}
+          {/* Prioridade e turno — o turno sai do horário, não se escolhe */}
           <div className="grid grid-cols-2 gap-3">
             <div>
               <Label className="text-xs">Prioridade</Label>
@@ -177,13 +184,10 @@ export default function DialogNovaAtribuicao({ open, onClose, onSalvar, agentes,
             </div>
             <div>
               <Label className="text-xs">Turno</Label>
-              <Select value={form.turno} onValueChange={v => f('turno', v)}>
-                <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="manha">Manhã</SelectItem>
-                  <SelectItem value="tarde">Tarde</SelectItem>
-                </SelectContent>
-              </Select>
+              <div className="mt-1 flex h-10 items-center rounded-md border border-border bg-muted px-3 text-sm text-foreground">
+                {ROTULO_TURNO[turno] ?? '—'}
+              </div>
+              <p className="mt-1 text-xs text-muted-foreground">Pelo horário: até 11:59 é manhã, das 12:00 em diante é tarde.</p>
             </div>
           </div>
 

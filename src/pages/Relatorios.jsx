@@ -49,6 +49,11 @@ export default function Relatorios() {
     queryFn: () => db.entities.Tratativa.list('-created_date'),
     staleTime: 60000,
   });
+  const { data: escalasTurno = [] } = useQuery({
+    queryKey: ['escalas-turno', "filter({ ativa: true }, '-created_date', 60)"],
+    queryFn: () => db.entities.EscalaTurno.filter({ ativa: true }, '-created_date', 60),
+    staleTime: 120000,
+  });
 
   const eu = colaboradores.find((c) => c.email?.toLowerCase() === user?.email?.toLowerCase());
   const ehGestor = eu?.papel === 'gestor';
@@ -64,7 +69,7 @@ export default function Relatorios() {
   }
 
   const corpo = {
-    operacao: <Operacao tratativas={tratativas} periodo={periodo} apuracoes={apuracoes} colaboradores={colaboradores} />,
+    operacao: <Operacao tratativas={tratativas} periodo={periodo} apuracoes={apuracoes} colaboradores={colaboradores} escalasTurno={escalasTurno} />,
     canais: <Canais tratativas={tratativas} periodo={periodo} />,
     qualidade: <Qualidade periodo={periodo} colaboradores={colaboradores} />,
     financeiro: <Financeiro tratativas={tratativas} periodo={periodo} ehGestor={ehGestor} />,

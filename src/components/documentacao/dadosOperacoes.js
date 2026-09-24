@@ -43,7 +43,7 @@ export const modulosOperacoes = [
     campos_chave: [
       { campo: 'override_rodizio / justificativa_override', descricao: 'Quando o gestor ignora a sugestão do sistema, é obrigatório justificar.' },
       { campo: 'agente_sugerido_id/nome', descricao: 'Guarda o que o algoritmo sugeriu, mesmo se não seguido — permite auditar desvios.' },
-      { campo: 'turno (manha/tarde)', descricao: 'Segmenta o rodízio por turno de trabalho.' },
+      { campo: 'turno (manha/tarde)', descricao: 'Preenchido automaticamente pelo horário da atribuição — até 11:59 manhã, das 12:00 em diante tarde (Pedro, 24/09/2026). Não se escolhe à mão: escolher fazia o turno sair diferente do horário registrado.' },
     ],
     regras_negocio: [
       'É um registro de apoio à decisão — não cria a Tratativa nem altera seu agente_responsavel automaticamente; a vinculação real ao ticket é manual pelo gestor.',
@@ -91,7 +91,7 @@ export const modulosOperacoes = [
     id: 'dashboard',
     categoria: 'Operações',
     nome: 'Dashboard (Página Inicial)',
-    paginas: ['src/pages/Dashboard.jsx', 'src/components/dashboard/RankingTrimestral.jsx', 'src/components/dashboard/DistribuicaoTratativas.jsx', 'src/components/dashboard/MinhasAnotacoes.jsx', 'src/components/turnos/MeuTurnoCard.jsx', 'src/components/ui/MotivationalQuote.jsx'],
+    paginas: ['src/pages/Dashboard.jsx', 'src/components/dashboard/RankingTrimestral.jsx', 'src/components/dashboard/DistribuicaoTratativas.jsx', 'src/components/dashboard/MinhasAnotacoes.jsx', 'src/components/escalas/MinhaSemanaCard.jsx', 'src/components/ui/MotivationalQuote.jsx'],
     entidades: ['Tratativa', 'Colaborador', 'AnotacaoPessoal', 'FraseMotivacional', 'Aviso', 'Pesquisa', 'HanseiEnvio', 'EscalaTurno', 'PDI'],
     objetivo: 'Página inicial do sistema — visão geral consolidada da operação. Para gestores: KPIs globais, ranking trimestral, distribuição de tratativas e atalhos. Para agentes: suas próprias métricas, ranking (se visível), anotações pessoais, turno do dia e popups de avisos/pesquisas/Hansei pendentes.',
     fluxo: 'Ao carregar, busca Tratativa (todas), Colaborador, Aviso, Pesquisa, HanseiEnvio e EscalaTurno. Gestores veem contadores agregados (abertas, encerradas, críticas, no SLA) + RankingTrimestral + DistribuicaoTratativas. Agentes veem seus próprios números via usePontuacaoAgente + MinhasAnotacoes + MinhaSemanaCard (escala de trabalho e turno da semana). Popups automáticos verificam avisos não lidos, pesquisas pendentes e envios Hansei não visualizados — exibidos em sequência (modal sobreposto).',
@@ -138,11 +138,12 @@ export const modulosOperacoes = [
     categoria: 'Operações',
     nome: 'Relatórios (organizados por pergunta)',
     paginas: ['src/pages/Relatorios.jsx', 'src/components/relatorios/grupos/*.jsx', 'src/lib/relatorios/*.js', 'src/pages/RelatoriosApuracao.jsx'],
-    entidades: ['Tratativa', 'Colaborador', 'Apuracao', 'Pontuacao', 'CicloTrimestral', 'HanseiEnvio'],
+    entidades: ['Tratativa', 'Colaborador', 'Apuracao', 'Pontuacao', 'CicloTrimestral', 'HanseiEnvio', 'EscalaTurno'],
     objetivo: 'Seis grupos, cada um respondendo a uma pergunta: Operação (como está a fila hoje), Canais (como estamos em cada canal), Qualidade (como os clientes nos avaliam), Pessoas e premiação (como cada pessoa está), Financeiro (quanto custa e quanto recuperamos) e Jornada do cliente (onde o cliente sofre). Restrito a gestores. Reorganizado em 22/09/2026.',
     fluxo: 'O gestor escolhe o grupo e o período (um ciclo da premiação ou datas) → cada grupo calcula com funções puras de src/lib/relatorios (testadas em npm run testar) → cada quadro tem um "Como calculamos" em português.',
     campos_chave: [
       { campo: 'src/lib/relatorios/periodo.js', descricao: 'Compara pelo dia em horário de Brasília — "até 16/09" inclui o dia 16 inteiro.' },
+      { campo: 'src/lib/relatorios/turnos.js', descricao: 'Produtividade por turno dentro do grupo Operação (veio de Escalas em 24/09/2026): o turno da tratativa sai do horário do registro (até 11:59 manhã), e a EscalaTurno entra só para dizer quantas pessoas estavam escaladas em cada metade do dia.' },
       { campo: 'Financeiro', descricao: 'Custo operacional OFICIAL (servidor, dividido pela carga simultânea); contestação por desfecho (perda, acordo, recuperado, em andamento); risco reputacional só contado.' },
       { campo: 'Operação', descricao: 'Substitui o antigo Analytics Preditivo: fila de hoje, entrada × saída no mesmo período, dias para zerar a fila, tempo típico (mediana) por canal.' },
       { campo: 'Pessoas e premiação', descricao: 'Ranking oficial (useRankingCiclo) — o mesmo da tela inicial; a antiga aba lia a tabela de pontuação do Base44.' },

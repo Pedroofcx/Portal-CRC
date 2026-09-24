@@ -10,7 +10,6 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import GradeTrabalho from '@/components/escalas/GradeTrabalho';
 import GradeTurno from '@/components/escalas/GradeTurno';
-import RelatorioProdutividadeTurnos from '@/components/turnos/RelatorioProdutividadeTurnos';
 
 import {
   TRABALHANDO, diasDaSemana, segundaDaSemana, semanaDeReferencia, somarDias,
@@ -60,12 +59,6 @@ export default function Escalas() {
     queryKey: ['ferias-aprovadas'],
     queryFn: () => db.entities.SolicitacaoFerias.filter({ status: 'aprovada' }, '-data_inicio', 200),
     staleTime: 300000,
-  });
-
-  const { data: tratativas = [] } = useQuery({
-    queryKey: ['tratativas', "list('-created_date')"],
-    queryFn: () => db.entities.Tratativa.list('-created_date'),
-    staleTime: 120000,
   });
 
   const eu = colaboradores.find((c) => c.email === user?.email);
@@ -277,7 +270,6 @@ export default function Escalas() {
         <TabsList>
           <TabsTrigger value="trabalho">Escala de Trabalho</TabsTrigger>
           <TabsTrigger value="turno">Escala de Turno</TabsTrigger>
-          {isGestor && <TabsTrigger value="produtividade">Produtividade</TabsTrigger>}
         </TabsList>
 
         <TabsContent value="trabalho" className="pt-4">
@@ -310,11 +302,7 @@ export default function Escalas() {
           />
         </TabsContent>
 
-        {isGestor && (
-          <TabsContent value="produtividade" className="pt-4">
-            <RelatorioProdutividadeTurnos escalas={escalasTurno} tratativas={tratativas} colaboradores={colaboradores} />
-          </TabsContent>
-        )}
+
       </Tabs>
     </div>
   );

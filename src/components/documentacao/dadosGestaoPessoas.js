@@ -132,7 +132,7 @@ export const modulosGestaoPessoas = [
       'O padrão é quem atende de manhã analisar tickets à tarde — mas cada célula da grade é editável: clicar gira atende → analisa → fora. "Inverter" troca manhã por tarde no dia inteiro e "copiar anterior" repete o dia de antes (pedido de Pedro, 24/09/2026: "hoje elas estão de tarde, amanhã de manhã").',
       'Só é escalável quem está trabalhando naquele dia na Escala de Trabalho; o "Equilíbrio da semana" mostra quantas metades de dia cada um passou atendendo.',
     ],
-    integracoes: ['Colaborador ativo com papel agente é a lista da escala.', 'SolicitacaoFerias aprovada bloqueia o dia.', 'RelatorioProdutividadeTurnos cruza EscalaTurno com as tratativas do dia (aba Produtividade).'],
+    integracoes: ['Colaborador ativo com papel agente é a lista da escala.', 'SolicitacaoFerias aprovada bloqueia o dia.', 'A produtividade por turno saiu daqui e virou um bloco do relatório de Operação (Pedro, 24/09/2026): Escalas planeja, Relatórios mede.'],
   },
   {
     id: 'minha-performance',
