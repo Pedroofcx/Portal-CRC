@@ -419,3 +419,34 @@ pegam. As novas são de um dia só, e a marcação mais recente ganha.
 **Saiu:** a página Turnos (agora redireciona para Escalas), o painel WFM com
 slots e travas, o calendário mensal por equipe e o card "Meu turno hoje" — que
 virou "Minha semana", com o local de trabalho e o papel de cada metade do dia.
+
+---
+
+## Pesquisa anônima de verdade, e quem respondeu (24/09/2026)
+
+**O pedido.** Pedro: *"o sistema tem que guardar quem respondeu a pesquisa, a
+não ser que ela seja configurada como anônima"*.
+
+**O problema de guardar tudo na mesma linha.** Se a resposta anônima ficasse
+na mesma tabela com o `colaborador_id` só escondido na tela, bastaria abrir o
+banco para saber quem disse o quê — e aí o anonimato é só uma promessa. Por
+outro lado, sem saber quem respondeu, o popup de pendências ficaria pedindo
+resposta para sempre a quem já respondeu.
+
+**A solução (migration 23):** duas coisas separadas. `PesquisaParticipacao`
+guarda *que* a pessoa respondeu (pesquisa, pessoa, data, sem as respostas);
+`RespostaPesquisa` guarda *o que* foi respondido — e, quando a pesquisa é
+anônima, nasce sem `colaborador_id` e sem nome. O gestor vê quem falta
+responder e vê todas as respostas, mas não consegue ligar uma coisa na outra.
+
+**De quebra, um buraco fechado.** A política antiga dizia apenas "colaborador
+ativo lê", então qualquer pessoa da equipe conseguia listar as respostas de
+todo mundo pelo console do navegador. Agora o gestor lê tudo e cada pessoa lê
+só as próprias.
+
+**Na tela:** cards por pesquisa separados em No ar / Encerradas / Arquivadas,
+com "X de Y responderam" já na lista; dentro, o resultado por pergunta (média
+e distribuição nas escalas, contagem nas escolhas, lista nos textos), quem
+respondeu com data, quem falta, e Editar / Duplicar / Reenviar / Arquivar. O
+gestor também responde: o que falta para ele fica no topo da tela. Saíram o
+painel de agendamento (metadado que nunca disparou nada) e a tabela de ícones.

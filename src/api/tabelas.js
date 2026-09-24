@@ -43,6 +43,7 @@ export const TABELAS = {
   PopLeitura: 'pop_leitura',
   PopVersao: 'pop_versao',
   RespostaPesquisa: 'resposta_pesquisa',
+  PesquisaParticipacao: 'pesquisa_participacao',
   SaldoFerias: 'saldo_ferias',
   SkillMestre: 'skill_mestre',
   SolicitacaoApoio: 'solicitacao_apoio',

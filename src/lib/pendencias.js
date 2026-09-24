@@ -90,14 +90,17 @@ const PESO_TIPO = { urgente: 0, alerta: 1, comunicado: 2, informativo: 3 };
  * @returns [{ tipo: 'aviso'|'pesquisa', item }]
  */
 export function filaDePendencias({
-  colaborador, avisos = [], leituras = [], pesquisas = [], respostas = [],
+  colaborador, avisos = [], leituras = [], pesquisas = [], participacoes = [],
   tratados = new Set(), agora = new Date(),
 }) {
   if (!colaborador?.id) return [];
   const confirmados = new Set(leituras
     .filter((l) => l.colaborador_id === colaborador.id && l.confirmou === true)
     .map((l) => l.aviso_id));
-  const respondidas = new Set(respostas
+  // Quem já respondeu vem da PARTICIPAÇÃO, não da resposta: em pesquisa
+  // anônima a resposta não guarda o nome de ninguém, e sem isto o lembrete
+  // ficaria pedindo resposta para sempre a quem já respondeu.
+  const respondidas = new Set(participacoes
     .filter((r) => r.colaborador_id === colaborador.id)
     .map((r) => r.pesquisa_id));
 
@@ -132,6 +135,10 @@ export function obrigatoriasSemResposta(pesquisa, respostas = {}) {
  * O registro de resposta a gravar — com a nota e o sentimento que a
  * pesquisa de clima e os relatórios usam (CSAT: 1 a 5; NPS: 0 a 10, pela
  * primeira pergunta).
+ *
+ * Em pesquisa anônima a resposta sai sem colaborador_id e sem nome: quem
+ * respondeu fica só na participação (src/lib/pesquisas.js), separada das
+ * respostas de propósito.
  */
 export function montarResposta(pesquisa, respostas, colaborador, agora = new Date()) {
   let nota = null;
@@ -149,9 +156,9 @@ export function montarResposta(pesquisa, respostas, colaborador, agora = new Dat
     pesquisa_id: pesquisa.id,
     pesquisa_titulo: pesquisa.titulo,
     pesquisa_tipo: pesquisa.tipo,
-    colaborador_id: colaborador.id,
-    colaborador_nome: colaborador.nome_completo,
-    respostas: (pesquisa.perguntas ?? []).map((p) => ({ pergunta_id: p.id, resposta: respostas[p.id] ?? '' })),
+    colaborador_id: pesquisa.anonima ? null : colaborador.id,
+    colaborador_nome: pesquisa.anonima ? null : colaborador.nome_completo,
+    respostas: (pesquisa.perguntas ?? []).map((p) => ({ pergunta_id: p.id, pergunta_texto: p.texto, resposta: respostas[p.id] ?? '' })),
     confirmou_leitura: true,
     data_leitura: iso,
     data_resposta: iso,

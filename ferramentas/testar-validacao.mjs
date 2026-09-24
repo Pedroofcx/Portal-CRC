@@ -14,6 +14,7 @@ import { posicaoNoRanking } from '../src/lib/posicaoRanking.js';
 import { prazoDaTratativa, descreverPrazo, consumoDoPrazo } from '../src/lib/prazoSla.js';
 import { indicadoresDoCiclo } from '../src/lib/indicadoresCiclo.js';
 import { conferirLinha } from './conferir-cores.mjs';
+import { situacaoDaPesquisa, quemRespondeu, resultadoDasPerguntas, resumoDaPesquisa, montarParticipacao } from '../src/lib/pesquisas.js';
 import { segundaDaSemana, semanaDeReferencia, diasDaSemana, trabalhoDaSemana, trabalhoDe, montarSemanaDeTrabalho, avisosDoTrabalho, montarTurnosDaSemana, meuDiaNoTurno, equilibrioDoAtendimento } from '../src/lib/escalas.js';
 import { mediaDasCompetencias, leiturasDoColaborador, palavrasRecorrentes, pontosDoRadar, evolucaoDasLeituras } from '../src/lib/competencias.js';
 import { proximaVersao, popsParaCiencia, agruparPorCategoria, popsDoTipo, fotografia } from '../src/lib/pops.js';
@@ -399,9 +400,13 @@ console.log('\n== central de pendencias (avisos e pesquisas) ==');
   checa('cadastrado em 15/09 so recebe o publicado depois', ids(filaNovo), 'a2,p1');
 
   const leituras = [{ aviso_id: 'a2', colaborador_id: 'c1', confirmou: true }, { aviso_id: 'a1', colaborador_id: 'OUTRA', confirmou: true }];
-  const respostas = [{ pesquisa_id: 'p3', colaborador_id: 'c1' }];
+  // Quem ja respondeu vem da participacao (migration 23): em pesquisa
+  // anonima a resposta nao guarda o nome de ninguem.
+  const participacoes = [{ pesquisa_id: 'p3', colaborador_id: 'c1' }];
   checa('confirmado e respondido saem; confirmacao de outra pessoa nao conta',
-    ids(filaDePendencias({ colaborador: antigo, avisos, pesquisas, leituras, respostas, agora: hoje })), 'a1,p1');
+    ids(filaDePendencias({ colaborador: antigo, avisos, pesquisas, leituras, participacoes, agora: hoje })), 'a1,p1');
+  checa('participacao de outra pessoa nao tira a pesquisa da minha fila',
+    ids(filaDePendencias({ colaborador: antigo, avisos, pesquisas, leituras, participacoes: [{ pesquisa_id: 'p3', colaborador_id: 'OUTRA' }], agora: hoje })), 'a1,p3,p1');
   checa('tratado nesta sessao sai na hora, antes do banco responder',
     ids(filaDePendencias({ colaborador: antigo, avisos, pesquisas, tratados: new Set(['a2', 'p3']), agora: hoje })), 'a1,p1');
   checa('gestor recebe aviso de gestores', ids(filaDePendencias({ colaborador: gestor, avisos, pesquisas: [], agora: hoje })), 'a2,a3,a1');
@@ -416,6 +421,11 @@ console.log('\n== central de pendencias (avisos e pesquisas) ==');
   checa('CSAT 4 e positivo', `${r.nota_calculada} ${r.sentimento}`, '4 positivo');
   checa('resposta leva todas as perguntas', String(r.respostas.length), '3');
   checa('NPS 7 e neutro', montarResposta({ ...pesq, tipo: 'nps' }, { q1: '7' }, { id: 'c1' }, hoje).sentimento, 'neutro');
+  checa('resposta identificada guarda quem respondeu', `${r.colaborador_id}|${r.colaborador_nome}`, 'c1|Ana');
+  const anonima = montarResposta({ ...pesq, anonima: true }, { q1: '4' }, { id: 'c1', nome_completo: 'Ana' }, hoje);
+  checa('resposta anonima nao guarda o id', String(anonima.colaborador_id), 'null');
+  checa('resposta anonima nao guarda o nome', String(anonima.colaborador_nome), 'null');
+  checa('resposta anonima continua guardando a nota', String(anonima.nota_calculada), '4');
 }
 
 console.log('\n== POPs: versao, ciencia e busca ==');
@@ -753,6 +763,70 @@ console.log('\n== escalas (trabalho e turno) ==');
   checa('dia cancelado nao tem turno', String(meuDiaNoTurno({ ...turnos[0], cancelado: true }, turnos[0].manha[0].colaborador_id)), 'null');
   const equilibrio = equilibrioDoAtendimento(turnos);
   checa('ninguem atende o dobro do outro na semana', String(equilibrio[0].metades - equilibrio[equilibrio.length - 1].metades <= 1), 'true');
+}
+
+console.log('\n== pesquisas (quem respondeu e anonimato) ==');
+{
+  const pesquisa = {
+    id: 'ps1', titulo: 'Kaizen', tipo: 'personalizada', ativa: true,
+    data_inicio: '2026-09-01', data_fim: '2026-09-30',
+    perguntas: [
+      { id: 'q1', texto: 'Nota da semana', tipo_resposta: 'escala_1_5' },
+      { id: 'q2', texto: 'Voltaria?', tipo_resposta: 'sim_nao' },
+      { id: 'q3', texto: 'O que melhorar', tipo_resposta: 'texto' },
+      { id: 'q4', texto: 'Quais canais', tipo_resposta: 'multipla_escolha_multipla', opcoes: ['telefone', 'chat'] },
+    ],
+  };
+  checa('pesquisa no ar dentro do periodo', situacaoDaPesquisa(pesquisa, '2026-09-15'), 'no_ar');
+  checa('agendada antes de comecar', situacaoDaPesquisa(pesquisa, '2026-08-20'), 'agendada');
+  checa('encerrada depois do fim', situacaoDaPesquisa(pesquisa, '2026-10-02'), 'encerrada');
+  checa('arquivada quando ativa e false', situacaoDaPesquisa({ ...pesquisa, ativa: false }, '2026-09-15'), 'arquivada');
+  checa('sem periodo fica no ar', situacaoDaPesquisa({ id: 'x', ativa: true }, '2026-09-15'), 'no_ar');
+
+  const pessoas = [
+    { id: 'c1', nome_completo: 'Ana' },
+    { id: 'c2', nome_completo: 'Bia' },
+    { id: 'c3', nome_completo: 'Caio' },
+  ];
+  const participacoes = [
+    { pesquisa_id: 'ps1', colaborador_id: 'c1', respondida_em: '2026-09-10T12:00:00Z' },
+    { pesquisa_id: 'ps1', colaborador_id: 'c9', colaborador_nome: 'Quem saiu', respondida_em: '2026-09-10T12:00:00Z' },
+    { pesquisa_id: 'outra', colaborador_id: 'c2', respondida_em: '2026-09-10T12:00:00Z' },
+  ];
+  const q = quemRespondeu({ pesquisa, participacoes, pessoas });
+  checa('quem respondeu', q.responderam.map((p) => p.nome_completo).join(','), 'Ana');
+  checa('quem falta', q.faltam.map((p) => p.nome_completo).join(','), 'Bia,Caio');
+  checa('participacao de outra pesquisa nao conta', String(q.responderam.length), '1');
+  checa('quem saiu da equipe aparece a parte', String(q.deDesligados.length), '1');
+  checa('taxa de resposta', q.taxa.toFixed(1), '33.3');
+
+  // resposta anonima: sem nome, mas a participacao existe
+  const respostas = [
+    { pesquisa_id: 'ps1', colaborador_id: null, nota_calculada: 4, sentimento: 'positivo', respostas: [
+      { pergunta_id: 'q1', resposta: '4' }, { pergunta_id: 'q2', resposta: 'sim' },
+      { pergunta_id: 'q3', resposta: 'mais tempo de analise' }, { pergunta_id: 'q4', resposta: 'telefone,chat' },
+    ] },
+    { pesquisa_id: 'ps1', colaborador_id: null, nota_calculada: 2, sentimento: 'negativo', respostas: [
+      { pergunta_id: 'q1', resposta: '2' }, { pergunta_id: 'q2', resposta: 'nao' },
+      { pergunta_id: 'q3', resposta: '' }, { pergunta_id: 'q4', resposta: 'chat' },
+    ] },
+    { pesquisa_id: 'outra', colaborador_id: 'c2', nota_calculada: 5, sentimento: 'positivo', respostas: [] },
+  ];
+  const [r1, r2, r3, r4] = resultadoDasPerguntas(pesquisa, respostas);
+  checa('media da escala', String(r1.media), '3');
+  checa('distribuicao da escala em ordem de nota', r1.opcoes.map((o) => o.opcao).join(','), '2,4');
+  checa('sim e nao em portugues', r2.opcoes.map((o) => `${o.opcao}:${o.vezes}`).join(','), 'Sim:1,Não:1');
+  checa('texto vazio nao entra', String(r3.textos.length), '1');
+  checa('pergunta de texto nao tem media', String(r3.media), 'null');
+  checa('multipla escolha conta cada opcao', r4.opcoes.map((o) => `${o.opcao}:${o.vezes}`).join(','), 'chat:2,telefone:1');
+
+  const resumo = resumoDaPesquisa(pesquisa, respostas);
+  checa('so as respostas desta pesquisa', String(resumo.respostas), '2');
+  checa('media das notas', String(resumo.media), '3');
+  checa('sentimentos contados', `${resumo.sentimentos.positivo}/${resumo.sentimentos.negativo}`, '1/1');
+
+  const part = montarParticipacao(pesquisa, { id: 'c1', nome_completo: 'Ana' }, new Date('2026-09-24T10:00:00Z'));
+  checa('participacao guarda quem e quando', `${part.pesquisa_id}|${part.colaborador_id}|${part.respondida_em.slice(0, 10)}`, 'ps1|c1|2026-09-24');
 }
 
 console.log('\n== conferencia de cores (o verificador pega o que deve) ==');

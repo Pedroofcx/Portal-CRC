@@ -130,6 +130,10 @@
       "default": 0,
       "description": "Peso desta pesquisa no c\u00e1lculo do Health Score (0-10)"
     },
+    "anonima": {
+      "type": "boolean",
+      "description": "Pesquisa anônima: a resposta não guarda quem respondeu"
+    },
     "publicada": {
       "type": "boolean",
       "default": false,

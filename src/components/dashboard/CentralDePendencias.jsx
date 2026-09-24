@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import CampoPergunta from '@/components/pesquisas/CampoPergunta';
 import { formatDateSP } from '@/components/utils/helpers';
 import { filaDePendencias, obrigatoriasSemResposta, montarResposta } from '@/lib/pendencias';
+import { montarParticipacao } from '@/lib/pesquisas';
 import { popsParaCiencia } from '@/lib/pops';
 import { traduzirErro } from '@/lib/erros';
 
@@ -61,9 +62,11 @@ export default function CentralDePendencias({ colaborador }) {
     enabled: Boolean(id),
     staleTime: 60000,
   });
-  const { data: respostas, isSuccess: okRespostas } = useQuery({
-    queryKey: ['respostas-pesquisa', id],
-    queryFn: () => db.entities.RespostaPesquisa.filter({ colaborador_id: id }),
+  // Quem já respondeu vem da participação: em pesquisa anônima a resposta
+  // não guarda o nome de ninguém (migration 23).
+  const { data: participacoes, isSuccess: okRespostas } = useQuery({
+    queryKey: ['pesquisa-participacoes', id],
+    queryFn: () => db.entities.PesquisaParticipacao.filter({ colaborador_id: id }),
     enabled: Boolean(id),
     staleTime: 0,
   });
@@ -100,11 +103,11 @@ export default function CentralDePendencias({ colaborador }) {
   const carregado = okAvisos && okLeituras && okPesquisas && okRespostas;
   const fila = useMemo(() => {
     if (!carregado) return [];
-    const base = filaDePendencias({ colaborador, avisos, leituras, pesquisas, respostas, tratados });
+    const base = filaDePendencias({ colaborador, avisos, leituras, pesquisas, participacoes, tratados });
     for (const pop of popsParaCiencia({ pops, leituras: leiturasPop, colaborador, tratados })) base.push({ tipo: 'pop', item: pop });
     if (ehAgente && hanseis.length && !hanseiAdiado) base.push({ tipo: 'hansei', item: hanseis });
     return base;
-  }, [carregado, colaborador, avisos, leituras, pesquisas, respostas, tratados, ehAgente, hanseis, hanseiAdiado, pops, leiturasPop]);
+  }, [carregado, colaborador, avisos, leituras, pesquisas, participacoes, tratados, ehAgente, hanseis, hanseiAdiado, pops, leiturasPop]);
 
   const atual = fila[0];
   const total = concluidos + fila.length;
@@ -141,12 +144,17 @@ export default function CentralDePendencias({ colaborador }) {
   });
 
   const responder = useMutation({
-    mutationFn: (registro) => db.entities.RespostaPesquisa.create(registro),
-    onSuccess: (_, registro) => {
-      concluir(registro.pesquisa_id);
+    mutationFn: async ({ resposta, participacao }) => {
+      await db.entities.RespostaPesquisa.create(resposta);
+      // A participação é o que tira a pesquisa da fila desta pessoa.
+      await db.entities.PesquisaParticipacao.create(participacao);
+    },
+    onSuccess: (_, { participacao }) => {
+      concluir(participacao.pesquisa_id);
       toast.success('Resposta enviada. Obrigado!');
-      queryClient.invalidateQueries({ queryKey: ['respostas-pesquisa'] });
+      queryClient.invalidateQueries({ queryKey: ['pesquisa-participacoes'] });
       queryClient.invalidateQueries({ queryKey: ['respostasPesquisa'] });
+      queryClient.invalidateQueries({ queryKey: ['pesquisa-participacoes-todas'] });
     },
     onError: (e) => { setFalhou(true); toast.error(`Não foi possível enviar: ${traduzirErro(e)}`); },
   });
@@ -160,7 +168,10 @@ export default function CentralDePendencias({ colaborador }) {
       document.getElementById(`pergunta-${sem[0]}`)?.scrollIntoView?.({ block: 'center' });
       return;
     }
-    responder.mutate(montarResposta(atual.item, respostasAtuais, colaborador));
+    responder.mutate({
+      resposta: montarResposta(atual.item, respostasAtuais, colaborador),
+      participacao: montarParticipacao(atual.item, colaborador),
+    });
   };
 
   let rotulo = 'Aviso';
@@ -195,6 +206,11 @@ export default function CentralDePendencias({ colaborador }) {
     corpo = (
       <div className="space-y-3">
         {p.descricao && <p className="text-sm text-muted-foreground">{p.descricao}</p>}
+        <p className="rounded-lg bg-muted p-3 text-sm text-muted-foreground">
+          {p.anonima
+            ? 'Esta pesquisa é anônima: fica registrado que você respondeu, mas a resposta não é ligada ao seu nome.'
+            : 'Sua resposta fica registrada com o seu nome e é lida pela gestão.'}
+        </p>
         {(p.perguntas ?? []).map((q, i) => (
           <CampoPergunta
             key={q.id}

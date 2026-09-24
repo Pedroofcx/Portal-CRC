@@ -1,0 +1,27 @@
+{
+  "name": "PesquisaParticipacao",
+  "type": "object",
+  "properties": {
+    "pesquisa_id": {
+      "type": "string",
+      "description": "Pesquisa respondida"
+    },
+    "colaborador_id": {
+      "type": "string",
+      "description": "Quem respondeu"
+    },
+    "colaborador_nome": {
+      "type": "string",
+      "description": "Nome de quem respondeu"
+    },
+    "respondida_em": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Quando respondeu"
+    }
+  },
+  "required": [
+    "pesquisa_id",
+    "colaborador_id"
+  ]
+}
