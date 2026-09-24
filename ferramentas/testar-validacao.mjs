@@ -14,6 +14,7 @@ import { posicaoNoRanking } from '../src/lib/posicaoRanking.js';
 import { prazoDaTratativa, descreverPrazo, consumoDoPrazo } from '../src/lib/prazoSla.js';
 import { indicadoresDoCiclo } from '../src/lib/indicadoresCiclo.js';
 import { conferirLinha } from './conferir-cores.mjs';
+import { mediaDasCompetencias, leiturasDoColaborador, palavrasRecorrentes, pontosDoRadar, evolucaoDasLeituras } from '../src/lib/competencias.js';
 import { proximaVersao, popsParaCiencia, agruparPorCategoria, popsDoTipo, fotografia } from '../src/lib/pops.js';
 import { filaDePendencias, avisosVisiveis, pesquisasVisiveis, obrigatoriasSemResposta, montarResposta } from '../src/lib/pendencias.js';
 import { traduzirErro } from '../src/lib/erros.js';
@@ -657,6 +658,39 @@ console.log('\n== o time esta sobrecarregado? ==');
   const tranquilo = [enc('e1', '2026-09-02'), enc('e2', '2026-09-03')];
   const d2 = diagnosticoDeCarga({ tratativas: tranquilo, colaboradores, periodo, agora });
   checa('da conta quando sai mais do que entra', d2.veredito, 'da_conta');
+}
+
+console.log('\n== leitura de pessoas (Observacoes -> Oraculo) ==');
+{
+  const leitura = (id, dia, humanas, tecnicas, palavras = []) => ({
+    id, tipo: 'leitura', colaboradores_ids: ['a'], data_registro: `${dia}T12:00:00Z`,
+    competencias: { humanas, tecnicas }, palavras_chave: palavras,
+  });
+  const todas = [
+    leitura('l1', '2026-09-01', { comunicacao: 4, empatia: 2 }, { negociacao: 5 }, [{ palavra: 'clareza' }, { palavra: 'ritmo' }]),
+    leitura('l2', '2026-09-20', { comunicacao: 2 }, { negociacao: 3 }, ['clareza']),
+    { id: 'o1', tipo: 'one_on_one', colaboradores_ids: ['a'], data_registro: '2026-09-10T12:00:00Z' },
+    leitura('l3', '2026-09-05', { comunicacao: 5 }, {}, []),
+  ];
+  const minhas = leiturasDoColaborador(todas, 'a');
+  checa('so as leituras, da mais nova para a mais antiga', minhas.map((l) => l.id).join(','), 'l2,l3,l1');
+  checa('outro colaborador nao entra', String(leiturasDoColaborador(todas, 'b').length), '0');
+
+  const m = mediaDasCompetencias(minhas);
+  checa('media da competencia avaliada', m.humanas.comunicacao.toFixed(2), ((4 + 2 + 5) / 3).toFixed(2));
+  checa('competencia nunca avaliada fica vazia', m.humanas.disciplina, null);
+  checa('media do grupo ignora o vazio', m.humanas_geral.toFixed(2), (((11 / 3) + 2) / 2).toFixed(2));
+  checa('media do grupo tecnico', String(m.tecnicas_geral), '4');
+
+  const equipe = mediaDasCompetencias([leitura('l9', '2026-09-01', { comunicacao: 3 }, {})]);
+  const radar = pontosDoRadar('humanas', m, equipe);
+  checa('radar tem as seis competencias humanas', String(radar.length), '6');
+  checa('radar compara pessoa e equipe', `${radar[0].pessoa.toFixed(2)}/${radar[0].equipe}`, `${(11 / 3).toFixed(2)}/3`);
+
+  const evo = evolucaoDasLeituras(minhas);
+  checa('evolucao vai da mais antiga para a mais nova', evo.map((e) => e.id).join(','), 'l1,l3,l2');
+  const palavras = palavrasRecorrentes(minhas);
+  checa('palavra repetida vem primeiro', `${palavras[0].palavra}:${palavras[0].vezes}`, 'clareza:2');
 }
 
 console.log('\n== conferencia de cores (o verificador pega o que deve) ==');

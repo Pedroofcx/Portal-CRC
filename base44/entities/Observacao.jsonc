@@ -122,6 +122,46 @@
         }
       }
     },
+    "competencias": {
+      "type": "object",
+      "description": "Leitura de pessoas: { humanas: {chave: 1..5}, tecnicas: {chave: 1..5} }. Lista fixa em src/lib/competencias.js.",
+      "properties": {
+        "humanas": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "number"
+          }
+        },
+        "tecnicas": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "number"
+          }
+        }
+      }
+    },
+    "palavras_chave": {
+      "type": "array",
+      "description": "Palavras-chave escolhidas na leitura de pessoas",
+      "items": {
+        "type": "object",
+        "properties": {
+          "palavra": {
+            "type": "string"
+          },
+          "categoria": {
+            "type": "string"
+          },
+          "origem": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "pergunta_gerada": {
+      "type": "string",
+      "description": "Pergunta que guiou a conversa da leitura de pessoas"
+    },
     "soft_skills_avaliadas": {
       "type": "object",
       "description": "Soft skills avaliadas manualmente (0-10)",

@@ -1,5 +1,6 @@
 import db from '@/api/db';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 import PageHeader from '@/components/ui/PageHeader';
@@ -15,6 +16,8 @@ import { toast } from 'sonner';
 import { MessageSquare, Plus, Search } from 'lucide-react';
 import RichTextEditor from '@/components/ui/RichTextEditor';
 import PainelLateral, { RodapeFixo } from '@/components/ui/PainelLateral';
+import PainelLeitura from '@/components/observacoes/PainelLeitura';
+import { contextoDoColaborador } from '@/lib/contextoColaborador';
 
 const TIPOS_OBS = [
   { value: 'observacao_diaria', label: 'Observação Diária' },
@@ -30,8 +33,12 @@ const TIPOS_OBS = [
 
 export default function Observacoes() {
   const [colaboradorSelecionado, setColaboradorSelecionado] = useState(null);
+  // O Oráculo manda para cá com ?colaborador=<id>&leitura=1 — a pessoa já vem
+  // aberta e o painel de leitura também, para o gestor não procurar de novo.
+  const [parametros, setParametros] = useSearchParams();
   const [busca, setBusca] = useState('');
   const [dialogNovaObs, setDialogNovaObs] = useState(false);
+  const [dialogLeitura, setDialogLeitura] = useState(false);
   const [form, setForm] = useState({
     tipo: '',
     titulo: '',
@@ -65,8 +72,49 @@ export default function Observacoes() {
     staleTime: 120000,
   });
 
+  const { data: palavrasDicionario = [] } = useQuery({
+    queryKey: ['oraculoPalavras'],
+    queryFn: () => db.entities.OraculoPalavra.list(),
+    staleTime: 600000,
+  });
+
+  const { data: ciclos = [] } = useQuery({
+    queryKey: ['ciclos-trimestrais', "list()"],
+    queryFn: () => db.entities.CicloTrimestral.list(),
+    staleTime: 600000,
+  });
+
+  const { data: tratativas = [] } = useQuery({
+    queryKey: ['tratativas', "list('-created_date')"],
+    queryFn: () => db.entities.Tratativa.list('-created_date'),
+    staleTime: 120000,
+  });
+
+  const { data: apuracoes = [] } = useQuery({
+    queryKey: ['apuracoes-equipe'],
+    queryFn: () => db.entities.Apuracao.list('-periodo_fim'),
+    staleTime: 120000,
+  });
+
+  const { data: bonus = [] } = useQuery({
+    queryKey: ['bonus-manual'],
+    queryFn: () => db.entities.Pontuacao.filter({ tipo: 'bonus_manual' }, '-created_date'),
+    staleTime: 120000,
+  });
+
   const colaboradorAtual = colaboradores.find(c => c.email === user?.email);
   const isGestor = colaboradorAtual?.papel === 'gestor';
+
+  const idNaUrl = parametros.get('colaborador');
+  useEffect(() => {
+    if (!idNaUrl || colaboradores.length === 0) return;
+    const alvo = colaboradores.find(c => c.id === idNaUrl);
+    if (alvo) {
+      setColaboradorSelecionado(alvo);
+      if (parametros.get('leitura') === '1') setDialogLeitura(true);
+    }
+    setParametros({}, { replace: true });
+  }, [idNaUrl, colaboradores, parametros, setParametros]);
 
   const criarMutation = useMutation({
     mutationFn: (data) => db.entities.Observacao.create(data),
@@ -77,6 +125,17 @@ export default function Observacoes() {
       setForm({ tipo: '', titulo: '', conteudo: '', visibilidade: 'gestor' });
     },
     onError: () => toast.error('Erro ao salvar observação'),
+  });
+
+  const leituraMutation = useMutation({
+    mutationFn: ({ dados }) => db.entities.Observacao.create(dados),
+    onSuccess: (_r, variaveis) => {
+      queryClient.invalidateQueries({ queryKey: ['observacoes'] });
+      toast.success('Leitura registrada! Ela já aparece no Oráculo CRC.');
+      variaveis.aoTerminar?.();
+      setDialogLeitura(false);
+    },
+    onError: () => toast.error('Erro ao salvar a leitura'),
   });
 
   const deleteMutation = useMutation({
@@ -139,9 +198,26 @@ export default function Observacoes() {
           pdis={pdis}
           onBack={() => setColaboradorSelecionado(null)}
           onNovaObservacao={() => setDialogNovaObs(true)}
+          onNovaLeitura={() => setDialogLeitura(true)}
           isGestor={isGestor}
           colaboradorAtual={colaboradorAtual}
           onDelete={(id) => deleteMutation.mutate(id)}
+        />
+        <PainelLeitura
+          open={dialogLeitura}
+          onOpenChange={setDialogLeitura}
+          colaborador={colaboradorSelecionado}
+          palavrasDicionario={palavrasDicionario}
+          autor={colaboradorAtual}
+          contexto={contextoDoColaborador({
+            colaboradorId: colaboradorSelecionado.id,
+            ciclo: ciclos.find(c => c.ativo) ?? null,
+            tratativas,
+            apuracoes,
+            bonus,
+          })}
+          salvando={leituraMutation.isPending}
+          onSalvar={(dados, aoTerminar) => leituraMutation.mutate({ dados, aoTerminar })}
         />
         <PainelLateral
           open={dialogNovaObs} onOpenChange={setDialogNovaObs}

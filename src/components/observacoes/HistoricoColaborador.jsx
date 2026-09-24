@@ -10,6 +10,7 @@ import RichTextViewer from '@/components/ui/RichTextViewer';
 import { formatDateSP } from '@/components/utils/helpers';
 import { ArrowLeft, Plus, Eye, EyeOff, Trash2, Calendar, User, Filter, MessageSquare } from 'lucide-react';
 import PainelLateral from '@/components/ui/PainelLateral';
+import { GRUPOS_COMPETENCIA } from '@/lib/competencias';
 
 export const tipoLabels = {
   observacao_diaria: 'Observação Diária',
@@ -22,7 +23,8 @@ export const tipoLabels = {
   keidoh: 'Keidoh',
   registro_livre: 'Registro Livre',
   feedback: 'Feedback',
-  registro_diario: 'Registro Diário'
+  registro_diario: 'Registro Diário',
+  leitura: 'Leitura de Pessoas'
 };
 
 const tipoCores = {
@@ -35,6 +37,7 @@ const tipoCores = {
   keidoh: 'bg-info-soft text-primary border-primary/25',
   registro_livre: 'bg-muted text-foreground border-border',
   observacao_diaria: 'bg-info-soft text-info border-info/25',
+  leitura: 'bg-primary/10 text-primary border-primary/25',
 };
 
 function ObservacaoCard({ obs, onView, onDelete, podeExcluir }) {
@@ -78,6 +81,9 @@ function ObservacaoCard({ obs, onView, onDelete, podeExcluir }) {
             {(obs.soft_skills_avaliadas && Object.keys(obs.soft_skills_avaliadas).length > 0) && (
               <span className="text-primary">Skills avaliadas</span>
             )}
+            {obs.competencias && (
+              <span className="text-primary">Competências avaliadas</span>
+            )}
           </div>
         </div>
 
@@ -102,6 +108,7 @@ export default function HistoricoColaborador({
   pdis,
   onBack,
   onNovaObservacao,
+  onNovaLeitura,
   isGestor,
   colaboradorAtual,
   onDelete
@@ -169,10 +176,18 @@ export default function HistoricoColaborador({
             </div>
           </div>
           {isGestor && (
-            <Button onClick={onNovaObservacao} className="bg-primary hover:bg-primary/90 self-start sm:self-center">
-              <Plus className="w-4 h-4 mr-2" />
-              Nova Observação
-            </Button>
+            <div className="flex flex-wrap gap-2 self-start sm:self-center">
+              <Button onClick={onNovaObservacao} className="bg-primary hover:bg-primary/90">
+                <Plus className="w-4 h-4 mr-2" />
+                Nova Observação
+              </Button>
+              {onNovaLeitura && (
+                <Button variant="outline" onClick={onNovaLeitura}>
+                  <Plus className="w-4 h-4 mr-2" />
+                  Nova Leitura
+                </Button>
+              )}
+            </div>
           )}
         </div>
       </div>
@@ -274,6 +289,39 @@ export default function HistoricoColaborador({
                 <span>Por: <strong>{viewObs.autor_nome}</strong></span>
                 <span>Em: <strong>{formatDateSP(viewObs.data_registro || viewObs.created_date, 'DD/MM/YYYY')}</strong></span>
               </div>
+
+              {viewObs.pergunta_gerada && (
+                <p className="text-sm italic text-muted-foreground">"{viewObs.pergunta_gerada}"</p>
+              )}
+
+              {viewObs.palavras_chave?.length > 0 && (
+                <div className="flex flex-wrap gap-1.5">
+                  {viewObs.palavras_chave.map((p, i) => (
+                    <Badge key={i} variant="outline" className="text-xs">{typeof p === 'string' ? p : p.palavra}</Badge>
+                  ))}
+                </div>
+              )}
+
+              {viewObs.competencias && (
+                <div className="grid gap-4 sm:grid-cols-2">
+                  {GRUPOS_COMPETENCIA.map(grupo => (
+                    <div key={grupo.chave}>
+                      <p className="text-xs font-medium text-muted-foreground mb-1">{grupo.rotulo}</p>
+                      <div className="divide-y divide-border border-t border-border">
+                        {grupo.itens.map(item => {
+                          const nota = viewObs.competencias?.[grupo.chave]?.[item.chave];
+                          return (
+                            <div key={item.chave} className="flex justify-between py-1.5 text-sm">
+                              <span className="text-muted-foreground">{item.rotulo}</span>
+                              <span className="font-semibold tabular-nums">{nota == null ? '—' : `${nota}/5`}</span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
 
               {viewObs.analise_swot && Object.values(viewObs.analise_swot).some(v => v?.length > 0) && (
                 <Card className="bg-info-soft border-info/25">

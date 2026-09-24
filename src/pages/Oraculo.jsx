@@ -1,458 +1,205 @@
 import db from '@/api/db';
-import React, { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import React, { useMemo, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { Eye } from 'lucide-react';
 
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Badge } from '@/components/ui/badge';
 import PageHeader from '@/components/ui/PageHeader';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import EmptyState from '@/components/ui/EmptyState';
-import OraculoWizard from '@/components/oraculo/OraculoWizard';
-import { 
-  Eye, 
-  Plus, 
-  Sparkles, 
-  Users,
-  Calendar,
-  BarChart3
-} from 'lucide-react';
-import { formatDateSP } from '@/components/utils/helpers';
-import { indicadoresDoCiclo } from '@/lib/indicadoresCiclo';
+import { Input } from '@/components/ui/input';
+import CartaoColaboradorOraculo from '@/components/oraculo/CartaoColaboradorOraculo';
+import Visao360 from '@/components/oraculo/Visao360';
+
+import { leiturasDoColaborador, mediaDasCompetencias } from '@/lib/competencias';
+import { contextoDoColaborador } from '@/lib/contextoColaborador';
 import { totalNoCiclo } from '@/lib/hanseiDados';
-import { tratativaNosCiclo } from '@/lib/pontuacaoCiclo';
-import { toast } from 'sonner';
+import { tratativaNosCiclo, reaberturaDe } from '@/lib/pontuacaoCiclo';
+import { situacaoReplicavel } from '@/components/utils/helpers';
 
+/**
+ * ORÁCULO CRC — a visão 360º de cada pessoa.
+ *
+ * Desde 23/09/2026 o Oráculo não registra mais nada: a leitura é feita em
+ * Observações (tipo 'leitura'), e aqui ela encontra os números do ciclo. De
+ * um lado o que o gestor vê na pessoa, do outro o que a operação mostra.
+ * Tela exclusiva da gestão.
+ */
 export default function OraculoPage() {
-  const [showWizard, setShowWizard] = useState(false);
-  const [colaboradorSelecionado, setColaboradorSelecionado] = useState(null);
-  const queryClient = useQueryClient();
+  const [selecionado, setSelecionado] = useState(null);
+  const [busca, setBusca] = useState('');
 
-  // Dados do usuário
-  const { data: user } = useQuery({
-    queryKey: ['currentUser'],
-    queryFn: () => db.auth.me()
-  });
+  const { data: user } = useQuery({ queryKey: ['currentUser'], queryFn: () => db.auth.me() });
 
-  const { data: currentColaborador } = useQuery({
-    queryKey: ['currentColaborador', user?.email],
-    queryFn: async () => {
-      if (!user?.email) return null;
-      const colaboradores = await db.entities.Colaborador.list();
-      return colaboradores.find(c => c.email === user.email);
-    },
-    enabled: !!user?.email
-  });
-
-  // Verificar se é gestor
-  const isGestor = currentColaborador?.papel === 'gestor';
-
-  // Buscar dados
-  const { data: colaboradores = [], isLoading: loadingColaboradores } = useQuery({
+  const { data: colaboradores = [], isLoading: carregandoColabs } = useQuery({
     queryKey: ['colaboradores', "list()"],
-    queryFn: () => db.entities.Colaborador.list()
+    queryFn: () => db.entities.Colaborador.list(),
   });
 
-  const { data: lancamentos = [], isLoading: loadingLancamentos } = useQuery({
-    queryKey: ['oraculoLancamentos'],
-    queryFn: () => db.entities.OraculoLancamento.list('-data_lancamento')
+  const { data: observacoes = [], isLoading: carregandoObs } = useQuery({
+    queryKey: ['observacoes', "list('-created_date', 2000)"],
+    queryFn: () => db.entities.Observacao.list('-created_date', 2000),
+    staleTime: 60000,
   });
 
-  const { data: palavrasDicionario = [], isLoading: loadingPalavras } = useQuery({
-    queryKey: ['oraculoPalavras'],
-    queryFn: () => db.entities.OraculoPalavra.list()
-  });
-
-  const { data: bonus = [] } = useQuery({
-    queryKey: ['bonus-manual'],
-    queryFn: () => db.entities.Pontuacao.filter({ tipo: 'bonus_manual' }, '-created_date')
+  const { data: pdis = [] } = useQuery({
+    queryKey: ['pdis', "list('-created_date', 500)"],
+    queryFn: () => db.entities.PDI.list('-created_date', 500),
+    staleTime: 120000,
   });
 
   const { data: ciclos = [] } = useQuery({
     queryKey: ['ciclos-trimestrais', "list()"],
-    queryFn: () => db.entities.CicloTrimestral.list()
-  });
-
-  const { data: apuracoes = [] } = useQuery({
-    queryKey: ['apuracoes', "list()"],
-    queryFn: () => db.entities.Apuracao.list()
+    queryFn: () => db.entities.CicloTrimestral.list(),
+    staleTime: 600000,
   });
 
   const { data: tratativas = [] } = useQuery({
-    queryKey: ['tratativas', "list()"],
-    queryFn: () => db.entities.Tratativa.list()
+    queryKey: ['tratativas', "list('-created_date')"],
+    queryFn: () => db.entities.Tratativa.list('-created_date'),
+    staleTime: 120000,
   });
 
-  // Mutation para criar lançamento
-  const createLancamentoMutation = useMutation({
-    mutationFn: (lancamento) => db.entities.OraculoLancamento.create(lancamento),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['oraculoLancamentos'] });
-      toast.success('Lançamento registrado com sucesso!');
-      setShowWizard(false);
-      setColaboradorSelecionado(null);
-    }
+  const { data: apuracoes = [] } = useQuery({
+    queryKey: ['apuracoes-equipe'],
+    queryFn: () => db.entities.Apuracao.list('-periodo_fim'),
+    staleTime: 120000,
   });
 
-  // Contexto do colaborador no CICLO ATIVO, com as contas oficiais: os pontos
-  // são os do ranking (antes vinham da tabela de pontuação do Base44, que
-  // mostrava 3 pontos para quem tinha 79,5) e o CSAT é o do ciclo inteiro.
-  const cicloAtivo = ciclos.find((c) => c.ativo) ?? null;
+  const { data: bonus = [] } = useQuery({
+    queryKey: ['bonus-manual'],
+    queryFn: () => db.entities.Pontuacao.filter({ tipo: 'bonus_manual' }, '-created_date'),
+    staleTime: 120000,
+  });
 
-  const gerarContexto = (colaboradorId) => {
-    const minhasApuracoes = apuracoes.filter((a) => a.colaborador_id === colaboradorId);
-    const indicadores = indicadoresDoCiclo(minhasApuracoes, cicloAtivo);
-    const pontos = totalNoCiclo({ tratativas, apuracoes, bonus, ciclo: cicloAtivo, colaboradorId });
-    const doCiclo = tratativas.filter((t) => !t.excluida && t.agente_responsavel_id === colaboradorId
-      && ['encerrada', 'aguardando_confirmacao_reabertura'].includes(t.status)
+  const { data: hanseis = [] } = useQuery({
+    queryKey: ['hansei-envios', "list('-data_envio')"],
+    queryFn: () => db.entities.HanseiEnvio.list('-data_envio'),
+    staleTime: 120000,
+  });
+
+  const eu = colaboradores.find((c) => c.email === user?.email);
+  const isGestor = eu?.papel === 'gestor';
+  const cicloAtivo = useMemo(() => ciclos.find((c) => c.ativo) ?? null, [ciclos]);
+
+  const agentes = useMemo(() => colaboradores
+    .filter((c) => c.papel === 'agente')
+    .sort((a, b) => (a.nome_completo || '').localeCompare(b.nome_completo || '')), [colaboradores]);
+
+  /** Média da equipe: todas as leituras de todos os agentes, para comparar. */
+  const mediasEquipe = useMemo(() => {
+    const idsAgentes = new Set(agentes.map((a) => a.id));
+    const todas = observacoes.filter((o) => o.tipo === 'leitura' && (o.colaboradores_ids || []).some((id) => idsAgentes.has(id)));
+    return mediaDasCompetencias(todas);
+  }, [observacoes, agentes]);
+
+  const porPessoa = useMemo(() => new Map(agentes.map((c) => {
+    const leituras = leiturasDoColaborador(observacoes, c.id);
+    return [c.id, {
+      leituras,
+      medias: mediaDasCompetencias(leituras),
+      pontos: cicloAtivo ? totalNoCiclo({ tratativas, apuracoes, bonus, ciclo: cicloAtivo, colaboradorId: c.id }) : null,
+    }];
+  })), [agentes, observacoes, tratativas, apuracoes, bonus, cicloAtivo]);
+
+  const dadosDoSelecionado = useMemo(() => {
+    if (!selecionado) return null;
+    const contexto = contextoDoColaborador({
+      colaboradorId: selecionado.id, ciclo: cicloAtivo, tratativas, apuracoes, bonus,
+    });
+    const minhas = tratativas.filter((t) => !t.excluida
+      && t.agente_responsavel_id === selecionado.id
       && cicloAtivo && tratativaNosCiclo(t, cicloAtivo));
-    const noPrazo = doCiclo.filter((t) => t.encerrado_no_sla === true).length;
+    const encerradas = minhas.filter((t) => ['encerrada', 'aguardando_confirmacao_reabertura'].includes(t.status));
+    const reaberturas = encerradas.filter((t) => reaberturaDe(t, tratativas).situacao === 'reabriu').length;
+    const replicaveis = minhas.map((t) => situacaoReplicavel(t)).filter(Boolean);
 
-    const sinais = [];
-    if (indicadores.csat?.valor >= 95) sinais.push(`CSAT de ${indicadores.csat.valor.toFixed(1)}% no ciclo — faixa máxima da premiação`);
-    else if (indicadores.csat?.valor >= 85) sinais.push(`CSAT de ${indicadores.csat.valor.toFixed(1)}% no ciclo`);
-    if (doCiclo.length >= 5) {
-      const pct = Math.round((noPrazo / doCiclo.length) * 100);
-      sinais.push(`${pct}% das ${doCiclo.length} tratativas encerradas no prazo`);
-    }
-    if (indicadores.performance?.valor >= 100) sinais.push('Todas as ligações atendidas no ciclo');
+    const minhasObs = observacoes.filter((o) => (o.colaboradores_ids || []).includes(selecionado.id));
+    const meusHanseis = hanseis.filter((h) => h.colaborador_id === selecionado.id);
 
     return {
-      csat_recente: indicadores.csat?.valor ?? null,
-      tratativas_periodo: doCiclo.length,
-      pontos_trimestre: pontos ?? 0,
-      ciclo_nome: cicloAtivo?.nome ?? null,
-      sinais_recentes: sinais,
+      leituras: porPessoa.get(selecionado.id)?.leituras ?? [],
+      processo: {
+        ciclo: cicloAtivo?.nome ?? null,
+        pontos: contexto.pontos_trimestre,
+        csat: contexto.csat_recente,
+        performance: contexto.performance,
+        cx: contexto.cx,
+        tratativas: encerradas.length,
+        noPrazo: contexto.tratativas_no_prazo,
+        reaberturas,
+        replicaveisAprovadas: replicaveis.filter((s) => s === 'aprovada').length,
+        replicaveisPendentes: replicaveis.filter((s) => s === 'pendente').length,
+      },
+      acompanhamento: {
+        pdisAtivos: pdis.filter((p) => p.colaborador_id === selecionado.id && p.status === 'em_andamento').length,
+        feedbacks: minhasObs.filter((o) => String(o.tipo || '').toLowerCase().includes('feedback')).length,
+        positivos: minhasObs.filter((o) => String(o.tipo || '').toLowerCase().includes('positivo')).length,
+        negativos: minhasObs.filter((o) => String(o.tipo || '').toLowerCase().includes('negativo')).length,
+        ultimoHansei: meusHanseis[0]?.periodo_fim ?? null,
+        hanseiLido: !!meusHanseis[0]?.visualizado,
+      },
     };
-  };
-
-  const handleNovoLancamento = (colaborador) => {
-    setColaboradorSelecionado(colaborador);
-    setShowWizard(true);
-  };
-
-  const handleCompletarLancamento = (data) => {
-    const contexto = gerarContexto(colaboradorSelecionado.id);
-    
-    const lancamento = {
-      colaborador_id: colaboradorSelecionado.id,
-      colaborador_nome: colaboradorSelecionado.nome_completo,
-      gestor_id: currentColaborador.id,
-      gestor_nome: currentColaborador.nome_completo,
-      pergunta_gerada: data.pergunta_gerada,
-      palavras_chave: data.palavras_selecionadas,
-      soft_skills: data.soft_skills,
-      hard_skills: data.hard_skills,
-      texto_livre: data.texto_livre,
-      contexto_performance: contexto,
-      data_lancamento: new Date().toISOString()
-    };
-
-    createLancamentoMutation.mutate(lancamento);
-  };
-
-  // Consolidação por colaborador
-  const consolidacaoPorColaborador = React.useMemo(() => {
-    const consolidacao = {};
-    
-    lancamentos.forEach(lanc => {
-      if (!consolidacao[lanc.colaborador_id]) {
-        consolidacao[lanc.colaborador_id] = {
-          colaborador_nome: lanc.colaborador_nome,
-          total_lancamentos: 0,
-          palavras_recorrentes: {},
-          media_soft_skills: {},
-          media_hard_skills: {}
-        };
-      }
-      
-      const cons = consolidacao[lanc.colaborador_id];
-      cons.total_lancamentos++;
-      
-      // Contar palavras
-      lanc.palavras_chave?.forEach(p => {
-        cons.palavras_recorrentes[p.palavra] = (cons.palavras_recorrentes[p.palavra] || 0) + 1;
-      });
-      
-      // Média de skills
-      Object.entries(lanc.soft_skills || {}).forEach(([skill, valor]) => {
-        if (!cons.media_soft_skills[skill]) cons.media_soft_skills[skill] = [];
-        cons.media_soft_skills[skill].push(valor);
-      });
-      
-      Object.entries(lanc.hard_skills || {}).forEach(([skill, valor]) => {
-        if (!cons.media_hard_skills[skill]) cons.media_hard_skills[skill] = [];
-        cons.media_hard_skills[skill].push(valor);
-      });
-    });
-    
-    // Calcular médias
-    Object.values(consolidacao).forEach(cons => {
-      Object.keys(cons.media_soft_skills).forEach(skill => {
-        const valores = cons.media_soft_skills[skill];
-        cons.media_soft_skills[skill] = valores.reduce((a, b) => a + b, 0) / valores.length;
-      });
-      Object.keys(cons.media_hard_skills).forEach(skill => {
-        const valores = cons.media_hard_skills[skill];
-        cons.media_hard_skills[skill] = valores.reduce((a, b) => a + b, 0) / valores.length;
-      });
-    });
-    
-    return consolidacao;
-  }, [lancamentos]);
+  }, [selecionado, cicloAtivo, tratativas, apuracoes, bonus, observacoes, pdis, hanseis, porPessoa]);
 
   if (!isGestor) {
     return (
-      <div className="min-h-screen p-6 bg-muted">
-        <EmptyState
-          icon={Eye}
-          title="Acesso Restrito"
-          description="O módulo ORÁCULO CRC é exclusivo para gestores."
-        />
-      </div>
+      <EmptyState icon={Eye} title="Acesso restrito" description="O Oráculo CRC é exclusivo da gestão." />
     );
   }
 
-  if (loadingColaboradores || loadingLancamentos || loadingPalavras) {
-    return <LoadingSpinner text="Carregando ORÁCULO CRC..." />;
-  }
+  if (carregandoColabs || carregandoObs) return <LoadingSpinner text="Carregando o Oráculo CRC..." />;
 
-  if (showWizard && colaboradorSelecionado) {
+  if (selecionado && dadosDoSelecionado) {
     return (
-      <div className="min-h-screen p-6 bg-muted">
-        <div className="max-w-4xl mx-auto">
-          <PageHeader
-            title="Novo Lançamento - ORÁCULO CRC"
-            subtitle={`Leitura ativa de ${colaboradorSelecionado.nome_completo}`}
-            icon={Sparkles}
-          />
-          <OraculoWizard
-            colaborador={colaboradorSelecionado}
-            contexto={gerarContexto(colaboradorSelecionado.id)}
-            palavrasDicionario={palavrasDicionario}
-            onComplete={handleCompletarLancamento}
-            onCancel={() => {
-              setShowWizard(false);
-              setColaboradorSelecionado(null);
-            }}
-          />
-        </div>
-      </div>
+      <>
+        <PageHeader title="Oráculo CRC" subtitle={selecionado.nome_completo} icon={Eye} />
+        <Visao360
+          colaborador={selecionado}
+          leituras={dadosDoSelecionado.leituras}
+          mediasEquipe={mediasEquipe}
+          processo={dadosDoSelecionado.processo}
+          acompanhamento={dadosDoSelecionado.acompanhamento}
+          onVoltar={() => setSelecionado(null)}
+        />
+      </>
     );
   }
+
+  const filtrados = agentes.filter((c) => c.nome_completo?.toLowerCase().includes(busca.toLowerCase()));
 
   return (
-    <div className="min-h-screen p-6 bg-muted">
+    <div className="space-y-6">
       <PageHeader
-        title="ORÁCULO CRC"
-        subtitle="Leitura Ativa de Pessoas - Módulo Exclusivo Gestores"
+        title="Oráculo CRC"
+        subtitle="A visão 360º de cada pessoa — o que as leituras dizem e o que os números mostram"
         icon={Eye}
       />
 
-      <Tabs defaultValue="equipe" className="mt-6">
-        <TabsList className="grid w-full max-w-md grid-cols-3">
-          <TabsTrigger value="equipe">
-            <Users className="w-4 h-4 mr-2" />
-            Equipe
-          </TabsTrigger>
-          <TabsTrigger value="historico">
-            <Calendar className="w-4 h-4 mr-2" />
-            Histórico
-          </TabsTrigger>
-          <TabsTrigger value="consolidacao">
-            <BarChart3 className="w-4 h-4 mr-2" />
-            Consolidação
-          </TabsTrigger>
-        </TabsList>
+      <Input placeholder="Buscar colaborador..." value={busca} onChange={(e) => setBusca(e.target.value)} />
 
-        {/* Tab Equipe */}
-        <TabsContent value="equipe">
-          <div className="grid gap-4 mt-6">
-            {colaboradores.filter(c => c.papel === 'agente').map(colaborador => {
-              const lancamentosColaborador = lancamentos.filter(l => l.colaborador_id === colaborador.id);
-              const ultimoLancamento = lancamentosColaborador[0];
-              
-              return (
-                <Card key={colaborador.id} className="hover:shadow-sm transition-shadow">
-                  <CardContent className="p-6">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <h3 className="font-semibold text-lg">{colaborador.nome_completo}</h3>
-                        <p className="text-sm text-muted-foreground">{colaborador.cargo_atual}</p>
-                        
-                        {ultimoLancamento && (
-                          <div className="mt-3 text-sm text-muted-foreground">
-                            Último lançamento: {formatDateSP(ultimoLancamento.data_lancamento, 'DD/MM/YYYY')}
-                          </div>
-                        )}
-                        
-                        {lancamentosColaborador.length > 0 && (
-                          <div className="mt-2 flex flex-wrap gap-1">
-                            {Object.entries(
-                              consolidacaoPorColaborador[colaborador.id]?.palavras_recorrentes || {}
-                            )
-                              .sort((a, b) => b[1] - a[1])
-                              .slice(0, 5)
-                              .map(([palavra, count]) => (
-                                <Badge key={palavra} variant="outline" className="text-xs">
-                                  {palavra} ({count}x)
-                                </Badge>
-                              ))}
-                          </div>
-                        )}
-                      </div>
-                      
-                      <div className="flex flex-col gap-2">
-                        <Button
-                          size="sm"
-                          onClick={() => handleNovoLancamento(colaborador)}
-                          className="bg-primary hover:bg-primary/90"
-                        >
-                          <Plus className="w-4 h-4 mr-2" />
-                          Novo Lançamento
-                        </Button>
-                        {lancamentosColaborador.length > 0 && (
-                          <Badge className="bg-muted text-foreground justify-center">
-                            {lancamentosColaborador.length} lançamentos
-                          </Badge>
-                        )}
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </div>
-
-          {colaboradores.filter(c => c.papel === 'agente').length === 0 && (
-            <EmptyState
-              icon={Users}
-              title="Nenhum agente encontrado"
-              description="Não há agentes cadastrados para lançamento."
-            />
-          )}
-        </TabsContent>
-
-        {/* Tab Histórico */}
-        <TabsContent value="historico">
-          <div className="space-y-4 mt-6">
-            {lancamentos.length === 0 ? (
-              <EmptyState
-                icon={Calendar}
-                title="Nenhum lançamento ainda"
-                description="Comece criando o primeiro lançamento na aba Equipe."
+      {filtrados.length === 0 ? (
+        <EmptyState icon={Eye} title="Nenhum colaborador encontrado" description="Ajuste a busca." />
+      ) : (
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {filtrados.map((c) => {
+            const d = porPessoa.get(c.id);
+            return (
+              <CartaoColaboradorOraculo
+                key={c.id}
+                colaborador={c}
+                leituras={d.leituras}
+                medias={d.medias}
+                pontos={d.pontos}
+                onClick={() => setSelecionado(c)}
               />
-            ) : (
-              lancamentos.map(lanc => (
-                <Card key={lanc.id}>
-                  <CardHeader>
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <CardTitle className="text-base">{lanc.colaborador_nome}</CardTitle>
-                        <p className="text-sm text-muted-foreground">
-                          {formatDateSP(lanc.data_lancamento, 'DD/MM/YYYY HH:mm')} • 
-                          Por {lanc.gestor_nome}
-                        </p>
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    {lanc.pergunta_gerada && (
-                      <div className="p-3 bg-info-soft rounded-lg text-sm italic">
-                        "{lanc.pergunta_gerada}"
-                      </div>
-                    )}
-                    
-                    <div>
-                      <h4 className="text-xs font-semibold text-muted-foreground mb-2">PALAVRAS-CHAVE</h4>
-                      <div className="flex flex-wrap gap-1">
-                        {lanc.palavras_chave?.map((p, idx) => (
-                          <Badge 
-                            key={idx}
-                            className={p.origem === 'manual' ? 'bg-warning' : 'bg-success'}
-                          >
-                            {p.palavra}
-                            {p.origem === 'manual' && ' *'}
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
+            );
+          })}
+        </div>
+      )}
 
-                    {lanc.texto_livre && (
-                      <div className="p-3 bg-muted rounded text-sm">
-                        {lanc.texto_livre}
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              ))
-            )}
-          </div>
-        </TabsContent>
-
-        {/* Tab Consolidação */}
-        <TabsContent value="consolidacao">
-          <div className="space-y-4 mt-6">
-            {Object.keys(consolidacaoPorColaborador).length === 0 ? (
-              <EmptyState
-                icon={BarChart3}
-                title="Sem dados consolidados"
-                description="Ainda não há lançamentos suficientes para consolidação."
-              />
-            ) : (
-              Object.entries(consolidacaoPorColaborador).map(([colabId, dados]) => (
-                <Card key={colabId}>
-                  <CardHeader>
-                    <CardTitle>{dados.colaborador_nome}</CardTitle>
-                    <p className="text-sm text-muted-foreground">
-                      {dados.total_lancamentos} lançamento(s) registrado(s)
-                    </p>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    {/* Palavras recorrentes */}
-                    <div>
-                      <h4 className="text-sm font-semibold mb-2">Palavras Recorrentes</h4>
-                      <div className="flex flex-wrap gap-2">
-                        {Object.entries(dados.palavras_recorrentes)
-                          .sort((a, b) => b[1] - a[1])
-                          .slice(0, 10)
-                          .map(([palavra, count]) => (
-                            <Badge key={palavra} className="bg-primary">
-                              {palavra} ({count}x)
-                            </Badge>
-                          ))}
-                      </div>
-                    </div>
-
-                    {/* Médias de Skills */}
-                    <div className="grid md:grid-cols-2 gap-4">
-                      <div>
-                        <h4 className="text-sm font-semibold mb-2">Soft Skills (Média)</h4>
-                        {Object.entries(dados.media_soft_skills).map(([skill, media]) => (
-                          <div key={skill} className="flex justify-between text-sm mb-1">
-                            <span>{skill}</span>
-                            <span className="font-medium text-warning">{media.toFixed(1)}</span>
-                          </div>
-                        ))}
-                      </div>
-                      <div>
-                        <h4 className="text-sm font-semibold mb-2">Hard Skills (Média)</h4>
-                        {Object.entries(dados.media_hard_skills).map(([skill, media]) => (
-                          <div key={skill} className="flex justify-between text-sm mb-1">
-                            <span>{skill}</span>
-                            <span className="font-medium text-warning">{media.toFixed(1)}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))
-            )}
-          </div>
-        </TabsContent>
-      </Tabs>
+      <p className="text-center text-xs text-muted-foreground">
+        As leituras são registradas em Observações. Aqui elas se juntam aos números do ciclo.
+      </p>
     </div>
   );
 }
