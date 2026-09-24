@@ -24,7 +24,7 @@ import { carregarModuloJsx } from './lib/carregar-jsx.mjs';
 
 // calculosApuracao.jsx é JS puro com extensão .jsx (sem elementos JSX de
 // verdade) — carregado via esbuild porque o Node não importa .jsx direto.
-const { calcularChat, calcularTelefone, validarConsistenciaTelefone } = await carregarModuloJsx(path.resolve('src/components/apuracao/calculosApuracao.jsx'));
+const { calcularChat, calcularTelefone, validarConsistenciaTelefone, calcularCX } = await carregarModuloJsx(path.resolve('src/components/apuracao/calculosApuracao.jsx'));
 import { produtividadePorTurno } from '../src/lib/relatorios/turnos.js';
 import { diasCorridos, saldoDoCiclo, situacaoDoCiclo, cicloParaAData, deFeriasEm, lotacaoNoPeriodo, conferirPedido, fragmentoDoPedido, proximasFerias } from '../src/lib/ferias.js';
 import { situacaoDaPesquisa, quemRespondeu, resultadoDasPerguntas, resumoDaPesquisa, montarParticipacao } from '../src/lib/pesquisas.js';
@@ -1166,6 +1166,32 @@ console.log('\n== telefone (55PBX): transferencia de fila pelo relatorio real ==
   checa('so a ligacao direta gera avaliacao', String(r.totalAvaliadas), '1');
   checa('a nota da ligacao transferida (CSAT 2) nao entra em nada', String(r.totalNegativas), '0');
   checa('csat sai 100% -- so a ligacao direta (nota 5) conta', String(r.csatPercentual), '100');
+}
+
+console.log('\n== CX: media divide pela quantidade de criterios avaliados, nao por 6 fixo ==');
+{
+  // Regra de Pedro (24/09/2026): soma as notas dos criterios preenchidos e
+  // divide pela QUANTIDADE de criterios avaliados naquela linha -- uma
+  // coluna em branco nao vira nota zero, so sai do denominador.
+  const mapeamento = {
+    agente: 'Agente', data: 'Data',
+    empatia: 'Empatia', cordialidade: 'Cordialidade', comunicacao: 'Comunicacao',
+    escrita: 'Escrita', profissionalismo: 'Profissionalismo', resolucao: 'Resolucao',
+  };
+  const linhas = [
+    // Todos os 6 preenchidos: media = (5+5+5+5+5+5)/6 = 5.
+    { Agente: 'Ana', Data: '10/09/2026', Empatia: '5', Cordialidade: '5', Comunicacao: '5', Escrita: '5', Profissionalismo: '5', Resolucao: '5' },
+    // So 2 dos 6 preenchidos: media = (4+2)/2 = 3, NAO (4+2+0+0+0+0)/6 = 1.
+    { Agente: 'Ana', Data: '11/09/2026', Empatia: '4', Cordialidade: '', Comunicacao: '2', Escrita: '', Profissionalismo: '', Resolucao: '' },
+    // Nenhum criterio preenchido: nao e avaliacao de verdade, fica de fora.
+    { Agente: 'Ana', Data: '12/09/2026', Empatia: '', Cordialidade: '', Comunicacao: '', Escrita: '', Profissionalismo: '', Resolucao: '' },
+  ];
+  const r = calcularCX(linhas, mapeamento).Ana;
+  checa('linha vazia nao conta como avaliacao', String(r.totalAvaliacoes), '2');
+  checa('linha com todos os 6 criterios: media 5', String(r.avaliacoes[0].media), '5');
+  checa('linha com so 2 criterios: media 3 (nao 1)', String(r.avaliacoes[1].media), '3');
+  checa('criterio em branco fica nulo, nao vira zero', String(r.avaliacoes[1].cordialidade), 'null');
+  checa('mediaCX da pessoa: (5 + 3) / 2 = 4', String(r.mediaCX), '4');
 }
 
 console.log('\n== chat (Zendesk): calculo bruto, sem coluna de nota ==');

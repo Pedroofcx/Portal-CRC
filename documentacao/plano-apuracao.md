@@ -175,8 +175,12 @@ de agente por fonte — é ela que faz o sistema "lembrar" do mapeamento.
    (1, 2 ou 3) é manual, ticket por ticket, na aba **Apuração → Ouvidoria**.
    Aparece à parte num comparativo "com e sem os neutros", só informativo.
    Ver decisoes-de-regra.md, "Ouvidoria do chat".
-5. **CX**: quem avalia, quantas avaliações por pessoa em cada quinzena, e a
-   nota é a média simples dos seis critérios?
+5. ~~**CX**: ... e a nota é a média simples dos seis critérios?~~
+   **Respondido em 24/09/2026:** a média soma as notas dos critérios
+   preenchidos e divide pela quantidade de critérios avaliados naquela
+   linha — não por 6 fixo; critério em branco sai da conta, não vira zero.
+   Ver "CX: a média é por critérios respondidos..." em decisoes-de-regra.md.
+   Ainda em aberto: quem avalia e a cadência (quinzenal?).
 6. **Reimportar o mesmo período**: substitui o que estava lá (é o que o
    sistema faz hoje na leitura) ou soma?
 7. **O aviso de "ciclo sem apuração"** no painel: faz sentido?

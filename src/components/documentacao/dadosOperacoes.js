@@ -69,6 +69,7 @@ export const modulosOperacoes = [
     regras_negocio: [
       'Telefone (55PBX): transferência de fila conta como atendida (entra na performance) mas nunca gera avaliação. FCR 1 + CSAT 4 ou 5 é positiva; FCR 1 + CSAT 1 ou 2 é negativa; FCR 1 + CSAT 3 é neutra (conta como avaliada, mas não a favor nem contra); FCR 2 é sempre negativa, qualquer que seja a nota. FCR 1 sem nota válida (erro operacional do cliente ao avaliar) é incompleta e nem conta como avaliada. O CSAT é positivas ÷ (positivas + negativas) — neutras e incompletas ficam fora.',
       'Chat (Zendesk): "boa" é sempre positiva; "ruim" sempre conta como negativo na premiação. A classificação de quais "ruim" são nota 3 (neutro — a empresa considera isso negativo, o Portal não) é manual, ticket por ticket, na aba Ouvidoria; aparece à parte num comparativo, sem mudar o resultado oficial.',
+      'CX: a média de cada avaliação soma as notas dos critérios preenchidos e divide pela quantidade de critérios avaliados naquela linha, não por um total fixo de 6 — um critério em branco sai da conta em vez de virar nota zero.',
       'Um dia importado duas vezes vale pela importação mais recente — a conferência avisa antes de salvar quais dias já existiam.',
       'Nenhuma linha entra sem nome de agente e sem data entendível; a tela diz quantas foram descartadas e por quê.',
       'Salvar sem ligar todas as pessoas do arquivo é bloqueado — um nome solto viraria número perdido.',

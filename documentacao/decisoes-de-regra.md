@@ -681,3 +681,32 @@ ligações com "transferência fila" na origem (Bárbara, 17/09) saíram do CSAT
 **Onde vive:** `src/components/apuracao/calculosApuracao.jsx`,
 `src/lib/indicadoresCiclo.js`, `src/lib/relatorios/qualidade.js`,
 `src/pages/RelatoriosApuracao.jsx`, `src/lib/apuracao/importacao.js`.
+
+---
+
+## CX: a média é por critérios respondidos, não por 6 fixo (24/09/2026)
+
+**A regra de Pedro.** A planilha de CX tem 6 critérios por avaliação
+(empatia, cordialidade, comunicação, escrita, profissionalismo, resolução).
+A média de cada avaliação soma as notas dos critérios **preenchidos** e
+divide pela **quantidade de critérios avaliados** naquela linha — não por 6
+fixo. Uma coluna em branco não vira nota zero; ela sai da conta inteira,
+soma e denominador.
+
+**O que estava errado.** `calcularCX` fazia `parseFloat(...) || 0` em cada
+coluna e dividia sempre por 6. Uma avaliação com só 2 dos 6 critérios
+preenchidos (nota 4 e nota 2) saía com média **1,0** (`(4+2+0+0+0+0)/6`) em
+vez de **3,0** (`(4+2)/2`) — arrastando pra baixo a média de quem avaliou
+poucos critérios, com um número que parecia real mas media outra coisa.
+
+**Efeito em cascata.** A avaliação CX entra direto na premiação
+(`indicadoresDoCiclo` em `indicadoresCiclo.js`, lendo `historico_detalhado[].media`),
+no Hansei, no Oráculo, no ranking e nos relatórios de Qualidade — todos
+usam esse número sem recalcular nada, então o erro se propagava para todo
+mundo que lê apuração de CX.
+
+**Linha sem nenhum critério preenchido não é avaliação.** Assumido, não
+pedido explicitamente por Pedro: uma linha com os 6 critérios em branco não
+entra em `totalAvaliacoes` nem em `porData`, como se a linha não existisse.
+
+**Onde vive:** `calcularCX` em `src/components/apuracao/calculosApuracao.jsx`.

@@ -447,6 +447,11 @@ export function calcularChat(dados, mapeamento) {
 
 // =====================================================
 // CX — Avaliação qualitativa
+// Regra (Pedro, 24/09/2026): a média de cada avaliação soma as notas dos
+// critérios preenchidos e divide pela QUANTIDADE de critérios avaliados
+// naquela linha — não por um total fixo de 6. Uma coluna em branco ou com
+// valor não numérico simplesmente não entra na conta (nem soma, nem conta
+// no denominador); não é tratada como nota zero.
 // =====================================================
 export function calcularCX(dados, mapeamento) {
   const resultados = {};
@@ -462,8 +467,14 @@ export function calcularCX(dados, mapeamento) {
     }
 
     const campos = ['empatia', 'cordialidade', 'comunicacao', 'escrita', 'profissionalismo', 'resolucao'];
-    const valores = campos.map(c => parseFloat(row[mapeamento[c]]) || 0);
-    const media = valores.reduce((a, b) => a + b, 0) / campos.length;
+    const valores = campos.map(c => {
+      const n = parseFloat(row[mapeamento[c]]);
+      return Number.isFinite(n) ? n : null;
+    });
+    const validos = valores.filter((v) => v !== null);
+    // Linha sem nenhum critério preenchido não é uma avaliação de verdade.
+    if (validos.length === 0) return;
+    const media = validos.reduce((a, b) => a + b, 0) / validos.length;
 
     if (!resultados[agente].porData[data]) {
       resultados[agente].porData[data] = { data, avaliacoes: [], media_dia: 0, total_avaliacoes_dia: 0 };
