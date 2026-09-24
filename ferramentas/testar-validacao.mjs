@@ -16,7 +16,7 @@ import { indicadoresDoCiclo } from '../src/lib/indicadoresCiclo.js';
 import { conferirLinha } from './conferir-cores.mjs';
 import { diasCorridos, saldoDoCiclo, situacaoDoCiclo, cicloParaAData, deFeriasEm, lotacaoNoPeriodo, conferirPedido, fragmentoDoPedido, proximasFerias } from '../src/lib/ferias.js';
 import { situacaoDaPesquisa, quemRespondeu, resultadoDasPerguntas, resumoDaPesquisa, montarParticipacao } from '../src/lib/pesquisas.js';
-import { segundaDaSemana, semanaDeReferencia, diasDaSemana, trabalhoDaSemana, trabalhoDe, montarSemanaDeTrabalho, avisosDoTrabalho, montarTurnosDaSemana, meuDiaNoTurno, equilibrioDoAtendimento } from '../src/lib/escalas.js';
+import { segundaDaSemana, semanaDeReferencia, diasDaSemana, trabalhoDaSemana, trabalhoDe, montarSemanaDeTrabalho, avisosDoTrabalho, montarTurnosDaSemana, meuDiaNoTurno, equilibrioDoAtendimento, estadoNoTurno, definirEstado, proximoEstado, inverterDia, copiarDia, trabalhandoNaMetade } from '../src/lib/escalas.js';
 import { mediaDasCompetencias, leiturasDoColaborador, palavrasRecorrentes, pontosDoRadar, evolucaoDasLeituras } from '../src/lib/competencias.js';
 import { proximaVersao, popsParaCiencia, agruparPorCategoria, popsDoTipo, fotografia } from '../src/lib/pops.js';
 import { filaDePendencias, avisosVisiveis, pesquisasVisiveis, obrigatoriasSemResposta, montarResposta } from '../src/lib/pendencias.js';
@@ -764,6 +764,31 @@ console.log('\n== escalas (trabalho e turno) ==');
   checa('dia cancelado nao tem turno', String(meuDiaNoTurno({ ...turnos[0], cancelado: true }, turnos[0].manha[0].colaborador_id)), 'null');
   const equilibrio = equilibrioDoAtendimento(turnos);
   checa('ninguem atende o dobro do outro na semana', String(equilibrio[0].metades - equilibrio[equilibrio.length - 1].metades <= 1), 'true');
+
+  // Turno de verdade: quem so trabalha de manha, quem so de tarde, e a troca
+  // dia a dia (pedido de Pedro em 24/09/2026).
+  const dia = turnos[0];
+  const quemAtende = dia.manha[0];
+  const quemAnalisa = dia.analisa_manha.find((p) => !dia.manha.some((m) => m.colaborador_id === p.colaborador_id));
+  checa('quem nao atende de manha esta analisando', estadoNoTurno(dia, quemAnalisa.colaborador_id, 'manha'), 'analisando');
+  checa('todo mundo presente trabalha na metade', String(trabalhandoNaMetade(dia, 'manha').length), '5');
+
+  const soDeTarde = definirEstado(dia, quemAtende, 'manha', 'fora');
+  checa('da para tirar alguem da manha inteira', estadoNoTurno(soDeTarde, quemAtende.colaborador_id, 'manha'), 'fora');
+  checa('e ele continua escalado a tarde', String(estadoNoTurno(soDeTarde, quemAtende.colaborador_id, 'tarde') !== 'fora'), 'true');
+  checa('quem saiu da manha nao conta mais como trabalhando', String(trabalhandoNaMetade(soDeTarde, 'manha').length), '4');
+  checa('o clique gira atende para analisa', proximoEstado('atendendo'), 'analisando');
+  checa('depois analisa para fora', proximoEstado('analisando'), 'fora');
+  checa('e fora volta para atende', proximoEstado('fora'), 'atendendo');
+
+  const invertido = inverterDia(dia);
+  checa('inverter troca manha por tarde', String(invertido.manha[0].colaborador_id === dia.tarde[0].colaborador_id), 'true');
+  checa('inverter troca tambem quem analisa', String(invertido.analisa_manha.length === dia.analisa_tarde.length), 'true');
+  checa('quem atendia de manha passa a atender a tarde', estadoNoTurno(invertido, quemAtende.colaborador_id, 'tarde'), 'atendendo');
+
+  const copiado = copiarDia(dia, { dia: 'terca', data: '2026-09-22', manha: [], tarde: [], analisa_manha: [], analisa_tarde: [] });
+  checa('copiar mantem a data do dia de destino', copiado.data, '2026-09-22');
+  checa('copiar traz a escalacao do outro dia', String(copiado.manha.length === dia.manha.length), 'true');
 }
 
 console.log('\n== pesquisas (quem respondeu e anonimato) ==');

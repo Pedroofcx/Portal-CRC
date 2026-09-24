@@ -4,9 +4,10 @@
  * Escala de Trabalho: quem fica presencial e quem fica em home office.
  * Regra do CRC (Pedro, 23/09/2026): três presenciais e dois em casa por dia.
  *
- * Escala de Turno: de manhã duas pessoas atendem e as outras analisam
- * tickets; à tarde inverte. Não é horário de entrada — é o que cada uma faz
- * em cada metade do dia.
+ * Escala de Turno: o que cada pessoa faz em cada metade do dia — atendendo,
+ * analisando tickets ou fora (não trabalha naquela metade). O padrão do CRC
+ * é duas atendendo de manhã invertendo à tarde, mas cada célula é editável:
+ * dá para deixar alguém só de manhã, só de tarde, e trocar dia a dia.
  *
  * Aqui só as contas. As telas ficam em src/components/escalas/.
  */
@@ -155,12 +156,89 @@ export function avisosDoTrabalho({ mapa, pessoas = [], dias = [], minimoPresenci
 }
 
 /**
- * Monta a escala de turno da semana: em cada dia, duas pessoas atendem de
- * manhã e as demais analisam tickets; à tarde inverte. A escolha de quem
- * começa atendendo gira dia a dia, para ninguém passar a semana só num lado.
+ * ESCALA DE TURNO — o que cada pessoa faz em cada metade do dia.
  *
- * Grava em `manha`/`tarde` (quem está ATENDENDO em cada metade do dia) —
- * as mesmas chaves que o relatório de produtividade já lê desde o Base44.
+ * Três estados por metade: atendendo, analisando (tickets) ou fora (não
+ * trabalha naquela metade). O "fora" é o que permite o turno de verdade —
+ * quem só trabalha de manhã, quem só trabalha de tarde, e a troca dia a dia
+ * (pedido de Pedro, 24/09/2026: "hoje elas estão de tarde, amanhã de manhã").
+ *
+ * No banco cada metade tem duas listas: `manha`/`tarde` são quem ATENDE (as
+ * mesmas chaves que o relatório de produtividade lê desde o Base44) e
+ * `analisa_manha`/`analisa_tarde` são quem analisa tickets. Quem não está em
+ * nenhuma das duas está fora daquela metade.
+ */
+export const METADES = [
+  { chave: 'manha', rotulo: 'manhã', analisa: 'analisa_manha' },
+  { chave: 'tarde', rotulo: 'tarde', analisa: 'analisa_tarde' },
+];
+
+export const ESTADOS_TURNO = [
+  { valor: 'atendendo', rotulo: 'Atende', ajuda: 'Atendendo telefone e chat' },
+  { valor: 'analisando', rotulo: 'Analisa', ajuda: 'Analisando tickets' },
+  { valor: 'fora', rotulo: '—', ajuda: 'Não trabalha nesta metade do dia' },
+];
+
+const metadeDe = (chave) => METADES.find((m) => m.chave === chave) ?? METADES[0];
+
+/** O que a pessoa faz numa metade do dia: atendendo, analisando ou fora. */
+export function estadoNoTurno(dia, colaboradorId, metade) {
+  const m = metadeDe(metade);
+  if ((dia?.[m.chave] || []).some((c) => c.colaborador_id === colaboradorId)) return 'atendendo';
+  if ((dia?.[m.analisa] || []).some((c) => c.colaborador_id === colaboradorId)) return 'analisando';
+  return 'fora';
+}
+
+/** Troca o que uma pessoa faz numa metade do dia e devolve o dia novo. */
+export function definirEstado(dia, pessoa, metade, estado) {
+  const m = metadeDe(metade);
+  const fora = (lista) => (lista || []).filter((c) => c.colaborador_id !== pessoa.colaborador_id);
+  const novo = { ...dia, [m.chave]: fora(dia[m.chave]), [m.analisa]: fora(dia[m.analisa]) };
+  if (estado === 'atendendo') novo[m.chave] = [...novo[m.chave], pessoa];
+  if (estado === 'analisando') novo[m.analisa] = [...novo[m.analisa], pessoa];
+  return novo;
+}
+
+/** O próximo estado ao clicar na célula: atende → analisa → fora → atende. */
+export const proximoEstado = (estado) => (
+  estado === 'atendendo' ? 'analisando' : estado === 'analisando' ? 'fora' : 'atendendo'
+);
+
+/** Inverte manhã e tarde do dia inteiro — quem era da tarde passa para a manhã. */
+export function inverterDia(dia) {
+  return {
+    ...dia,
+    manha: dia.tarde || [],
+    tarde: dia.manha || [],
+    analisa_manha: dia.analisa_tarde || [],
+    analisa_tarde: dia.analisa_manha || [],
+  };
+}
+
+/** Copia a escalação de um dia para outro, mantendo a data e o nome do dia. */
+export function copiarDia(origem, destino) {
+  return {
+    ...destino,
+    manha: origem.manha || [],
+    tarde: origem.tarde || [],
+    analisa_manha: origem.analisa_manha || [],
+    analisa_tarde: origem.analisa_tarde || [],
+    cancelado: false,
+    motivo_cancelamento: '',
+  };
+}
+
+/** Um dia vazio, do jeito que ele é gravado. */
+export const diaEmBranco = (chave, data) => ({
+  dia: chave, data, cancelado: false, motivo_cancelamento: '',
+  manha: [], tarde: [], analisa_manha: [], analisa_tarde: [],
+});
+
+/**
+ * Monta a escala de turno da semana no padrão do CRC: em cada dia, duas
+ * pessoas atendem de manhã e as demais analisam tickets; à tarde inverte. A
+ * dupla gira dia a dia, para ninguém passar a semana só num lado. Depois de
+ * montada, cada célula continua editável à mão.
  */
 export function montarTurnosDaSemana({ dias = [], presentesPorDia = new Map(), atendendoPorTurno = ATENDENDO_POR_TURNO, giro = 0 }) {
   return dias.map(({ chave, data }, indice) => {
@@ -169,15 +247,15 @@ export function montarTurnosDaSemana({ dias = [], presentesPorDia = new Map(), a
     const deslocamento = (indice + giro) * quantos;
     const girados = presentes.map((_, i) => presentes[(i + deslocamento) % presentes.length]);
     const manha = girados.slice(0, quantos);
-    const restantes = girados.filter((p) => !manha.some((m) => m.colaborador_id === p.colaborador_id));
-    const tarde = restantes.slice(0, quantos);
+    const semManha = girados.filter((p) => !manha.some((m) => m.colaborador_id === p.colaborador_id));
+    const tarde = semManha.slice(0, quantos);
+    const estaEm = (lista, p) => lista.some((x) => x.colaborador_id === p.colaborador_id);
     return {
-      dia: chave,
-      data,
-      cancelado: false,
-      motivo_cancelamento: '',
+      ...diaEmBranco(chave, data),
       manha,
       tarde,
+      analisa_manha: presentes.filter((p) => !estaEm(manha, p)),
+      analisa_tarde: presentes.filter((p) => !estaEm(tarde, p)),
     };
   });
 }
@@ -185,13 +263,16 @@ export function montarTurnosDaSemana({ dias = [], presentesPorDia = new Map(), a
 /** O que a pessoa faz no dia, em palavras — para o card do agente. */
 export function meuDiaNoTurno(diaTurno, colaboradorId) {
   if (!diaTurno || diaTurno.cancelado) return null;
-  const atendeManha = (diaTurno.manha || []).some((c) => c.colaborador_id === colaboradorId);
-  const atendeTarde = (diaTurno.tarde || []).some((c) => c.colaborador_id === colaboradorId);
-  if (!atendeManha && !atendeTarde) return null;
-  return {
-    manha: atendeManha ? 'atendendo' : 'analisando',
-    tarde: atendeTarde ? 'atendendo' : 'analisando',
-  };
+  const manha = estadoNoTurno(diaTurno, colaboradorId, 'manha');
+  const tarde = estadoNoTurno(diaTurno, colaboradorId, 'tarde');
+  if (manha === 'fora' && tarde === 'fora') return null;
+  return { manha, tarde };
+}
+
+/** Quem trabalha em cada metade do dia (atendendo ou analisando). */
+export function trabalhandoNaMetade(dia, metade) {
+  const m = metadeDe(metade);
+  return [...(dia?.[m.chave] || []), ...(dia?.[m.analisa] || [])];
 }
 
 /** Quantas metades de dia cada pessoa passou atendendo na semana. */

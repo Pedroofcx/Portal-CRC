@@ -13,8 +13,9 @@ import GradeTurno from '@/components/escalas/GradeTurno';
 import RelatorioProdutividadeTurnos from '@/components/turnos/RelatorioProdutividadeTurnos';
 
 import {
-  ATENDENDO_POR_TURNO, TRABALHANDO, diasDaSemana, segundaDaSemana, semanaDeReferencia, somarDias,
+  TRABALHANDO, diasDaSemana, segundaDaSemana, semanaDeReferencia, somarDias,
   trabalhoDaSemana, trabalhoDe, montarSemanaDeTrabalho, montarTurnosDaSemana, historicoDeHomeOffice,
+  definirEstado, inverterDia, copiarDia, diaEmBranco,
 } from '@/lib/escalas';
 
 /**
@@ -201,23 +202,27 @@ export default function Escalas() {
     onError: () => toast.error('Não consegui salvar a escala de turno.'),
   });
 
-  const turnosDaTela = () => dias.map((d) => turnos.find((t) => t.data === d.data)
-    ?? { dia: d.chave, data: d.data, cancelado: false, motivo_cancelamento: '', manha: [], tarde: [] });
+  const turnosDaTela = () => dias.map((d) => turnos.find((t) => t.data === d.data) ?? diaEmBranco(d.chave, d.data));
 
-  const alternarAtendimento = (data, pessoa) => {
-    const novos = turnosDaTela().map((t) => {
-      if (t.data !== data) return t;
-      const jaAtende = (t.manha || []).some((c) => c.colaborador_id === pessoa.colaborador_id);
-      const manha = jaAtende
-        ? t.manha.filter((c) => c.colaborador_id !== pessoa.colaborador_id)
-        : [...(t.manha || []), pessoa];
-      const presentes = presentesPorDia.get(data) ?? [];
-      const tarde = presentes
-        .filter((p) => !manha.some((m) => m.colaborador_id === p.colaborador_id))
-        .slice(0, ATENDENDO_POR_TURNO);
-      return { ...t, manha, tarde };
-    });
+  /** Clique na célula: atende → analisa → fora, para aquela metade do dia. */
+  const trocarEstado = (data, pessoa, metade, estado) => {
+    const novos = turnosDaTela().map((t) => (t.data === data
+      ? definirEstado(t, { colaborador_id: pessoa.id, colaborador_nome: pessoa.nome_completo }, metade, estado)
+      : t));
     salvarTurno.mutate(novos);
+  };
+
+  /** Troca manhã por tarde no dia inteiro — o "amanhã elas invertem". */
+  const inverterODia = (data) => {
+    salvarTurno.mutate(turnosDaTela().map((t) => (t.data === data ? inverterDia(t) : t)));
+  };
+
+  /** Repete no dia a escalação do dia anterior da mesma semana. */
+  const copiarDoAnterior = (data) => {
+    const atuais = turnosDaTela();
+    const indice = atuais.findIndex((t) => t.data === data);
+    if (indice <= 0) { toast.info('Este é o primeiro dia da semana.'); return; }
+    salvarTurno.mutate(atuais.map((t, i) => (i === indice ? copiarDia(atuais[indice - 1], t) : t)));
   };
 
   const cancelarDia = (data) => {
@@ -239,14 +244,7 @@ export default function Escalas() {
     if (!anterior) { toast.info('A semana passada não tem escala de turno.'); return; }
     salvarTurno.mutate(dias.map((d, i) => {
       const daAnterior = (anterior.turnos || [])[i];
-      return {
-        dia: d.chave,
-        data: d.data,
-        cancelado: false,
-        motivo_cancelamento: '',
-        manha: daAnterior?.manha ?? [],
-        tarde: daAnterior?.tarde ?? [],
-      };
+      return daAnterior ? copiarDia(daAnterior, diaEmBranco(d.chave, d.data)) : diaEmBranco(d.chave, d.data);
     }));
   };
 
@@ -297,12 +295,15 @@ export default function Escalas() {
 
         <TabsContent value="turno" className="pt-4">
           <GradeTurno
+            pessoas={pessoas}
             dias={dias}
             turnos={turnosDaTela()}
             presentesPorDia={presentesPorDia}
             podeEditar={isGestor}
             salvando={salvarTurno.isPending}
-            onAlternar={alternarAtendimento}
+            onTrocarEstado={trocarEstado}
+            onInverterDia={inverterODia}
+            onCopiarDoAnterior={copiarDoAnterior}
             onCancelarDia={cancelarDia}
             onMontarSemana={montarSemanaDeTurno}
             onRepetirSemana={repetirSemanaDeTurno}

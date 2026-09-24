@@ -30,8 +30,12 @@ export default function RelatorioProdutividadeTurnos({ escalas, tratativas, cola
     escalasFiltradas.forEach(escala => {
       (escala.turnos || []).forEach(dia => {
         if (dia.cancelado) return;
+        // Quem trabalhou em cada metade do dia: quem atendeu e quem analisou
+        // tickets (as duas listas desde 24/09/2026 — antes só existia quem
+        // atendia, e quem só analisava não aparecia no relatório).
+        const daMetade = { manha: [...(dia.manha || []), ...(dia.analisa_manha || [])], tarde: [...(dia.tarde || []), ...(dia.analisa_tarde || [])] };
         ['manha', 'tarde'].forEach(turno => {
-          (dia[turno] || []).forEach(colab => {
+          daMetade[turno].forEach(colab => {
             const dataStr = dia.data;
             const colabEmail = colaboradores.find(c => c.id === colab.colaborador_id)?.email;
             // Dia em horário de Brasília (o created_date é UTC: às 23h de um
@@ -58,6 +62,7 @@ export default function RelatorioProdutividadeTurnos({ escalas, tratativas, cola
               turno,
               colaborador_id: colab.colaborador_id,
               colaborador_nome: colab.colaborador_nome,
+              funcao: (dia[turno] || []).some(c => c.colaborador_id === colab.colaborador_id) ? 'atendendo' : 'analisando',
               abertas,
               concluidas,
               total: tratativasDoDia.length,

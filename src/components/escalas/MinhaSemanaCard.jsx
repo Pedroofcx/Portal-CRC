@@ -16,7 +16,8 @@ import {
  */
 const hojeSP = () => new Date().toLocaleDateString('en-CA', { timeZone: 'America/Sao_Paulo' });
 const rotuloDoLocal = (tipo) => TIPOS_TRABALHO.find((t) => t.valor === tipo)?.rotulo ?? 'sem marcação';
-const rotuloDoPapel = (papel) => (papel === 'atendendo' ? 'atendendo' : 'analisando tickets');
+const PAPEL = { atendendo: 'atendendo', analisando: 'analisando tickets', fora: 'não trabalha' };
+const rotuloDoPapel = (papel) => PAPEL[papel] ?? '—';
 
 export default function MinhaSemanaCard({ colaboradorId }) {
   const [aberto, setAberto] = useState(false);

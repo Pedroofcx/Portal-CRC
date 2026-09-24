@@ -481,3 +481,33 @@ pagamento pela CLT.
 aprovadas, e o card do painel do operador passou a mostrar saldo, vencimento e
 pedido em análise em vez do antigo "períodos esperando validação", que não
 validava nada.
+
+---
+
+## A escala de turno virou grade de meio período (24/09/2026)
+
+**O que faltava.** A primeira versão assumia que todo mundo trabalha o dia
+inteiro e só troca de função no meio dele — duas pessoas atendendo de manhã,
+invertendo à tarde. Pedro, usando a tela: *"eu não posso alocar pessoas em
+turnos diferentes... hoje elas estão de tarde, amanhã de manhã"*. Faltava o
+turno de verdade: alguém que só trabalha de manhã, outro só de tarde.
+
+**Como ficou.** A escala de turno agora é uma grade de pessoas × dias com
+**duas células por dia** (manhã e tarde). Cada célula tem três estados e gira
+no clique: **atende → analisa tickets → fora**. "Fora" é o que permite o meio
+período. Por dia ainda dá para **inverter** (troca manhã por tarde do time
+inteiro), **copiar o dia anterior** e marcar **sem operação**; "Montar no
+padrão" continua fazendo o 2-atendendo-invertendo, que é o normal do CRC.
+
+**No banco:** cada dia passou a ter quatro listas — `manha`/`tarde` (quem
+atende, as mesmas chaves que o relatório de produtividade lê desde o Base44) e
+`analisa_manha`/`analisa_tarde`. Quem não está em nenhuma das duas listas da
+metade não trabalha naquela metade.
+
+**Semanas antigas.** As 17 escalas que vieram do Base44 guardavam turno de
+horário (metade do time de manhã, metade à tarde) — e é assim que elas
+aparecem agora: quem está na lista da manhã trabalha de manhã, quem não está
+aparece como fora naquela metade. Nada foi reescrito.
+
+**No relatório de produtividade**, a metade do dia passou a contar quem
+atendeu *e* quem analisou tickets: antes, quem só analisava não aparecia.
