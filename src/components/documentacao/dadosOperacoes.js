@@ -64,9 +64,11 @@ export const modulosOperacoes = [
       { campo: 'ApuracaoMapeamento (migration 24)', descricao: 'O de-para por fonte: qual coluna é cada campo e qual nome do arquivo é qual pessoa do Portal. É o que faz o sistema lembrar em vez de pedir tudo de novo toda semana.' },
       { campo: 'dados_por_data[]', descricao: 'Um registro por dia — é daqui que saem o CSAT e a performance do ciclo (src/lib/indicadoresCiclo.js), com cada dia contando uma vez só.' },
       { campo: 'periodo_inicio / periodo_fim', descricao: 'Agora é o primeiro e o último dia que o arquivo trouxe daquela pessoa. Antes era o mês inteiro escolhido à mão, mesmo quando o arquivo tinha uma semana.' },
+      { campo: 'chat.total_neutros / negativos_confirmados / csat_sem_neutros', descricao: 'Ouvidoria do chat (24/09/2026): quando a coluna de nota do ticket é mapeada, os "ruim=1" com nota 3 são marcados como neutros. Só informativo — o CSAT oficial (csat/csatPercentual, usado na premiação) nunca muda por causa disso.' },
     ],
     regras_negocio: [
       'Telefone (55PBX): a ligação só conta como avaliada com FCR 1 ou 2; só é positiva com CSAT 4 ou 5 E FCR 1; transferência de fila conta como atendida (entra na performance) mas nunca gera avaliação.',
+      'Chat (Zendesk): "boa" é sempre positiva; "ruim" sempre conta como negativo na premiação. Se a nota do ticket foi mapeada, os "ruim" com nota 3 (neutro — a empresa considera isso negativo, o Portal não) aparecem à parte num comparativo, sem mudar o resultado oficial.',
       'Um dia importado duas vezes vale pela importação mais recente — a conferência avisa antes de salvar quais dias já existiam.',
       'Nenhuma linha entra sem nome de agente e sem data entendível; a tela diz quantas foram descartadas e por quê.',
       'Salvar sem ligar todas as pessoas do arquivo é bloqueado — um nome solto viraria número perdido.',

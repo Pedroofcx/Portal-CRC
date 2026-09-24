@@ -153,7 +153,9 @@ export default function RelatoriosApuracao() {
             chat: {
               total_chats: 0,
               total_avaliados: 0,
-              total_positivos: 0
+              total_positivos: 0,
+              total_neutros: 0,
+              tem_nota: false
             }
           };
         }
@@ -171,11 +173,15 @@ export default function RelatoriosApuracao() {
           agg.telefone.transferencias += dia.telefone.transferencias || 0;
         }
 
-        // Agregar chat
+        // Agregar chat. total_neutros e ouvidoria (24/09/2026): "ruim=1" com
+        // nota 3, que na verdade e neutro -- nunca entra no CSAT oficial
+        // acima, so no comparativo informativo da aba Chat.
         if (dia.chat) {
           agg.chat.total_chats += dia.chat.total_chats || 0;
           agg.chat.total_avaliados += dia.chat.total_avaliados || 0;
           agg.chat.total_positivos += dia.chat.total_positivos || 0;
+          agg.chat.total_neutros += dia.chat.total_neutros || 0;
+          if ((dia.chat.total_neutros || 0) > 0 || dia.chat.negativos_confirmados !== undefined) agg.chat.tem_nota = true;
         }
       });
     });
@@ -195,14 +201,22 @@ export default function RelatoriosApuracao() {
         ? (agg.telefone.total_avaliadas / agg.telefone.total_atendidas) * 100
         : 0;
 
-      // Chat
+      // Chat -- CSAT oficial (premiação) segue igual: positivos / avaliados.
       agg.chat.csat = agg.chat.total_avaliados > 0
         ? (agg.chat.total_positivos / agg.chat.total_avaliados) * 100
         : 0;
-      
+
       agg.chat.percentual_avaliados = agg.chat.total_chats > 0
         ? (agg.chat.total_avaliados / agg.chat.total_chats) * 100
         : 0;
+
+      // Ouvidoria: mesmo CSAT, tirando do negativo e do avaliado os "ruim=1"
+      // que eram nota 3 (neutro). Só informativo -- não afeta premiação.
+      agg.chat.negativos_confirmados = agg.chat.total_avaliados - agg.chat.total_positivos - agg.chat.total_neutros;
+      const avaliadosSemNeutros = agg.chat.total_avaliados - agg.chat.total_neutros;
+      agg.chat.csat_sem_neutros = avaliadosSemNeutros > 0
+        ? (agg.chat.total_positivos / avaliadosSemNeutros) * 100
+        : agg.chat.csat;
 
       return agg;
     }).sort((a, b) => a.periodo.localeCompare(b.periodo));
@@ -214,15 +228,18 @@ export default function RelatoriosApuracao() {
   const consolidacao = useMemo(() => {
     if (!dadosAgregados.length) return null;
     const t = { lig: 0, at: 0, av: 0, pos: 0 };
-    const c = { chats: 0, av: 0, pos: 0 };
+    const c = { chats: 0, av: 0, pos: 0, neutros: 0, temNota: false };
     dadosAgregados.forEach(agg => {
       t.lig += agg.telefone.total_ligacoes; t.at += agg.telefone.total_atendidas;
       t.av += agg.telefone.total_avaliadas; t.pos += agg.telefone.total_positivas;
       c.chats += agg.chat.total_chats; c.av += agg.chat.total_avaliados; c.pos += agg.chat.total_positivos;
+      c.neutros += agg.chat.total_neutros || 0;
+      if (agg.chat.tem_nota) c.temNota = true;
     });
     const pct = (parte, total) => (total > 0 ? (parte / total) * 100 : 0);
     const csatTelefoneMedia = pct(t.pos, t.av);
     const csatChatMedia = pct(c.pos, c.av);
+    const csatChatSemNeutros = (c.av - c.neutros) > 0 ? pct(c.pos, c.av - c.neutros) : csatChatMedia;
     const canais = [t.av > 0 ? csatTelefoneMedia : null, c.av > 0 ? csatChatMedia : null].filter((v) => v !== null);
     const avaliados = [t.at > 0 ? pct(t.av, t.at) : null, c.chats > 0 ? pct(c.av, c.chats) : null].filter((v) => v !== null);
     return {
@@ -231,6 +248,11 @@ export default function RelatoriosApuracao() {
       avaliadosMedia: avaliados.length ? avaliados.reduce((s2, v) => s2 + v, 0) / avaliados.length : 0,
       csatTelefoneMedia,
       csatChatMedia,
+      // Ouvidoria (chat): só aparece quando alguma apuração trouxe a coluna
+      // de nota. Nunca substitui csatChatMedia — a premiação usa esse.
+      chatTemNota: c.temNota,
+      chatNeutros: c.neutros,
+      csatChatSemNeutros,
     };
   }, [dadosAgregados]);
 
@@ -389,30 +411,63 @@ export default function RelatoriosApuracao() {
 
         {/* ABA CHAT */}
         <TabsContent value="chat">
-          <Card className="border-0 shadow-sm">
-            <CardHeader>
-              <CardTitle>Tabela de Chat por Agente</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {dadosAgregados.length === 0 ? (
-                <p className="text-center text-muted-foreground py-8">Nenhum dado disponível</p>
-              ) : (
-                <TabelaResumida
-                  linhas={dadosAgregados}
-                  chaveDaLinha={(agg, i) => `${agg.agente}-${agg.periodo}-${i}`}
-                  colunas={[
-                    { chave: 'agente', rotulo: 'Agente', alinhar: 'esquerda', principal: true, valor: (agg) => <span className="font-medium">{agg.agente}</span> },
-                    { chave: 'periodo', rotulo: 'Período', alinhar: 'esquerda', principal: true, valor: (agg) => <span className="whitespace-nowrap">{agg.periodo}</span> },
-                    { chave: 'total', rotulo: 'Total de chats', principal: true, valor: (agg) => agg.chat.total_chats },
-                    { chave: 'avaliados', rotulo: 'Avaliados', principal: true, valor: (agg) => agg.chat.total_avaliados },
-                    { chave: 'positivos', rotulo: 'Positivos', principal: true, valor: (agg) => agg.chat.total_positivos },
-                    { chave: 'aval', rotulo: '% Avaliados', principal: true, valor: (agg) => `${agg.chat.percentual_avaliados.toFixed(1)}%` },
-                    { chave: 'csat', rotulo: 'CSAT %', principal: true, valor: (agg) => <span className="font-semibold text-primary">{agg.chat.csat.toFixed(1)}%</span> },
-                  ]}
-                />
-              )}
-            </CardContent>
-          </Card>
+          <div className="space-y-6">
+            {consolidacao?.chatTemNota && (
+              <Card className="border-0 shadow-sm bg-info-soft">
+                <CardHeader>
+                  <CardTitle className="text-base">Ouvidoria — tickets "ruim" que eram neutros</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground mb-3">
+                    O Zendesk marca "satisfação ruim" quando a nota é 1, 2 <strong>ou 3</strong>. A nota 3 é neutra,
+                    não negativa — o CSAT oficial abaixo (usado na premiação) conta esses tickets como negativos;
+                    este quadro mostra o número desconsiderando-os, só para conferência.
+                  </p>
+                  <div className="grid grid-cols-3 gap-3">
+                    <div className="text-center">
+                      <p className="text-2xl font-bold text-foreground">{consolidacao.chatNeutros}</p>
+                      <p className="text-xs text-muted-foreground mt-1">tickets "ruim" que eram nota 3</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-2xl font-bold text-primary">{consolidacao.csatChatMedia.toFixed(1)}%</p>
+                      <p className="text-xs text-muted-foreground mt-1">CSAT oficial (usado na premiação)</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-2xl font-bold text-success">{consolidacao.csatChatSemNeutros.toFixed(1)}%</p>
+                      <p className="text-xs text-muted-foreground mt-1">CSAT desconsiderando os neutros</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            <Card className="border-0 shadow-sm">
+              <CardHeader>
+                <CardTitle>Tabela de Chat por Agente</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {dadosAgregados.length === 0 ? (
+                  <p className="text-center text-muted-foreground py-8">Nenhum dado disponível</p>
+                ) : (
+                  <TabelaResumida
+                    linhas={dadosAgregados}
+                    chaveDaLinha={(agg, i) => `${agg.agente}-${agg.periodo}-${i}`}
+                    colunas={[
+                      { chave: 'agente', rotulo: 'Agente', alinhar: 'esquerda', principal: true, valor: (agg) => <span className="font-medium">{agg.agente}</span> },
+                      { chave: 'periodo', rotulo: 'Período', alinhar: 'esquerda', principal: true, valor: (agg) => <span className="whitespace-nowrap">{agg.periodo}</span> },
+                      { chave: 'total', rotulo: 'Total de chats', principal: true, valor: (agg) => agg.chat.total_chats },
+                      { chave: 'avaliados', rotulo: 'Avaliados', principal: true, valor: (agg) => agg.chat.total_avaliados },
+                      { chave: 'positivos', rotulo: 'Positivos', principal: true, valor: (agg) => agg.chat.total_positivos },
+                      { chave: 'aval', rotulo: '% Avaliados', principal: true, valor: (agg) => `${agg.chat.percentual_avaliados.toFixed(1)}%` },
+                      { chave: 'csat', rotulo: 'CSAT % (premiação)', principal: true, valor: (agg) => <span className="font-semibold text-primary">{agg.chat.csat.toFixed(1)}%</span> },
+                      { chave: 'neutros', rotulo: 'Neutros (nota 3)', valor: (agg) => agg.chat.total_neutros || 0 },
+                      { chave: 'csatsn', rotulo: 'CSAT sem neutros', valor: (agg) => `${agg.chat.csat_sem_neutros.toFixed(1)}%` },
+                    ]}
+                  />
+                )}
+              </CardContent>
+            </Card>
+          </div>
         </TabsContent>
 
         {/* ABA CONSOLIDAÇÃO */}

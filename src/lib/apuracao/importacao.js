@@ -34,6 +34,13 @@ export const CAMPOS = {
     { chave: 'data', rotulo: 'Data', obrigatorio: true, sinonimos: ['data', 'criado em', 'created at', 'data de criacao', 'data de criação', 'solucionado em', 'atualizado em'] },
     { chave: 'bom', rotulo: 'Satisfação boa (0 ou 1)', obrigatorio: true, sinonimos: ['bom', 'boa', 'good', 'satisfacao boa', 'satisfação boa', 'positivo', 'positiva'] },
     { chave: 'ruim', rotulo: 'Satisfação ruim (0 ou 1)', obrigatorio: true, sinonimos: ['ruim', 'bad', 'satisfacao ruim', 'satisfação ruim', 'negativo', 'negativa'] },
+    {
+      chave: 'nota',
+      rotulo: 'Nota do ticket (opcional)',
+      obrigatorio: false,
+      sinonimos: ['nota', 'nota csat', 'csat score', 'score', 'pontuacao', 'pontuação', 'avaliacao numerica', 'avaliação numérica'],
+      ajuda: 'Não muda quem é positivo ou negativo — isso já vem das colunas de satisfação boa/ruim. Serve só para separar, dentro dos "ruim", quais eram nota 3 (neutro, não negativo de verdade). Continuam contando como negativo no resultado oficial; aparecem à parte, ticket por ticket, num relatório comparativo com e sem eles.',
+    },
   ],
   cx: [
     { chave: 'agente', rotulo: 'Agente', obrigatorio: true, sinonimos: ['agente', 'atendente', 'colaborador', 'avaliado', 'nome'] },

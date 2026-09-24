@@ -573,3 +573,37 @@ em massa, porque não há como saber o que veio junto com o quê.
 inclusive as três regras do telefone — avaliada exige FCR 1 ou 2, positiva exige
 CSAT 4 ou 5 com FCR 1, e transferência de fila conta como atendida mas não gera
 avaliação. Elas ainda precisam ser confirmadas e escritas no POP (Fase 3).
+
+---
+
+## Ouvidoria do chat (Zendesk): nota 3 é neutra, não negativa (24/09/2026)
+
+**A regra de Pedro.** O relatório do Zendesk traz duas colunas booleanas —
+"satisfação boa" e "satisfação ruim", 1 ou 0 — e, à parte, a nota do ticket. A
+empresa hoje trata "satisfação ruim" como sempre negativo, mas dentro desse
+grupo existe a nota 3, que é **neutra**, não negativa de verdade. Pedro não
+quer seguir esse critério da empresa: quer poder dizer "esse ticket ruim é
+nota 1, esse é nota 2, mas aquele ali é nota 3 — é neutro", sem que isso mude
+o resultado oficial, e quer o comparativo (com e sem os neutros) num relatório.
+
+**Como ficou.** A coluna de nota é **opcional** no mapeamento do chat. Quando
+ela vem:
+- **"Boa" nunca precisa de checagem** — é sempre positiva.
+- **"Ruim" continua contando como negativo na premiação**, sempre — a conta
+  oficial (`csatPercentual`, usada no ranking, no Hansei e no Oráculo) não
+  muda em nenhuma hipótese.
+- Dentro dos "ruim", os que têm **nota 3 são marcados como neutros**
+  (`total_neutros`), ticket por ticket, guardados no dia (`dados_por_data`) e
+  no total da apuração.
+- Um comparativo informativo mostra o resultado **com e sem** os neutros
+  (`negativos_confirmados`, `csat_sem_neutros`) — na aba Chat de Análise, um
+  quadro "Ouvidoria" aparece automaticamente quando alguma apuração trouxe a
+  coluna de nota, com os dois números lado a lado.
+
+Sem a coluna de nota mapeada, nada disso existe: o "ruim" fica cru, exatamente
+como sempre foi — a regra só vale quando a nota vem junto do arquivo.
+
+**Correção de rótulo.** O campo de mapeamento dizia "Nota do CSAT (1 a 3)",
+dando a entender que era uma escala fechada de todos os tickets. Pedro
+apontou que estava confuso; o rótulo virou "Nota do ticket (opcional)" com uma
+explicação abaixo do campo, no mesmo texto desta decisão.

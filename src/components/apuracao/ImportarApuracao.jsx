@@ -147,6 +147,7 @@ export default function ImportarApuracao({ colaboradores, mapeamentos = [], apur
                       {leitura.colunas.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
                     </SelectContent>
                   </Select>
+                  {campo.ajuda && <p className="mt-1 text-xs text-muted-foreground">{campo.ajuda}</p>}
                 </div>
               ))}
             </div>

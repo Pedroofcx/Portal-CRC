@@ -288,8 +288,21 @@ export function validarConsistenciaTelefone(r) {
 //   - CSAT = positivos / avaliados × 100
 //   - % Avaliados = avaliados / chats × 100
 // =====================================================
+// Ouvidoria (Zendesk, 24/09/2026): o relatorio traz duas colunas booleanas
+// (satisfacao boa / satisfacao ruim, 1 ou 0) e, quando mapeada, uma coluna de
+// nota (1 a 3). A regra de Pedro: "boa" nunca precisa de checagem extra -- e
+// sempre positiva. Ja "ruim" pode estar escondendo um ticket NEUTRO (nota 3),
+// que nao e de fato negativo. So valida a nota nos tickets marcados ruim.
+//
+// PREMIACAO NAO MUDA: total_positivos/total_negativos/total_avaliados e o
+// csat continuam exatamente como sempre foram calculados -- ruim=1 conta como
+// negativo, ponto. O que este bloco acrescenta e so informativo: quantos
+// desses "ruins" eram na verdade neutros (nota 3), para relatorios que
+// mostrem a leitura com e sem esse ajuste. Vale so quando a coluna de nota e
+// mapeada; sem ela, os campos de neutro ficam zerados e nada muda.
 export function calcularChat(dados, mapeamento) {
   const resultados = {};
+  const temNota = !!mapeamento.nota;
 
   dados.forEach(row => {
     const agente = (row[mapeamento.agente] || '').trim();
@@ -305,6 +318,7 @@ export function calcularChat(dados, mapeamento) {
         totalAvaliados: 0,
         totalPositivos: 0,
         totalNegativos: 0,
+        totalNeutros: 0,
         historico: []
       };
     }
@@ -312,7 +326,7 @@ export function calcularChat(dados, mapeamento) {
     const r = resultados[agente];
 
     if (!r.porData[data]) {
-      r.porData[data] = { data, total_chats: 0, total_avaliados: 0, total_positivos: 0, total_negativos: 0 };
+      r.porData[data] = { data, total_chats: 0, total_avaliados: 0, total_positivos: 0, total_negativos: 0, total_neutros: 0 };
     }
 
     const inicioSemana = getInicioSemana(data);
@@ -323,7 +337,8 @@ export function calcularChat(dados, mapeamento) {
         total_chats: 0,
         total_avaliados: 0,
         total_positivos: 0,
-        total_negativos: 0
+        total_negativos: 0,
+        total_neutros: 0
       };
     }
 
@@ -336,6 +351,8 @@ export function calcularChat(dados, mapeamento) {
 
     const bom = parseInt((row[mapeamento.bom] || '').toString().trim()) || 0;
     const ruim = parseInt((row[mapeamento.ruim] || '').toString().trim()) || 0;
+    const notaRaw = temNota ? parseInt((row[mapeamento.nota] || '').toString().trim()) : null;
+    const nota = Number.isFinite(notaRaw) ? notaRaw : null;
 
     if (bom === 1) {
       r.totalPositivos++;
@@ -345,15 +362,23 @@ export function calcularChat(dados, mapeamento) {
       semD.total_positivos++;
       semD.total_avaliados++;
     } else if (ruim === 1) {
+      // Continua contando como negativo -- a premiacao nao muda.
       r.totalNegativos++;
       r.totalAvaliados++;
       diaD.total_negativos++;
       diaD.total_avaliados++;
       semD.total_negativos++;
       semD.total_avaliados++;
+
+      // Alem disso, se a nota veio junto e e 3, marca como neutro (ouvidoria).
+      if (nota === 3) {
+        r.totalNeutros++;
+        diaD.total_neutros++;
+        semD.total_neutros++;
+      }
     }
 
-    r.historico.push({ data, ticket: row[mapeamento.ticket], bom, ruim });
+    r.historico.push({ data, ticket: row[mapeamento.ticket], bom, ruim, nota });
   });
 
   Object.keys(resultados).forEach(agente => {
@@ -363,6 +388,12 @@ export function calcularChat(dados, mapeamento) {
       const d = r.porData[dt];
       d.csat = d.total_avaliados > 0 ? (d.total_positivos / d.total_avaliados) * 100 : 0;
       d.percentual_avaliados = d.total_chats > 0 ? (d.total_avaliados / d.total_chats) * 100 : 0;
+      // Ouvidoria: o mesmo CSAT, mas tirando os "ruins" que eram neutros
+      // (nota 3) do negativo E do total avaliado -- informativo, nao entra
+      // na premiacao.
+      d.negativos_confirmados = d.total_negativos - d.total_neutros;
+      const avaliadosSemNeutros = d.total_avaliados - d.total_neutros;
+      d.csat_sem_neutros = avaliadosSemNeutros > 0 ? (d.total_positivos / avaliadosSemNeutros) * 100 : 0;
     });
 
     const semanasOrd = Object.keys(r.porSemana).sort();
@@ -370,6 +401,9 @@ export function calcularChat(dados, mapeamento) {
       const s = r.porSemana[iniSem];
       s.csat = s.total_avaliados > 0 ? (s.total_positivos / s.total_avaliados) * 100 : 0;
       s.percentual_avaliados = s.total_chats > 0 ? (s.total_avaliados / s.total_chats) * 100 : 0;
+      s.negativos_confirmados = s.total_negativos - s.total_neutros;
+      const avaliadosSemNeutros = s.total_avaliados - s.total_neutros;
+      s.csat_sem_neutros = avaliadosSemNeutros > 0 ? (s.total_positivos / avaliadosSemNeutros) * 100 : 0;
       s.numero = idx + 1;
       s.rotulo = formatarRotuloSemana(iniSem, idx + 1);
     });
@@ -377,8 +411,15 @@ export function calcularChat(dados, mapeamento) {
     r.consolidadoSemanal = semanasOrd.map(k => r.porSemana[k]);
     const nS = r.consolidadoSemanal.length;
 
+    // Oficial (premiacao): media das semanas do CSAT bruto -- igual a sempre foi.
     r.csatPercentual = nS > 0 ? r.consolidadoSemanal.reduce((a, s) => a + s.csat, 0) / nS : 0;
     r.percentualAvaliados = nS > 0 ? r.consolidadoSemanal.reduce((a, s) => a + s.percentual_avaliados, 0) / nS : 0;
+
+    // So informativo (ouvidoria): existe apenas quando a nota foi mapeada.
+    r.temNotaChat = temNota;
+    r.negativosConfirmados = r.totalNegativos - r.totalNeutros;
+    const avaliadosSemNeutrosTotal = r.totalAvaliados - r.totalNeutros;
+    r.csatSemNeutros = avaliadosSemNeutrosTotal > 0 ? (r.totalPositivos / avaliadosSemNeutrosTotal) * 100 : 0;
   });
 
   return resultados;

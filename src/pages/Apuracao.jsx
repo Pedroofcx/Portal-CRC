@@ -79,8 +79,15 @@ function registrosDaImportacao({ resultados, tipo, fonte, vinculos, colaboradore
           total_chats: dia.total_chats || 0,
           total_avaliados: dia.total_avaliados || 0,
           total_positivos: dia.total_positivos || 0,
+          total_negativos: dia.total_negativos || 0,
           percentual_avaliados: dia.percentual_avaliados || 0,
           csat: dia.csat || 0,
+          // Ouvidoria (24/09/2026): so preenchido quando a coluna de nota foi
+          // mapeada. total_neutros sao os "ruim=1" com nota 3 (nao entram no
+          // csat oficial acima, so no comparativo de ouvidoria).
+          total_neutros: dia.total_neutros || 0,
+          negativos_confirmados: dia.negativos_confirmados ?? (dia.total_negativos || 0),
+          csat_sem_neutros: dia.csat_sem_neutros ?? (dia.csat || 0),
         };
       } else {
         registro.cx = {
@@ -106,6 +113,11 @@ function registrosDaImportacao({ resultados, tipo, fonte, vinculos, colaboradore
         csat: r.csatPercentual || 0,
         avaliados: r.totalAvaliados || 0,
         total_atendimentos: r.totalChats || 0,
+        // Ouvidoria: comparativo informativo, nunca usado na premiacao.
+        tem_nota: !!r.temNotaChat,
+        total_neutros: r.totalNeutros || 0,
+        negativos_confirmados: r.negativosConfirmados ?? (r.totalNegativos || 0),
+        csat_sem_neutros: r.csatSemNeutros ?? (r.csatPercentual || 0),
       };
       base.satisfacao_media = r.csatPercentual || 0;
       base.percentual_avaliados = r.percentualAvaliados || 0;

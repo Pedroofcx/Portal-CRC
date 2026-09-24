@@ -159,8 +159,12 @@ de agente por fonte — é ela que faz o sistema "lembrar" do mapeamento.
 2. **A cadência de cada uma**: telefone e chat são semanais? O CX é quinzenal?
    Qual o dia de corte?
 3. **As três regras do telefone** acima: confirmo como estão?
-4. **Chat**: o CSAT é bons ÷ (bons + ruins)? Chat sem avaliação fica fora da
-   conta, certo?
+4. ~~**Chat**: o CSAT é bons ÷ (bons + ruins)?~~ **Respondido em 24/09/2026:**
+   sim, e "ruim=1" sempre conta como negativo na premiação — mesmo quando a
+   nota do ticket é 3 (neutra pelo critério do Pedro, negativa pelo da
+   empresa). Quando a coluna de nota vem no arquivo, esses casos aparecem à
+   parte num comparativo "com e sem os neutros", só informativo. Ver
+   decisoes-de-regra.md, "Ouvidoria do chat".
 5. **CX**: quem avalia, quantas avaliações por pessoa em cada quinzena, e a
    nota é a média simples dos seis critérios?
 6. **Reimportar o mesmo período**: substitui o que estava lá (é o que o

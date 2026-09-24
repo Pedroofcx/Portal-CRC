@@ -18,6 +18,12 @@ import { lerCsv, descobrirSeparador } from '../src/lib/csv.js';
 import { detectarFonte, sugerirMapeamento, camposFaltando, periodoDoArquivo, vincularAgentes, conferirImportacao, lotesDeImportacao } from '../src/lib/apuracao/importacao.js';
 import { normalizarData } from '../src/lib/apuracao/datas.js';
 import { turnoDoHorario } from '../src/lib/escalas.js';
+import path from 'node:path';
+import { carregarModuloJsx } from './lib/carregar-jsx.mjs';
+
+// calculosApuracao.jsx é JS puro com extensão .jsx (sem elementos JSX de
+// verdade) — carregado via esbuild porque o Node não importa .jsx direto.
+const { calcularChat } = await carregarModuloJsx(path.resolve('src/components/apuracao/calculosApuracao.jsx'));
 import { produtividadePorTurno } from '../src/lib/relatorios/turnos.js';
 import { diasCorridos, saldoDoCiclo, situacaoDoCiclo, cicloParaAData, deFeriasEm, lotacaoNoPeriodo, conferirPedido, fragmentoDoPedido, proximasFerias } from '../src/lib/ferias.js';
 import { situacaoDaPesquisa, quemRespondeu, resultadoDasPerguntas, resumoDaPesquisa, montarParticipacao } from '../src/lib/pesquisas.js';
@@ -1088,6 +1094,49 @@ console.log('\n== importacao da apuracao ==');
   ]);
   checa('importacoes antigas do mesmo momento viram um lote so', String(antigas.length), '2');
   checa('e o lote antigo soma as pessoas', String(antigas.find((l) => l.tipo === 'chat').pessoas), '2');
+}
+
+console.log('\n== ouvidoria do chat (Zendesk): nota 3 e neutra, nao negativa ==');
+{
+  // Regra de Pedro (24/09/2026): o Zendesk marca "satisfacao ruim" quando a
+  // nota e 1, 2 OU 3. So a nota 3 e neutra, nao negativa. A premiacao NAO
+  // muda -- continua contando ruim=1 como negativo. O ajuste e so um
+  // comparativo informativo, e so existe quando a coluna de nota e mapeada.
+  const mapeamento = { agente: 'Agente', data: 'Data', ticket: 'Ticket', bom: 'Bom', ruim: 'Ruim', nota: 'Nota' };
+  const linha = (bom, ruim, nota) => ({ Agente: 'Ana', Data: '10/09/2026', Ticket: 't', Bom: String(bom), Ruim: String(ruim), Nota: nota === null ? '' : String(nota) });
+  const linhas = [
+    linha(1, 0, null), // positivo
+    linha(1, 0, null), // positivo
+    linha(0, 1, 1),    // negativo confirmado
+    linha(0, 1, 2),    // negativo confirmado
+    linha(0, 1, 3),    // "ruim" mas neutro -- nao e negativo de fato
+    linha(0, 1, 3),    // idem
+    linha(0, 0, null), // sem avaliacao nenhuma
+  ];
+
+  const comNota = calcularChat(linhas, mapeamento).Ana;
+  checa('total de chats inclui os sem avaliacao', String(comNota.totalChats), '7');
+  checa('positivos nao mexem com a nota', String(comNota.totalPositivos), '2');
+  checa('premiacao: negativos continuam contando ruim=1 (nao muda)', String(comNota.totalNegativos), '4');
+  checa('premiacao: avaliados tambem nao muda', String(comNota.totalAvaliados), '6');
+  checa('csat oficial (premiacao) usa o bruto', comNota.csatPercentual.toFixed(1), (2 / 6 * 100).toFixed(1));
+  checa('so 2 dos 4 "ruins" eram nota 3 (neutros)', String(comNota.totalNeutros), '2');
+  checa('negativos confirmados tira os neutros', String(comNota.negativosConfirmados), '2');
+  checa('csat sem neutros fica mais alto que o oficial', comNota.csatSemNeutros.toFixed(1), (2 / 4 * 100).toFixed(1));
+  checa('flag de que a nota foi mapeada', String(comNota.temNotaChat), 'true');
+
+  const dia = comNota.porData['2026-09-10'];
+  checa('o dia tambem carrega os neutros', String(dia.total_neutros), '2');
+  checa('e o csat sem neutros do dia', dia.csat_sem_neutros.toFixed(1), (2 / 4 * 100).toFixed(1));
+
+  // Sem a coluna de nota mapeada, nada disso existe -- o "ruim" fica cru,
+  // exatamente como sempre foi (a regra so vale quando a nota vem junto).
+  const semNotaMap = { agente: 'Agente', data: 'Data', ticket: 'Ticket', bom: 'Bom', ruim: 'Ruim' };
+  const semNota = calcularChat(linhas, semNotaMap).Ana;
+  checa('sem mapear a nota, nao ha neutros', String(semNota.totalNeutros), '0');
+  checa('negativos confirmados vira igual ao negativo bruto', String(semNota.negativosConfirmados), String(semNota.totalNegativos));
+  checa('csat sem neutros vira igual ao csat oficial', semNota.csatSemNeutros.toFixed(2), semNota.csatPercentual.toFixed(2));
+  checa('flag fica falso sem a coluna', String(semNota.temNotaChat), 'false');
 }
 
 console.log('\n== conferencia de cores (o verificador pega o que deve) ==');
