@@ -214,12 +214,12 @@ const modulosAgente = [
   {
     icon: Calendar,
     nome: 'Escalas',
-    descricao: 'Calendário de escalas e eventos da equipe',
+    descricao: 'A semana da equipe: onde cada um trabalha e quem atende em cada turno',
     comoUsar: [
-      'Visualize o calendário mensal com todas as escalas da equipe',
-      'Confira quem está presencial, home office ou em treinamento',
-      'Veja eventos especiais, reuniões obrigatórias e feriados',
-      'Planeje-se com base na disponibilidade da equipe'
+      'Veja a semana inteira: quem está presencial e quem está em home office',
+      'Confira na Escala de Turno quem atende e quem analisa tickets de manhã e à tarde',
+      'Use as setas para olhar a semana passada ou a próxima',
+      'No painel inicial, o card "Minha semana" resume o seu dia'
     ]
   },
   {
@@ -275,7 +275,7 @@ const modulosComuns = [
     icon: Calendar,
     nome: 'Escalas',
     categoria: 'Logística',
-    resumo: 'Calendário de escalas, turnos, home office e eventos especiais da equipe'
+    resumo: 'Escala de trabalho (presencial x home office) e escala de turno (atender x analisar), semana a semana'
   },
   {
     icon: Palmtree,

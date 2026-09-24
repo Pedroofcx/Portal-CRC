@@ -1,609 +1,320 @@
 import db from '@/api/db';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-
-import { formatDateSP } from '@/components/utils/helpers';
-import PageHeader from '@/components/ui/PageHeader';
-import DataTable from '@/components/ui/DataTable';
-import LoadingSpinner from '@/components/ui/LoadingSpinner';
-import ConfirmDialog from '@/components/ui/ConfirmDialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
+import { Calendar } from 'lucide-react';
 
+import PageHeader from '@/components/ui/PageHeader';
+import LoadingSpinner from '@/components/ui/LoadingSpinner';
+import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import GradeTrabalho from '@/components/escalas/GradeTrabalho';
+import GradeTurno from '@/components/escalas/GradeTurno';
+import RelatorioProdutividadeTurnos from '@/components/turnos/RelatorioProdutividadeTurnos';
 
 import {
-  Calendar as CalendarIcon,
-  Plus,
-  Eye,
-  Trash2,
-  Users,
-} from 'lucide-react';
-import CalendarioEquipes from '@/components/escalas/CalendarioEquipes';
-import DiaDetalheDialog from '@/components/escalas/DiaDetalheDialog';
-import EquipeCard from '@/components/escalas/EquipeCard';
-import EquipeDetalhes from '@/components/escalas/EquipeDetalhes';
-import AtribuicaoDialog from '@/components/escalas/AtribuicaoDialog';
-import FerramentasLancamentoColetivo from '@/components/escalas/FerramentasLancamentoColetivo';
-import PainelLateral, { RodapeFixo } from '@/components/ui/PainelLateral';
+  ATENDENDO_POR_TURNO, TRABALHANDO, diasDaSemana, segundaDaSemana, semanaDeReferencia, somarDias,
+  trabalhoDaSemana, trabalhoDe, montarSemanaDeTrabalho, montarTurnosDaSemana, historicoDeHomeOffice,
+} from '@/lib/escalas';
 
-const periodosSobrepoem = (atrib, dataInicio, dataFim) => {
-  const inicio = new Date(atrib.data_inicio).toISOString().split('T')[0];
-  const fim = atrib.data_fim ? new Date(atrib.data_fim).toISOString().split('T')[0] : '9999-12-31';
-  return dataInicio <= fim && dataFim >= inicio;
-};
-
-const diasSemana = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
-const _diasSemanaFull = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
+/**
+ * ESCALAS — a escala de trabalho (presencial x home office) e a escala de
+ * turno (quem atende e quem analisa tickets) na mesma tela, semana a semana.
+ *
+ * Juntar as duas foi decisão de Pedro (23/09/2026): eram dois módulos que
+ * falavam da mesma semana e nunca batiam. Não existe visão de mês — a semana
+ * é a unidade de trabalho do CRC.
+ */
+const hojeSP = () => new Date().toLocaleDateString('en-CA', { timeZone: 'America/Sao_Paulo' });
 
 export default function Escalas() {
-  const [visao, setVisao] = useState('equipes'); // 'equipes', 'calendario', 'lista'
-  const [mesAtual, setMesAtual] = useState(new Date());
-  const [diaDetalheDialog, setDiaDetalheDialog] = useState(null);
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [atribuirDialogOpen, setAtribuirDialogOpen] = useState(false);
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [selectedEscala, setSelectedEscala] = useState(null);
-  const [selectedEquipe, setSelectedEquipe] = useState(null);
-  const [formData, setFormData] = useState({
-    nome: '',
-    descricao: '',
-    turnos: [{ nome: '', hora_inicio: '', hora_fim: '', dias_semana: [] }]
-  });
-
+  const [semanaOffset, setSemanaOffset] = useState(0);
   const queryClient = useQueryClient();
 
-  const { data: user } = useQuery({
-    queryKey: ['currentUser'],
-    queryFn: () => db.auth.me(),
-  });
+  const segunda = useMemo(() => segundaDaSemana(somarDias(hojeSP(), semanaOffset * 7)), [semanaOffset]);
+  const dias = useMemo(() => diasDaSemana(segunda), [segunda]);
+  const semanaRef = useMemo(() => semanaDeReferencia(segunda), [segunda]);
+  const segundaAnterior = useMemo(() => somarDias(segunda, -7), [segunda]);
 
-  const { data: colaboradores = [] } = useQuery({
+  const { data: user } = useQuery({ queryKey: ['currentUser'], queryFn: () => db.auth.me() });
+
+  const { data: colaboradores = [], isLoading: carregandoPessoas } = useQuery({
     queryKey: ['colaboradores', "list()"],
     queryFn: () => db.entities.Colaborador.list(),
   });
 
-  const { data: escalas = [], isLoading } = useQuery({
-    queryKey: ['escalas'],
-    queryFn: () => db.entities.Escala.filter({ ativa: true }),
-  });
-
-  const { data: atribuicoes = [] } = useQuery({
+  const { data: atribuicoes = [], isLoading: carregandoTrabalho } = useQuery({
     queryKey: ['escalaAtribuicoes', "list('-created_date')"],
-    queryFn: () => db.entities.EscalaAtribuicao.list('-created_date'),
+    queryFn: () => db.entities.EscalaAtribuicao.list('-created_date', 2000),
+    staleTime: 60000,
   });
 
-  const { data: equipes = [] } = useQuery({
-    queryKey: ['equipes'],
-    queryFn: () => db.entities.Equipe.filter({ ativa: true }),
+  const { data: escalasTurno = [] } = useQuery({
+    queryKey: ['escalas-turno', "filter({ ativa: true }, '-created_date', 60)"],
+    queryFn: () => db.entities.EscalaTurno.filter({ ativa: true }, '-created_date', 60),
+    staleTime: 60000,
   });
 
-  const colaborador = React.useMemo(() => 
-    colaboradores.find(c => c.email === user?.email),
-    [colaboradores, user]
-  );
-  const isGestor = colaborador?.papel === 'gestor';
-
-  // Cleanup ao desmontar - CRITICAL
-  React.useEffect(() => {
-    return () => {
-      setDialogOpen(false);
-      setAtribuirDialogOpen(false);
-      setDeleteDialogOpen(false);
-      setDiaDetalheDialog(null);
-      setSelectedEscala(null);
-      setSelectedEquipe(null);
-    };
-  }, []);
-
-  const createMutation = useMutation({
-    mutationFn: (data) => db.entities.Escala.create({ ...data, ativa: true }),
-    onSuccess: () => {
-      queryClient.invalidateQueries(['escalas']);
-      toast.success('Escala criada com sucesso');
-      setDialogOpen(false);
-      resetForm();
-    },
-    onError: () => toast.error('Erro ao criar escala'),
+  const { data: ferias = [] } = useQuery({
+    queryKey: ['ferias-aprovadas'],
+    queryFn: () => db.entities.SolicitacaoFerias.filter({ status: 'aprovada' }, '-data_inicio', 200),
+    staleTime: 300000,
   });
 
-  const atribuirMutation = useMutation({
-    mutationFn: async ({ colaboradorIds, periodo, tipoEvento }) => {
-      const promises = colaboradorIds.map(colabId => {
-        const colab = colaboradores.find(c => c.id === colabId);
-        return db.entities.EscalaAtribuicao.create({
-          escala_id: 'direct',
-          escala_nome: 'Escala Direta',
-          colaborador_id: colabId,
-          colaborador_nome: colab?.nome_completo,
-          data_inicio: periodo.inicio,
-          data_fim: periodo.fim,
-          tipo_evento: tipoEvento || 'presencial',
-          ativa: true
-        });
-      });
-      return Promise.all(promises);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries(['escalaAtribuicoes']);
-      toast.success('Escala atribuída com sucesso');
-      setAtribuirDialogOpen(false);
-    },
-    onError: () => toast.error('Erro ao atribuir escala'),
+  const { data: tratativas = [] } = useQuery({
+    queryKey: ['tratativas', "list('-created_date')"],
+    queryFn: () => db.entities.Tratativa.list('-created_date'),
+    staleTime: 120000,
   });
 
-  const deleteMutation = useMutation({
-    mutationFn: (id) => db.entities.Escala.update(id, { ativa: false }),
-    onSuccess: () => {
-      queryClient.invalidateQueries(['escalas']);
-      toast.success('Escala removida');
-      setDeleteDialogOpen(false);
-    },
-    onError: () => toast.error('Erro ao remover'),
-  });
+  const eu = colaboradores.find((c) => c.email === user?.email);
+  const isGestor = eu?.papel === 'gestor';
 
-  const aplicarMassaMutation = useMutation({
-    mutationFn: async ({ colaboradorIds, dataInicio, dataFim, tipoEvento }) => {
-      // Antiduplicação: remove registros existentes que se sobrepõem ao período para os colaboradores escolhidos
-      const sobrepostos = atribuicoes.filter(a => colaboradorIds.includes(a.colaborador_id) && periodosSobrepoem(a, dataInicio, dataFim));
-      await Promise.all(sobrepostos.map(a => db.entities.EscalaAtribuicao.delete(a.id)));
+  const pessoas = useMemo(() => colaboradores
+    .filter((c) => c.ativo !== false && c.papel === 'agente')
+    .sort((a, b) => (a.nome_completo || '').localeCompare(b.nome_completo || '')), [colaboradores]);
 
-      const novos = colaboradorIds.map(id => ({
-        escala_id: 'direct',
-        escala_nome: 'Lançamento em Massa',
-        colaborador_id: id,
-        colaborador_nome: colaboradores.find(c => c.id === id)?.nome_completo,
-        data_inicio: dataInicio,
-        data_fim: dataFim,
-        tipo_evento: tipoEvento,
-        ativa: true
-      }));
-      return db.entities.EscalaAtribuicao.bulkCreate(novos);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries(['escalaAtribuicoes']);
-      toast.success('Escala aplicada em massa com sucesso');
-    },
-    onError: () => toast.error('Erro ao aplicar escala em massa'),
-  });
+  const mapa = useMemo(() => trabalhoDaSemana(atribuicoes, dias), [atribuicoes, dias]);
 
-  const limparMassaMutation = useMutation({
-    mutationFn: async ({ colaboradorIds, dataInicio, dataFim }) => {
-      const sobrepostos = atribuicoes.filter(a => colaboradorIds.includes(a.colaborador_id) && periodosSobrepoem(a, dataInicio, dataFim));
-      await Promise.all(sobrepostos.map(a => db.entities.EscalaAtribuicao.delete(a.id)));
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries(['escalaAtribuicoes']);
-      toast.success('Agendamentos do período removidos');
-    },
-    onError: () => toast.error('Erro ao limpar agendamentos'),
-  });
+  /** Férias aprovadas travam o dia: não dá para marcar presencial nem home. */
+  const indisponiveis = useMemo(() => {
+    const m = new Map();
+    ferias.forEach((f) => dias.forEach(({ data }) => {
+      if (data >= String(f.data_inicio).slice(0, 10) && data <= String(f.data_fim).slice(0, 10)) {
+        m.set(`${f.colaborador_id}|${data}`, 'ferias');
+      }
+    }));
+    dias.forEach(({ data }) => pessoas.forEach((p) => {
+      const tipo = trabalhoDe(mapa, p.id, data);
+      if (tipo && !TRABALHANDO.has(tipo)) m.set(`${p.id}|${data}`, tipo);
+    }));
+    return m;
+  }, [ferias, dias, pessoas, mapa]);
 
-  if (!user) {
-    return <LoadingSpinner />;
-  }
-
-  const resetForm = () => {
-    setFormData({
-      nome: '',
-      descricao: '',
-      turnos: [{ nome: '', hora_inicio: '', hora_fim: '', dias_semana: [] }]
+  /**
+   * Quem está de pé em cada dia, para a escala de turno. Sem escala de
+   * trabalho montada, considera a equipe inteira — assim dá para montar o
+   * turno mesmo em semana que ninguém marcou ainda.
+   */
+  const presentesPorDia = useMemo(() => {
+    const m = new Map();
+    dias.forEach(({ data }) => {
+      const marcados = pessoas.filter((p) => TRABALHANDO.has(trabalhoDe(mapa, p.id, data)));
+      const semNadaMarcado = pessoas.every((p) => !trabalhoDe(mapa, p.id, data));
+      const doDia = semNadaMarcado
+        ? pessoas.filter((p) => !indisponiveis.get(`${p.id}|${data}`))
+        : marcados;
+      m.set(data, doDia.map((p) => ({ colaborador_id: p.id, colaborador_nome: p.nome_completo })));
     });
-  };
+    return m;
+  }, [dias, pessoas, mapa, indisponiveis]);
 
-  const addTurno = () => {
-    setFormData({
-      ...formData,
-      turnos: [...formData.turnos, { nome: '', hora_inicio: '', hora_fim: '', dias_semana: [] }]
-    });
-  };
+  const escalaDaSemana = useMemo(() => escalasTurno.find((e) => e.semana_referencia === semanaRef) ?? null, [escalasTurno, semanaRef]);
+  const turnos = escalaDaSemana?.turnos ?? [];
 
-  const updateTurno = (index, field, value) => {
-    const newTurnos = [...formData.turnos];
-    newTurnos[index] = { ...newTurnos[index], [field]: value };
-    setFormData({ ...formData, turnos: newTurnos });
-  };
-
-  const toggleDiaSemana = (turnoIndex, dia) => {
-    const newTurnos = [...formData.turnos];
-    const diasAtuais = newTurnos[turnoIndex].dias_semana || [];
-    if (diasAtuais.includes(dia)) {
-      newTurnos[turnoIndex].dias_semana = diasAtuais.filter(d => d !== dia);
-    } else {
-      newTurnos[turnoIndex].dias_semana = [...diasAtuais, dia];
-    }
-    setFormData({ ...formData, turnos: newTurnos });
-  };
-
-  const removeTurno = (index) => {
-    setFormData({ ...formData, turnos: formData.turnos.filter((_, i) => i !== index) });
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (!formData.nome) {
-      toast.error('Preencha o nome da escala');
-      return;
-    }
-    createMutation.mutate(formData);
-  };
-
-  // Minhas escalas (se não for gestor)
-  const minhasAtribuicoes = atribuicoes.filter(a => a.colaborador_id === colaborador?.id && a.ativa);
-
-  // Funções do calendário
-  const _getDiasDoMes = (data) => {
-    const ano = data.getFullYear();
-    const mes = data.getMonth();
-    const primeiroDia = new Date(ano, mes, 1);
-    const ultimoDia = new Date(ano, mes + 1, 0);
-    const diasAnteriores = primeiroDia.getDay();
-    const dias = [];
-    for (let i = diasAnteriores - 1; i >= 0; i--) dias.push({ data: new Date(ano, mes, -i), mesAtual: false });
-    for (let i = 1; i <= ultimoDia.getDate(); i++) dias.push({ data: new Date(ano, mes, i), mesAtual: true });
-    const diasFaltantes = 42 - dias.length;
-    for (let i = 1; i <= diasFaltantes; i++) dias.push({ data: new Date(ano, mes + 1, i), mesAtual: false });
-    return dias;
-  };
-
-  const _getAtribuicoesDoDia = (data) => {
-    const dataStr = data.toISOString().split('T')[0];
-    return atribuicoes.filter(atrib => {
-      const inicio = new Date(atrib.data_inicio).toISOString().split('T')[0];
-      const fim = atrib.data_fim ? new Date(atrib.data_fim).toISOString().split('T')[0] : '9999-12-31';
-      return dataStr >= inicio && dataStr <= fim;
-    });
-  };
-
-  const mesAnterior = () => setMesAtual(new Date(mesAtual.getFullYear(), mesAtual.getMonth() - 1, 1));
-  const mesPosterior = () => setMesAtual(new Date(mesAtual.getFullYear(), mesAtual.getMonth() + 1, 1));
-  const hoje = () => setMesAtual(new Date());
-
-  const columns = [
-    {
-      header: 'Nome',
-      accessor: 'nome'
-    },
-    {
-      header: 'Turnos',
-      render: (row) => `${row.turnos?.length || 0} turnos`
-    },
-    {
-      header: 'Colaboradores',
-      render: (row) => {
-        const atribuicoesDaEscala = atribuicoes.filter(a => a.escala_id === row.id && a.ativa);
-        return (
-          <div className="flex items-center gap-2">
-            <Users className="w-4 h-4 text-muted-foreground" />
-            <span>{atribuicoesDaEscala.length}</span>
-          </div>
-        );
+  // ── Escala de trabalho ────────────────────────────────────────────────
+  const salvarTrabalho = useMutation({
+    mutationFn: async (marcacoes) => {
+      for (const { pessoa, data, tipo } of marcacoes) {
+        const existente = atribuicoes.find((a) => a.colaborador_id === pessoa.id
+          && String(a.data_inicio).slice(0, 10) === data
+          && String(a.data_fim || a.data_inicio).slice(0, 10) === data);
+        if (!tipo) {
+          if (existente) await db.entities.EscalaAtribuicao.delete(existente.id);
+        } else if (existente) {
+          if (existente.tipo_evento !== tipo) await db.entities.EscalaAtribuicao.update(existente.id, { tipo_evento: tipo, ativa: true });
+        } else {
+          await db.entities.EscalaAtribuicao.create({
+            escala_id: 'direct',
+            escala_nome: 'Escala de Trabalho',
+            colaborador_id: pessoa.id,
+            colaborador_nome: pessoa.nome_completo,
+            data_inicio: data,
+            data_fim: data,
+            tipo_evento: tipo,
+            ativa: true,
+          });
+        }
       }
     },
-    {
-      header: '',
-      render: (row) => (
-        <div className="flex items-center gap-1">
-          {isGestor && (
-            <Button 
-              variant="outline"
-              size="sm"
-              onClick={() => { setSelectedEscala(row); setAtribuirDialogOpen(true); }}
-            >
-              Atribuir
-            </Button>
-          )}
-          <Button 
-            variant="ghost" 
-            size="icon"
-            onClick={() => { setSelectedEscala(row); }}
-          >
-            <Eye className="w-4 h-4" />
-          </Button>
-          {isGestor && (
-            <Button 
-              variant="ghost" 
-              size="icon"
-              className="text-destructive"
-              onClick={() => { setSelectedEscala(row); setDeleteDialogOpen(true); }}
-            >
-              <Trash2 className="w-4 h-4" />
-            </Button>
-          )}
-        </div>
-      )
-    }
-  ];
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['escalaAtribuicoes'] });
+      toast.success('Escala de trabalho salva.');
+    },
+    onError: () => toast.error('Não consegui salvar a escala de trabalho.'),
+  });
 
-  if (isLoading) {
-    return <LoadingSpinner />;
-  }
+  const marcarTrabalho = (pessoa, data, tipo) => {
+    if (indisponiveis.get(`${pessoa.id}|${data}`) === 'ferias' && tipo && TRABALHANDO.has(tipo)) {
+      toast.error(`${pessoa.nome_completo.split(' ')[0]} está de férias neste dia.`);
+      return;
+    }
+    salvarTrabalho.mutate([{ pessoa, data, tipo }]);
+  };
+
+  const montarSemanaDeTrabalhoNaTela = () => {
+    const historico = historicoDeHomeOffice(atribuicoes, pessoas, somarDias(segunda, -28));
+    const plano = montarSemanaDeTrabalho({ pessoas, dias, indisponiveis, historico });
+    const marcacoes = [];
+    plano.forEach((tipo, chave) => {
+      const [pessoaId, data] = chave.split('|');
+      const pessoa = pessoas.find((p) => p.id === pessoaId);
+      if (pessoa && trabalhoDe(mapa, pessoaId, data) !== tipo) marcacoes.push({ pessoa, data, tipo });
+    });
+    if (marcacoes.length === 0) { toast.info('A semana já está montada assim.'); return; }
+    salvarTrabalho.mutate(marcacoes);
+  };
+
+  const repetirSemanaDeTrabalho = () => {
+    const diasAnteriores = diasDaSemana(segundaAnterior);
+    const anterior = trabalhoDaSemana(atribuicoes, diasAnteriores);
+    const marcacoes = [];
+    dias.forEach((d, i) => pessoas.forEach((p) => {
+      const tipo = trabalhoDe(anterior, p.id, diasAnteriores[i].data);
+      if (tipo && trabalhoDe(mapa, p.id, d.data) !== tipo) marcacoes.push({ pessoa: p, data: d.data, tipo });
+    }));
+    if (marcacoes.length === 0) { toast.info('Nada para copiar da semana passada.'); return; }
+    salvarTrabalho.mutate(marcacoes);
+  };
+
+  // ── Escala de turno ───────────────────────────────────────────────────
+  const salvarTurno = useMutation({
+    mutationFn: async (novosTurnos) => {
+      const participantes = [...new Set(dias.flatMap(({ data }) => (presentesPorDia.get(data) ?? []).map((p) => p.colaborador_id)))];
+      if (escalaDaSemana) {
+        return db.entities.EscalaTurno.update(escalaDaSemana.id, { turnos: novosTurnos, colaboradores_participantes: participantes });
+      }
+      return db.entities.EscalaTurno.create({
+        semana_referencia: semanaRef,
+        data_inicio_semana: segunda,
+        colaboradores_participantes: participantes,
+        turnos: novosTurnos,
+        gerado_por_id: eu?.id,
+        gerado_por_nome: eu?.nome_completo,
+        ativa: true,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['escalas-turno'] });
+      toast.success('Escala de turno salva.');
+    },
+    onError: () => toast.error('Não consegui salvar a escala de turno.'),
+  });
+
+  const turnosDaTela = () => dias.map((d) => turnos.find((t) => t.data === d.data)
+    ?? { dia: d.chave, data: d.data, cancelado: false, motivo_cancelamento: '', manha: [], tarde: [] });
+
+  const alternarAtendimento = (data, pessoa) => {
+    const novos = turnosDaTela().map((t) => {
+      if (t.data !== data) return t;
+      const jaAtende = (t.manha || []).some((c) => c.colaborador_id === pessoa.colaborador_id);
+      const manha = jaAtende
+        ? t.manha.filter((c) => c.colaborador_id !== pessoa.colaborador_id)
+        : [...(t.manha || []), pessoa];
+      const presentes = presentesPorDia.get(data) ?? [];
+      const tarde = presentes
+        .filter((p) => !manha.some((m) => m.colaborador_id === p.colaborador_id))
+        .slice(0, ATENDENDO_POR_TURNO);
+      return { ...t, manha, tarde };
+    });
+    salvarTurno.mutate(novos);
+  };
+
+  const cancelarDia = (data) => {
+    const novos = turnosDaTela().map((t) => (t.data === data ? { ...t, cancelado: !t.cancelado } : t));
+    salvarTurno.mutate(novos);
+  };
+
+  const montarSemanaDeTurno = () => {
+    const base = montarTurnosDaSemana({ dias, presentesPorDia, giro: Number(semanaRef.slice(-2)) });
+    const atuais = turnosDaTela();
+    salvarTurno.mutate(base.map((t) => {
+      const atual = atuais.find((a) => a.data === t.data);
+      return atual?.cancelado ? atual : t;
+    }));
+  };
+
+  const repetirSemanaDeTurno = () => {
+    const anterior = escalasTurno.find((e) => e.semana_referencia === semanaDeReferencia(segundaAnterior));
+    if (!anterior) { toast.info('A semana passada não tem escala de turno.'); return; }
+    salvarTurno.mutate(dias.map((d, i) => {
+      const daAnterior = (anterior.turnos || [])[i];
+      return {
+        dia: d.chave,
+        data: d.data,
+        cancelado: false,
+        motivo_cancelamento: '',
+        manha: daAnterior?.manha ?? [],
+        tarde: daAnterior?.tarde ?? [],
+      };
+    }));
+  };
+
+  if (carregandoPessoas || carregandoTrabalho) return <LoadingSpinner text="Carregando as escalas..." />;
+
+  const eSemanaAtual = semanaOffset === 0;
+  const periodo = `${dias[0].data.slice(8, 10)}/${dias[0].data.slice(5, 7)} a ${dias[4].data.slice(8, 10)}/${dias[4].data.slice(5, 7)}`;
 
   return (
     <div className="space-y-6">
-      <PageHeader 
+      <PageHeader
         title="Escalas"
-        subtitle="Gerenciamento de escalas de trabalho"
-        icon={CalendarIcon}
-        actions={
-          <div className="flex gap-2">
-            <div className="flex gap-1 border rounded-lg p-1 bg-card">
-              <Button 
-                variant={visao === 'equipes' ? 'default' : 'ghost'} 
-                size="sm"
-                onClick={() => setVisao('equipes')}
-              >
-                <Users className="w-4 h-4 mr-1" />
-                Equipes
-              </Button>
-              <Button 
-                variant={visao === 'calendario' ? 'default' : 'ghost'} 
-                size="sm"
-                onClick={() => setVisao('calendario')}
-              >
-                <CalendarIcon className="w-4 h-4 mr-1" />
-                Calendário
-              </Button>
-              <Button 
-                variant={visao === 'lista' ? 'default' : 'ghost'} 
-                size="sm"
-                onClick={() => setVisao('lista')}
-              >
-                Lista
-              </Button>
-            </div>
-            {isGestor && (
-              <Button onClick={() => setDialogOpen(true)} className="bg-primary hover:bg-primary/90">
-                <Plus className="w-4 h-4 mr-2" />
-                Nova Chave
-              </Button>
-            )}
-          </div>
-        }
+        subtitle="A semana da equipe: quem trabalha de onde e quem atende em cada turno"
+        icon={Calendar}
       />
 
-      {isGestor && (
-        <FerramentasLancamentoColetivo
-          colaboradores={colaboradores}
-          equipes={equipes}
-          isPending={aplicarMassaMutation.isPending || limparMassaMutation.isPending}
-          onAplicar={(dados) => aplicarMassaMutation.mutate(dados)}
-          onLimpar={(dados) => limparMassaMutation.mutate(dados)}
-        />
-      )}
+      <div className="flex flex-wrap items-center gap-3">
+        <Button variant="outline" size="sm" onClick={() => setSemanaOffset((o) => o - 1)}>← Semana anterior</Button>
+        <span className="text-sm font-medium text-foreground">
+          {periodo}
+          <span className="ml-2 text-xs font-normal text-muted-foreground">{semanaRef}{eSemanaAtual ? ' · esta semana' : ''}</span>
+        </span>
+        <Button variant="outline" size="sm" onClick={() => setSemanaOffset((o) => o + 1)}>Próxima semana →</Button>
+        {!eSemanaAtual && (
+          <Button variant="ghost" size="sm" onClick={() => setSemanaOffset(0)}>Voltar para esta semana</Button>
+        )}
+      </div>
 
-      {visao === 'equipes' ? (
-        selectedEquipe ? (
-          <EquipeDetalhes
-            equipe={selectedEquipe}
-            colaboradores={colaboradores}
-            atribuicoes={atribuicoes.filter(a => a.ativa)}
-            escalas={escalas}
-            onVoltar={() => setSelectedEquipe(null)}
+      <Tabs defaultValue="trabalho">
+        <TabsList>
+          <TabsTrigger value="trabalho">Escala de Trabalho</TabsTrigger>
+          <TabsTrigger value="turno">Escala de Turno</TabsTrigger>
+          {isGestor && <TabsTrigger value="produtividade">Produtividade</TabsTrigger>}
+        </TabsList>
+
+        <TabsContent value="trabalho" className="pt-4">
+          <GradeTrabalho
+            pessoas={pessoas}
+            dias={dias}
+            mapa={mapa}
+            podeEditar={isGestor}
+            salvando={salvarTrabalho.isPending}
+            onMarcar={marcarTrabalho}
+            onMontarSemana={montarSemanaDeTrabalhoNaTela}
+            onRepetirSemana={repetirSemanaDeTrabalho}
           />
-        ) : (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {equipes.map(equipe => (
-              <EquipeCard
-                key={equipe.id}
-                equipe={equipe}
-                colaboradores={colaboradores}
-                atribuicoes={atribuicoes.filter(a => a.ativa)}
-                onClick={() => setSelectedEquipe(equipe)}
-              />
-            ))}
-            {equipes.length === 0 && (
-              <div className="col-span-full text-center py-12">
-                <Users className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
-                <p className="text-muted-foreground font-medium">Nenhuma equipe cadastrada</p>
-                <p className="text-muted-foreground text-sm">Crie equipes para organizar melhor as escalas</p>
-              </div>
-            )}
-          </div>
-        )
-      ) : visao === 'calendario' ? (
-        <div className="space-y-6">
-          <CalendarioEquipes
-            mesAtual={mesAtual}
-            onMesAnterior={mesAnterior}
-            onMesPosterior={mesPosterior}
-            onHoje={hoje}
-            atribuicoes={atribuicoes.filter(a => a.ativa)}
-            colaboradores={colaboradores}
-            equipes={equipes}
-            onDiaClick={(data) => setDiaDetalheDialog(data)}
+        </TabsContent>
+
+        <TabsContent value="turno" className="pt-4">
+          <GradeTurno
+            dias={dias}
+            turnos={turnosDaTela()}
+            presentesPorDia={presentesPorDia}
+            podeEditar={isGestor}
+            salvando={salvarTurno.isPending}
+            onAlternar={alternarAtendimento}
+            onCancelarDia={cancelarDia}
+            onMontarSemana={montarSemanaDeTurno}
+            onRepetirSemana={repetirSemanaDeTurno}
           />
-          <DiaDetalheDialog
-            open={!!diaDetalheDialog}
-            onClose={() => setDiaDetalheDialog(null)}
-            data={diaDetalheDialog}
-            atribuicoes={atribuicoes.filter(a => a.ativa)}
-            colaboradores={colaboradores}
-            equipes={equipes}
-          />
-          
-          {isGestor && (
-            <div className="flex justify-center">
-              <Button 
-                onClick={() => setAtribuirDialogOpen(true)} 
-                size="lg"
-                className="bg-primary hover:bg-primary/90"
-              >
-                <Plus className="w-5 h-5 mr-2" />
-                Atribuir Nova Escala
-              </Button>
-            </div>
-          )}
-        </div>
-      ) : (
-        <>
-          {!isGestor && minhasAtribuicoes.length > 0 && (
-            <Card className="border-0 shadow-sm bg-info-soft">
-              <CardHeader>
-                <CardTitle className="text-base">Minhas Escalas Ativas</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                {minhasAtribuicoes.map(atrib => (
-                  <div key={atrib.id} className="p-3 bg-card rounded-lg">
-                    <p className="font-medium">{atrib.escala_nome}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {formatDateSP(atrib.data_inicio, 'DD/MM/YYYY')} 
-                      {atrib.data_fim ? ` - ${formatDateSP(atrib.data_fim, 'DD/MM/YYYY')}` : ' - Sem fim definido'}
-                    </p>
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
-          )}
+        </TabsContent>
 
-          <DataTable
-            columns={columns}
-            data={escalas}
-            isLoading={isLoading}
-            emptyIcon={CalendarIcon}
-            emptyTitle="Nenhuma chave de escala cadastrada"
-            emptyDescription={isGestor ? "Crie a primeira chave de escala." : "Nenhuma chave disponível."}
-            emptyAction={isGestor ? () => setDialogOpen(true) : null}
-            emptyActionLabel="Criar Chave"
-          />
-        </>
-      )}
-
-      {/* Dialog de Criação */}
-      <PainelLateral
-        open={dialogOpen} onOpenChange={setDialogOpen}
-        largura="xl"
-        titulo="Nova Chave de Escala"
-      >
-          <form onSubmit={handleSubmit} className="space-y-4 mt-4">
-            <div>
-              <Label>Nome da Chave *</Label>
-              <Input
-                value={formData.nome}
-                onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
-                placeholder="Ex: Home Office, Presencial, Híbrido"
-              />
-            </div>
-            <div>
-              <Label>Descrição</Label>
-              <Textarea
-                value={formData.descricao}
-                onChange={(e) => setFormData({ ...formData, descricao: e.target.value })}
-                placeholder="Descrição da escala..."
-                rows={2}
-              />
-            </div>
-
-            {/* Turnos */}
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <Label>Turnos</Label>
-                <Button type="button" variant="outline" size="sm" onClick={addTurno}>
-                  <Plus className="w-4 h-4" />
-                </Button>
-              </div>
-              {formData.turnos.map((turno, tIndex) => (
-                <Card key={tIndex} className="mb-3">
-                  <CardContent className="p-4 space-y-3">
-                    <div className="flex items-center justify-between">
-                      <Badge variant="outline">Turno {tIndex + 1}</Badge>
-                      {formData.turnos.length > 1 && (
-                        <Button type="button" variant="ghost" size="icon" onClick={() => removeTurno(tIndex)}>
-                          <Trash2 className="w-4 h-4 text-destructive" />
-                        </Button>
-                      )}
-                    </div>
-                    <Input
-                      placeholder="Nome do turno (ex: Manhã)"
-                      value={turno.nome}
-                      onChange={(e) => updateTurno(tIndex, 'nome', e.target.value)}
-                    />
-                    <div className="grid grid-cols-2 gap-2">
-                      <div>
-                        <Label className="text-xs">Hora Início</Label>
-                        <Input
-                          type="time"
-                          value={turno.hora_inicio}
-                          onChange={(e) => updateTurno(tIndex, 'hora_inicio', e.target.value)}
-                        />
-                      </div>
-                      <div>
-                        <Label className="text-xs">Hora Fim</Label>
-                        <Input
-                          type="time"
-                          value={turno.hora_fim}
-                          onChange={(e) => updateTurno(tIndex, 'hora_fim', e.target.value)}
-                        />
-                      </div>
-                    </div>
-                    <div>
-                      <Label className="text-xs mb-2 block">Dias da Semana</Label>
-                      <div className="flex flex-wrap gap-2">
-                        {diasSemana.map((dia, diaIndex) => (
-                          <Button
-                            key={diaIndex}
-                            type="button"
-                            variant={turno.dias_semana?.includes(diaIndex) ? 'default' : 'outline'}
-                            size="sm"
-                            className={turno.dias_semana?.includes(diaIndex) ? 'bg-primary' : ''}
-                            onClick={() => toggleDiaSemana(tIndex, diaIndex)}
-                          >
-                            {dia}
-                          </Button>
-                        ))}
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-
-            <RodapeFixo>
-              <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
-                Cancelar
-              </Button>
-              <Button type="submit" className="bg-primary hover:bg-primary/90" disabled={createMutation.isPending}>
-                {createMutation.isPending ? (
-                  <>
-                    <div className="w-4 h-4 mr-2 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    Criando...
-                  </>
-                ) : (
-                  'Criar Escala'
-                )}
-              </Button>
-            </RodapeFixo>
-          </form>
-        </PainelLateral>
-
-      {/* Dialog de Atribuição Simplificado */}
-      <AtribuicaoDialog
-        open={atribuirDialogOpen}
-        onOpenChange={setAtribuirDialogOpen}
-        colaboradores={colaboradores.filter(c => c.ativo !== false)}
-        onSubmit={(form) => {
-          atribuirMutation.mutate({
-            escalaId: 'direct', // Não precisa mais de chave de escala
-            colaboradorIds: form.colaboradoresIds,
-            periodo: { inicio: form.dataInicio, fim: form.dataFim },
-            tipoEvento: form.tipoEvento
-          });
-        }}
-      />
-
-      <ConfirmDialog
-        open={deleteDialogOpen}
-        onOpenChange={setDeleteDialogOpen}
-        title="Remover Escala"
-        description={`Tem certeza que deseja remover a escala "${selectedEscala?.nome}"? As atribuições não serão afetadas.`}
-        confirmLabel="Remover"
-        onConfirm={() => selectedEscala && deleteMutation.mutate(selectedEscala.id)}
-        variant="danger"
-      />
+        {isGestor && (
+          <TabsContent value="produtividade" className="pt-4">
+            <RelatorioProdutividadeTurnos escalas={escalasTurno} tratativas={tratativas} colaboradores={colaboradores} />
+          </TabsContent>
+        )}
+      </Tabs>
     </div>
   );
 }

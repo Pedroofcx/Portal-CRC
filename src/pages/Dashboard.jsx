@@ -13,7 +13,7 @@ import DistribuicaoTratativas from '@/components/dashboard/DistribuicaoTratativa
 import FaixaVencidas from '@/components/dashboard/gestor/FaixaVencidas';
 import PainelCicloGestor from '@/components/dashboard/gestor/PainelCicloGestor';
 import { useCicloEquipe } from '@/hooks/useCicloEquipe';
-import MeuTurnoCard from '@/components/turnos/MeuTurnoCard';
+import MinhaSemanaCard from '@/components/escalas/MinhaSemanaCard';
 import CardHorasImplantacao from '@/components/dashboard/CardHorasImplantacao';
 import CardRodizioDashboard from '@/components/rodizio/CardRodizioDashboard';
 import PainelMeuCiclo from '@/components/dashboard/operador/PainelMeuCiclo';
@@ -304,7 +304,7 @@ export default function Dashboard() {
             <FilaDoOperador tratativas={minhasTratativas} />
 
             <div className="space-y-4">
-              <MeuTurnoCard colaboradorId={colaborador?.id} />
+              <MinhaSemanaCard colaboradorId={colaborador?.id} />
               <CardRodizioDashboard tipo="lider" />
               <CardRodizioDashboard tipo="n2" />
               <AvisosDoOperador avisosParaExibir={avisosParaExibir} leituras={leituras} colaborador={colaborador} />

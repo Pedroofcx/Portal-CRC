@@ -28,7 +28,6 @@ import {
   Eye,
   Map,
   Palmtree,
-  Clock,
   ShieldCheck,
   Wrench,
   PanelLeft,
@@ -72,7 +71,6 @@ const menuItems = [
     items: [
       { name: 'POP', page: 'POP', icon: FileText },
       { name: 'Escalas', page: 'Escalas', icon: Calendar },
-      { name: 'Turnos', page: 'Turnos', icon: Clock },
       { name: 'Gestão de Férias', page: 'GestaoFerias', icon: Palmtree, gestorOnly: true },
     ]
   },

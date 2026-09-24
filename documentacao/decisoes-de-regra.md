@@ -386,3 +386,36 @@ dia deixou de ter as tratativas contadas duas vezes.
 **Oráculo:** o contexto do colaborador (CSAT, tratativas e pontos) vinha da
 tabela de pontuação antiga e de uma apuração solta — mostrava 3 pontos para
 quem tinha 77,5. Agora usa as contas oficiais do ciclo ativo.
+
+---
+
+## Escalas e Turnos viraram um módulo só (24/09/2026)
+
+**Por quê.** Eram dois módulos falando da mesma semana — "Escalas" com um
+calendário mensal de eventos por equipe e "Turnos" com um painel WFM de slots
+— e nunca batiam. Pedro: *"O modulo vai se chamar Escalas e lá dentro terá
+Escala de Trabalho e Escala de Turno"*. Sem visão de mês: a semana é a unidade
+de trabalho do CRC.
+
+**Escala de Trabalho.** Três presenciais e dois em home office por dia. O botão
+"Montar a semana" distribui os dois home office revezando quem ficou menos
+vezes em casa nas últimas quatro semanas, e é **determinístico** — a mesma
+semana montada duas vezes dá o mesmo resultado. O antigo gerador sorteava
+aleatoriamente, e o gestor não conseguia repetir o que tinha visto. Cada
+célula continua editável à mão, e a conferência acusa na hora dia com menos de
+três presenciais ou com home office demais. Férias aprovadas travam o dia.
+
+**Escala de Turno.** Duas pessoas atendendo de manhã; as demais analisam
+tickets. À tarde inverte. O gestor só escolhe a dupla da manhã — a tarde é o
+espelho, calculado na hora. A dupla gira a cada dia, e o "Equilíbrio da semana"
+mostra quantas metades de dia cada pessoa passou atendendo.
+
+**Compatibilidade.** As 17 escalas de turno e as 388 atribuições de trabalho
+que vieram do Base44 continuam sendo lidas: `EscalaTurno.turnos[].manha/tarde`
+guarda quem está **atendendo** (o relatório de Produtividade já lia assim) e as
+atribuições antigas, que cobrem períodos, valem para todos os dias que elas
+pegam. As novas são de um dia só, e a marcação mais recente ganha.
+
+**Saiu:** a página Turnos (agora redireciona para Escalas), o painel WFM com
+slots e travas, o calendário mensal por equipe e o card "Meu turno hoje" — que
+virou "Minha semana", com o local de trabalho e o papel de cada metade do dia.

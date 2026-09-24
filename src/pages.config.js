@@ -78,9 +78,9 @@ import PlanoSetorial from './pages/PlanoSetorial';
 import Relatorios from './pages/Relatorios';
 import RelatoriosApuracao from './pages/RelatoriosApuracao';
 import { redirecionarPara } from './components/relatorios/hub/Redirecionar';
+import { redirecionarParaPagina } from './components/ui/RedirecionarPagina';
 import TratativaDetalhe from './pages/TratativaDetalhe';
 import Tratativas from './pages/Tratativas';
-import Turnos from './pages/Turnos';
 import UploadFoto from './pages/UploadFoto';
 import FerramentasOperacionais from './pages/FerramentasOperacionais';
 import __Layout from './Layout.jsx';
@@ -120,7 +120,7 @@ export const PAGES = {
     "RelatoriosTratativas": redirecionarPara('canais'),
     "TratativaDetalhe": TratativaDetalhe,
     "Tratativas": Tratativas,
-    "Turnos": Turnos,
+    "Turnos": redirecionarParaPagina('Escalas'),
     "UploadFoto": UploadFoto,
     "FerramentasOperacionais": FerramentasOperacionais,
 }

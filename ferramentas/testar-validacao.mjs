@@ -14,6 +14,7 @@ import { posicaoNoRanking } from '../src/lib/posicaoRanking.js';
 import { prazoDaTratativa, descreverPrazo, consumoDoPrazo } from '../src/lib/prazoSla.js';
 import { indicadoresDoCiclo } from '../src/lib/indicadoresCiclo.js';
 import { conferirLinha } from './conferir-cores.mjs';
+import { segundaDaSemana, semanaDeReferencia, diasDaSemana, trabalhoDaSemana, trabalhoDe, montarSemanaDeTrabalho, avisosDoTrabalho, montarTurnosDaSemana, meuDiaNoTurno, equilibrioDoAtendimento } from '../src/lib/escalas.js';
 import { mediaDasCompetencias, leiturasDoColaborador, palavrasRecorrentes, pontosDoRadar, evolucaoDasLeituras } from '../src/lib/competencias.js';
 import { proximaVersao, popsParaCiencia, agruparPorCategoria, popsDoTipo, fotografia } from '../src/lib/pops.js';
 import { filaDePendencias, avisosVisiveis, pesquisasVisiveis, obrigatoriasSemResposta, montarResposta } from '../src/lib/pendencias.js';
@@ -691,6 +692,67 @@ console.log('\n== leitura de pessoas (Observacoes -> Oraculo) ==');
   checa('evolucao vai da mais antiga para a mais nova', evo.map((e) => e.id).join(','), 'l1,l3,l2');
   const palavras = palavrasRecorrentes(minhas);
   checa('palavra repetida vem primeiro', `${palavras[0].palavra}:${palavras[0].vezes}`, 'clareza:2');
+}
+
+console.log('\n== escalas (trabalho e turno) ==');
+{
+  checa('segunda da semana de uma quinta', segundaDaSemana('2026-09-24'), '2026-09-21');
+  checa('segunda continua sendo ela mesma', segundaDaSemana('2026-09-21'), '2026-09-21');
+  checa('domingo pertence a semana que comecou na segunda', segundaDaSemana('2026-09-27'), '2026-09-21');
+  checa('semana de referencia no formato do Base44', semanaDeReferencia('2026-09-24'), '2026-W39');
+
+  const dias = diasDaSemana('2026-09-21');
+  checa('cinco dias uteis', `${dias.length}:${dias[0].data}:${dias[4].data}`, '5:2026-09-21:2026-09-25');
+
+  const pessoas = ['Ana', 'Bia', 'Caio', 'Duda', 'Eva'].map((n, i) => ({ id: `p${i}`, nome_completo: n }));
+
+  // atribuicao antiga, por periodo, vale para todos os dias que ela cobre
+  const mapa = trabalhoDaSemana([
+    { id: 'a1', colaborador_id: 'p0', data_inicio: '2026-09-21', data_fim: '2026-09-23', tipo_evento: 'home_office', created_date: '2026-09-01' },
+    { id: 'a2', colaborador_id: 'p0', data_inicio: '2026-09-22', data_fim: '2026-09-22', tipo_evento: 'presencial', created_date: '2026-09-20' },
+    { id: 'a3', colaborador_id: 'p1', data_inicio: '2026-09-21', tipo_evento: 'ferias', created_date: '2026-09-01' },
+  ], dias);
+  checa('periodo antigo cobre o dia', trabalhoDe(mapa, 'p0', '2026-09-23'), 'home_office');
+  checa('marcacao mais recente ganha do periodo', trabalhoDe(mapa, 'p0', '2026-09-22'), 'presencial');
+  checa('sem data_fim vale so o dia de inicio', String(trabalhoDe(mapa, 'p1', '2026-09-22')), 'null');
+
+  const plano = montarSemanaDeTrabalho({ pessoas, dias });
+  const emCasaNaSegunda = pessoas.filter((p) => plano.get(`${p.id}|2026-09-21`) === 'home_office');
+  const presenciaisNaSegunda = pessoas.filter((p) => plano.get(`${p.id}|2026-09-21`) === 'presencial');
+  checa('dois em casa por dia', String(emCasaNaSegunda.length), '2');
+  checa('tres presenciais por dia', String(presenciaisNaSegunda.length), '3');
+  const porPessoa = pessoas.map((p) => dias.filter((d) => plano.get(`${p.id}|${d.data}`) === 'home_office').length);
+  checa('reveza: ninguem fica em casa 3 dias na semana', String(Math.max(...porPessoa)), '2');
+  checa('e ninguem fica sem nenhum dia', String(Math.min(...porPessoa)), '2');
+
+  // quem esta indisponivel nao ocupa vaga nem e sorteado
+  const indisponiveis = new Map([['p0|2026-09-21', 'ferias']]);
+  const plano2 = montarSemanaDeTrabalho({ pessoas, dias, indisponiveis });
+  checa('quem esta de ferias nao recebe marcacao', String(plano2.get('p0|2026-09-21')), 'undefined');
+  checa('com 4 disponiveis so 1 vai para casa', String(pessoas.filter((p) => plano2.get(`${p.id}|2026-09-21`) === 'home_office').length), '1');
+
+  const mapaCheio = new Map();
+  pessoas.forEach((p) => dias.forEach((d) => mapaCheio.set(`${p.id}|${d.data}`, { tipo: plano.get(`${p.id}|${d.data}`) })));
+  checa('semana montada nao gera aviso', String(avisosDoTrabalho({ mapa: mapaCheio, pessoas, dias }).length), '0');
+  mapaCheio.set(`p0|2026-09-21`, { tipo: 'home_office' });
+  mapaCheio.set(`p1|2026-09-21`, { tipo: 'home_office' });
+  mapaCheio.set(`p2|2026-09-21`, { tipo: 'home_office' });
+  const avisos = avisosDoTrabalho({ mapa: mapaCheio, pessoas, dias });
+  checa('acusa home office demais', avisos.find((av) => av.texto.includes('home office'))?.texto, '3 em home office');
+  checa('acusa presenciais de menos', avisos.find((av) => av.texto.includes('presencial'))?.texto, 'só 2 presencial(is)');
+
+  // turno: 2 atendem de manha, os outros analisam, e a tarde inverte
+  const presentes = new Map(dias.map((d) => [d.data, pessoas.map((p) => ({ colaborador_id: p.id, colaborador_nome: p.nome_completo }))]));
+  const turnos = montarTurnosDaSemana({ dias, presentesPorDia: presentes });
+  checa('duas pessoas atendendo de manha', String(turnos[0].manha.length), '2');
+  checa('duas pessoas atendendo a tarde', String(turnos[0].tarde.length), '2');
+  const mesmaPessoa = turnos[0].manha.some((m) => turnos[0].tarde.some((t) => t.colaborador_id === m.colaborador_id));
+  checa('quem atendeu de manha nao atende a tarde', String(mesmaPessoa), 'false');
+  checa('a dupla da manha muda no dia seguinte', String(turnos[0].manha[0].colaborador_id === turnos[1].manha[0].colaborador_id), 'false');
+  checa('meu dia: atende de manha e analisa a tarde', `${meuDiaNoTurno(turnos[0], turnos[0].manha[0].colaborador_id).manha}/${meuDiaNoTurno(turnos[0], turnos[0].manha[0].colaborador_id).tarde}`, 'atendendo/analisando');
+  checa('dia cancelado nao tem turno', String(meuDiaNoTurno({ ...turnos[0], cancelado: true }, turnos[0].manha[0].colaborador_id)), 'null');
+  const equilibrio = equilibrioDoAtendimento(turnos);
+  checa('ninguem atende o dobro do outro na semana', String(equilibrio[0].metades - equilibrio[equilibrio.length - 1].metades <= 1), 'true');
 }
 
 console.log('\n== conferencia de cores (o verificador pega o que deve) ==');

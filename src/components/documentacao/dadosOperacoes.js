@@ -94,7 +94,7 @@ export const modulosOperacoes = [
     paginas: ['src/pages/Dashboard.jsx', 'src/components/dashboard/RankingTrimestral.jsx', 'src/components/dashboard/DistribuicaoTratativas.jsx', 'src/components/dashboard/MinhasAnotacoes.jsx', 'src/components/turnos/MeuTurnoCard.jsx', 'src/components/ui/MotivationalQuote.jsx'],
     entidades: ['Tratativa', 'Colaborador', 'AnotacaoPessoal', 'FraseMotivacional', 'Aviso', 'Pesquisa', 'HanseiEnvio', 'EscalaTurno', 'PDI'],
     objetivo: 'Página inicial do sistema — visão geral consolidada da operação. Para gestores: KPIs globais, ranking trimestral, distribuição de tratativas e atalhos. Para agentes: suas próprias métricas, ranking (se visível), anotações pessoais, turno do dia e popups de avisos/pesquisas/Hansei pendentes.',
-    fluxo: 'Ao carregar, busca Tratativa (todas), Colaborador, Aviso, Pesquisa, HanseiEnvio e EscalaTurno. Gestores veem contadores agregados (abertas, encerradas, críticas, no SLA) + RankingTrimestral + DistribuicaoTratativas. Agentes veem seus próprios números via usePontuacaoAgente + MinhasAnotacoes + MeuTurnoCard. Popups automáticos verificam avisos não lidos, pesquisas pendentes e envios Hansei não visualizados — exibidos em sequência (modal sobreposto).',
+    fluxo: 'Ao carregar, busca Tratativa (todas), Colaborador, Aviso, Pesquisa, HanseiEnvio e EscalaTurno. Gestores veem contadores agregados (abertas, encerradas, críticas, no SLA) + RankingTrimestral + DistribuicaoTratativas. Agentes veem seus próprios números via usePontuacaoAgente + MinhasAnotacoes + MinhaSemanaCard (escala de trabalho e turno da semana). Popups automáticos verificam avisos não lidos, pesquisas pendentes e envios Hansei não visualizados — exibidos em sequência (modal sobreposto).',
     campos_chave: [
       { campo: 'usePontuacaoAgente(colaboradorId)', descricao: 'Hook (src/hooks/usePontuacaoAgente.js) que recalcula ao vivo a pontuação do agente a partir de suas Tratativas usando calculateTratativaPoints() — mesma fonte de verdade do Ranking e da Auditoria.' },
       { campo: 'AnotacaoPessoal', descricao: 'Anotações privadas do próprio colaborador (sticky notes) com cor, prioridade e tipo "aviso" com data_alerta — exibidas em MinhasAnotacoes no Dashboard do agente.' },
@@ -105,7 +105,7 @@ export const modulosOperacoes = [
       'ranking_visivel_agentes (Configuracao) controla se o RankingTrimestral aparece para agentes — gestor sempre vê.',
       'Os popups são exibidos um por vez (índice controlado por estado) e só desaparecem após confirmação/leitura — não há auto-dismiss.',
     ],
-    integracoes: ['Consolida dados de praticamente todos os módulos: Tratativa (KPIs), Apuracao (CSAT/performance), PDI (planos ativos), Avisos/Pesquisas/Hansei (comunicação), EscalaTurno (turno do dia), AnotacaoPessoal (notas pessoais).'],
+    integracoes: ['Consolida dados de praticamente todos os módulos: Tratativa (KPIs), Apuracao (CSAT/performance), PDI (planos ativos), Avisos/Pesquisas/Hansei (comunicação), EscalaTurno e EscalaAtribuicao (a semana da pessoa), AnotacaoPessoal (notas pessoais).'],
   },
   {
     id: 'jornada-cliente',
