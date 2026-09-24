@@ -10,8 +10,10 @@ import ConfirmDialog from '@/components/ui/ConfirmDialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import ImportarApuracao from '@/components/apuracao/ImportarApuracao';
 import HistoricoImportacoes from '@/components/apuracao/HistoricoImportacoes';
+import OuvidoriaChat from '@/components/apuracao/OuvidoriaChat';
 import RelatoriosApuracao from './RelatoriosApuracao';
 import { calcularTelefone, calcularChat, calcularCX } from '@/components/apuracao/calculosApuracao';
+import { classificarTicket } from '@/lib/apuracao/ouvidoriaChat';
 
 /**
  * APURAÇÃO — de onde vêm o CSAT, a performance e a avaliação CX.
@@ -82,12 +84,14 @@ function registrosDaImportacao({ resultados, tipo, fonte, vinculos, colaboradore
           total_negativos: dia.total_negativos || 0,
           percentual_avaliados: dia.percentual_avaliados || 0,
           csat: dia.csat || 0,
-          // Ouvidoria (24/09/2026): so preenchido quando a coluna de nota foi
-          // mapeada. total_neutros sao os "ruim=1" com nota 3 (nao entram no
-          // csat oficial acima, so no comparativo de ouvidoria).
+          // Ouvidoria (24/09/2026): nasce zerado — ninguem classificou ainda
+          // nenhum ticket. A tela Ouvidoria marca, ticket por ticket, quais
+          // "ruim" sao nota 3 (neutro) e recalcula estes campos por cima do
+          // que foi salvo aqui (src/lib/apuracao/ouvidoriaChat.js).
           total_neutros: dia.total_neutros || 0,
           negativos_confirmados: dia.negativos_confirmados ?? (dia.total_negativos || 0),
           csat_sem_neutros: dia.csat_sem_neutros ?? (dia.csat || 0),
+          tem_nota: false,
         };
       } else {
         registro.cx = {
@@ -206,6 +210,22 @@ export default function Apuracao() {
     onError: () => toast.error('Não consegui desfazer esta importação.'),
   });
 
+  // Ouvidoria: classifica UM ticket por vez, direto em cima da apuração já
+  // salva. Recalcula os campos de comparativo (nunca o CSAT oficial).
+  const classificar = useMutation({
+    mutationFn: async ({ linha, nota }) => {
+      const apuracao = apuracoes.find((a) => a.id === linha.apuracaoId);
+      if (!apuracao) throw new Error('Apuração não encontrada.');
+      const patch = classificarTicket(apuracao, linha.ticket, nota);
+      await db.entities.Apuracao.update(linha.apuracaoId, patch);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['apuracoes-equipe'] });
+      queryClient.invalidateQueries({ queryKey: ['apuracoes'] });
+    },
+    onError: () => toast.error('Não consegui salvar a classificação deste ticket.'),
+  });
+
   if (isLoading) return <LoadingSpinner text="Carregando a apuração..." />;
 
   if (!isGestor) {
@@ -229,6 +249,7 @@ export default function Apuracao() {
         <TabsList>
           <TabsTrigger value="importar">Importar</TabsTrigger>
           <TabsTrigger value="historico">Importações</TabsTrigger>
+          <TabsTrigger value="ouvidoria">Ouvidoria</TabsTrigger>
           <TabsTrigger value="analise">Análise</TabsTrigger>
         </TabsList>
 
@@ -247,6 +268,14 @@ export default function Apuracao() {
             apuracoes={apuracoes}
             desfazendo={desfazerImportacao.isPending}
             onDesfazer={setDesfazer}
+          />
+        </TabsContent>
+
+        <TabsContent value="ouvidoria" className="pt-4">
+          <OuvidoriaChat
+            apuracoes={apuracoes}
+            classificando={classificar.isPending}
+            onClassificar={(linha, nota) => classificar.mutate({ linha, nota })}
           />
         </TabsContent>
 

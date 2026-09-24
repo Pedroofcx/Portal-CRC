@@ -18,6 +18,7 @@ import { lerCsv, descobrirSeparador } from '../src/lib/csv.js';
 import { detectarFonte, sugerirMapeamento, camposFaltando, periodoDoArquivo, vincularAgentes, conferirImportacao, lotesDeImportacao } from '../src/lib/apuracao/importacao.js';
 import { normalizarData } from '../src/lib/apuracao/datas.js';
 import { turnoDoHorario } from '../src/lib/escalas.js';
+import { classificarTicket, filaDeNegativos, resumoDaFila } from '../src/lib/apuracao/ouvidoriaChat.js';
 import path from 'node:path';
 import { carregarModuloJsx } from './lib/carregar-jsx.mjs';
 
@@ -1096,47 +1097,86 @@ console.log('\n== importacao da apuracao ==');
   checa('e o lote antigo soma as pessoas', String(antigas.find((l) => l.tipo === 'chat').pessoas), '2');
 }
 
-console.log('\n== ouvidoria do chat (Zendesk): nota 3 e neutra, nao negativa ==');
+console.log('\n== chat (Zendesk): calculo bruto, sem coluna de nota ==');
 {
-  // Regra de Pedro (24/09/2026): o Zendesk marca "satisfacao ruim" quando a
-  // nota e 1, 2 OU 3. So a nota 3 e neutra, nao negativa. A premiacao NAO
-  // muda -- continua contando ruim=1 como negativo. O ajuste e so um
-  // comparativo informativo, e so existe quando a coluna de nota e mapeada.
-  const mapeamento = { agente: 'Agente', data: 'Data', ticket: 'Ticket', bom: 'Bom', ruim: 'Ruim', nota: 'Nota' };
-  const linha = (bom, ruim, nota) => ({ Agente: 'Ana', Data: '10/09/2026', Ticket: 't', Bom: String(bom), Ruim: String(ruim), Nota: nota === null ? '' : String(nota) });
+  // O Zendesk nao manda nota nenhuma no arquivo -- so bom/ruim. calcularChat
+  // fica no basico; quem classifica ticket por ticket e a tela Ouvidoria,
+  // depois de salvo (proximo bloco).
+  const mapeamento = { agente: 'Agente', data: 'Data', ticket: 'Ticket', bom: 'Bom', ruim: 'Ruim' };
+  const linha = (ticket, bom, ruim) => ({ Agente: 'Ana', Data: '10/09/2026', Ticket: ticket, Bom: String(bom), Ruim: String(ruim) });
   const linhas = [
-    linha(1, 0, null), // positivo
-    linha(1, 0, null), // positivo
-    linha(0, 1, 1),    // negativo confirmado
-    linha(0, 1, 2),    // negativo confirmado
-    linha(0, 1, 3),    // "ruim" mas neutro -- nao e negativo de fato
-    linha(0, 1, 3),    // idem
-    linha(0, 0, null), // sem avaliacao nenhuma
+    linha('t1', 1, 0), linha('t2', 1, 0),
+    linha('t3', 0, 1), linha('t4', 0, 1), linha('t5', 0, 1), linha('t6', 0, 1),
+    linha('t7', 0, 0),
   ];
+  const r = calcularChat(linhas, mapeamento).Ana;
+  checa('positivos', String(r.totalPositivos), '2');
+  checa('negativos brutos (todo "ruim" conta)', String(r.totalNegativos), '4');
+  checa('cada historico sai com nota nula, pronto para classificar depois', String(r.historico.every((h) => h.nota === null)), 'true');
+  checa('nao sobra rastro de ouvidoria no calculo (isso e so na tela)', String(r.totalNeutros), 'undefined');
+}
 
-  const comNota = calcularChat(linhas, mapeamento).Ana;
-  checa('total de chats inclui os sem avaliacao', String(comNota.totalChats), '7');
-  checa('positivos nao mexem com a nota', String(comNota.totalPositivos), '2');
-  checa('premiacao: negativos continuam contando ruim=1 (nao muda)', String(comNota.totalNegativos), '4');
-  checa('premiacao: avaliados tambem nao muda', String(comNota.totalAvaliados), '6');
-  checa('csat oficial (premiacao) usa o bruto', comNota.csatPercentual.toFixed(1), (2 / 6 * 100).toFixed(1));
-  checa('so 2 dos 4 "ruins" eram nota 3 (neutros)', String(comNota.totalNeutros), '2');
-  checa('negativos confirmados tira os neutros', String(comNota.negativosConfirmados), '2');
-  checa('csat sem neutros fica mais alto que o oficial', comNota.csatSemNeutros.toFixed(1), (2 / 4 * 100).toFixed(1));
-  checa('flag de que a nota foi mapeada', String(comNota.temNotaChat), 'true');
+console.log('\n== ouvidoria do chat: classificacao manual, ticket por ticket ==');
+{
+  // Pedro (24/09/2026, corrigindo a primeira versao): o campo de nota no
+  // mapeamento saiu. Depois de importado, ele revisa cada "ruim" e diz se e
+  // 1, 2 (negativo de verdade) ou 3 (neutro). So isso muda o comparativo --
+  // nunca o csat oficial.
+  const apuracaoBase = {
+    id: 'ap1',
+    tipo_apuracao: 'chat',
+    colaborador_id: 'c1',
+    colaborador_nome: 'Ana',
+    canal_chat: { csat: 33.333333, avaliados: 6, total_atendimentos: 7 },
+    dados_por_data: [
+      { data: '2026-09-10', chat: { total_chats: 3, total_avaliados: 3, total_positivos: 2, total_negativos: 1, csat: 66.6667 } },
+      { data: '2026-09-11', chat: { total_chats: 4, total_avaliados: 3, total_positivos: 0, total_negativos: 3, csat: 0 } },
+    ],
+    historico_detalhado: [
+      { data: '2026-09-10', ticket: 't1', bom: 1, ruim: 0, nota: null },
+      { data: '2026-09-10', ticket: 't2', bom: 1, ruim: 0, nota: null },
+      { data: '2026-09-10', ticket: 't3', bom: 0, ruim: 1, nota: null },
+      { data: '2026-09-11', ticket: 't4', bom: 0, ruim: 1, nota: null },
+      { data: '2026-09-11', ticket: 't5', bom: 0, ruim: 1, nota: null },
+      { data: '2026-09-11', ticket: 't6', bom: 0, ruim: 1, nota: null },
+    ],
+  };
 
-  const dia = comNota.porData['2026-09-10'];
-  checa('o dia tambem carrega os neutros', String(dia.total_neutros), '2');
-  checa('e o csat sem neutros do dia', dia.csat_sem_neutros.toFixed(1), (2 / 4 * 100).toFixed(1));
+  const fila0 = filaDeNegativos([apuracaoBase]);
+  checa('a fila tem so os "ruim"', String(fila0.length), '4');
+  const resumo0 = resumoDaFila(fila0);
+  checa('nada classificado ainda', String(resumo0.naoClassificados), '4');
 
-  // Sem a coluna de nota mapeada, nada disso existe -- o "ruim" fica cru,
-  // exatamente como sempre foi (a regra so vale quando a nota vem junto).
-  const semNotaMap = { agente: 'Agente', data: 'Data', ticket: 'Ticket', bom: 'Bom', ruim: 'Ruim' };
-  const semNota = calcularChat(linhas, semNotaMap).Ana;
-  checa('sem mapear a nota, nao ha neutros', String(semNota.totalNeutros), '0');
-  checa('negativos confirmados vira igual ao negativo bruto', String(semNota.negativosConfirmados), String(semNota.totalNegativos));
-  checa('csat sem neutros vira igual ao csat oficial', semNota.csatSemNeutros.toFixed(2), semNota.csatPercentual.toFixed(2));
-  checa('flag fica falso sem a coluna', String(semNota.temNotaChat), 'false');
+  // Classifica t3 como 1 (negativo confirmado)
+  let atual = { ...apuracaoBase, ...classificarTicket(apuracaoBase, 't3', 1) };
+  checa('t3 vira nota 1 no historico', String(atual.historico_detalhado.find((h) => h.ticket === 't3').nota), '1');
+  checa('nota 1 nao e neutro -- csat oficial nao mexe', String(atual.canal_chat.csat), '33.333333');
+  checa('ainda nao ha neutro nenhum', String(atual.canal_chat.total_neutros), '0');
+
+  // Classifica t4 e t5 como 3 (neutro) e t6 como 2
+  atual = { ...atual, ...classificarTicket(atual, 't4', 3) };
+  atual = { ...atual, ...classificarTicket(atual, 't5', 3) };
+  atual = { ...atual, ...classificarTicket(atual, 't6', 2) };
+
+  checa('dois neutros no total', String(atual.canal_chat.total_neutros), '2');
+  checa('negativos confirmados tira os neutros (4 brutos - 2 neutros)', String(atual.canal_chat.negativos_confirmados), '2');
+  checa('csat sem neutros sobe (positivos / avaliados-neutros)', atual.canal_chat.csat_sem_neutros.toFixed(2), (2 / 4 * 100).toFixed(2));
+  checa('csat oficial continua intocado', String(atual.canal_chat.csat), '33.333333');
+  checa('flag de classificacao liga', String(atual.canal_chat.tem_nota), 'true');
+
+  const dia11 = atual.dados_por_data.find((d) => d.data === '2026-09-11');
+  checa('o dia 11 carrega os dois neutros dele', String(dia11.chat.total_neutros), '2');
+  checa('e o dia 11 fica marcado como classificado', String(dia11.chat.tem_nota), 'true');
+  const dia10 = atual.dados_por_data.find((d) => d.data === '2026-09-10');
+  checa('o dia 10 nao tem neutro (so t3, que e nota 1)', String(dia10.chat.total_neutros), '0');
+  checa('mas o dia 10 tambem fica marcado, porque t3 foi classificado', String(dia10.chat.tem_nota), 'true');
+
+  // Desclassificar (nota null) volta ao estado bruto naquele ticket.
+  const desfeito = { ...atual, ...classificarTicket(atual, 't6', null) };
+  checa('desfazer tira do "classificado"', String(desfeito.historico_detalhado.find((h) => h.ticket === 't6').nota), 'null');
+
+  const filaFinal = filaDeNegativos([atual], { apenasNaoClassificados: true });
+  checa('so falta o que nunca foi tocado', String(filaFinal.length), '0');
 }
 
 console.log('\n== conferencia de cores (o verificador pega o que deve) ==');

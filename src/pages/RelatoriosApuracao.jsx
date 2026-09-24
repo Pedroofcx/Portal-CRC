@@ -181,7 +181,7 @@ export default function RelatoriosApuracao() {
           agg.chat.total_avaliados += dia.chat.total_avaliados || 0;
           agg.chat.total_positivos += dia.chat.total_positivos || 0;
           agg.chat.total_neutros += dia.chat.total_neutros || 0;
-          if ((dia.chat.total_neutros || 0) > 0 || dia.chat.negativos_confirmados !== undefined) agg.chat.tem_nota = true;
+          if (dia.chat.tem_nota) agg.chat.tem_nota = true;
         }
       });
     });
@@ -419,9 +419,9 @@ export default function RelatoriosApuracao() {
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm text-muted-foreground mb-3">
-                    O Zendesk marca "satisfação ruim" quando a nota é 1, 2 <strong>ou 3</strong>. A nota 3 é neutra,
-                    não negativa — o CSAT oficial abaixo (usado na premiação) conta esses tickets como negativos;
-                    este quadro mostra o número desconsiderando-os, só para conferência.
+                    Entre os tickets marcados "satisfação ruim", os classificados como nota 3 na aba Ouvidoria são
+                    neutros, não negativos — o CSAT oficial abaixo (usado na premiação) conta todos como negativos;
+                    este quadro mostra o número desconsiderando os neutros já classificados, só para conferência.
                   </p>
                   <div className="grid grid-cols-3 gap-3">
                     <div className="text-center">
