@@ -2,34 +2,29 @@ import db from '@/api/db';
 import React, { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
-import { formatDateSP } from '@/components/utils/helpers';
 import PageHeader from '@/components/ui/PageHeader';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
 import {
-  TrendingUp, Send, Eye, Users, CheckCircle, Filter, Calendar
+  TrendingUp, Send, Users, Search
 } from 'lucide-react';
 import HanseiEnvioDialog from '@/components/hansei/HanseiEnvioDialog';
 import HanseiVisualizarDialog from '@/components/hansei/HanseiVisualizarDialog';
 import HanseiAgenteDashboard from '@/components/hansei/HanseiAgenteDashboard';
+import { Cartao } from '@/components/ui/Cartao';
+import CartaoColaboradorHansei from '@/components/hansei/CartaoColaboradorHansei';
+import PainelColaboradorHansei from '@/components/hansei/PainelColaboradorHansei';
 
 export default function Hansei() {
   const [envioDialogOpen, setEnvioDialogOpen] = useState(false);
   const [visualizarDialogOpen, setVisualizarDialogOpen] = useState(false);
   const [envioSelecionado, setEnvioSelecionado] = useState(null);
+  const [pessoaAberta, setPessoaAberta] = useState(null);
+  const [busca, setBusca] = useState('');
   const [feedbackForm, setFeedbackForm] = useState({ comentario: '', sentimento: 'neutro' });
-
-  // Filtros para gestor
-  const [filtroColaborador, setFiltroColaborador] = useState('');
-  const [filtroPeriodoInicio, setFiltroPeriodoInicio] = useState('');
-  const [filtroPeriodoFim, setFiltroPeriodoFim] = useState('');
 
   const queryClient = useQueryClient();
 
@@ -96,13 +91,13 @@ export default function Hansei() {
     return envios.filter(e => e.colaborador_id === colaborador.id);
   }, [envios, colaborador]);
 
-  const enviosFiltrados = useMemo(() => {
-    let lista = isGestor ? envios : meusEnvios;
-    if (filtroColaborador) lista = lista.filter(e => e.colaborador_id === filtroColaborador);
-    if (filtroPeriodoInicio) lista = lista.filter(e => e.periodo_inicio >= filtroPeriodoInicio);
-    if (filtroPeriodoFim) lista = lista.filter(e => e.periodo_fim <= filtroPeriodoFim);
-    return lista;
-  }, [envios, meusEnvios, isGestor, filtroColaborador, filtroPeriodoInicio, filtroPeriodoFim]);
+  const agentesDaLista = useMemo(() => {
+    const termo = busca.trim().toLowerCase();
+    return colaboradores
+      .filter((c) => c.papel === 'agente' && c.ativo !== false)
+      .filter((c) => !termo || c.nome_completo?.toLowerCase().includes(termo))
+      .sort((a, b) => String(a.nome_completo).localeCompare(String(b.nome_completo)));
+  }, [colaboradores, busca]);
 
   const statsGestor = useMemo(() => {
     if (!isGestor) return null;
@@ -130,25 +125,14 @@ export default function Hansei() {
         }
       />
 
-      {/* Cards de estatísticas para gestor */}
       {isGestor && statsGestor && (
-        <div className="grid grid-cols-3 gap-4">
-          {[
-            { label: 'Total de Envios', value: statsGestor.total, icon: Send, color: 'text-primary', bg: 'bg-info-soft' },
-            { label: 'Colaboradores', value: statsGestor.agentes, icon: Users, color: 'text-primary', bg: 'bg-info-soft' },
-            { label: 'Não Visualizados', value: statsGestor.naoVistos, icon: Eye, color: 'text-warning', bg: 'bg-warning-soft' },
-          ].map(s => (
-            <Card key={s.label} className="border-0 shadow-sm">
-              <CardContent className="pt-5 pb-4">
-                <div className={`w-10 h-10 ${s.bg} rounded-xl flex items-center justify-center mb-3`}>
-                  <s.icon className={`w-5 h-5 ${s.color}`} />
-                </div>
-                <p className="text-2xl font-bold text-foreground">{s.value}</p>
-                <p className="text-xs text-muted-foreground">{s.label}</p>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        <Cartao>
+          <div className="grid grid-cols-3 gap-4">
+            <div><p className="text-xs text-muted-foreground">Hanseis enviados</p><p className="text-2xl font-semibold tabular-nums text-foreground">{statsGestor.total}</p></div>
+            <div><p className="text-xs text-muted-foreground">Colaboradores com Hansei</p><p className="text-2xl font-semibold tabular-nums text-foreground">{statsGestor.agentes}</p></div>
+            <div><p className="text-xs text-muted-foreground">Ainda não lidos</p><p className="text-2xl font-semibold tabular-nums text-foreground">{statsGestor.naoVistos}</p></div>
+          </div>
+        </Cartao>
       )}
 
       <Tabs defaultValue={isGestor ? 'gestor' : 'agente'} className="space-y-4">
@@ -165,99 +149,46 @@ export default function Hansei() {
           </TabsTrigger>
         </TabsList>
 
-        {/* TAB GESTOR */}
+        {/* TAB GESTOR — a pessoa primeiro, o histórico dentro (como em Observações) */}
         {isGestor && (
           <TabsContent value="gestor" className="space-y-4">
-            {/* Filtros */}
-            <Card className="border-0 shadow-sm">
-              <CardContent className="p-4">
-                <div className="flex flex-wrap gap-3 items-end">
-                  <div className="flex items-center gap-2 text-muted-foreground">
-                    <Filter className="w-4 h-4" />
-                    <span className="text-sm font-medium">Filtros</span>
-                  </div>
-                  <div className="flex-1 min-w-[160px]">
-                    <Label className="text-xs mb-1 block">Colaborador</Label>
-                    <Select value={filtroColaborador} onValueChange={setFiltroColaborador}>
-                      <SelectTrigger className="h-8"><SelectValue placeholder="Todos" /></SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value={null}>Todos</SelectItem>
-                        {colaboradores.filter(c => c.papel === 'agente').map(c => (
-                          <SelectItem key={c.id} value={c.id}>{c.nome_completo}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <Label className="text-xs mb-1 block">De</Label>
-                    <Input type="date" className="h-8 text-xs w-36" value={filtroPeriodoInicio} onChange={e => setFiltroPeriodoInicio(e.target.value)} />
-                  </div>
-                  <div>
-                    <Label className="text-xs mb-1 block">Até</Label>
-                    <Input type="date" className="h-8 text-xs w-36" value={filtroPeriodoFim} onChange={e => setFiltroPeriodoFim(e.target.value)} />
-                  </div>
-                  {(filtroColaborador || filtroPeriodoInicio || filtroPeriodoFim) && (
-                    <Button variant="ghost" size="sm" onClick={() => { setFiltroColaborador(''); setFiltroPeriodoInicio(''); setFiltroPeriodoFim(''); }}>
-                      Limpar
-                    </Button>
-                  )}
+            {pessoaAberta ? (
+              <PainelColaboradorHansei
+                colaborador={pessoaAberta}
+                envios={envios}
+                comentarios={comentarios}
+                onVoltar={() => setPessoaAberta(null)}
+                onAbrir={handleVisualizar}
+                onEnviar={() => setEnvioDialogOpen(true)}
+              />
+            ) : (
+              <>
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <Input
+                    placeholder="Buscar colaborador..."
+                    value={busca}
+                    onChange={(e) => setBusca(e.target.value)}
+                    className="pl-10"
+                  />
                 </div>
-              </CardContent>
-            </Card>
-
-            {/* Lista de envios */}
-            <Card className="border-0 shadow-sm">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-base">
-                  Histórico de Envios
-                  <Badge variant="outline" className="ml-2">{enviosFiltrados.length}</Badge>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {enviosFiltrados.length === 0 ? (
-                  <p className="text-center text-muted-foreground py-8">Nenhum envio encontrado</p>
-                ) : (
-                  <div className="space-y-2">
-                    {enviosFiltrados.map(envio => {
-                      const d = envio.dados_consolidados || {};
-                      return (
-                        <div key={envio.id}
-                          className="p-4 bg-muted hover:bg-muted rounded-xl cursor-pointer transition-colors border border-transparent hover:border-border"
-                          onClick={() => handleVisualizar(envio)}>
-                          <div className="flex items-center justify-between gap-4">
-                            <div className="flex-1">
-                              <div className="flex items-center gap-2 mb-1">
-                                <p className="font-medium text-foreground">{envio.colaborador_nome}</p>
-                                <Badge variant="outline" className="text-xs capitalize">{envio.periodicidade}</Badge>
-                                {envio.visualizado
-                                  ? <Badge className="bg-success-soft text-success border-success/25 text-xs"><CheckCircle className="w-3 h-3 mr-1" />Visto</Badge>
-                                  : <Badge className="bg-warning-soft text-warning text-xs">Não visto</Badge>
-                                }
-                              </div>
-                              <p className="text-xs text-muted-foreground">
-                                <Calendar className="w-3 h-3 inline mr-1" />
-                                {formatDateSP(envio.periodo_inicio, 'DD/MM/YY')} – {formatDateSP(envio.periodo_fim, 'DD/MM/YY')}
-                                <span className="ml-3">Perf: <strong>{d.performance_percentual || 0}%</strong></span>
-                                <span className="ml-2">CSAT: <strong>{d.csat_individual || 0}%</strong></span>
-                                <span className="ml-2 hidden sm:inline">Trat: <strong>{d.tratativas_solucionadas || 0}/{d.tratativas_total || 0}</strong></span>
-                              </p>
-                            </div>
-                            <Eye className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  {agentesDaLista.map((c) => (
+                    <CartaoColaboradorHansei key={c.id} colaborador={c} envios={envios} onClick={() => setPessoaAberta(c)} />
+                  ))}
+                </div>
+                {agentesDaLista.length === 0 && (
+                  <p className="py-10 text-center text-sm text-muted-foreground">Nenhum colaborador encontrado.</p>
                 )}
-              </CardContent>
-            </Card>
+              </>
+            )}
           </TabsContent>
         )}
 
         {/* TAB AGENTE */}
         <TabsContent value="agente">
           <HanseiAgenteDashboard
-            meusEnvios={isGestor ? (filtroColaborador ? envios.filter(e => e.colaborador_id === filtroColaborador) : meusEnvios) : meusEnvios}
+            meusEnvios={isGestor ? (pessoaAberta ? envios.filter(e => e.colaborador_id === pessoaAberta.id) : meusEnvios) : meusEnvios}
             onVerDetalhes={handleVisualizar}
           />
         </TabsContent>
@@ -273,6 +204,7 @@ export default function Hansei() {
         bonus={bonus}
         ciclos={ciclos}
         colaborador={colaborador}
+        colaboradorInicial={pessoaAberta}
         user={user}
         onEnviar={enviarMutation.mutate}
         isEnviando={enviarMutation.isPending}

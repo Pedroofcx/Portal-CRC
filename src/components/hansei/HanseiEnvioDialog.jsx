@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -95,7 +95,7 @@ function PreviewDados({ dados, colaboradorNome, periodoInicio, periodoFim }) {
   );
 }
 
-export default function HanseiEnvioDialog({ open, onClose, colaboradores, tratativas, apuracoes, bonus, ciclos, colaborador, user, onEnviar, isEnviando }) {
+export default function HanseiEnvioDialog({ open, onClose, colaboradores, tratativas, apuracoes, bonus, ciclos, colaborador, colaboradorInicial, user, onEnviar, isEnviando }) {
   const [formData, setFormData] = useState({
     colaborador_id: '',
     periodicidade: 'semanal',
@@ -105,6 +105,11 @@ export default function HanseiEnvioDialog({ open, onClose, colaboradores, tratat
   });
   const [preview, setPreview] = useState(null);
   const [showPreview, setShowPreview] = useState(false);
+
+  // Aberto a partir do card de uma pessoa: já vem com ela escolhida.
+  useEffect(() => {
+    if (open && colaboradorInicial?.id) setFormData((f) => ({ ...f, colaborador_id: colaboradorInicial.id }));
+  }, [open, colaboradorInicial?.id]);
 
   const handlePeriodoRapido = (tipo) => {
     const { inicio, fim } = getQuickPeriod(tipo);
