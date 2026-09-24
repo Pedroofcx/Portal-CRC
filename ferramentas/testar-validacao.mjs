@@ -1121,7 +1121,8 @@ console.log('\n== telefone (55PBX): FCR 1 + nota 3 e neutro, nao negativo ==');
   //   FCR 1 + CSAT 1 ou 2 -> negativa
   //   FCR 1 + CSAT 3      -> NEUTRA (antes entrava como negativa por engano)
   //   FCR 2, qualquer CSAT -> negativa sempre
-  //   FCR 1 sem CSAT valido -> incompleta (pesquisa abandonada no meio)
+  //   FCR 1 sem CSAT valido -> incompleta: erro operacional do cliente,
+  //     NAO conta como avaliada (Pedro, 24/09/2026)
   const mapeamento = { agente: 'Agente', data: 'Data', origem: 'Origem', status: 'Status', fcr: 'FCR', csat: 'CSAT' };
   const linha = (id, fcr, csat) => ({ Agente: 'Ana', Data: '10/09/2026', Origem: '', Status: 'Atendida', FCR: fcr === null ? '' : String(fcr), CSAT: csat === null ? '' : String(csat) });
   const linhas = [
@@ -1136,8 +1137,8 @@ console.log('\n== telefone (55PBX): FCR 1 + nota 3 e neutro, nao negativo ==');
   checa('negativas de verdade (1,2 e os dois FCR2)', String(r.totalNegativas), '4');
   checa('duas neutras (fcr1+nota3)', String(r.totalNeutras), '2');
   checa('uma incompleta (fcr1 sem nota)', String(r.totalIncompletas), '1');
-  checa('avaliadas fecha com a soma de todos os baldes', String(r.totalAvaliadas), String(r.totalPositivas + r.totalNegativas + r.totalNeutras + r.totalIncompletas));
-  checa('avaliadas = 9 (todo mundo respondeu o fcr)', String(r.totalAvaliadas), '9');
+  checa('avaliadas fecha com positivas+negativas+neutras (incompleta fica fora)', String(r.totalAvaliadas), String(r.totalPositivas + r.totalNegativas + r.totalNeutras));
+  checa('avaliadas = 8 (a incompleta nao conta)', String(r.totalAvaliadas), '8');
   // CSAT oficial = positivas / (positivas + negativas) = 2 / 6, NAO 2/9.
   checa('csat exclui neutras e incompletas do denominador', r.csatPercentual.toFixed(2), (2 / 6 * 100).toFixed(2));
   checa('sem a correcao o csat sairia 2/9 = 22%: confirma que nao e isso', String(Math.abs(r.csatPercentual - (2 / 9 * 100)) > 1), 'true');

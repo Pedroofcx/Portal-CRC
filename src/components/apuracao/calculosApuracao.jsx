@@ -49,11 +49,13 @@ export function formatarRotuloSemana(inicioSemana, numero) {
 // Regras:
 //   - Ligação transferida: conta total E atendida, mas NÃO entra em FCR/CSAT
 //   - Atendida: status contém "atendida" (case-insensitive)
-//   - Avaliada: FCR === 1 ou FCR === 2 (inteiro exato)
-//   - REGRA CRÍTICA: Positiva = CSAT 4 ou 5 APENAS quando FCR === 1 (resolvido)
-//     FCR === 2 não gera positivos, independente da nota CSAT
+//   - Avaliada de verdade: FCR 1 com CSAT válido (positiva/negativa/neutra)
+//     ou FCR 2 (sempre negativa, com ou sem nota). FCR 1 sem CSAT válido é
+//     "incompleta" e NÃO conta como avaliada (erro operacional do cliente).
+//   - Positiva = FCR 1 + CSAT 4/5. Negativa = FCR 1 + CSAT 1/2, ou FCR 2
+//     (qualquer nota). Neutra = FCR 1 + CSAT 3 — nem positiva nem negativa.
 //   - Performance = atendidas / ligações × 100
-//   - CSAT = positivas / avaliadas × 100
+//   - CSAT = positivas / (positivas + negativas) × 100 — neutras ficam fora
 //   - % Avaliados = avaliadas / atendidas × 100
 // =====================================================
 export function calcularTelefone(dados, mapeamento) {
@@ -180,17 +182,27 @@ export function calcularTelefone(dados, mapeamento) {
     //   FCR 1 + CSAT 3       → NEUTRA — não é negativa. Antes desta correção
     //     entrava como negativa (era só "avaliada && !positiva"), inflando
     //     o negativo de quem tinha atendimento nota 3.
-    //   FCR 2 (qualquer CSAT, inclusive sem nota) → negativa sempre.
-    //   FCR 1 sem CSAT válido (pesquisa abandonada no meio) → incompleta:
-    //     não é positiva, negativa nem neutra — não dá pra confirmar o
-    //     sentimento. Conta como "avaliada" (respondeu o FCR), mas fica de
-    //     fora do CSAT (nem soma no positivo, nem no negativo).
+    //   FCR 2 (qualquer CSAT, inclusive sem nota) → negativa sempre. O "não
+    //     resolveu" já é o dado que importa; falta de nota não muda isso.
+    //   FCR 1 sem CSAT válido (pesquisa abandonada no meio, ex. "Abandonada")
+    //     → incompleta: erro operacional da avaliação por parte do cliente
+    //     (Pedro, 24/09/2026) — não conta como avaliada, não entra no CSAT
+    //     nem no "% avaliados". É como se a ligação não tivesse sido
+    //     avaliada de verdade.
     const isPositiva = fcrInt === 1 && csatValido && (csatInt === 4 || csatInt === 5);
     const isNeutra = fcrInt === 1 && csatValido && csatInt === 3;
     const isIncompleta = fcrInt === 1 && !csatValido;
-    const isNegativa = isAvaliada && !isPositiva && !isNeutra && !isIncompleta;
 
-    if (isAvaliada) {
+    if (isIncompleta) {
+      r.totalIncompletas++;
+      diaD.total_incompletas++;
+      semD.total_incompletas++;
+    }
+
+    const isAvaliadaDeVerdade = isAvaliada && !isIncompleta;
+    const isNegativa = isAvaliadaDeVerdade && !isPositiva && !isNeutra;
+
+    if (isAvaliadaDeVerdade) {
       r.totalAvaliadas++;
       diaD.total_avaliadas++;
       semD.total_avaliadas++;
@@ -205,10 +217,6 @@ export function calcularTelefone(dados, mapeamento) {
         r.totalNeutras++;
         diaD.total_neutras++;
         semD.total_neutras++;
-      } else if (isIncompleta) {
-        r.totalIncompletas++;
-        diaD.total_incompletas++;
-        semD.total_incompletas++;
       } else {
         r.totalNegativas++;
         diaD.total_negativas++;
@@ -216,7 +224,7 @@ export function calcularTelefone(dados, mapeamento) {
       }
     }
 
-    r.historico.push({ data, status, fcr: fcrInt, csat: csatInt, isAtendida, isAvaliada, isPositiva, isNeutra, isIncompleta, isNegativa });
+    r.historico.push({ data, status, fcr: fcrInt, csat: csatInt, isAtendida, isAvaliada: isAvaliadaDeVerdade, isPositiva, isNeutra, isIncompleta, isNegativa });
   });
 
   // Calcular métricas e validação de consistência
@@ -295,10 +303,11 @@ export function validarConsistenciaTelefone(r) {
     alertas.push(`Inconsistência: nota4 (${r.nota4}) + nota5 (${r.nota5}) ≠ positivas (${r.totalPositivas})`);
   }
 
-  // Positivas + negativas + neutras + incompletas deve fechar com avaliadas
-  const somaClassificada = r.totalPositivas + r.totalNegativas + (r.totalNeutras || 0) + (r.totalIncompletas || 0);
+  // Positivas + negativas + neutras deve fechar com avaliadas. Incompletas
+  // ficam de fora: não contam como avaliada (erro operacional do cliente).
+  const somaClassificada = r.totalPositivas + r.totalNegativas + (r.totalNeutras || 0);
   if (somaClassificada !== r.totalAvaliadas) {
-    alertas.push(`Inconsistência: positivas + negativas + neutras + incompletas (${somaClassificada}) ≠ avaliadas (${r.totalAvaliadas})`);
+    alertas.push(`Inconsistência: positivas + negativas + neutras (${somaClassificada}) ≠ avaliadas (${r.totalAvaliadas})`);
   }
 
   return {

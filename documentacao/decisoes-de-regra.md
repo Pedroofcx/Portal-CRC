@@ -642,17 +642,20 @@ inclusive a nota 3, que não deveria contar nem a favor nem contra.
 | FCR | CSAT | Classificação |
 |---|---|---|
 | 1 | 4 ou 5 | **Positiva** |
-| 1 | 3 | **Neutra** — não é positiva nem negativa |
+| 1 | 3 | **Neutra** — não é positiva nem negativa, mas conta como avaliada |
 | 1 | 1 ou 2 | **Negativa** |
-| 1 | ausente/inválida (ex.: "Abandonada") | **Incompleta** — assumi esse nome; ligação foi avaliada como FCR 1 mas não veio nota utilizável. **Não confirmado por Pedro, sinalizar.** |
+| 1 | ausente/inválida (ex.: "Abandonada") | **Incompleta** — erro operacional da avaliação por parte do cliente. **Não conta como avaliada** (confirmado por Pedro, 24/09/2026) |
 | 2 | 1 a 5 (qualquer nota) | **Negativa sempre**, independente do CSAT |
 
 **Por que o CSAT não pode dividir por "avaliadas".** `total_avaliadas` (quem
-respondeu FCR) agora inclui as neutras e as incompletas — nenhuma das duas é
-positiva nem negativa. A fórmula antiga (`positivas / avaliadas`) sub-avaliava
-quem tivesse notas 3: o CSAT correto é **positivas ÷ (positivas + negativas)**,
-só essas duas categorias no denominador. A taxa de resposta (`% avaliados`)
-continua sendo `avaliadas / atendidas` — não muda, mede outra coisa.
+respondeu FCR **de verdade**) inclui as neutras, mas não as incompletas — a
+incompleta é tratada como se a ligação não tivesse sido avaliada, porque a
+falha foi do cliente ao preencher a pesquisa, não uma resposta neutra dele. A
+fórmula antiga (`positivas / avaliadas`) sub-avaliava quem tivesse notas 3: o
+CSAT correto é **positivas ÷ (positivas + negativas)**, só essas duas
+categorias no denominador. A taxa de resposta (`% avaliados`) continua sendo
+`avaliadas / atendidas` — e agora também exclui as incompletas do numerador,
+porque elas não são uma resposta válida.
 
 **Isso corrigiu a fórmula em cinco lugares**, que precisam ficar sempre
 coerentes entre si: `calculosApuracao.jsx` (o cálculo por dia/semana/total),
