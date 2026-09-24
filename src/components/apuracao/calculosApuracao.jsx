@@ -77,6 +77,8 @@ export function calcularTelefone(dados, mapeamento) {
         totalAvaliadas: 0,
         totalPositivas: 0,
         totalNegativas: 0,
+        totalNeutras: 0,
+        totalIncompletas: 0,
         nota4: 0,
         nota5: 0,
         historico: [],
@@ -96,6 +98,8 @@ export function calcularTelefone(dados, mapeamento) {
         total_avaliadas: 0,
         total_positivas: 0,
         total_negativas: 0,
+        total_neutras: 0,
+        total_incompletas: 0,
         nota4: 0,
         nota5: 0,
         transferencias: 0
@@ -113,6 +117,8 @@ export function calcularTelefone(dados, mapeamento) {
         total_avaliadas: 0,
         total_positivas: 0,
         total_negativas: 0,
+        total_neutras: 0,
+        total_incompletas: 0,
         nota4: 0,
         nota5: 0,
         transferencias: 0
@@ -157,7 +163,8 @@ export function calcularTelefone(dados, mapeamento) {
     diaD.total_sem_transferencia++;
     semD.total_sem_transferencia++;
 
-    // FCR: apenas 1 (resolvido) ou 2 (não resolvido) = avaliada
+    // FCR: apenas 1 (resolvido) ou 2 (não resolvido) = avaliada (respondeu a
+    // pesquisa). Isso não muda — é o "% Avaliados" (taxa de resposta).
     const fcrRaw = (row[mapeamento.fcr] || '').toString().trim();
     const fcrInt = parseInt(fcrRaw);
     const isAvaliada = fcrInt === 1 || fcrInt === 2;
@@ -165,10 +172,23 @@ export function calcularTelefone(dados, mapeamento) {
     // CSAT nota
     const csatRaw = (row[mapeamento.csat] || '').toString().trim();
     const csatInt = parseInt(csatRaw);
+    const csatValido = Number.isInteger(csatInt) && csatInt >= 1 && csatInt <= 5;
 
-    // REGRA CRÍTICA: Positiva = CSAT 4 ou 5 SOMENTE se FCR === 1
-    const isPositiva = fcrInt === 1 && (csatInt === 4 || csatInt === 5);
-    const isNegativa = isAvaliada && !isPositiva;
+    // REGRA (Pedro, 24/09/2026 — combinação oficial do CSAT do telefone):
+    //   FCR 1 + CSAT 4 ou 5  → positiva
+    //   FCR 1 + CSAT 1 ou 2  → negativa
+    //   FCR 1 + CSAT 3       → NEUTRA — não é negativa. Antes desta correção
+    //     entrava como negativa (era só "avaliada && !positiva"), inflando
+    //     o negativo de quem tinha atendimento nota 3.
+    //   FCR 2 (qualquer CSAT, inclusive sem nota) → negativa sempre.
+    //   FCR 1 sem CSAT válido (pesquisa abandonada no meio) → incompleta:
+    //     não é positiva, negativa nem neutra — não dá pra confirmar o
+    //     sentimento. Conta como "avaliada" (respondeu o FCR), mas fica de
+    //     fora do CSAT (nem soma no positivo, nem no negativo).
+    const isPositiva = fcrInt === 1 && csatValido && (csatInt === 4 || csatInt === 5);
+    const isNeutra = fcrInt === 1 && csatValido && csatInt === 3;
+    const isIncompleta = fcrInt === 1 && !csatValido;
+    const isNegativa = isAvaliada && !isPositiva && !isNeutra && !isIncompleta;
 
     if (isAvaliada) {
       r.totalAvaliadas++;
@@ -181,6 +201,14 @@ export function calcularTelefone(dados, mapeamento) {
         semD.total_positivas++;
         if (csatInt === 4) { r.nota4++; diaD.nota4++; semD.nota4++; }
         if (csatInt === 5) { r.nota5++; diaD.nota5++; semD.nota5++; }
+      } else if (isNeutra) {
+        r.totalNeutras++;
+        diaD.total_neutras++;
+        semD.total_neutras++;
+      } else if (isIncompleta) {
+        r.totalIncompletas++;
+        diaD.total_incompletas++;
+        semD.total_incompletas++;
       } else {
         r.totalNegativas++;
         diaD.total_negativas++;
@@ -188,7 +216,7 @@ export function calcularTelefone(dados, mapeamento) {
       }
     }
 
-    r.historico.push({ data, status, fcr: fcrInt, csat: csatInt, isAtendida, isAvaliada, isPositiva, isNegativa });
+    r.historico.push({ data, status, fcr: fcrInt, csat: csatInt, isAtendida, isAvaliada, isPositiva, isNeutra, isIncompleta, isNegativa });
   });
 
   // Calcular métricas e validação de consistência
@@ -199,10 +227,14 @@ export function calcularTelefone(dados, mapeamento) {
     Object.keys(r.porData).forEach(dt => {
       const d = r.porData[dt];
       d.performance = d.total_ligacoes > 0 ? (d.total_atendidas / d.total_ligacoes) * 100 : 0;
-      // % Avaliados = avaliadas / atendidas (sem contar transferências)
+      // % Avaliados = avaliadas / atendidas (sem contar transferências) —
+      // taxa de resposta, inclui neutras e incompletas (respondeu o FCR).
       const atendidasSemTransf = d.total_atendidas - d.transferencias;
       d.percentual_avaliados = atendidasSemTransf > 0 ? (d.total_avaliadas / atendidasSemTransf) * 100 : 0;
-      d.csat = d.total_avaliadas > 0 ? (d.total_positivas / d.total_avaliadas) * 100 : 0;
+      // CSAT = positivas / (positivas + negativas) — neutras e incompletas
+      // ficam de fora do CSAT (não são nem positivas nem negativas de fato).
+      const baseCsat = d.total_positivas + d.total_negativas;
+      d.csat = baseCsat > 0 ? (d.total_positivas / baseCsat) * 100 : 0;
     });
 
     // Por semana
@@ -212,7 +244,8 @@ export function calcularTelefone(dados, mapeamento) {
       s.performance = s.total_ligacoes > 0 ? (s.total_atendidas / s.total_ligacoes) * 100 : 0;
       const atendidasSemTransf = s.total_atendidas - s.transferencias;
       s.percentual_avaliados = atendidasSemTransf > 0 ? (s.total_avaliadas / atendidasSemTransf) * 100 : 0;
-      s.csat = s.total_avaliadas > 0 ? (s.total_positivas / s.total_avaliadas) * 100 : 0;
+      const baseCsatSemana = s.total_positivas + s.total_negativas;
+      s.csat = baseCsatSemana > 0 ? (s.total_positivas / baseCsatSemana) * 100 : 0;
       s.numero = idx + 1;
       s.rotulo = formatarRotuloSemana(iniSem, idx + 1);
     });
@@ -224,7 +257,8 @@ export function calcularTelefone(dados, mapeamento) {
     const totalAtendidas = r.totalAtendidas;
     const totalSemTransf = totalAtendidas - r.totalTransferencias;
 
-    r.csatPercentual = r.totalAvaliadas > 0 ? (r.totalPositivas / r.totalAvaliadas) * 100 : 0;
+    const baseCsatTotal = r.totalPositivas + r.totalNegativas;
+    r.csatPercentual = baseCsatTotal > 0 ? (r.totalPositivas / baseCsatTotal) * 100 : 0;
     r.percentualAvaliados = totalSemTransf > 0 ? (r.totalAvaliadas / totalSemTransf) * 100 : 0;
     r.performance = r.totalLigacoes > 0 ? (totalAtendidas / r.totalLigacoes) * 100 : 0;
     r.fcrPercentual = r.csatPercentual; // Alias para compatibilidade
@@ -261,6 +295,12 @@ export function validarConsistenciaTelefone(r) {
     alertas.push(`Inconsistência: nota4 (${r.nota4}) + nota5 (${r.nota5}) ≠ positivas (${r.totalPositivas})`);
   }
 
+  // Positivas + negativas + neutras + incompletas deve fechar com avaliadas
+  const somaClassificada = r.totalPositivas + r.totalNegativas + (r.totalNeutras || 0) + (r.totalIncompletas || 0);
+  if (somaClassificada !== r.totalAvaliadas) {
+    alertas.push(`Inconsistência: positivas + negativas + neutras + incompletas (${somaClassificada}) ≠ avaliadas (${r.totalAvaliadas})`);
+  }
+
   return {
     ok: alertas.length === 0,
     alertas,
@@ -273,6 +313,8 @@ export function validarConsistenciaTelefone(r) {
       total_avaliadas: r.totalAvaliadas,
       total_positivas: r.totalPositivas,
       total_negativas: r.totalNegativas,
+      total_neutras: r.totalNeutras || 0,
+      total_incompletas: r.totalIncompletas || 0,
       nota4: r.nota4,
       nota5: r.nota5
     }
@@ -468,7 +510,7 @@ export function agruparDadosPorSemana(dadosPorData, _tipo) {
         inicio: iniSem,
         fim: getFimSemana(iniSem),
         rotulo: '',
-        telefone: { total_ligacoes: 0, total_atendidas: 0, total_avaliadas: 0, total_positivas: 0, transferencias: 0 },
+        telefone: { total_ligacoes: 0, total_atendidas: 0, total_avaliadas: 0, total_positivas: 0, total_negativas: 0, transferencias: 0 },
         chat: { total_chats: 0, total_avaliados: 0, total_positivos: 0 }
       };
     }
@@ -478,6 +520,7 @@ export function agruparDadosPorSemana(dadosPorData, _tipo) {
       s.telefone.total_atendidas += dia.telefone.total_atendidas || 0;
       s.telefone.total_avaliadas += dia.telefone.total_avaliadas || 0;
       s.telefone.total_positivas += dia.telefone.total_positivas || 0;
+      s.telefone.total_negativas += dia.telefone.total_negativas || 0;
       s.telefone.transferencias += dia.telefone.transferencias || 0;
     }
     if (dia.chat) {
@@ -493,12 +536,15 @@ export function agruparDadosPorSemana(dadosPorData, _tipo) {
     // Métricas derivadas
     s.telefone.performance = s.telefone.total_ligacoes > 0 ? (s.telefone.total_atendidas / s.telefone.total_ligacoes) * 100 : 0;
     s.telefone.percentual_avaliados = s.telefone.total_atendidas > 0 ? (s.telefone.total_avaliadas / s.telefone.total_atendidas) * 100 : 0;
-    s.telefone.csat = s.telefone.total_avaliadas > 0 ? (s.telefone.total_positivas / s.telefone.total_avaliadas) * 100 : 0;
+    // CSAT = positivas / (positivas + negativas) -- neutras e incompletas
+    // ficam de fora (regra de Pedro, 24/09/2026).
+    const baseCsatSem = s.telefone.total_positivas + s.telefone.total_negativas;
+    s.telefone.csat = baseCsatSem > 0 ? (s.telefone.total_positivas / baseCsatSem) * 100 : 0;
     s.chat.percentual_avaliados = s.chat.total_chats > 0 ? (s.chat.total_avaliados / s.chat.total_chats) * 100 : 0;
     s.chat.csat = s.chat.total_avaliados > 0 ? (s.chat.total_positivos / s.chat.total_avaliados) * 100 : 0;
     // Satisfação média consolidada
     const canais = [];
-    if (s.telefone.total_avaliadas > 0) canais.push(s.telefone.csat);
+    if (baseCsatSem > 0) canais.push(s.telefone.csat);
     if (s.chat.total_avaliados > 0) canais.push(s.chat.csat);
     s.satisfacao_media = canais.length > 0 ? canais.reduce((a, b) => a + b, 0) / canais.length : 0;
     const canaisAv = [];

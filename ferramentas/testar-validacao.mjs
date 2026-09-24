@@ -24,7 +24,7 @@ import { carregarModuloJsx } from './lib/carregar-jsx.mjs';
 
 // calculosApuracao.jsx é JS puro com extensão .jsx (sem elementos JSX de
 // verdade) — carregado via esbuild porque o Node não importa .jsx direto.
-const { calcularChat } = await carregarModuloJsx(path.resolve('src/components/apuracao/calculosApuracao.jsx'));
+const { calcularChat, calcularTelefone, validarConsistenciaTelefone } = await carregarModuloJsx(path.resolve('src/components/apuracao/calculosApuracao.jsx'));
 import { produtividadePorTurno } from '../src/lib/relatorios/turnos.js';
 import { diasCorridos, saldoDoCiclo, situacaoDoCiclo, cicloParaAData, deFeriasEm, lotacaoNoPeriodo, conferirPedido, fragmentoDoPedido, proximasFerias } from '../src/lib/ferias.js';
 import { situacaoDaPesquisa, quemRespondeu, resultadoDasPerguntas, resumoDaPesquisa, montarParticipacao } from '../src/lib/pesquisas.js';
@@ -250,7 +250,7 @@ checa('metade do prazo consumida', String(consumoDoPrazo({ data_registro: emH(-1
 console.log('\n== indicadores do ciclo (ciclo inteiro, dia a dia) ==');
 {
   const cicloT = { data_inicio: '2026-06-16', data_fim: '2026-09-16' };
-  const tel = (data, lig, at, av, pos) => ({ data, telefone: { total_ligacoes: lig, total_atendidas: at, total_avaliadas: av, total_positivas: pos } });
+  const tel = (data, lig, at, av, pos, neg = Math.max(0, av - pos)) => ({ data, telefone: { total_ligacoes: lig, total_atendidas: at, total_avaliadas: av, total_positivas: pos, total_negativas: neg } });
   const chat = (data, av, pos) => ({ data, chat: { total_avaliados: av, total_positivos: pos } });
   const apur = [
     // julho: importado duas vezes com o dia 10 repetido — vale o mais recente
@@ -554,7 +554,7 @@ console.log('\n== extrato de pontos do agente ==');
 
 console.log('\n== Hansei: numeros do periodo ==');
 {
-  const tel = (data, av, pos, lig = 10, at = 10) => ({ data, telefone: { total_ligacoes: lig, total_atendidas: at, total_avaliadas: av, total_positivas: pos } });
+  const tel = (data, av, pos, lig = 10, at = 10, neg = Math.max(0, av - pos)) => ({ data, telefone: { total_ligacoes: lig, total_atendidas: at, total_avaliadas: av, total_positivas: pos, total_negativas: neg } });
   const apur = [
     { id: 'a', colaborador_id: 'ana', tipo_apuracao: 'telefone', created_date: '2026-04-20', dados_por_data: [tel('2026-04-06', 4, 4), tel('2026-04-07', 4, 0)] },
     // reimportação do dia 06 (mais antiga): não pode contar de novo
@@ -640,7 +640,7 @@ console.log('\n== relatorio de canais ==');
 
 console.log('\n== relatorio de qualidade ==');
 {
-  const tel = (data, av, pos) => ({ data, telefone: { total_ligacoes: 10, total_atendidas: 10, total_avaliadas: av, total_positivas: pos } });
+  const tel = (data, av, pos, neg = Math.max(0, av - pos)) => ({ data, telefone: { total_ligacoes: 10, total_atendidas: 10, total_avaliadas: av, total_positivas: pos, total_negativas: neg } });
   const apuracoes = [
     // Ana: 1 avaliação, 0 positiva; Bia: 9 avaliações, 9 positivas
     { colaborador_id: 'a', tipo_apuracao: 'telefone', created_date: '2026-07-10', dados_por_data: [tel('2026-07-01', 1, 0)] },
@@ -1026,6 +1026,23 @@ console.log('\n== importacao da apuracao ==');
   const mapa = sugerirMapeamento(colunas55, 'telefone');
   checa('mapeia agente e data sozinho', mapa.agente + '|' + mapa.data, 'Agente|Data');
   checa('mapeia origem e status', mapa.origem + '|' + mapa.status, 'Ligação de Origem|Status da Ligação');
+
+  // As colunas de verdade do relatório do 55PBX (report.csv, 24/09/2026) --
+  // nomes bem diferentes do que a gente supôs antes de ver o arquivo real.
+  const colunas55Real = [
+    'Chamada', 'Operador', 'Data', 'Fila', 'Id ligação de origem', 'I D Do Ticket',
+    'Pergunta3 1 SIM O NAO', 'Pergunta3 2 NOTA 1 a 5', 'Quantidade de Transbordos', 'Motivo de Desconexão',
+  ];
+  checa('reconhece o 55pbx de verdade', detectarFonte(colunas55Real), '55pbx');
+  const mapaReal = sugerirMapeamento(colunas55Real, 'telefone');
+  checa('agente vem do Operador', mapaReal.agente, 'Operador');
+  // "Fila" é um id de fila de atendimento, não indica transferência -- quem
+  // indica é "Id ligação de origem" ("<id> - transferência fila"). Fila não
+  // pode ganhar essa disputa.
+  checa('origem e a ligacao de origem, nao a Fila', mapaReal.origem, 'Id ligação de origem');
+  checa('status vem da coluna Chamada', mapaReal.status, 'Chamada');
+  checa('fcr vem da Pergunta3 1', mapaReal.fcr, 'Pergunta3 1 SIM O NAO');
+  checa('csat vem da Pergunta3 2', mapaReal.csat, 'Pergunta3 2 NOTA 1 a 5');
   checa('nada faltando quando o mapa esta completo', String(camposFaltando('telefone', mapa).length), '0');
   checa('acusa campo obrigatorio faltando', camposFaltando('telefone', { agente: 'Agente' })[0], 'Data');
 
@@ -1095,6 +1112,59 @@ console.log('\n== importacao da apuracao ==');
   ]);
   checa('importacoes antigas do mesmo momento viram um lote so', String(antigas.length), '2');
   checa('e o lote antigo soma as pessoas', String(antigas.find((l) => l.tipo === 'chat').pessoas), '2');
+}
+
+console.log('\n== telefone (55PBX): FCR 1 + nota 3 e neutro, nao negativo ==');
+{
+  // Regra real do 55PBX de Pedro (arquivo report.csv, 24/09/2026):
+  //   FCR 1 + CSAT 4 ou 5 -> positiva
+  //   FCR 1 + CSAT 1 ou 2 -> negativa
+  //   FCR 1 + CSAT 3      -> NEUTRA (antes entrava como negativa por engano)
+  //   FCR 2, qualquer CSAT -> negativa sempre
+  //   FCR 1 sem CSAT valido -> incompleta (pesquisa abandonada no meio)
+  const mapeamento = { agente: 'Agente', data: 'Data', origem: 'Origem', status: 'Status', fcr: 'FCR', csat: 'CSAT' };
+  const linha = (id, fcr, csat) => ({ Agente: 'Ana', Data: '10/09/2026', Origem: '', Status: 'Atendida', FCR: fcr === null ? '' : String(fcr), CSAT: csat === null ? '' : String(csat) });
+  const linhas = [
+    linha('t1', 1, 5), linha('t2', 1, 4),       // positivas
+    linha('t3', 1, 1), linha('t4', 1, 2),       // negativas de verdade
+    linha('t5', 1, 3), linha('t6', 1, 3),       // neutras -- o caso corrigido
+    linha('t7', 2, 5), linha('t8', 2, null),    // FCR 2: negativa sempre, com ou sem nota
+    linha('t9', 1, null),                       // incompleta: respondeu FCR, nao deu nota
+  ];
+  const r = calcularTelefone(linhas, mapeamento).Ana;
+  checa('positivas', String(r.totalPositivas), '2');
+  checa('negativas de verdade (1,2 e os dois FCR2)', String(r.totalNegativas), '4');
+  checa('duas neutras (fcr1+nota3)', String(r.totalNeutras), '2');
+  checa('uma incompleta (fcr1 sem nota)', String(r.totalIncompletas), '1');
+  checa('avaliadas fecha com a soma de todos os baldes', String(r.totalAvaliadas), String(r.totalPositivas + r.totalNegativas + r.totalNeutras + r.totalIncompletas));
+  checa('avaliadas = 9 (todo mundo respondeu o fcr)', String(r.totalAvaliadas), '9');
+  // CSAT oficial = positivas / (positivas + negativas) = 2 / 6, NAO 2/9.
+  checa('csat exclui neutras e incompletas do denominador', r.csatPercentual.toFixed(2), (2 / 6 * 100).toFixed(2));
+  checa('sem a correcao o csat sairia 2/9 = 22%: confirma que nao e isso', String(Math.abs(r.csatPercentual - (2 / 9 * 100)) > 1), 'true');
+
+  const validacao = validarConsistenciaTelefone(r);
+  checa('a soma dos baldes bate com avaliadas (sem alerta)', String(validacao.ok), 'true');
+}
+
+console.log('\n== telefone (55PBX): transferencia de fila pelo relatorio real ==');
+{
+  // No relatorio real, quem indica transbordo e "Id ligacao de origem"
+  // (populado com "<id> - transferencia fila"), nao uma coluna "origem"
+  // categorica como Receptiva/Transferencia. Uma ligacao transferida conta
+  // como atendida, mas nunca gera avaliacao -- mesmo tendo FCR/CSAT no
+  // arquivo, eles sao ignorados.
+  const mapeamento = { agente: 'Operador', data: 'Data', origem: 'Id ligação de origem', status: 'Chamada', fcr: 'Pergunta3 1 SIM O NAO', csat: 'Pergunta3 2 NOTA 1 a 5' };
+  const linhas = [
+    { Operador: 'Dayane Santos', Data: '14/09/2026', 'Id ligação de origem': '', Chamada: 'Atendida', 'Pergunta3 1 SIM O NAO': '1', 'Pergunta3 2 NOTA 1 a 5': '5' },
+    { Operador: 'Dayane Santos', Data: '14/09/2026', 'Id ligação de origem': '1789416523.14818 - transferência fila', Chamada: 'Atendida', 'Pergunta3 1 SIM O NAO': '1', 'Pergunta3 2 NOTA 1 a 5': '2' },
+  ];
+  const r = calcularTelefone(linhas, mapeamento)['Dayane Santos'];
+  checa('as duas ligacoes contam no total', String(r.totalLigacoes), '2');
+  checa('as duas contam como atendidas (a transferida tambem)', String(r.totalAtendidas), '2');
+  checa('uma transferencia detectada', String(r.totalTransferencias), '1');
+  checa('so a ligacao direta gera avaliacao', String(r.totalAvaliadas), '1');
+  checa('a nota da ligacao transferida (CSAT 2) nao entra em nada', String(r.totalNegativas), '0');
+  checa('csat sai 100% -- so a ligacao direta (nota 5) conta', String(r.csatPercentual), '100');
 }
 
 console.log('\n== chat (Zendesk): calculo bruto, sem coluna de nota ==');

@@ -625,3 +625,56 @@ Fase 1, sem alteração de código:
 
 Nenhuma dessas regras mudou. Ficam registradas aqui porque, diferente do
 chat, elas dependiam de confirmação e agora estão fechadas.
+
+---
+
+## Telefone (55PBX): nota 3 é neutra, FCR 2 é sempre negativo (24/09/2026)
+
+**A regra de Pedro**, a partir de um relatório real do 55PBX: "*para a questão
+CSAT é considerada a seguinte combinação: FCR 1 e CSAT 4 até 5 positivo, FCR 1
+CSAT 1,2 negativo, nota 3 neutro. FCR 2 CSAT 1 a 5 é negativo*". Isso refina a
+regra 2 do bloco anterior — "positiva exige CSAT 4/5 com FCR 1" já estava
+certa, mas o que sobrava de "não-positiva" estava caindo tudo em negativa,
+inclusive a nota 3, que não deveria contar nem a favor nem contra.
+
+**A classificação (`calcularTelefone`, em `calculosApuracao.jsx`):**
+
+| FCR | CSAT | Classificação |
+|---|---|---|
+| 1 | 4 ou 5 | **Positiva** |
+| 1 | 3 | **Neutra** — não é positiva nem negativa |
+| 1 | 1 ou 2 | **Negativa** |
+| 1 | ausente/inválida (ex.: "Abandonada") | **Incompleta** — assumi esse nome; ligação foi avaliada como FCR 1 mas não veio nota utilizável. **Não confirmado por Pedro, sinalizar.** |
+| 2 | 1 a 5 (qualquer nota) | **Negativa sempre**, independente do CSAT |
+
+**Por que o CSAT não pode dividir por "avaliadas".** `total_avaliadas` (quem
+respondeu FCR) agora inclui as neutras e as incompletas — nenhuma das duas é
+positiva nem negativa. A fórmula antiga (`positivas / avaliadas`) sub-avaliava
+quem tivesse notas 3: o CSAT correto é **positivas ÷ (positivas + negativas)**,
+só essas duas categorias no denominador. A taxa de resposta (`% avaliados`)
+continua sendo `avaliadas / atendidas` — não muda, mede outra coisa.
+
+**Isso corrigiu a fórmula em cinco lugares**, que precisam ficar sempre
+coerentes entre si: `calculosApuracao.jsx` (o cálculo por dia/semana/total),
+`indicadoresCiclo.js` (o número oficial da premiação), `relatorios/qualidade.js`
+e `pages/RelatoriosApuracao.jsx` (os relatórios). No caminho, apareceu um
+esquecimento antigo, sem relação com esta regra: `RelatoriosApuracao.jsx` nunca
+somava `total_negativas` do telefone na agregação por agente — só a do chat.
+
+**O arquivo real também exigiu ajustar o de-para de colunas.** O 55PBX de
+verdade não tem uma coluna "origem" categórica — tem **"Id ligação de
+origem"**, vazia na maioria das linhas e preenchida com um texto contendo
+"transferência fila" quando a ligação veio de uma transferência. Existe uma
+coluna **"Fila"**, de nome parecido, que é só o id da fila de atendimento e
+não tem nada a ver com transferência — o mapeamento automático estava
+escolhendo "Fila" por engano (sinônimo exato bate antes de um sinônimo
+parcial). Corrigido em `CAMPOS.telefone` (`src/lib/apuracao/importacao.js`).
+
+**Verificado com o arquivo real do Pedro** (32 linhas, 8 dias, 4 agentes):
+fonte, as 6 colunas e o vínculo de nome bateram certo na importação; o exemplo
+de FCR 2 (Bárbara, 23/09, FCR "2" CSAT "1") entrou como negativa; as duas
+ligações com "transferência fila" na origem (Bárbara, 17/09) saíram do CSAT.
+
+**Onde vive:** `src/components/apuracao/calculosApuracao.jsx`,
+`src/lib/indicadoresCiclo.js`, `src/lib/relatorios/qualidade.js`,
+`src/pages/RelatoriosApuracao.jsx`, `src/lib/apuracao/importacao.js`.

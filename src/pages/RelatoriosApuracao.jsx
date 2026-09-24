@@ -146,6 +146,7 @@ export default function RelatoriosApuracao() {
               total_atendidas: 0,
               total_avaliadas: 0,
               total_positivas: 0,
+              total_negativas: 0,
               nota4: 0,
               nota5: 0,
               transferencias: 0
@@ -168,6 +169,7 @@ export default function RelatoriosApuracao() {
           agg.telefone.total_atendidas += dia.telefone.total_atendidas || 0;
           agg.telefone.total_avaliadas += dia.telefone.total_avaliadas || 0;
           agg.telefone.total_positivas += dia.telefone.total_positivas || 0;
+          agg.telefone.total_negativas += dia.telefone.total_negativas || 0;
           agg.telefone.nota4 += dia.telefone.nota4 || 0;
           agg.telefone.nota5 += dia.telefone.nota5 || 0;
           agg.telefone.transferencias += dia.telefone.transferencias || 0;
@@ -193,10 +195,13 @@ export default function RelatoriosApuracao() {
         ? (agg.telefone.total_atendidas / agg.telefone.total_ligacoes) * 100
         : 0;
       
-      agg.telefone.csat = agg.telefone.total_avaliadas > 0
-        ? (agg.telefone.total_positivas / agg.telefone.total_avaliadas) * 100
+      // CSAT = positivas / (positivas + negativas) -- avaliadas inclui as
+      // neutras (FCR 1 + nota 3) e incompletas, que nao entram no CSAT.
+      const baseCsatTel = agg.telefone.total_positivas + agg.telefone.total_negativas;
+      agg.telefone.csat = baseCsatTel > 0
+        ? (agg.telefone.total_positivas / baseCsatTel) * 100
         : 0;
-      
+
       agg.telefone.percentual_avaliados = agg.telefone.total_atendidas > 0
         ? (agg.telefone.total_avaliadas / agg.telefone.total_atendidas) * 100
         : 0;
@@ -227,17 +232,19 @@ export default function RelatoriosApuracao() {
   // mais pesa mais (antes era a média das médias de cada linha).
   const consolidacao = useMemo(() => {
     if (!dadosAgregados.length) return null;
-    const t = { lig: 0, at: 0, av: 0, pos: 0 };
+    const t = { lig: 0, at: 0, av: 0, pos: 0, neg: 0 };
     const c = { chats: 0, av: 0, pos: 0, neutros: 0, temNota: false };
     dadosAgregados.forEach(agg => {
       t.lig += agg.telefone.total_ligacoes; t.at += agg.telefone.total_atendidas;
       t.av += agg.telefone.total_avaliadas; t.pos += agg.telefone.total_positivas;
+      t.neg += agg.telefone.total_negativas || 0;
       c.chats += agg.chat.total_chats; c.av += agg.chat.total_avaliados; c.pos += agg.chat.total_positivos;
       c.neutros += agg.chat.total_neutros || 0;
       if (agg.chat.tem_nota) c.temNota = true;
     });
     const pct = (parte, total) => (total > 0 ? (parte / total) * 100 : 0);
-    const csatTelefoneMedia = pct(t.pos, t.av);
+    // Telefone: positivas / (positivas + negativas) -- ver nota acima.
+    const csatTelefoneMedia = pct(t.pos, t.pos + t.neg);
     const csatChatMedia = pct(c.pos, c.av);
     const csatChatSemNeutros = (c.av - c.neutros) > 0 ? pct(c.pos, c.av - c.neutros) : csatChatMedia;
     const canais = [t.av > 0 ? csatTelefoneMedia : null, c.av > 0 ? csatChatMedia : null].filter((v) => v !== null);

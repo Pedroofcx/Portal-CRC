@@ -69,6 +69,10 @@ function registrosDaImportacao({ resultados, tipo, fonte, vinculos, colaboradore
           total_avaliadas: dia.total_avaliadas || 0,
           total_positivas: dia.total_positivas || 0,
           total_negativas: dia.total_negativas || 0,
+          // Neutras (FCR 1 + nota 3) e incompletas (FCR 1 sem nota válida)
+          // ficam de fora do CSAT — só aqui para conferência (24/09/2026).
+          total_neutras: dia.total_neutras || 0,
+          total_incompletas: dia.total_incompletas || 0,
           nota4: dia.nota4 || 0,
           nota5: dia.nota5 || 0,
           performance: dia.performance || 0,
@@ -109,6 +113,8 @@ function registrosDaImportacao({ resultados, tipo, fonte, vinculos, colaboradore
         performance: r.performance || 0,
         avaliados: r.totalAvaliadas || 0,
         total_atendimentos: r.totalLigacoes || 0,
+        total_neutras: r.totalNeutras || 0,
+        total_incompletas: r.totalIncompletas || 0,
       };
       base.satisfacao_media = r.csatPercentual || 0;
       base.percentual_avaliados = r.percentualAvaliados || 0;

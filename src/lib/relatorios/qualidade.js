@@ -14,7 +14,7 @@ const pct = (parte, total) => (total > 0 ? (parte / total) * 100 : null);
 
 /** Soma de telefone e chat de um grupo de apurações (já sem dias duplicados por pessoa). */
 function somar(apuracoesPorPessoa, periodo) {
-  const t = { ligacoes: 0, atendidas: 0, avaliadas: 0, positivas: 0 };
+  const t = { ligacoes: 0, atendidas: 0, avaliadas: 0, positivas: 0, negativas: 0 };
   const c = { chats: 0, avaliados: 0, positivos: 0 };
   for (const lista of apuracoesPorPessoa) {
     for (const { dados } of diasApurados(lista, 'telefone', periodo)) {
@@ -22,6 +22,7 @@ function somar(apuracoesPorPessoa, periodo) {
       t.atendidas += Number(dados.total_atendidas) || 0;
       t.avaliadas += Number(dados.total_avaliadas) || 0;
       t.positivas += Number(dados.total_positivas) || 0;
+      t.negativas += Number(dados.total_negativas) || 0;
     }
     for (const { dados } of diasApurados(lista, 'chat', periodo)) {
       c.chats += Number(dados.total_chats) || 0;
@@ -29,7 +30,10 @@ function somar(apuracoesPorPessoa, periodo) {
       c.positivos += Number(dados.total_positivos) || 0;
     }
   }
-  const csatTel = pct(t.positivas, t.avaliadas);
+  // Telefone: positivas ÷ (positivas + negativas) — avaliadas inclui as
+  // neutras (FCR 1 + nota 3) e as incompletas, que não entram no CSAT
+  // (Pedro, 24/09/2026).
+  const csatTel = pct(t.positivas, t.positivas + t.negativas);
   const csatChat = pct(c.positivos, c.avaliados);
   const canais = [csatTel, csatChat].filter((v) => v !== null);
   return {

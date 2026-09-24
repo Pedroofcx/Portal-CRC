@@ -5,9 +5,12 @@
  * Regras decididas por Pedro em 22/09/2026 (documentacao/decisoes-de-regra.md):
  *
  * - CSAT = (CSAT do telefone + CSAT do chat) ÷ 2, cada canal calculado no
- *   ciclo inteiro (positivas ÷ avaliadas). Canal sem nenhuma avaliação no
- *   ciclo fica de fora da média — dividir por 2 com um canal vazio puniria
- *   quem não atendeu por ele.
+ *   ciclo inteiro. Canal sem nenhuma avaliação no ciclo fica de fora da
+ *   média — dividir por 2 com um canal vazio puniria quem não atendeu por
+ *   ele. Chat: positivos ÷ avaliados. Telefone: positivas ÷ (positivas +
+ *   negativas) — NÃO positivas ÷ avaliadas, porque "avaliadas" inclui as
+ *   neutras (FCR 1 + nota 3, regra de Pedro em 24/09/2026) e as incompletas
+ *   (FCR 1 sem nota válida), que não são nem positivas nem negativas.
  * - Performance = ligações atendidas (não abandonadas) ÷ ligações recebidas,
  *   no ciclo inteiro.
  * - Avaliação CX = média de todas as avaliações do ciclo.
@@ -89,7 +92,12 @@ export function indicadoresDoCiclo(apuracoes = [], ciclo) {
   const somaTel = (campo) => tel.reduce((s, d) => s + num(d[campo]), 0);
   const somaChat = (campo) => chat.reduce((s, d) => s + num(d[campo]), 0);
 
-  const csatTel = pct(somaTel('total_positivas'), somaTel('total_avaliadas'));
+  // CSAT do telefone = positivas / (positivas + negativas). NÃO é
+  // total_avaliadas: avaliadas inclui as neutras (FCR 1 + nota 3) e as
+  // incompletas (FCR 1 sem nota) — regra de Pedro, 24/09/2026. Usar
+  // avaliadas aqui inflaria o denominador e sub-avaliaria o CSAT de quem
+  // tivesse atendimentos nota 3.
+  const csatTel = pct(somaTel('total_positivas'), somaTel('total_positivas') + somaTel('total_negativas'));
   const csatChat = pct(somaChat('total_positivos'), somaChat('total_avaliados'));
   const canais = [csatTel, csatChat].filter((v) => v !== null);
   const csat = canais.length

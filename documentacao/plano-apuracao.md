@@ -163,6 +163,11 @@ de agente por fonte — é ela que faz o sistema "lembrar" do mapeamento.
    faz hoje (`calcularTelefone`, sem mudança nenhuma): avaliada exige FCR 1
    ou 2; positiva exige CSAT 4 ou 5 **e** FCR 1; transferência de fila conta
    como atendida (entra na performance) mas nunca gera avaliação.
+   **Refinado no mesmo dia**, a partir do relatório real do 55PBX: nota 3
+   com FCR 1 é **neutra** (não positiva, não negativa); FCR 2 é **sempre
+   negativa**, qualquer que seja a nota. O CSAT passou a ser
+   positivas ÷ (positivas + negativas), não mais positivas ÷ avaliadas — ver
+   "Telefone (55PBX): nota 3 é neutra..." em decisoes-de-regra.md.
 4. ~~**Chat**: o CSAT é bons ÷ (bons + ruins)?~~ **Respondido em 24/09/2026:**
    sim, e "ruim=1" sempre conta como negativo na premiação — mesmo quando o
    ticket é nota 3 (neutra pelo critério do Pedro, negativa pelo da

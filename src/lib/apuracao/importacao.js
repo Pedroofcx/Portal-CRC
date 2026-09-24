@@ -23,10 +23,14 @@ export const CAMPOS = {
   telefone: [
     { chave: 'agente', rotulo: 'Agente', obrigatorio: true, sinonimos: ['agente', 'atendente', 'operador', 'usuario', 'usuário', 'nome do agente', 'ramal'] },
     { chave: 'data', rotulo: 'Data', obrigatorio: true, sinonimos: ['data', 'dia', 'data da ligacao', 'data da ligação', 'data hora', 'data/hora', 'inicio', 'início'] },
-    { chave: 'origem', rotulo: 'Origem da ligação', obrigatorio: true, sinonimos: ['origem', 'ligacao de origem', 'ligação de origem', 'tipo de ligacao', 'fila', 'transferencia', 'transferência'] },
-    { chave: 'status', rotulo: 'Status da ligação', obrigatorio: true, sinonimos: ['status', 'situacao', 'situação', 'status da ligacao', 'status da ligação', 'resultado'] },
-    { chave: 'fcr', rotulo: 'FCR (1 resolveu, 2 não resolveu)', obrigatorio: true, sinonimos: ['fcr', 'resolucao', 'resolução', 'resolvido', 'primeiro contato'] },
-    { chave: 'csat', rotulo: 'CSAT (1 a 5)', obrigatorio: true, sinonimos: ['csat', 'nota', 'satisfacao', 'satisfação', 'avaliacao', 'avaliação', 'pesquisa'] },
+    // "fila" saiu dos sinônimos de origem: no relatório real do 55PBX existe
+    // uma coluna "Fila" (id da fila de atendimento) que não tem nada a ver
+    // com transferência — ela colidia com "Id ligação de origem", que é onde
+    // o transbordo realmente aparece ("<id> - transferência fila").
+    { chave: 'origem', rotulo: 'Origem da ligação (id da ligação de origem)', obrigatorio: true, sinonimos: ['id ligacao de origem', 'id ligação de origem', 'ligacao de origem', 'ligação de origem', 'origem', 'tipo de ligacao', 'transferencia', 'transferência'] },
+    { chave: 'status', rotulo: 'Status da ligação', obrigatorio: true, sinonimos: ['chamada', 'status', 'situacao', 'situação', 'status da ligacao', 'status da ligação', 'resultado'] },
+    { chave: 'fcr', rotulo: 'FCR (1 resolveu, 2 não resolveu)', obrigatorio: true, sinonimos: ['pergunta3 1 sim o nao', 'pergunta3 1', 'pergunta 3 1', 'fcr', 'resolucao', 'resolução', 'resolvido', 'primeiro contato'] },
+    { chave: 'csat', rotulo: 'CSAT (1 a 5)', obrigatorio: true, sinonimos: ['pergunta3 2 nota 1 a 5', 'pergunta3 2', 'pergunta 3 2', 'csat', 'nota', 'satisfacao', 'satisfação', 'avaliacao', 'avaliação', 'pesquisa'] },
   ],
   chat: [
     { chave: 'agente', rotulo: 'Agente', obrigatorio: true, sinonimos: ['agente', 'atribuido a', 'atribuído a', 'assignee', 'atendente', 'responsavel', 'responsável'] },
@@ -50,7 +54,12 @@ export const CAMPOS = {
 
 /** Pistas que identificam a fonte pelo cabeçalho do arquivo. */
 const PISTAS = {
-  '55pbx': ['fcr', 'csat', 'ligacao de origem', 'ligação de origem', 'ramal', 'fila', 'status da ligacao', 'status da ligação'],
+  '55pbx': [
+    'fcr', 'csat', 'ligacao de origem', 'ligação de origem', 'ramal', 'status da ligacao', 'status da ligação',
+    // Sinais do relatório real do 55PBX (24/09/2026) — específicos o
+    // bastante para nunca colidir com Zendesk ou a planilha de CX.
+    'tempo na ura', 'tempo de espera', 'quantidade de transbordos', 'motivo de desconexao', 'caminho u r a', 'pergunta3',
+  ],
   zendesk: ['ticket', 'assignee', 'atribuido a', 'atribuído a', 'satisfacao', 'satisfação', 'good', 'bad', 'solucionado em'],
   planilha_cx: ['empatia', 'cordialidade', 'profissionalismo', 'resolucao', 'resolução', 'escrita'],
 };
