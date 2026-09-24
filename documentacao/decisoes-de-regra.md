@@ -535,3 +535,41 @@ o turno da tratativa vem do **horário em que ela foi registrada** — o número
 não muda quando a escala é editada depois. A escala entra só para dizer
 **quantas pessoas estavam de pé em cada metade do dia**, o que permite ler
 volume por pessoa escalada.
+
+---
+
+## Apuração, Fase 1: o arquivo lido de verdade (24/09/2026)
+
+**O erro silencioso que foi embora.** O leitor de CSV da Apuração era um
+`split` por vírgula ou ponto e vírgula. Qualquer campo com vírgula dentro — uma
+observação, o motivo de um cliente — empurrava as colunas daquela linha para o
+lado, sem erro na tela: o número saía errado e ninguém via. Agora o arquivo é
+lido caractere a caractere (`src/lib/csv.js`), respeitando aspas, aspas duplas
+dentro do campo, quebra de linha dentro do campo, separador `,` ou `;` e o BOM
+que o Excel põe no começo.
+
+**O período passou a sair do arquivo.** Antes o gestor escolhia ano e mês, e a
+apuração era gravada como "01 a 31" daquele mês mesmo que o arquivo tivesse
+uma semana. Agora cada pessoa recebe o primeiro e o último dia que o arquivo
+trouxe dela.
+
+**O sistema lembra.** O de-para de colunas e o vínculo "nome no arquivo → pessoa
+do Portal" ficam guardados por fonte (`apuracao_mapeamento`, migration 24). Na
+semana seguinte o arquivo entra praticamente pronto — e o que o gestor corrigir
+uma vez ganha da adivinhação automática.
+
+**Nada entra sem conferência.** Antes de salvar, a tela mostra quantas linhas
+foram lidas, quantas entram, quantas foram descartadas e por quê, o período, os
+dias que já tinham sido importados (salvar de novo substitui) e quem ficou sem
+vínculo. Salvar com nome solto é bloqueado.
+
+**Dá para desfazer.** Cada importação virou um lote (`importacao_id`) com
+arquivo, autor e contagem de linhas. O histórico lista os lotes e desfaz o lote
+inteiro. As apurações antigas, sem lote, aparecem agrupadas por momento da
+apuração (foi assim que o assistente antigo gravou) e não podem ser desfeitas
+em massa, porque não há como saber o que veio junto com o quê.
+
+**O que continua igual:** as contas de cada canal (`calculosApuracao.jsx`),
+inclusive as três regras do telefone — avaliada exige FCR 1 ou 2, positiva exige
+CSAT 4 ou 5 com FCR 1, e transferência de fila conta como atendida mas não gera
+avaliação. Elas ainda precisam ser confirmadas e escritas no POP (Fase 3).

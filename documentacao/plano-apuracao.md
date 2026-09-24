@@ -83,7 +83,13 @@ fluxo de importação.
 **Princípio:** importar tem que ser chato e seguro; analisar tem que ser
 rápido e claro. São duas telas, não cinco passos.
 
-### Fase 1 — Importar sem erro (a base de tudo)
+### Fase 1 — Importar sem erro (a base de tudo) — **FEITA em 24/09/2026**
+
+> Tudo abaixo já está no código (migration 24 + tela nova). O único ponto que
+> continua provisório é o reconhecimento automático das colunas: ele funciona
+> por sinônimos comuns e será afinado quando os três arquivos de exemplo
+> chegarem. Nada disso trava o uso — o de-para é editável e fica guardado.
+
 1. **Leitor de CSV de verdade**: aspas, vírgula ou ponto e vírgula, acentuação
    e Excel brasileiro. Antes de qualquer conta.
 2. **O sistema reconhece a fonte** pelo cabeçalho do arquivo: "isto é um

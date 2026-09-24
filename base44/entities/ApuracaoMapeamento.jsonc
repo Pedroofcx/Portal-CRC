@@ -1,0 +1,28 @@
+{
+  "name": "ApuracaoMapeamento",
+  "type": "object",
+  "properties": {
+    "fonte": {
+      "type": "string",
+      "description": "55pbx | zendesk | planilha_cx"
+    },
+    "tipo_apuracao": {
+      "type": "string",
+      "description": "telefone | chat | cx"
+    },
+    "colunas": {
+      "type": "object",
+      "description": "De-para campo do sistema -> coluna do arquivo"
+    },
+    "agentes": {
+      "type": "object",
+      "description": "De-para nome no arquivo -> colaborador_id"
+    },
+    "atualizado_por_nome": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "fonte"
+  ]
+}

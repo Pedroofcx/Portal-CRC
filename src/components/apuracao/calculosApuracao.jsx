@@ -4,53 +4,11 @@
 // parsing robusto de datas, validação de consistência
 // ======================================================
 
-// Normaliza data para YYYY-MM-DD
-// Suporta: DD/MM/AAAA, AAAA-MM-DD, DD-MM-AAAA, DD/MM/AA, D/M/AA, D/M/AAAA
-export function normalizarData(dataStr) {
-  if (!dataStr) return null;
-  const s = String(dataStr).trim().replace(/["\r\n]/g, '');
-  if (!s) return null;
+// A leitura da data mora em src/lib/apuracao/datas.js — o importador novo e
+// estes cálculos precisam entender exatamente a mesma coisa.
+import { normalizarData } from '@/lib/apuracao/datas';
 
-  let d, m, a;
-
-  if (s.includes('/')) {
-    const partes = s.split('/');
-    if (partes.length === 3) {
-      [d, m, a] = partes.map(p => p.trim());
-      // Detectar se está no formato AAAA/MM/DD
-      if (parseInt(d) > 31) {
-        [a, m, d] = [d, m, a];
-      }
-      // Ano de 2 dígitos → 4 dígitos
-      if (a.length === 2) {
-        a = parseInt(a) >= 50 ? `19${a}` : `20${a}`;
-      }
-    }
-  } else if (s.includes('-')) {
-    const partes = s.split('T')[0].split('-');
-    if (partes.length === 3) {
-      // AAAA-MM-DD ou DD-MM-AAAA
-      if (partes[0].length === 4) {
-        [a, m, d] = partes;
-      } else {
-        [d, m, a] = partes;
-        if (a.length === 2) {
-          a = parseInt(a) >= 50 ? `19${a}` : `20${a}`;
-        }
-      }
-    }
-  } else {
-    return null;
-  }
-
-  const di = parseInt(d);
-  const mi = parseInt(m);
-  const ai = parseInt(a);
-  if (isNaN(di) || isNaN(mi) || isNaN(ai)) return null;
-  if (mi < 1 || mi > 12 || di < 1 || di > 31) return null;
-
-  return `${ai}-${String(mi).padStart(2, '0')}-${String(di).padStart(2, '0')}`;
-}
+export { normalizarData };
 
 // Segunda-feira da semana (seg→sex)
 function getInicioSemana(dataStr) {

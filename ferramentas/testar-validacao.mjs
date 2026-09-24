@@ -14,6 +14,9 @@ import { posicaoNoRanking } from '../src/lib/posicaoRanking.js';
 import { prazoDaTratativa, descreverPrazo, consumoDoPrazo } from '../src/lib/prazoSla.js';
 import { indicadoresDoCiclo } from '../src/lib/indicadoresCiclo.js';
 import { conferirLinha } from './conferir-cores.mjs';
+import { lerCsv, descobrirSeparador } from '../src/lib/csv.js';
+import { detectarFonte, sugerirMapeamento, camposFaltando, periodoDoArquivo, vincularAgentes, conferirImportacao, lotesDeImportacao } from '../src/lib/apuracao/importacao.js';
+import { normalizarData } from '../src/lib/apuracao/datas.js';
 import { turnoDoHorario } from '../src/lib/escalas.js';
 import { produtividadePorTurno } from '../src/lib/relatorios/turnos.js';
 import { diasCorridos, saldoDoCiclo, situacaoDoCiclo, cicloParaAData, deFeriasEm, lotacaoNoPeriodo, conferirPedido, fragmentoDoPedido, proximasFerias } from '../src/lib/ferias.js';
@@ -969,6 +972,122 @@ console.log('\n== produtividade por turno ==');
   checa('dia cancelado nao conta escalado', String(produtividadePorTurno({
     escalas: [{ turnos: [{ ...escalas[0].turnos[0], cancelado: true }] }], tratativas, colaboradores, periodo,
   }).manha.escalados), '0');
+}
+
+console.log('\n== leitor de csv ==');
+{
+  const NL = String.fromCharCode(10);
+  const csv = [
+    'Agente;Data;Observacao;CSAT',
+    'Ana;01/09/2026;"Cliente reclamou do prazo, mas entendeu";5',
+    'Bia;02/09/2026;sem virgula aqui;4',
+    '"Caio ""Junior""";03/09/2026;"quebra' + NL + 'de linha dentro do campo";3',
+  ].join(NL);
+  const r = lerCsv(csv);
+  checa('descobre o ponto e virgula do Excel brasileiro', descobrirSeparador(csv), ';');
+  checa('le as quatro colunas', r.colunas.join(','), 'Agente,Data,Observacao,CSAT');
+  checa('tres linhas de dados', String(r.linhas.length), '3');
+  checa('virgula dentro de aspas nao quebra a coluna', r.linhas[0].Observacao, 'Cliente reclamou do prazo, mas entendeu');
+  checa('csat da primeira linha continua no lugar', r.linhas[0].CSAT, '5');
+  checa('aspas duplas viram uma aspa', r.linhas[2].Agente, 'Caio "Junior"');
+  checa('quebra de linha dentro do campo nao vira linha nova', r.linhas[2].Observacao, 'de linha dentro do campo');
+
+  const comVirgula = lerCsv('Agente,Data' + NL + 'Ana,01/09/2026');
+  checa('tambem le arquivo com virgula', comVirgula.colunas.length + ':' + comVirgula.linhas[0].Agente, '2:Ana');
+  checa('arquivo vazio avisa', lerCsv('').avisos[0], 'vazio');
+  const bom = String.fromCharCode(65279) + 'Agente,Data' + NL + 'Ana,01/09/2026';
+  checa('BOM do Excel nao suja o nome da coluna', lerCsv(bom).colunas[0], 'Agente');
+  const torto = lerCsv(['a,b,c', '1,2', '1,2,3'].join(NL));
+  checa('linha com colunas de menos e avisada', torto.avisos[0], '1 linha(s) com um n');
+}
+
+console.log('\n== importacao da apuracao ==');
+{
+  checa('data brasileira', normalizarData('01/09/2026'), '2026-09-01');
+  checa('data com hora do zendesk', normalizarData('2026-09-01T14:30:00Z'), '2026-09-01');
+  checa('data com ano de dois digitos', normalizarData('1/9/26'), '2026-09-01');
+  checa('texto que nao e data', String(normalizarData('ontem')), 'null');
+
+  const colunas55 = ['Agente', 'Data', 'Ligação de Origem', 'Status da Ligação', 'FCR', 'CSAT'];
+  const colunasZd = ['Atribuído a', 'ID do Ticket', 'Criado em', 'Satisfação Boa', 'Satisfação Ruim'];
+  const colunasCx = ['Colaborador', 'Data', 'Empatia', 'Cordialidade', 'Comunicação', 'Escrita', 'Profissionalismo', 'Resolução', 'Observação'];
+  checa('reconhece o 55pbx', detectarFonte(colunas55), '55pbx');
+  checa('reconhece o zendesk', detectarFonte(colunasZd), 'zendesk');
+  checa('reconhece a planilha de cx', detectarFonte(colunasCx), 'planilha_cx');
+  checa('arquivo estranho nao e chutado', String(detectarFonte(['coluna 1', 'coluna 2'])), 'null');
+
+  const mapa = sugerirMapeamento(colunas55, 'telefone');
+  checa('mapeia agente e data sozinho', mapa.agente + '|' + mapa.data, 'Agente|Data');
+  checa('mapeia origem e status', mapa.origem + '|' + mapa.status, 'Ligação de Origem|Status da Ligação');
+  checa('nada faltando quando o mapa esta completo', String(camposFaltando('telefone', mapa).length), '0');
+  checa('acusa campo obrigatorio faltando', camposFaltando('telefone', { agente: 'Agente' })[0], 'Data');
+
+  const lembrado = sugerirMapeamento(['Quem atendeu', 'Dia', 'Origem', 'Status', 'FCR', 'CSAT'], 'telefone', { agente: 'Quem atendeu', data: 'Dia' });
+  checa('o que o gestor corrigiu antes ganha da adivinhacao', lembrado.agente + '|' + lembrado.data, 'Quem atendeu|Dia');
+
+  const linhas = [
+    { Agente: 'Ana Flavia G. Amarante', Data: '16/09/2026' },
+    { Agente: 'Ana Flavia G. Amarante', Data: '17/09/2026' },
+    { Agente: 'Fulano Externo', Data: '18/09/2026' },
+    { Agente: '', Data: '18/09/2026' },
+    { Agente: 'Ana Flavia G. Amarante', Data: 'ontem' },
+  ];
+  const per = periodoDoArquivo(linhas, 'Data');
+  checa('periodo sai do arquivo', per.inicio + ' a ' + per.fim, '2026-09-16 a 2026-09-18');
+  checa('e sabe quantos dias tem', String(per.dias.length), '3');
+
+  const colaboradores = [
+    { id: 'c1', nome_completo: 'Ana Flávia Guelber Amarante', ativo: true },
+    { id: 'c2', nome_completo: 'Bárbara Emanuella dos Santos', ativo: true },
+    { id: 'c3', nome_completo: 'Quem Saiu', ativo: false },
+  ];
+  const vinc = vincularAgentes(['Ana Flávia Guelber Amarante', 'Barbara E. dos Santos', 'Fulano Externo', 'Quem Saiu'], colaboradores);
+  checa('nome igual liga sozinho', vinc[0].colaborador_id + '/' + vinc[0].origem, 'c1/automatico');
+  checa('primeiro e ultimo nome tambem ligam', vinc[1].colaborador_id + '/' + vinc[1].origem, 'c2/automatico');
+  checa('desconhecido fica sem vinculo', vinc[2].origem, 'sem_vinculo');
+  checa('pessoa inativa nao e ligada', vinc[3].origem, 'sem_vinculo');
+  const comLembrete = vincularAgentes(['Fulano Externo'], colaboradores, { 'Fulano Externo': 'c2' });
+  checa('vinculo lembrado vale', comLembrete[0].colaborador_id + '/' + comLembrete[0].origem, 'c2/lembrado');
+
+  const existentes = [{
+    tipo_apuracao: 'telefone', colaborador_id: 'c1',
+    dados_por_data: [{ data: '2026-09-16' }, { data: '2026-09-15' }],
+  }];
+  const mapeamento = { agente: 'Agente', data: 'Data', origem: 'o', status: 's', fcr: 'f', csat: 'c' };
+  const conf = conferirImportacao({
+    tipo: 'telefone', linhas, colaboradores, apuracoesExistentes: existentes, mapeamento,
+    vinculos: { 'Ana Flavia G. Amarante': 'c1' },
+  });
+  checa('conta o que foi lido', String(conf.linhasLidas), '5');
+  checa('conta o que serve', String(conf.linhasValidas), '3');
+  checa('diz por que descartou', conf.descartadas.map((d) => d.quantidade + ' ' + d.motivo).join(' | '), '1 sem o nome do agente | 1 sem data');
+  checa('avisa quem ficou sem pessoa do Portal', conf.avisos.find((a) => a.includes('sem pessoa')) || '', 'Fulano Externo');
+  checa('avisa dia ja importado', conf.avisos.find((a) => a.includes('substitui')) || '', '1 dia(s) já tinham sido importados');
+  checa('nao libera salvar com agente solto', String(conf.pronta), 'false');
+
+  const conf2 = conferirImportacao({
+    tipo: 'telefone', linhas: linhas.slice(0, 2), colaboradores, apuracoesExistentes: [], mapeamento,
+    vinculos: { 'Ana Flavia G. Amarante': 'c1' },
+  });
+  checa('libera salvar quando esta tudo ligado', String(conf2.pronta), 'true');
+  checa('pede o campo que falta antes de conferir', conferirImportacao({ tipo: 'telefone', linhas, mapeamento: { agente: 'Agente' } }).faltando[0], 'Data');
+
+  const lotes = lotesDeImportacao([
+    { id: 'a1', importacao_id: 'imp1', tipo_apuracao: 'telefone', arquivo_nome: 'setembro.csv', data_apuracao: '2026-09-20T10:00:00Z', periodo_inicio: '2026-09-16', periodo_fim: '2026-09-18', dados_por_data: [{ data: '2026-09-16' }] },
+    { id: 'a2', importacao_id: 'imp1', tipo_apuracao: 'telefone', arquivo_nome: 'setembro.csv', data_apuracao: '2026-09-20T10:00:00Z', periodo_inicio: '2026-09-16', periodo_fim: '2026-09-20', dados_por_data: [{ data: '2026-09-17' }] },
+    { id: 'a3', tipo_apuracao: 'chat', data_apuracao: '2026-09-21T10:00:00Z', dados_por_data: [] },
+  ]);
+  checa('duas importacoes no historico', String(lotes.length), '2');
+  checa('a mais recente vem primeiro', lotes[0].tipo, 'chat');
+  checa('o lote junta as pessoas e os dias', lotes[1].pessoas + '/' + lotes[1].dias + '/' + lotes[1].fim, '2/2/2026-09-20');
+  checa('apuracao antiga aparece como avulsa', String(lotes[0].avulsa), 'true');
+  const antigas = lotesDeImportacao([
+    { id: 'v1', tipo_apuracao: 'chat', data_apuracao: '2026-05-25T10:00:10Z', periodo_inicio: '2026-05-01', periodo_fim: '2026-05-31', dados_por_data: [{ data: '2026-05-04' }] },
+    { id: 'v2', tipo_apuracao: 'chat', data_apuracao: '2026-05-25T10:00:12Z', periodo_inicio: '2026-05-01', periodo_fim: '2026-05-31', dados_por_data: [{ data: '2026-05-05' }] },
+    { id: 'v3', tipo_apuracao: 'telefone', data_apuracao: '2026-05-25T10:00:12Z', periodo_inicio: '2026-05-01', periodo_fim: '2026-05-31', dados_por_data: [{ data: '2026-05-05' }] },
+  ]);
+  checa('importacoes antigas do mesmo momento viram um lote so', String(antigas.length), '2');
+  checa('e o lote antigo soma as pessoas', String(antigas.find((l) => l.tipo === 'chat').pessoas), '2');
 }
 
 console.log('\n== conferencia de cores (o verificador pega o que deve) ==');

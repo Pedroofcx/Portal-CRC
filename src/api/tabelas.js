@@ -6,6 +6,7 @@ export const TABELAS = {
   AgenteN2: 'agente_n2',
   AnotacaoPessoal: 'anotacao_pessoal',
   Apuracao: 'apuracao',
+  ApuracaoMapeamento: 'apuracao_mapeamento',
   Aviso: 'aviso',
   AvisoLeitura: 'aviso_leitura',
   CategoriaTratativa: 'categoria_tratativa',
