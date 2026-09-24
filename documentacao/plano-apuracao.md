@@ -158,7 +158,11 @@ de agente por fonte — é ela que faz o sistema "lembrar" do mapeamento.
    reais, o reconhecimento automático vira chute.
 2. **A cadência de cada uma**: telefone e chat são semanais? O CX é quinzenal?
    Qual o dia de corte?
-3. **As três regras do telefone** acima: confirmo como estão?
+3. ~~**As três regras do telefone** acima: confirmo como estão?~~
+   **Confirmado em 24/09/2026:** sim, mantém as três. Já é o que o código
+   faz hoje (`calcularTelefone`, sem mudança nenhuma): avaliada exige FCR 1
+   ou 2; positiva exige CSAT 4 ou 5 **e** FCR 1; transferência de fila conta
+   como atendida (entra na performance) mas nunca gera avaliação.
 4. ~~**Chat**: o CSAT é bons ÷ (bons + ruins)?~~ **Respondido em 24/09/2026:**
    sim, e "ruim=1" sempre conta como negativo na premiação — mesmo quando o
    ticket é nota 3 (neutra pelo critério do Pedro, negativa pelo da

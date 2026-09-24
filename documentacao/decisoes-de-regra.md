@@ -607,3 +607,21 @@ confirmado) e **3 · neutro**. Marcar um ticket:
 
 Ticket nunca classificado continua contando como negativo em tudo — inclusive
 no comparativo — exatamente como "ruim" sempre significou.
+
+---
+
+## Regras do telefone (55PBX) confirmadas, sem mudança (24/09/2026)
+
+Pedro confirmou as três regras que já estavam em `calcularTelefone` desde a
+Fase 1, sem alteração de código:
+
+1. **Avaliada** exige FCR 1 (resolvido) ou 2 (não resolvido) — sem FCR
+   reconhecível, a ligação conta no total e na performance, mas não entra
+   no CSAT.
+2. **Positiva** exige CSAT 4 ou 5 **e** FCR igual a 1. FCR 2 nunca gera
+   positiva, mesmo com nota alta.
+3. **Transferência de fila** conta como atendida (entra na performance),
+   mas nunca gera avaliação — não é FCR 1 nem 2, some do CSAT.
+
+Nenhuma dessas regras mudou. Ficam registradas aqui porque, diferente do
+chat, elas dependiam de confirmação e agora estão fechadas.
