@@ -226,3 +226,96 @@ export function avisosDaOperacao({ fila, es, tempos = [], produtividade: prod = 
   }
   return avisos;
 }
+
+/**
+ * O time está sobrecarregado? Junta as evidências e dá um veredito com os
+ * critérios à mostra (pedido de Pedro em 22/09/2026: "o mais importante é
+ * provar que o time está sobrecarregado ou não").
+ *
+ * Sinais (cada um é um fato, com número):
+ *   1. entra mais do que sai no período;
+ *   2. mais da metade da fila já venceu;
+ *   3. a fila por pessoa passa de 8 tratativas abertas;
+ *   4. a fila levaria mais de 15 dias para zerar no ritmo atual;
+ *   5. a fila acumulada cresceu do começo ao fim do período.
+ * 3 ou mais sinais: sobrecarregado. 1 ou 2: no limite. Nenhum: dá conta.
+ */
+export function diagnosticoDeCarga({ tratativas = [], apuracoes = [], colaboradores = [], periodo = {}, agora = new Date() }) {
+  const fila = filaDeHoje(tratativas, agora);
+  const es = entradaESaida(tratativas, periodo, agora);
+  const prod = produtividade(tratativas, periodo, agora);
+  const pontos = serie(tratativas, periodo, 'semana');
+
+  const agentes = colaboradores.filter((c) => c.papel === 'agente' && c.ativo !== false);
+  const trabalhando = prod.filter((p) => p.encerradas > 0).length || agentes.length || 1;
+  const filaPorAgente = fila.total / trabalhando;
+  const crescimentoDaFila = pontos.length ? pontos[pontos.length - 1].acumulado : 0;
+
+  // Volume de atendimento fora das tratativas (telefone e chat), das apurações.
+  const dias = diasDoPeriodo(periodo, agora) || 1;
+  let ligacoes = 0; let chats = 0;
+  for (const a of apuracoes) {
+    for (const d of a.dados_por_data ?? []) {
+      const dia = diaSP(d?.data);
+      if (!dia || !noPeriodo(dia, periodo)) continue;
+      ligacoes += Number(d.telefone?.total_atendidas) || 0;
+      chats += Number(d.chat?.total_chats) || 0;
+    }
+  }
+
+  const sinais = [
+    {
+      chave: 'entrada',
+      grave: es.saldo > 0,
+      texto: es.saldo > 0
+        ? `Entra mais do que sai: ${es.entraram} entraram e ${es.sairam} saíram no período.`
+        : `Sai mais do que entra: ${es.sairam} encerradas contra ${es.entraram} novas.`,
+    },
+    {
+      chave: 'vencidas',
+      grave: fila.total > 0 && fila.vencidas / fila.total > 0.5,
+      texto: fila.total
+        ? `${fila.vencidas} das ${fila.total} tratativas abertas já venceram (${Math.round((fila.vencidas / fila.total) * 100)}%).`
+        : 'Nenhuma tratativa aberta.',
+    },
+    {
+      chave: 'por_agente',
+      grave: filaPorAgente > 8,
+      texto: `Cada pessoa está com ${filaPorAgente.toFixed(1)} tratativas abertas, em média (${trabalhando} pessoas na fila).`,
+    },
+    {
+      chave: 'zerar',
+      grave: es.diasParaZerar !== null && es.diasParaZerar > 15,
+      texto: es.diasParaZerar === null
+        ? 'Nada foi encerrado no período: não dá para medir o ritmo.'
+        : `No ritmo atual, a fila levaria ${Math.ceil(es.diasParaZerar)} dias para zerar.`,
+    },
+    {
+      chave: 'tendencia',
+      grave: crescimentoDaFila > 0,
+      texto: crescimentoDaFila > 0
+        ? `A fila cresceu ${crescimentoDaFila} tratativas ao longo do período.`
+        : `A fila encolheu ${Math.abs(crescimentoDaFila)} tratativas ao longo do período.`,
+    },
+  ];
+
+  const graves = sinais.filter((s) => s.grave).length;
+  const veredito = graves >= 3 ? 'sobrecarregado' : graves >= 1 ? 'no_limite' : 'da_conta';
+
+  return {
+    veredito,
+    graves,
+    sinais,
+    numeros: {
+      entradaPorDia: es.entradaPorDia,
+      saidaPorDia: es.saidaPorDia,
+      saidaPorAgenteDia: es.saidaPorDia / trabalhando,
+      filaPorAgente,
+      trabalhando,
+      ligacoesPorDia: ligacoes / dias,
+      chatsPorDia: chats / dias,
+      atendimentosPorAgenteDia: (ligacoes + chats) / dias / trabalhando,
+      crescimentoDaFila,
+    },
+  };
+}

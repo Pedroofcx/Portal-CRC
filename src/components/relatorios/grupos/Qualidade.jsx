@@ -6,6 +6,9 @@ import { createPageUrl } from '@/utils';
 import { Cartao, Linha } from '@/components/ui/Cartao';
 import TabelaResumida from '@/components/ui/TabelaResumida';
 import { resumoQualidade } from '@/lib/relatorios/qualidade';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
+import Grafico from '@/components/relatorios/hub/Grafico';
+import { SERIE_GRAFICO } from '@/lib/cores-grafico';
 import { ComoCalculamos, Pergunta, periodoPorExtenso } from '@/components/relatorios/hub/Pecas';
 
 /**
@@ -59,6 +62,17 @@ export default function Qualidade({ periodo, colaboradores }) {
             </Cartao>
 
             <Cartao titulo="Mês a mês" className="xl:col-span-3">
+              <Grafico altura={220} temDados={q.meses.length > 1}>
+                <LineChart data={q.meses.map((m) => ({ ...m, rotulo: mesCurto(m.mes) }))} margin={{ left: -18, right: 8 }}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                  <XAxis dataKey="rotulo" tick={{ fontSize: 11 }} />
+                  <YAxis domain={[0, 100]} tick={{ fontSize: 11 }} unit="%" />
+                  <Tooltip formatter={(v) => (v === null ? '—' : `${Number(v).toFixed(1)}%`)} />
+                  <Legend />
+                  <Line type="monotone" dataKey="csat" name="CSAT" stroke={SERIE_GRAFICO[0]} strokeWidth={2} connectNulls />
+                  <Line type="monotone" dataKey="performance" name="Performance" stroke={SERIE_GRAFICO[1]} strokeWidth={2} connectNulls />
+                </LineChart>
+              </Grafico>
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-border text-xs text-muted-foreground">

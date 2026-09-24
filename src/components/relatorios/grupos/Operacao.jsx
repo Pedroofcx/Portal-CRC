@@ -8,7 +8,7 @@ import { Cartao, Linha } from '@/components/ui/Cartao';
 import ListaResumida from '@/components/ui/ListaResumida';
 import TabelaResumida from '@/components/ui/TabelaResumida';
 import { descreverPrazo } from '@/lib/prazoSla';
-import { filaDeHoje, entradaESaida, serie, tempoPorCanal, produtividade, idadeDaFila, avisosDaOperacao } from '@/lib/relatorios/operacao';
+import { filaDeHoje, entradaESaida, serie, tempoPorCanal, produtividade, idadeDaFila, avisosDaOperacao, diagnosticoDeCarga } from '@/lib/relatorios/operacao';
 import { SERIE_GRAFICO, CORES_GRAFICO } from '@/lib/cores-grafico';
 import { ComoCalculamos, Pergunta, periodoPorExtenso } from '@/components/relatorios/hub/Pecas';
 
@@ -26,7 +26,13 @@ const GRANULARIDADES = [{ chave: 'dia', rotulo: 'Por dia' }, { chave: 'semana', 
 const MESES = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
 const rotuloDoPonto = (chave, g) => (g === 'mes' ? `${MESES[Number(chave.slice(5, 7)) - 1]}/${chave.slice(2, 4)}` : `${chave.slice(8, 10)}/${chave.slice(5, 7)}`);
 
-export default function Operacao({ tratativas, periodo }) {
+const VEREDITO = {
+  sobrecarregado: { titulo: 'Sim, o time está sobrecarregado', tom: 'text-critical' },
+  no_limite: { titulo: 'O time está no limite', tom: 'text-warning' },
+  da_conta: { titulo: 'Não: o time está dando conta', tom: 'text-success' },
+};
+
+export default function Operacao({ tratativas, periodo, apuracoes = [], colaboradores = [] }) {
   const agora = useMemo(() => new Date(), []);
   const [granularidade, setGranularidade] = useState('semana');
 
@@ -39,6 +45,10 @@ export default function Operacao({ tratativas, periodo }) {
   const tempos = useMemo(() => tempoPorCanal(tratativas, periodo), [tratativas, periodo]);
   const prod = useMemo(() => produtividade(tratativas, periodo, agora), [tratativas, periodo, agora]);
   const idade = useMemo(() => idadeDaFila(tratativas, agora), [tratativas, agora]);
+  const carga = useMemo(
+    () => diagnosticoDeCarga({ tratativas, apuracoes, colaboradores, periodo, agora }),
+    [tratativas, apuracoes, colaboradores, periodo, agora],
+  );
   const avisos = useMemo(() => avisosDaOperacao({ fila, es, tempos: tempos.map((t) => ({ ...t, tipo: tipoTratativaLabels[t.tipo] ?? t.tipo })), produtividade: prod }), [fila, es, tempos, prod]);
 
   const frase = es.saldo > 0
@@ -51,6 +61,35 @@ export default function Operacao({ tratativas, periodo }) {
         pergunta="Como está a fila hoje?"
         explicacao={`A fila deste momento, o ritmo de entrada e saída ${periodoPorExtenso(periodo)}, quem está encerrando o quê e quanto tempo cada canal leva.`}
       />
+
+      <Cartao titulo="O time está sobrecarregado?">
+        <p className={`text-2xl font-bold tracking-tight ${VEREDITO[carga.veredito].tom}`}>{VEREDITO[carga.veredito].titulo}</p>
+        <p className="mt-1 text-sm text-muted-foreground">
+          {carga.graves === 0 ? 'Nenhum dos 5 sinais de sobrecarga apareceu no período.' : `${carga.graves} de 5 sinais de sobrecarga apareceram no período.`}
+        </p>
+        <div className="mt-4 divide-y divide-border border-t border-border">
+          {carga.sinais.map((s) => (
+            <div key={s.chave} className="flex items-start gap-3 py-2 text-sm">
+              <span className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${s.grave ? 'bg-critical' : 'bg-success'}`} aria-hidden="true" />
+              <span className="min-w-0 text-foreground">{s.texto}</span>
+            </div>
+          ))}
+        </div>
+        <div className="mt-5 grid grid-cols-2 gap-4 border-t border-border pt-4 sm:grid-cols-4">
+          <div><p className="text-xs text-muted-foreground">Chegam por dia</p><p className="text-lg font-semibold tabular-nums">{um(carga.numeros.entradaPorDia)}</p></div>
+          <div><p className="text-xs text-muted-foreground">Encerram por dia</p><p className="text-lg font-semibold tabular-nums">{um(carga.numeros.saidaPorDia)}</p></div>
+          <div><p className="text-xs text-muted-foreground">Por pessoa, por dia</p><p className="text-lg font-semibold tabular-nums">{um(carga.numeros.saidaPorAgenteDia)}</p></div>
+          <div>
+            <p className="text-xs text-muted-foreground">Atendimentos por pessoa/dia</p>
+            <p className="text-lg font-semibold tabular-nums">{carga.numeros.atendimentosPorAgenteDia ? um(carga.numeros.atendimentosPorAgenteDia) : '—'}</p>
+          </div>
+        </div>
+        <ComoCalculamos titulo="Como chegamos nesse veredito">
+          <p>São cinco sinais, cada um com número: entra mais do que sai; mais da metade da fila vencida; mais de 8 tratativas abertas por pessoa; fila levaria mais de 15 dias para zerar; e a fila cresceu no período.</p>
+          <p><strong>Três ou mais sinais</strong> = sobrecarregado. <strong>Um ou dois</strong> = no limite. <strong>Nenhum</strong> = dando conta.</p>
+          <p><strong>Atendimentos por pessoa/dia</strong> junta as ligações atendidas e os chats das apurações importadas — é o trabalho que não vira tratativa. Sem apuração no período, aparece “—”.</p>
+        </ComoCalculamos>
+      </Cartao>
 
       {avisos.length > 0 && (
         <Cartao titulo="O que merece atenção">

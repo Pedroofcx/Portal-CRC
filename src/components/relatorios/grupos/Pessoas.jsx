@@ -18,6 +18,9 @@ import { pessoasNoPeriodo } from '@/lib/relatorios/pessoas';
 import { pontuacaoDoCiclo } from '@/lib/relatorios/pontuacao';
 import { extratoDoAgente } from '@/lib/extratoPontos';
 import { urlDaPessoa } from '@/components/dashboard/gestor/PainelCicloGestor';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
+import Grafico from '@/components/relatorios/hub/Grafico';
+import { SERIE_GRAFICO } from '@/lib/cores-grafico';
 import { ComoCalculamos, Pergunta, periodoPorExtenso, baixarCSV } from '@/components/relatorios/hub/Pecas';
 
 /**
@@ -174,9 +177,26 @@ export default function Pessoas({ tratativas, periodo, ciclos, colaboradores }) 
               </ComoCalculamos>
             </Cartao>
 
+            <Cartao titulo="De onde vêm os pontos de cada pessoa" className="xl:col-span-3">
+              <Grafico altura={Math.max(180, pontuacao.pessoas.filter((p) => p.total > 0).length * 46)} temDados={pontuacao.pessoas.some((p) => p.total > 0)}>
+                <BarChart layout="vertical" data={pontuacao.pessoas.filter((p) => p.total > 0).map((p) => ({ ...p, curto: p.nome.split(' ')[0] }))} margin={{ left: 8, right: 16 }}>
+                  <CartesianGrid strokeDasharray="3 3" horizontal={false} />
+                  <XAxis type="number" tick={{ fontSize: 11 }} />
+                  <YAxis type="category" dataKey="curto" width={80} tick={{ fontSize: 11 }} />
+                  <Tooltip formatter={(v) => pts(v)} />
+                  <Legend />
+                  <Bar dataKey="pontosEncerramento" name="Tratativas" stackId="p" fill={SERIE_GRAFICO[0]} />
+                  <Bar dataKey="pontosAbertura" name="Aberturas" stackId="p" fill={SERIE_GRAFICO[1]} />
+                  <Bar dataKey="pontosIndicadores" name="Indicadores" stackId="p" fill={SERIE_GRAFICO[2]} />
+                  <Bar dataKey="pontosBonus" name="Bônus" stackId="p" fill={SERIE_GRAFICO[3]} />
+                </BarChart>
+              </Grafico>
+            </Cartao>
+          </div>
+
+          <div className="grid items-start gap-6">
             <Cartao
               titulo="Pontuação de cada pessoa"
-              className="xl:col-span-3"
               extra={<Button variant="outline" size="sm" onClick={exportarPontuacao}><Download className="mr-1.5 h-4 w-4" aria-hidden="true" /> Exportar</Button>}
             >
               <TabelaResumida

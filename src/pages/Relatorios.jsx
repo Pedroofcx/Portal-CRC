@@ -39,6 +39,11 @@ export default function Relatorios() {
   const { data: user } = useQuery({ queryKey: ['currentUser'], queryFn: () => db.auth.me() });
   const { data: colaboradores = [] } = useQuery({ queryKey: ['colaboradores', "list()"], queryFn: () => db.entities.Colaborador.list() });
   const { data: ciclos = [] } = useQuery({ queryKey: ['ciclos-trimestrais', "list()"], queryFn: () => db.entities.CicloTrimestral.list() });
+  const { data: apuracoes = [] } = useQuery({
+    queryKey: ['apuracoes-equipe'],
+    queryFn: () => db.entities.Apuracao.list('-periodo_fim'),
+    staleTime: 120000,
+  });
   const { data: tratativas = [], isLoading } = useQuery({
     queryKey: ['tratativas', "list('-created_date')"],
     queryFn: () => db.entities.Tratativa.list('-created_date'),
@@ -59,7 +64,7 @@ export default function Relatorios() {
   }
 
   const corpo = {
-    operacao: <Operacao tratativas={tratativas} periodo={periodo} />,
+    operacao: <Operacao tratativas={tratativas} periodo={periodo} apuracoes={apuracoes} colaboradores={colaboradores} />,
     canais: <Canais tratativas={tratativas} periodo={periodo} />,
     qualidade: <Qualidade periodo={periodo} colaboradores={colaboradores} />,
     financeiro: <Financeiro tratativas={tratativas} periodo={periodo} ehGestor={ehGestor} />,

@@ -6,6 +6,9 @@ import { Cartao } from '@/components/ui/Cartao';
 import ListaResumida from '@/components/ui/ListaResumida';
 import TabelaResumida from '@/components/ui/TabelaResumida';
 import { resumoJornada } from '@/lib/relatorios/jornada';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
+import Grafico from '@/components/relatorios/hub/Grafico';
+import { SERIE_GRAFICO } from '@/lib/cores-grafico';
 import { ComoCalculamos, Pergunta, periodoPorExtenso, brl } from '@/components/relatorios/hub/Pecas';
 
 /**
@@ -26,6 +29,15 @@ export default function Jornada({ tratativas, periodo, ehGestor }) {
       />
 
       <Cartao titulo="Etapas da jornada, da mais cara para a mais barata" extra={<span className="text-xs text-muted-foreground">{j.encerradas} encerradas · {custo(j.custoTotal)}</span>}>
+        <Grafico altura={Math.max(160, Math.min(320, j.etapas.length * 34))} temDados={j.etapas.length > 0}>
+          <BarChart layout="vertical" data={j.etapas.slice(0, 8)} margin={{ left: 8, right: 16 }}>
+            <CartesianGrid strokeDasharray="3 3" horizontal={false} />
+            <XAxis type="number" tick={{ fontSize: 11 }} />
+            <YAxis type="category" dataKey="nome" width={150} tick={{ fontSize: 11 }} />
+            <Tooltip formatter={(v, n) => (n === 'Casos' ? v : brl(v))} />
+            <Bar dataKey="casos" name="Casos" fill={SERIE_GRAFICO[0]} />
+          </BarChart>
+        </Grafico>
         {j.etapas.length === 0 ? (
           <p className="text-sm text-muted-foreground">Nenhuma tratativa encerrada no período.</p>
         ) : (

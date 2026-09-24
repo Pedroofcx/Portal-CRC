@@ -27,7 +27,7 @@ import { extratoDoAgente } from '../src/lib/extratoPontos.js';
 import { calcularDadosConsolidados } from '../src/lib/hanseiDados.js';
 import { desfechoDaContestacao, resumoFinanceiro } from '../src/lib/relatorios/financeiro.js';
 import { pessoasNoPeriodo } from '../src/lib/relatorios/pessoas.js';
-import { filaDeHoje, entradaESaida, tempoPorCanal } from '../src/lib/relatorios/operacao.js';
+import { filaDeHoje, entradaESaida, tempoPorCanal, diagnosticoDeCarga } from '../src/lib/relatorios/operacao.js';
 import { resumoDoCanal } from '../src/lib/relatorios/canais.js';
 import { resumoQualidade } from '../src/lib/relatorios/qualidade.js';
 import { resumoJornada } from '../src/lib/relatorios/jornada.js';
@@ -639,6 +639,24 @@ console.log('\n== relatorio da jornada ==');
   ], { inicio: '2026-08-01', fim: '2026-08-31' });
   checa('etapa mais cara primeiro, custo oficial + devolvido', `${j.etapas[0].nome}:${j.etapas[0].custo}`, 'Uso:160');
   checa('cliente recorrente pelo id (com espaco)', `${j.recorrentes.length}:${j.recorrentes[0]?.qtd}`, '1:2');
+}
+
+console.log('\n== o time esta sobrecarregado? ==');
+{
+  const agora = new Date('2026-09-10T12:00:00Z');
+  const periodo = { inicio: '2026-09-01', fim: '2026-09-30' };
+  const colaboradores = [{ id: 'a', papel: 'agente', nome_completo: 'Ana' }];
+  const aberta = (id, horasAtras) => ({ id, status: 'em_andamento', sla_atribuido: 24, agente_responsavel_id: 'a', agente_responsavel_nome: 'Ana', data_registro: new Date(agora - horasAtras * 36e5).toISOString() });
+  const enc = (id, dia) => ({ id, status: 'encerrada', agente_responsavel_id: 'a', agente_responsavel_nome: 'Ana', data_registro: `${dia}T12:00:00Z`, data_encerramento: `${dia}T15:00:00Z` });
+  // fila grande, tudo vencido, entra mais do que sai
+  const sobrecarga = Array.from({ length: 12 }, (_, i) => aberta(`x${i}`, 100)).concat([enc('e1', '2026-09-02')]);
+  const d1 = diagnosticoDeCarga({ tratativas: sobrecarga, colaboradores, periodo, agora });
+  checa('sobrecarregado com 3+ sinais', `${d1.veredito}/${d1.graves >= 3}`, 'sobrecarregado/true');
+  checa('diz a fila por pessoa', d1.sinais.find((s) => s.chave === 'por_agente').texto, '12.0 tratativas abertas');
+  // nada na fila e tudo encerrado no período
+  const tranquilo = [enc('e1', '2026-09-02'), enc('e2', '2026-09-03')];
+  const d2 = diagnosticoDeCarga({ tratativas: tranquilo, colaboradores, periodo, agora });
+  checa('da conta quando sai mais do que entra', d2.veredito, 'da_conta');
 }
 
 console.log('\n== conferencia de cores (o verificador pega o que deve) ==');

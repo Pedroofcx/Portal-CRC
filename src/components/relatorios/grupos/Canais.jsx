@@ -7,6 +7,9 @@ import { formatDateSP, tipoTratativaLabels, statusLabels } from '@/components/ut
 import { Cartao, Linha } from '@/components/ui/Cartao';
 import TabelaResumida from '@/components/ui/TabelaResumida';
 import { resumoDoCanal } from '@/lib/relatorios/canais';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
+import Grafico from '@/components/relatorios/hub/Grafico';
+import { SERIE_GRAFICO } from '@/lib/cores-grafico';
 import { ComoCalculamos, Pergunta, periodoPorExtenso, brl, baixarCSV } from '@/components/relatorios/hub/Pecas';
 
 /**
@@ -88,6 +91,19 @@ export default function Canais({ tratativas, periodo }) {
                 <Linha rotulo="Soluções replicáveis" detalhe={`${r.replicaveis.aprovadas} aprovadas · ${r.replicaveis.pendentes} esperando você · ${r.replicaveis.contestadas} contestadas`} valor={r.replicaveis.marcadas} />
               </>
             )}
+            {aba === 'reclame_aqui' && r.avaliadas > 0 && (
+              <div className="py-3">
+                <Grafico altura={160}>
+                  <BarChart data={[{ faixa: '0 a 6', qtd: r.notas.ate6 }, { faixa: '7 e 8', qtd: r.notas.de7a8 }, { faixa: '9', qtd: r.notas.nove }, { faixa: '10', qtd: r.notas.dez }]} margin={{ left: -24, right: 4 }}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                    <XAxis dataKey="faixa" tick={{ fontSize: 11 }} />
+                    <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
+                    <Tooltip />
+                    <Bar dataKey="qtd" name="Avaliações" fill={SERIE_GRAFICO[0]} />
+                  </BarChart>
+                </Grafico>
+              </div>
+            )}
             {aba === 'reclame_aqui' && (
               <>
                 <Linha rotulo="Nota média do consumidor" detalhe={`${r.avaliadas} avaliadas${r.semNota ? ` · ${r.semNota} sem nota` : ''}`} valor={nota(r.notaMedia)} />
@@ -128,6 +144,17 @@ export default function Canais({ tratativas, periodo }) {
 
         <div className="space-y-6">
           <Cartao titulo="Mês a mês">
+            <Grafico altura={180} temDados={r.meses.length > 1}>
+              <BarChart data={r.meses.map((m) => ({ ...m, rotulo: mesCurto(m.mes) }))} margin={{ left: -24, right: 4 }}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                <XAxis dataKey="rotulo" tick={{ fontSize: 11 }} />
+                <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
+                <Tooltip />
+                <Legend />
+                <Bar dataKey="entraram" name="Entraram" fill={SERIE_GRAFICO[0]} />
+                <Bar dataKey="encerradas" name="Encerradas" fill={SERIE_GRAFICO[1]} />
+              </BarChart>
+            </Grafico>
             {r.meses.length === 0 ? (
               <p className="text-sm text-muted-foreground">Nada no período.</p>
             ) : (

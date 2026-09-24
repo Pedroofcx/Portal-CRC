@@ -6,6 +6,9 @@ import { Button } from '@/components/ui/button';
 import { Cartao, Linha } from '@/components/ui/Cartao';
 import TabelaResumida from '@/components/ui/TabelaResumida';
 import { resumoFinanceiro, financeiroPorMes, financeiroPorDimensao, EXPLICACAO_DO_GRUPO } from '@/lib/relatorios/financeiro';
+import { Bar, Line, ComposedChart, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
+import Grafico from '@/components/relatorios/hub/Grafico';
+import { SERIE_GRAFICO, CORES_GRAFICO } from '@/lib/cores-grafico';
 import { ComoCalculamos, Pergunta, brl, periodoPorExtenso } from '@/components/relatorios/hub/Pecas';
 
 /**
@@ -100,6 +103,19 @@ export default function Financeiro({ tratativas, periodo, ehGestor }) {
 
       <div className="grid items-start gap-6 xl:grid-cols-5">
         <Cartao titulo="Mês a mês" className="xl:col-span-2">
+          <Grafico altura={200} temDados={meses.length > 1}>
+            <ComposedChart data={meses.map((m) => ({ ...m, rotulo: mesCurto(m.mes) }))} margin={{ left: -8, right: 4 }}>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} />
+              <XAxis dataKey="rotulo" tick={{ fontSize: 11 }} />
+              <YAxis tick={{ fontSize: 11 }} tickFormatter={(v) => `${Math.round(v / 1000)}k`} />
+              <Tooltip formatter={(v) => brl(v)} />
+              <Legend />
+              <Bar dataKey="devolvido" name="Devolvido" stackId="custo" fill={SERIE_GRAFICO[0]} />
+              <Bar dataKey="perdaContestacoes" name="Contestações" stackId="custo" fill={SERIE_GRAFICO[1]} />
+              {ehGestor && <Bar dataKey="custoOperacional" name="Tempo da equipe" stackId="custo" fill={SERIE_GRAFICO[2]} />}
+              <Line type="monotone" dataKey="recuperado" name="Recuperado" stroke={CORES_GRAFICO.serie4 ?? SERIE_GRAFICO[3]} strokeWidth={2} dot={false} />
+            </ComposedChart>
+          </Grafico>
           {meses.length === 0 ? (
             <p className="text-sm text-muted-foreground">Nada encerrado no período.</p>
           ) : (
