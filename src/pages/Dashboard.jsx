@@ -25,11 +25,10 @@ import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ClipboardList, TrendingUp, CheckCircle, AlertCircle, ArrowRight, Users, Target, Palmtree } from 'lucide-react';
+import { ClipboardList, TrendingUp, CheckCircle, AlertCircle, ArrowRight, Users, Target } from 'lucide-react';
 
 
 import { usePontuacaoAgente } from '@/hooks/usePontuacaoAgente';
-import PainelLateral, { RodapeFixo } from '@/components/ui/PainelLateral';
 import CentralDePendencias from '@/components/dashboard/CentralDePendencias';
 import { avisosVisiveis } from '@/lib/pendencias';
 
@@ -80,13 +79,6 @@ export default function Dashboard() {
 
 
 
-  const { data: ciclosFerias = [] } = useQuery({
-    queryKey: ['ciclos-ferias-dashboard'],
-    queryFn: () => db.entities.CicloFerias.list('-created_date', 50),
-    staleTime: 120000,
-    gcTime: 300000,
-    refetchOnWindowFocus: false,
-  });
 
 
   const { data: solicitacoesApoio = [] } = useQuery({
@@ -96,7 +88,6 @@ export default function Dashboard() {
     refetchOnWindowFocus: false,
   });
 
-  const [validarFeriasOpen, setValidarFeriasOpen] = React.useState(false);
 
   // Mutations também devem ser definidos antes de lógica condicional
 
@@ -122,19 +113,7 @@ export default function Dashboard() {
   // `colaborador`: antes, o useMemo lia a variável ainda não criada e a tela
   // inicial inteira caía (ReferenceError). — só dá para validar
   // pelo diálogo desta tela, então o card na lateral do operador não pode sair.
-  const minhasferiasPendentes = React.useMemo(() => {
-    if (!colaborador?.id) return [];
-    const meusCiclos = ciclosFerias.filter(c => c.colaborador_id === colaborador.id);
-    const pendentes = [];
-    meusCiclos.forEach(ciclo => {
-      (ciclo.fragmentos || []).forEach(frag => {
-        if (frag.status === 'pendente_validacao') {
-          pendentes.push({ ...frag, ciclo });
-        }
-      });
-    });
-    return pendentes;
-  }, [ciclosFerias, colaborador]);
+
 
 
   // Férias pendentes de validação para o agente atual
@@ -310,7 +289,7 @@ export default function Dashboard() {
               <AvisosDoOperador avisosParaExibir={avisosParaExibir} leituras={leituras} colaborador={colaborador} />
               <MinhasAnotacoes colaboradorId={colaborador?.id} />
 
-              <CardMinhasFerias pendentes={minhasferiasPendentes.length} aoAbrir={() => setValidarFeriasOpen(true)} />
+              <CardMinhasFerias colaboradorId={colaborador?.id} />
               <AtalhosDoOperador />
             </div>
           </div>
@@ -452,56 +431,7 @@ export default function Dashboard() {
       )}
 
 
-          {/* Modal: Minhas Férias - Validação */}
-      <PainelLateral
-        open={validarFeriasOpen} onOpenChange={setValidarFeriasOpen}
-        largura="xl"
-        titulo={<><Palmtree className="w-5 h-5 text-success" /> Meus Períodos de Férias</>}
-      >
-          <div className="space-y-4 mt-2">
-            {ciclosFerias.filter(c => c.colaborador_id === colaborador?.id).length === 0 ? (
-              <p className="text-muted-foreground text-sm text-center py-6">Nenhum ciclo de férias cadastrado.</p>
-            ) : (
-              ciclosFerias
-                .filter(c => c.colaborador_id === colaborador?.id)
-                .sort((a, b) => (b.aquisitivo_inicio || '').localeCompare(a.aquisitivo_inicio || ''))
-                .map(ciclo => {
-                  const frags = ciclo.fragmentos || [];
-                  if (frags.length === 0) return null;
-                  return (
-                    <div key={ciclo.id} className="border border-border rounded-xl p-4 space-y-3">
-                      <p className="text-sm font-semibold text-foreground">
-                        Período aquisitivo: {ciclo.aquisitivo_inicio} → {ciclo.aquisitivo_fim}
-                      </p>
-                      {frags.map((frag, idx) => {
-                        return (
-                          <div key={frag.id || idx} className="flex items-center justify-between p-3 bg-muted rounded-lg border">
-                            <div>
-                              <p className="text-sm font-medium text-foreground">
-                                {frag.data_inicio} → {frag.data_fim}
-                              </p>
-                              <div className="flex items-center gap-2 mt-1 flex-wrap">
-                                <Badge className="bg-success-soft text-success text-xs">{frag.dias} dias</Badge>
-                                <StatusBadge status={frag.status || 'agendado'} className="text-xs" />
-                                {frag.observacao && <span className="text-xs text-muted-foreground italic">{frag.observacao}</span>}
-                              </div>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  );
-                })
-            )}
-            <RodapeFixo>
-              <Link to={createPageUrl('GestaoFerias')}>
-                <Button variant="outline" className="w-full">
-                  <ArrowRight className="w-4 h-4 mr-2" /> Ver Gestão de Férias completa
-                </Button>
-              </Link>
-            </RodapeFixo>
-          </div>
-      </PainelLateral>
+
 
       {/* Avisos a confirmar, pesquisas a responder e Hansei novo — uma
           pendência por vez (src/components/dashboard/CentralDePendencias). */}

@@ -225,13 +225,13 @@ const modulosAgente = [
   {
     icon: Palmtree,
     nome: 'Férias',
-    descricao: 'Solicite e acompanhe suas férias',
+    descricao: 'Seu saldo, o vencimento e o pedido de férias',
     comoUsar: [
-      'Consulte saldo disponível por período aquisitivo',
-      'Solicite férias escolhendo as datas desejadas',
-      'Fragmente em até 3 períodos conforme a CLT',
-      'Opte por vender até 10 dias (abono pecuniário)',
-      'Acompanhe o status da solicitação em tempo real'
+      'Veja quantos dias você tem em cada período aquisitivo e quando eles vencem',
+      'Confira quem já está de férias antes de escolher a data — no máximo 3 pessoas ao mesmo tempo',
+      'Peça com pelo menos 30 dias de antecedência; o sistema confere as regras antes de enviar',
+      'Acompanhe o pedido: a gestão aprova, recusa ou sugere outra data aqui mesmo',
+      'Você pode vender até 10 dias (abono), que saem do mesmo saldo'
     ]
   },
   {

@@ -6,10 +6,15 @@ import PageHeader from '@/components/ui/PageHeader';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import ColaboradorFeriasCard from '@/components/ferias/ColaboradorFeriasCard';
 import DetalheColaboradorFerias from '@/components/ferias/DetalheColaboradorFerias';
+import MinhasFerias from '@/components/ferias/MinhasFerias';
+import PainelPedidoFerias from '@/components/ferias/PainelPedidoFerias';
+import PedidosParaAprovar from '@/components/ferias/PedidosParaAprovar';
+import { fragmentoDoPedido, hojeSP, deFeriasEm, proximasFerias } from '@/lib/ferias';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Cartao, Linha } from '@/components/ui/Cartao';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Palmtree, Search, Download, AlertTriangle, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
@@ -148,8 +153,71 @@ export default function GestaoFerias() {
   const { data: colaboradores = [] } = useQuery({ queryKey: ['colaboradores', "list()"], queryFn: () => db.entities.Colaborador.list() });
   const { data: ciclos = [], isLoading } = useQuery({ queryKey: ['ciclos-ferias'], queryFn: () => db.entities.CicloFerias.list('-created_date') });
 
+  const { data: solicitacoes = [] } = useQuery({
+    queryKey: ['solicitacoes-ferias'],
+    queryFn: () => db.entities.SolicitacaoFerias.list('-data_inicio', 500),
+    staleTime: 30000,
+  });
+
   const colaboradorAtual = colaboradores.find(c => c.email === user?.email);
   const isGestor = colaboradorAtual?.papel === 'gestor' || user?.role === 'admin';
+  const [pedirAberto, setPedirAberto] = useState(false);
+
+  // ── Pedido de férias: o agente pede, a gestão responde aqui no Portal ──
+  const pedirMutation = useMutation({
+    mutationFn: (dados) => db.entities.SolicitacaoFerias.create({
+      ...dados,
+      colaborador_id: colaboradorAtual?.id,
+      colaborador_nome: colaboradorAtual?.nome_completo,
+      colaborador_funcao: colaboradorAtual?.cargo_atual ?? null,
+      status: 'em_analise',
+      data_solicitacao: new Date().toISOString(),
+      versao_regra: 'portal-2026-09',
+    }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['solicitacoes-ferias'] });
+      queryClient.invalidateQueries({ queryKey: ['ferias-aprovadas'] });
+      toast.success('Pedido enviado. A gestão responde por aqui.');
+      setPedirAberto(false);
+    },
+    onError: () => toast.error('Não consegui enviar o pedido.'),
+  });
+
+  const responderPedido = useMutation({
+    mutationFn: async ({ pedido, ciclo, status, extras = {} }) => {
+      await db.entities.SolicitacaoFerias.update(pedido.id, {
+        status,
+        aprovador_id: colaboradorAtual?.id,
+        aprovador_nome: colaboradorAtual?.nome_completo,
+        data_aprovacao: new Date().toISOString(),
+        ...extras,
+      });
+      // Aprovar baixa o saldo: o período vira um fragmento do ciclo.
+      if (status === 'aprovada' && ciclo) {
+        const fragmentos = [...(ciclo.fragmentos || []).filter(f => f.solicitacao_id !== pedido.id), fragmentoDoPedido(pedido)];
+        const utilizados = fragmentos.reduce((soma, f) => soma + (f.dias || 0), 0);
+        const abono = (pedido.venda_dias || 0) || ciclo.abono_dias || 0;
+        await db.entities.CicloFerias.update(ciclo.id, {
+          fragmentos,
+          dias_utilizados: utilizados,
+          abono_dias: abono,
+          status: calcularStatus({ ...ciclo, dias_utilizados: utilizados, abono_dias: abono }),
+        });
+      }
+    },
+    onSuccess: (_r, { status }) => {
+      queryClient.invalidateQueries({ queryKey: ['solicitacoes-ferias'] });
+      queryClient.invalidateQueries({ queryKey: ['ciclos-ferias'] });
+      queryClient.invalidateQueries({ queryKey: ['ferias-aprovadas'] });
+      toast.success({
+        aprovada: 'Férias aprovadas. O saldo já foi baixado.',
+        recusada: 'Pedido recusado. A pessoa vê o motivo.',
+        sugestao_nova_data: 'Sugestão enviada.',
+        cancelada: 'Pedido cancelado.',
+      }[status] || 'Pedido atualizado.');
+    },
+    onError: () => toast.error('Não consegui responder ao pedido.'),
+  });
 
   const criarMutation = useMutation({
     mutationFn: (data) => db.entities.CicloFerias.create(data),
@@ -194,6 +262,14 @@ export default function GestaoFerias() {
     ciclos.filter(c => { const s = calcularStatus(c); return s === 'vencendo' || s === 'vencido'; }),
     [ciclos]
   );
+
+  const pedidosPendentes = useMemo(
+    () => solicitacoes.filter(s => s.status === 'em_analise')
+      .sort((x, y) => String(x.data_inicio || '').localeCompare(String(y.data_inicio || ''))),
+    [solicitacoes],
+  );
+  const foraHoje = useMemo(() => deFeriasEm(solicitacoes, hojeSP()), [solicitacoes]);
+  const proximas = useMemo(() => proximasFerias(solicitacoes).slice(0, 8), [solicitacoes]);
 
   const resumo = useMemo(() => ({
     total: agentes.length,
@@ -332,12 +408,29 @@ export default function GestaoFerias() {
 
   if (!user || isLoading) return <LoadingSpinner text="Carregando gestão de férias..." />;
 
+  // O agente entra na própria tela: saldo, vencimento e pedido (decisão de
+  // Pedro, 23/09/2026 — a aprovação passou a acontecer no Portal).
   if (!isGestor) {
     return (
-      <div className="text-center py-16">
-        <Palmtree className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-        <h2 className="text-xl font-semibold mb-2">Acesso Restrito</h2>
-        <p className="text-muted-foreground">Apenas gestores têm acesso à gestão de férias.</p>
+      <div className="space-y-6">
+        <PageHeader title="Férias" subtitle="Seu saldo, seus pedidos e quem está de férias" icon={Palmtree} />
+        <MinhasFerias
+          colaborador={colaboradorAtual}
+          ciclos={ciclos}
+          solicitacoes={solicitacoes}
+          cancelando={responderPedido.isPending}
+          onPedir={() => setPedirAberto(true)}
+          onCancelar={(pedido) => responderPedido.mutate({ pedido, status: 'cancelada' })}
+        />
+        <PainelPedidoFerias
+          open={pedirAberto}
+          onOpenChange={setPedirAberto}
+          colaborador={colaboradorAtual}
+          ciclos={ciclos.filter(c => c.colaborador_id === colaboradorAtual?.id)}
+          solicitacoes={solicitacoes}
+          enviando={pedirMutation.isPending}
+          onEnviar={(dados) => pedirMutation.mutate(dados)}
+        />
       </div>
     );
   }
@@ -361,8 +454,8 @@ export default function GestaoFerias() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Gestão de Férias"
-        subtitle="Controle automático de períodos aquisitivos por admissão"
+        title="Férias"
+        subtitle="Pedidos, saldo e vencimento — até 3 pessoas de férias ao mesmo tempo"
         icon={Palmtree}
         actions={
           <div className="flex gap-2 flex-wrap">
@@ -385,25 +478,66 @@ export default function GestaoFerias() {
         </Alert>
       )}
 
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        {[
-          { label: 'Colaboradores', value: resumo.total, cls: 'text-foreground', bg: 'bg-muted' },
-          { label: 'Disponíveis', value: resumo.disponiveis, cls: 'text-success', bg: 'bg-success-soft' },
-          { label: 'Vencendo', value: resumo.vencendo, cls: 'text-warning', bg: 'bg-warning-soft' },
-          { label: 'Vencidos', value: resumo.vencidos, cls: 'text-destructive', bg: 'bg-destructive/10' },
-        ].map(({ label, value, cls, bg }) => (
-          <div key={label} className={`${bg} rounded-xl p-4 text-center`}>
-            <p className={`text-2xl font-bold ${cls}`}>{value}</p>
-            <p className="text-xs text-muted-foreground mt-1">{label}</p>
+      <div className="grid items-start gap-6 xl:grid-cols-2">
+        <Cartao titulo="A equipe hoje">
+          <div className="divide-y divide-border">
+            <Linha rotulo="Pedidos esperando resposta" valor={pedidosPendentes.length} forte />
+            <Linha rotulo="De férias hoje" detalhe={foraHoje.map(s => s.colaborador_nome.split(' ')[0]).join(', ') || null} valor={foraHoje.length} />
+            <Linha rotulo="Colaboradores" valor={resumo.total} />
           </div>
-        ))}
+        </Cartao>
+        <Cartao titulo="Saldo da equipe">
+          <div className="divide-y divide-border">
+            <Linha rotulo="Com período disponível" valor={resumo.disponiveis} />
+            <Linha rotulo="Vencendo nos próximos 90 dias" valor={resumo.vencendo} />
+            <Linha rotulo="Já vencidos" valor={resumo.vencidos} />
+          </div>
+        </Cartao>
       </div>
 
-      <Tabs defaultValue="colaboradores">
+      <Tabs defaultValue={pedidosPendentes.length > 0 ? 'pedidos' : 'colaboradores'}>
         <TabsList>
+          <TabsTrigger value="pedidos">Pedidos{pedidosPendentes.length > 0 ? ` (${pedidosPendentes.length})` : ''}</TabsTrigger>
           <TabsTrigger value="colaboradores">Colaboradores</TabsTrigger>
           <TabsTrigger value="planejamento">Planejamento</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="pedidos" className="space-y-4 mt-4">
+          <PedidosParaAprovar
+            pedidos={pedidosPendentes}
+            solicitacoes={solicitacoes}
+            ciclos={ciclos}
+            salvando={responderPedido.isPending}
+            onAprovar={(pedido, ciclo) => responderPedido.mutate({ pedido, ciclo, status: 'aprovada' })}
+            onRecusar={(pedido, motivo) => responderPedido.mutate({ pedido, status: 'recusada', extras: { motivo_recusa: motivo } })}
+            onSugerir={(pedido, inicio, fim) => responderPedido.mutate({
+              pedido, status: 'sugestao_nova_data',
+              extras: { sugestao_nova_data_inicio: inicio, sugestao_nova_data_fim: fim },
+            })}
+          />
+
+          <div className="grid items-start gap-6 xl:grid-cols-2">
+            <Cartao titulo="De férias hoje">
+              <div className="divide-y divide-border">
+                {foraHoje.length === 0
+                  ? <p className="py-2 text-sm text-muted-foreground">Ninguém de férias hoje.</p>
+                  : foraHoje.map((s) => (
+                    <Linha key={s.id} rotulo={s.colaborador_nome} detalhe={`volta em ${fmtDate(s.data_fim)}`} valor={`até ${fmtDate(s.data_fim)}`} />
+                  ))}
+              </div>
+            </Cartao>
+
+            <Cartao titulo="Próximas férias aprovadas" extra={<span className="text-xs text-muted-foreground">até 3 pessoas ao mesmo tempo</span>}>
+              <div className="divide-y divide-border">
+                {proximas.length === 0
+                  ? <p className="py-2 text-sm text-muted-foreground">Nada aprovado pela frente.</p>
+                  : proximas.map((s) => (
+                    <Linha key={s.id} rotulo={s.colaborador_nome} valor={`${fmtDate(s.data_inicio)} a ${fmtDate(s.data_fim)}`} />
+                  ))}
+              </div>
+            </Cartao>
+          </div>
+        </TabsContent>
 
         <TabsContent value="colaboradores" className="space-y-4 mt-4">
           <div className="flex flex-col sm:flex-row gap-3">

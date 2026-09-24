@@ -71,7 +71,7 @@ const menuItems = [
     items: [
       { name: 'POP', page: 'POP', icon: FileText },
       { name: 'Escalas', page: 'Escalas', icon: Calendar },
-      { name: 'Gestão de Férias', page: 'GestaoFerias', icon: Palmtree, gestorOnly: true },
+      { name: 'Férias', page: 'GestaoFerias', icon: Palmtree },
     ]
   },
   { 

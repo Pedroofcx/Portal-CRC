@@ -14,6 +14,7 @@ import { posicaoNoRanking } from '../src/lib/posicaoRanking.js';
 import { prazoDaTratativa, descreverPrazo, consumoDoPrazo } from '../src/lib/prazoSla.js';
 import { indicadoresDoCiclo } from '../src/lib/indicadoresCiclo.js';
 import { conferirLinha } from './conferir-cores.mjs';
+import { diasCorridos, saldoDoCiclo, situacaoDoCiclo, cicloParaAData, deFeriasEm, lotacaoNoPeriodo, conferirPedido, fragmentoDoPedido, proximasFerias } from '../src/lib/ferias.js';
 import { situacaoDaPesquisa, quemRespondeu, resultadoDasPerguntas, resumoDaPesquisa, montarParticipacao } from '../src/lib/pesquisas.js';
 import { segundaDaSemana, semanaDeReferencia, diasDaSemana, trabalhoDaSemana, trabalhoDe, montarSemanaDeTrabalho, avisosDoTrabalho, montarTurnosDaSemana, meuDiaNoTurno, equilibrioDoAtendimento } from '../src/lib/escalas.js';
 import { mediaDasCompetencias, leiturasDoColaborador, palavrasRecorrentes, pontosDoRadar, evolucaoDasLeituras } from '../src/lib/competencias.js';
@@ -827,6 +828,70 @@ console.log('\n== pesquisas (quem respondeu e anonimato) ==');
 
   const part = montarParticipacao(pesquisa, { id: 'c1', nome_completo: 'Ana' }, new Date('2026-09-24T10:00:00Z'));
   checa('participacao guarda quem e quando', `${part.pesquisa_id}|${part.colaborador_id}|${part.respondida_em.slice(0, 10)}`, 'ps1|c1|2026-09-24');
+}
+
+console.log('\n== ferias (saldo, vencimento e pedido) ==');
+{
+  const hoje = '2026-09-24';
+  checa('dias corridos contam as duas pontas', String(diasCorridos('2026-10-01', '2026-10-15')), '15');
+
+  const ciclo = { aquisitivo_inicio: '2025-01-01', aquisitivo_fim: '2025-12-31', concessivo_fim: '2026-12-31', dias_direito: 30, abono_dias: 0, dias_utilizados: 10 };
+  const saldo = saldoDoCiclo(ciclo, hoje);
+  checa('saldo desconta o que ja foi usado', String(saldo.restantes), '20');
+  checa('dias ate vencer', String(saldo.diasAteVencer), '98');
+  checa('ciclo com saldo e prazo fica parcialmente utilizado', situacaoDoCiclo(ciclo, hoje), 'parcialmente_utilizado');
+  checa('abono tambem consome saldo', String(saldoDoCiclo({ ...ciclo, abono_dias: 10 }, hoje).restantes), '10');
+  checa('ciclo vencendo em menos de 90 dias', situacaoDoCiclo({ ...ciclo, concessivo_fim: '2026-11-01' }, hoje), 'vencendo');
+  checa('ciclo vencido', situacaoDoCiclo({ ...ciclo, concessivo_fim: '2026-08-01' }, hoje), 'vencido');
+  checa('ciclo em aquisicao', situacaoDoCiclo({ ...ciclo, aquisitivo_fim: '2026-12-31' }, hoje), 'em_aquisicao');
+  checa('ciclo sem saldo', situacaoDoCiclo({ ...ciclo, dias_utilizados: 30 }, hoje), 'utilizado');
+
+  const ciclos = [
+    { ...ciclo, id: 'velho', concessivo_fim: '2026-12-31' },
+    { ...ciclo, id: 'novo', aquisitivo_fim: '2026-12-31', concessivo_fim: '2027-12-31', dias_utilizados: 0 },
+  ];
+  checa('usa primeiro o ciclo que vence antes', cicloParaAData(ciclos, '2026-11-01', hoje)?.id, 'velho');
+
+  const solicitacoes = [
+    { id: 's1', colaborador_id: 'c1', colaborador_nome: 'Ana', status: 'aprovada', data_inicio: '2026-11-02', data_fim: '2026-11-16' },
+    { id: 's2', colaborador_id: 'c2', colaborador_nome: 'Bia', status: 'em_analise', data_inicio: '2026-11-10', data_fim: '2026-11-20' },
+    { id: 's3', colaborador_id: 'c3', colaborador_nome: 'Caio', status: 'recusada', data_inicio: '2026-11-10', data_fim: '2026-11-20' },
+  ];
+  checa('de ferias no dia', deFeriasEm(solicitacoes, '2026-11-12').map((s) => s.colaborador_nome).join(','), 'Ana,Bia');
+  checa('pedido recusado nao ocupa vaga', String(deFeriasEm(solicitacoes, '2026-11-18').length), '1');
+
+  const lot = lotacaoNoPeriodo(solicitacoes, '2026-11-01', '2026-11-30');
+  checa('pico de pessoas fora no periodo', String(lot.pico), '2');
+  checa('dia do pico', lot.diaDoPico, '2026-11-10');
+
+  const base = { colaborador_id: 'c9', data_inicio: '2026-11-05', data_fim: '2026-11-19', venda_dias: 0 };
+  const ok = conferirPedido({ pedido: base, solicitacoes, ciclo: ciclos[0], hoje });
+  checa('pedido dentro das regras passa', String(ok.erros.length), '0');
+  checa('mas avisa que fecha o limite de tres', ok.avisos.find((a) => a.includes('limite')) || '', 'ficam fora ao mesmo tempo');
+  checa('conta os dias do pedido', String(ok.dias), '15');
+
+  const cheio = [...solicitacoes, { id: 's4', colaborador_id: 'c4', colaborador_nome: 'Duda', status: 'aprovada', data_inicio: '2026-11-08', data_fim: '2026-11-12' }];
+  const quarto = conferirPedido({ pedido: base, solicitacoes: cheio, ciclo: ciclos[0], hoje });
+  checa('o quarto pedido no mesmo periodo e barrado', quarto.erros.find((e) => e.includes('limite')) || '', 'O limite é 3');
+
+  const emCima = conferirPedido({ pedido: { ...base, data_inicio: '2026-10-01', data_fim: '2026-10-15' }, solicitacoes, ciclo: ciclos[0], hoje });
+  checa('antecedencia minima de 30 dias', emCima.erros.find((e) => e.includes('antecedência')) || '', '30 dias de antecedência');
+
+  const curto = conferirPedido({ pedido: { ...base, data_fim: '2026-11-07' }, solicitacoes, ciclo: ciclos[0], hoje });
+  checa('periodo de menos de 5 dias e barrado', curto.erros.find((e) => e.includes('5 dias')) || '', 'ao menos 5 dias');
+
+  const semSaldo = conferirPedido({ pedido: base, solicitacoes, ciclo: { ...ciclos[0], dias_utilizados: 25 }, hoje });
+  checa('pedido maior que o saldo e barrado', semSaldo.erros.find((e) => e.includes('saldo')) || '', 'saldo deste período é de 5');
+
+  const vendaDemais = conferirPedido({ pedido: { ...base, venda_dias: 11 }, solicitacoes, ciclo: ciclos[0], hoje });
+  checa('venda acima de 10 dias e barrada', vendaDemais.erros.find((e) => e.includes('venda')) || '', 'no máximo 10 dias');
+
+  const repetido = conferirPedido({ pedido: { ...base, colaborador_id: 'c1' }, solicitacoes, ciclo: ciclos[0], hoje });
+  checa('pedido repetido da mesma pessoa e barrado', repetido.erros.find((e) => e.includes('já tem')) || '', 'já tem um pedido');
+
+  const frag = fragmentoDoPedido({ id: 's9', data_inicio: '2026-11-05', data_fim: '2026-11-19', venda_dias: 5 });
+  checa('fragmento leva dias e abono', `${frag.dias}/${frag.abono_dias}/${frag.status}`, '15/5/aprovado');
+  checa('proximas ferias so as aprovadas em pe', proximasFerias(solicitacoes, hoje).map((s) => s.colaborador_nome).join(','), 'Ana');
 }
 
 console.log('\n== conferencia de cores (o verificador pega o que deve) ==');

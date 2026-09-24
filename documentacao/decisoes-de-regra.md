@@ -450,3 +450,34 @@ e distribuição nas escalas, contagem nas escolhas, lista nos textos), quem
 respondeu com data, quem falta, e Editar / Duplicar / Reenviar / Arquivar. O
 gestor também responde: o que falta para ele fica no topo da tela. Saíram o
 painel de agendamento (metadado que nunca disparou nada) e a tabela de ícones.
+
+---
+
+## Férias: o pedido e a aprovação passam a acontecer no Portal (24/09/2026)
+
+**Como era.** Só o gestor entrava no módulo. Ele lançava à mão cada período
+no ciclo do colaborador, e o agente via uma lista sem poder pedir nada. A
+tabela `SolicitacaoFerias` existia desde o Base44 com um único registro — o
+fluxo nunca tinha sido ligado.
+
+**Como ficou.** O agente abre Férias e vê o próprio saldo por período
+aquisitivo, quando cada um vence, quem já está de férias e os próprios
+pedidos. Pede pelo Portal; a gestão aprova, recusa (com motivo) ou sugere
+outra data na aba Pedidos. Aprovar grava um fragmento no `CicloFerias` — é
+assim que o saldo baixa, sem lançamento manual em paralelo.
+
+**As regras que Pedro definiu**, conferidas enquanto a pessoa escolhe a data:
+até **3 pessoas de férias ao mesmo tempo** (a conta olha o dia mais cheio do
+período, não só a data de início), **30 dias de antecedência** (Art. 135 da
+CLT), mínimo de 5 dias corridos por período, aviso quando nenhum período do
+ano chega a 14 dias, venda de até 10 dias e saldo suficiente no período
+aquisitivo. Um pedido que fere uma dessas regras nem chega a ser enviado.
+
+**O período que vence primeiro é usado primeiro.** Sem isso, o saldo mais
+antigo vence enquanto o mais novo é gasto — e férias vencida vira dobra de
+pagamento pela CLT.
+
+**Nas outras telas:** a Escala de Trabalho trava o dia de quem está de férias
+aprovadas, e o card do painel do operador passou a mostrar saldo, vencimento e
+pedido em análise em vez do antigo "períodos esperando validação", que não
+validava nada.
