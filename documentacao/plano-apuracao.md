@@ -108,15 +108,32 @@ rápido e claro. São duas telas, não cinco passos.
 8. **Histórico com desfazer**: cada importação vira um lote, com arquivo,
    quem importou, quando e quantas linhas. Desfazer remove o lote inteiro.
 
-### Fase 2 — A tela de análise repaginada
-- Separar **Apuração** (importar) de **Análise** (ler os números), no padrão
-  que já usamos: cartões por pessoa, e o detalhe dentro.
-- Por pessoa: CSAT do telefone, CSAT do chat, CSAT consolidado, performance,
-  CX — **com os pontos que cada um vale hoje** e quanto falta para a próxima
-  faixa (95% = 10 pontos, 90% = 9, 85% = 7; performance 100% = 10, 90–99% = 7;
-  CX 4,5 = 10, 4,3 = 4, 4,2 = 1).
-- Por dia e por semana, para achar o dia ruim que puxou o mês.
-- Um "como calculamos" em português em cada quadro, como nos relatórios.
+### Fase 2 — A tela de análise repaginada — **FEITA em 24/09/2026**
+- ~~Separar Apuração (importar) de Análise, cartões por pessoa e detalhe
+  dentro.~~ Feito — a aba Análise (`src/pages/RelatoriosApuracao.jsx`) foi
+  reescrita do zero no estilo Cartão/Linha (a mesma "essência" do resto do
+  sistema), usando as mesmas contas testadas da premiação
+  (`resumoQualidade`/`diaADiaQualidade`, em `src/lib/relatorios/qualidade.js`)
+  em vez de reimplementar o filtro de data e a agregação por conta própria.
+- ~~Por pessoa: CSAT, performance, CX, com os pontos e quanto falta para a
+  próxima faixa.~~ Feito — usa `pontosDaFaixa`/`proximaFaixa` de
+  `faixasIndicadores.js`, o mesmo componente que já aparece na visão do
+  ciclo de cada pessoa.
+- ~~Por dia e por semana, para achar o dia ruim que puxou o mês.~~ Feito —
+  ao escolher um agente, aparecem duas tabelas: semana a semana (seg→sex) e
+  dia a dia, com o CSAT de cada uma.
+- ~~"Como calculamos" em cada quadro.~~ Feito.
+
+**O que estava quebrado na tela antiga** (não era o filtro de data em si —
+a checagem por data já era string, sem o bug clássico de fuso horário de
+`new Date('AAAA-MM-DD')`; ver o comentário em `src/lib/relatorios/periodo.js`
+para esse bug em outra tela). O problema real: a tela tinha um filtro de
+**canal** (Telefone/Chat/Ambos) separado das **abas visíveis** (Ligações/
+Chat/Consolidado) — se o filtro estivesse em "Telefone" (o padrão) e o
+gestor clicasse na aba Chat, a tabela de chat aparecia **vazia**, porque os
+dados agregados já tinham sido filtrados para fora antes de chegar na aba.
+Dava a impressão de "lancei os dados e não aparece nada". A tela nova não
+tem mais essa separação — cada linha mostra telefone e chat lado a lado.
 
 ### Fase 3 — As regras, no POP e na tela
 - Confirmar com você as três regras do telefone, a regra do chat e a do CX.

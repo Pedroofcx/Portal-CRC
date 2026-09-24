@@ -45,7 +45,7 @@ import { desfechoDaContestacao, resumoFinanceiro } from '../src/lib/relatorios/f
 import { pessoasNoPeriodo } from '../src/lib/relatorios/pessoas.js';
 import { filaDeHoje, entradaESaida, tempoPorCanal, diagnosticoDeCarga } from '../src/lib/relatorios/operacao.js';
 import { resumoDoCanal } from '../src/lib/relatorios/canais.js';
-import { resumoQualidade } from '../src/lib/relatorios/qualidade.js';
+import { resumoQualidade, diaADiaQualidade } from '../src/lib/relatorios/qualidade.js';
 import { resumoJornada } from '../src/lib/relatorios/jornada.js';
 
 let passou = 0;
@@ -651,6 +651,30 @@ console.log('\n== relatorio de qualidade ==');
   checa('equipe ponderada: 9 de 10 = 90% (media de medias daria 50%)', String(q.equipe.csatTelefone), '90');
   checa('agosto fora do periodo', String(q.meses.length), '1');
   checa('por pessoa', q.pessoas.map((p) => `${p.nome}:${p.csatTelefone}`).join(','), 'Ana:0,Bia:100');
+}
+
+console.log('\n== qualidade dia a dia: achar o dia ruim que puxou a semana ==');
+{
+  const tel = (data, pos, neg) => ({ data, telefone: { total_ligacoes: pos + neg + 1, total_atendidas: pos + neg + 1, total_avaliadas: pos + neg, total_positivas: pos, total_negativas: neg } });
+  const apuracoes = [
+    // Semana de 14/09/2026 (seg): dois dias bons (5/0) e um dia ruim (0/5)
+    // que puxa a semana inteira para baixo.
+    { colaborador_id: 'a', tipo_apuracao: 'telefone', created_date: '2026-09-20', dados_por_data: [
+      tel('2026-09-14', 5, 0), tel('2026-09-15', 0, 5), tel('2026-09-16', 5, 0),
+    ] },
+    // Reimportado por cima do dia 15: a versao mais recente vale, nao soma.
+    { colaborador_id: 'a', tipo_apuracao: 'telefone', created_date: '2026-09-21', dados_por_data: [
+      tel('2026-09-15', 4, 1),
+    ] },
+  ];
+  const { dias, semanas } = diaADiaQualidade({ apuracoes, colaboradorId: 'a', periodo: { inicio: '2026-09-14', fim: '2026-09-18' } });
+  checa('tres dias no periodo', String(dias.length), '3');
+  checa('dia 15 vale a reimportacao mais recente (4/1), nao a original (0/5)', String(dias.find((d) => d.dia === '2026-09-15').csatTelefone), '80');
+  checa('uma semana so (seg-sex)', String(semanas.length), '1');
+  // Semana: 5+4+5 positivas / (5+4+5 + 0+1+0 negativas) = 14/15.
+  checa('csat da semana pondera os tres dias juntos', semanas[0].csatTelefone.toFixed(2), (14 / 15 * 100).toFixed(2));
+  checa('semana comeca na segunda 14/09', semanas[0].inicio, '2026-09-14');
+  checa('semana termina na sexta 18/09', semanas[0].fim, '2026-09-18');
 }
 
 console.log('\n== relatorio da jornada ==');
