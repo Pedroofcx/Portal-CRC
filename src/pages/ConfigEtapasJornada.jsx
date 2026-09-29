@@ -28,6 +28,11 @@ export default function ConfigEtapasJornada() {
 
   const queryClient = useQueryClient();
 
+  const { data: user } = useQuery({ queryKey: ['currentUser'], queryFn: () => db.auth.me() });
+  const { data: colaboradoresAcesso = [] } = useQuery({ queryKey: ['colaboradores', "list()"], queryFn: () => db.entities.Colaborador.list() });
+  const eu = colaboradoresAcesso.find((c) => c.email === user?.email);
+  const isGestor = eu?.papel === 'gestor';
+
   const { data: etapas = [], isLoading } = useQuery({
     queryKey: ['etapas-jornada', "list()"],
     queryFn: () => db.entities.EtapaJornada.list(),
@@ -147,6 +152,15 @@ export default function ConfigEtapasJornada() {
       )
     }
   ];
+
+  if (!isGestor) {
+    return (
+      <div className="py-16 text-center">
+        <h2 className="mb-2 text-xl font-semibold">Acesso restrito</h2>
+        <p className="text-muted-foreground">Configurações é uma área da gestão.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

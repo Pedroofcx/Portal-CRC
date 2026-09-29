@@ -31,10 +31,13 @@ export default function AuditoriaPontuacao() {
     );
   };
 
+  const { data: user } = useQuery({ queryKey: ['currentUser'], queryFn: () => db.auth.me() });
   const { data: colaboradores = [] } = useQuery({
     queryKey: ['colaboradores', "list()"],
     queryFn: () => db.entities.Colaborador.list(),
   });
+  const eu = colaboradores.find((c) => c.email === user?.email);
+  const isGestor = eu?.papel === 'gestor';
 
   const { data: ciclos = [] } = useQuery({
     queryKey: ['ciclos-trimestrais', "list()"],
@@ -106,6 +109,15 @@ export default function AuditoriaPontuacao() {
   const totalGeral = auditoria.reduce((a, b) => a + b.totalPontos, 0);
   const totalTratativas = auditoria.reduce((a, b) => a + b.totalTratativas, 0);
   const totalForaCiclo = auditoria.reduce((a, b) => a + b.foraDosCiclo, 0);
+
+  if (!isGestor) {
+    return (
+      <div className="py-16 text-center">
+        <h2 className="mb-2 text-xl font-semibold">Acesso restrito</h2>
+        <p className="text-muted-foreground">Auditoria de pontuação é uma área da gestão.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

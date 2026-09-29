@@ -41,6 +41,11 @@ export default function Configuracoes() {
 
   const queryClient = useQueryClient();
 
+  const { data: user } = useQuery({ queryKey: ['currentUser'], queryFn: () => db.auth.me() });
+  const { data: colaboradoresAcesso = [] } = useQuery({ queryKey: ['colaboradores', "list()"], queryFn: () => db.entities.Colaborador.list() });
+  const eu = colaboradoresAcesso.find((c) => c.email === user?.email);
+  const isGestor = eu?.papel === 'gestor';
+
   const { data: configuracoes = [], isLoading } = useQuery({
     queryKey: ['configuracoes'],
     queryFn: () => db.entities.Configuracao.list(),
@@ -227,9 +232,18 @@ export default function Configuracoes() {
     return <LoadingSpinner />;
   }
 
+  if (!isGestor) {
+    return (
+      <div className="py-16 text-center">
+        <h2 className="mb-2 text-xl font-semibold">Acesso restrito</h2>
+        <p className="text-muted-foreground">Configurações é uma área da gestão.</p>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
-      <PageHeader 
+      <PageHeader
         title="Configurações Gerais"
         subtitle="Gerenciamento e governança do sistema"
         icon={Settings}
