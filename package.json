@@ -20,6 +20,7 @@
     "conferir-contas": "node ferramentas/conferir-contas.mjs",
     "criar-contas": "node ferramentas/criar-contas.mjs",
     "exigir-troca-de-senha": "node ferramentas/exigir-troca-de-senha.mjs",
+    "apagar-apuracao": "node ferramentas/apagar-apuracao.mjs",
     "previa-operador": "node ferramentas/gerar-previa-operador.mjs",
     "previa-sistema": "node ferramentas/gerar-previa-sistema.mjs",
     "conferir-cores": "node ferramentas/conferir-cores.mjs"

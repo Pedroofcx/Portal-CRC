@@ -27,6 +27,22 @@
  * registro e monta o mapa id_antigo -> id_novo; a segunda reescreve todos os
  * vínculos usando esse mapa. O id antigo fica guardado em base44_id, que é o
  * que permite conferir depois se cada registro veio do lugar certo.
+ *
+ *
+ * RODAR DE NOVO, COM UM EXPORT MAIS NOVO (29/09/2026)
+ *
+ * A primeira versão gerava um uuid ALEATÓRIO NOVO para cada base44_id, toda
+ * vez que rodava. Na importação única isso não era problema — o banco estava
+ * vazio. Mas rodar de novo, com um export mais recente, faria o upsert (que
+ * casa pelo base44_id) SUBSTITUIR o id de um registro que já existe por esse
+ * uuid novo — e tudo que apontava para o id antigo (tratativas, observações,
+ * pontuação...) ficaria órfão, silenciosamente, em todo o banco.
+ *
+ * Por isso a passagem 1 agora CONSULTA o Supabase antes de gerar qualquer
+ * id: para cada base44_id que já existe em alguma tabela do pacote, reaproveita
+ * o uuid que já está lá. Só gera uuid novo para quem é registro genuinamente
+ * novo. Isso vale também em --teste, para o relatório mostrar de verdade
+ * quantos seriam atualizados (reaproveitados) e quantos seriam criados.
  */
 
 import { createClient } from '@supabase/supabase-js';
@@ -48,7 +64,9 @@ const URL_SUPABASE = lerEnv('.env.local', 'VITE_SUPABASE_URL');
 const CHAVE_SERVICE = process.env.SUPABASE_SERVICE_ROLE_KEY || lerEnv('.env.import', 'SUPABASE_SERVICE_ROLE_KEY');
 
 if (!URL_SUPABASE) { console.error('Falta VITE_SUPABASE_URL no .env.local'); process.exit(1); }
-if (!CHAVE_SERVICE && !TESTE) {
+if (!CHAVE_SERVICE) {
+  // Precisa mesmo em --teste agora: a passagem 1 consulta os ids que já
+  // existem no Supabase, pra não gerar uuid novo pra quem já foi importado.
   console.error('\nFalta a chave service_role.');
   console.error('Crie um arquivo .env.import na raiz do projeto com:');
   console.error('  SUPABASE_SERVICE_ROLE_KEY=<a chave service_role do painel>\n');
@@ -58,7 +76,8 @@ if (!CHAVE_SERVICE && !TESTE) {
 
 // ------------------------------------------------------------------- entrada
 const pastaDados = path.join(RAIZ, 'dados-base44');
-const arquivo = process.argv.find(a => a.endsWith('.json'))
+const argExplicito = process.argv.slice(2).find((a) => !a.startsWith('--') && existsSync(a));
+const arquivo = argExplicito
   || path.join(pastaDados, readdirSync(pastaDados).filter(f => f.endsWith('.json')).sort().pop());
 
 console.log(`\n══ IMPORTAÇÃO ${TESTE ? '(MODO TESTE — nada será gravado)' : ''} ══\n`);
@@ -92,15 +111,38 @@ for (const f of readdirSync(path.join(RAIZ, 'base44', 'entities'))) {
   };
 }
 
+const supabase = createClient(URL_SUPABASE, CHAVE_SERVICE, { auth: { persistSession: false } });
+
 // ------------------------------------- passagem 1: decidir os ids e mapeá-los
-const mapaIds = new Map();     // id do Base44 -> uuid novo
+// Primeiro pergunta ao Supabase quais desses base44_id já foram importados
+// antes (de uma execução anterior) — reaproveita o uuid que já está lá em vez
+// de gerar um novo, senão o upsert trocaria o id de um registro que já existe
+// e tudo que aponta pra ele ficaria órfão.
+const tabelasDoPacote = [...new Set(Object.keys(dados).filter((e) => esquemas[e]).map((e) => esquemas[e].tabela))];
+const idsExistentes = new Map(); // base44_id -> uuid já gravado no Supabase
+for (const tabela of tabelasDoPacote) {
+  let de = 0;
+  for (;;) {
+    const { data, error } = await supabase.from(tabela).select('id, base44_id').not('base44_id', 'is', null).range(de, de + 999);
+    if (error) { console.error(`Não consegui ler ${tabela}: ${error.message}`); process.exit(1); }
+    data.forEach((r) => idsExistentes.set(r.base44_id, r.id));
+    if (data.length < 1000) break;
+    de += 1000;
+  }
+}
+console.log(`Registros já importados antes (id reaproveitado): ${idsExistentes.size.toLocaleString('pt-BR')}`);
+
+const mapaIds = new Map();     // id do Base44 -> uuid (reaproveitado ou novo)
+let reaproveitados = 0;
 for (const [entidade, registros] of Object.entries(dados)) {
   if (!esquemas[entidade]) continue;
   for (const r of registros) {
-    if (r.id) mapaIds.set(r.id, randomUUID());
+    if (!r.id || mapaIds.has(r.id)) continue;
+    const existente = idsExistentes.get(r.id);
+    if (existente) { mapaIds.set(r.id, existente); reaproveitados++; } else { mapaIds.set(r.id, randomUUID()); }
   }
 }
-console.log(`Identificadores mapeados: ${mapaIds.size.toLocaleString('pt-BR')}`);
+console.log(`Identificadores mapeados: ${mapaIds.size.toLocaleString('pt-BR')} (${reaproveitados.toLocaleString('pt-BR')} reaproveitados, ${(mapaIds.size - reaproveitados).toLocaleString('pt-BR')} novos)`);
 
 // ------------------------------------------- passagem 2: transformar e enviar
 /** Campos *_id que NÃO são vínculo entre entidades — não devem ser remapeados. */
@@ -157,10 +199,6 @@ function transformar(entidade, r) {
   }
   return saida;
 }
-
-const supabase = CHAVE_SERVICE
-  ? createClient(URL_SUPABASE, CHAVE_SERVICE, { auth: { persistSession: false } })
-  : null;
 
 console.log('');
 for (const entidade of Object.keys(dados).sort()) {
