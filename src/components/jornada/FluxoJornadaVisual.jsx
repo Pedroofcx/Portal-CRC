@@ -4,9 +4,8 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { 
-  AlertTriangle, 
-  CheckCircle, 
-  ArrowRight,
+  AlertTriangle,
+  CheckCircle,
   Eye,
   Zap
 } from 'lucide-react';
@@ -91,28 +90,26 @@ export default function FluxoJornadaVisual({ etapas = [], tratativas = [], _moti
 
   return (
     <div className="space-y-8">
-      {/* Fluxo Visual */}
-      <div className="relative">
-        {/* Linha conectora */}
-        <div className="absolute top-20 left-0 right-0 h-1 bg-primary z-0" />
-        
-        {/* Etapas */}
-        <div className="relative flex flex-wrap items-start justify-between gap-6 z-10">
-          <AnimatePresence>
-            {etapas
-              .sort((a, b) => (a.ordem || 0) - (b.ordem || 0))
-              .map((etapa, index) => {
-                const metricas = metricasPorEtapa[etapa.id] || {};
-                const intensidade = calcularIntensidade(metricas.total, maxTotal);
-                const isCritica = etapaCritica?.etapa?.id === etapa.id;
+      {/* Fluxo Visual — grade responsiva: nada de linha/seta com posição
+          absoluta presa a "tudo numa linha só". Isso quebrava o layout
+          sempre que os cards não cabiam lado a lado e quebravam pra uma
+          segunda linha (a linha e as setas ficavam soltas, sem acompanhar). */}
+      <div className="grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-5">
+        <AnimatePresence>
+          {etapas
+            .sort((a, b) => (a.ordem || 0) - (b.ordem || 0))
+            .map((etapa, index) => {
+              const metricas = metricasPorEtapa[etapa.id] || {};
+              const intensidade = calcularIntensidade(metricas.total, maxTotal);
+              const isCritica = etapaCritica?.etapa?.id === etapa.id;
 
-                return (
+              return (
                   <motion.div
                     key={etapa.id}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.1 }}
-                    className="flex-1 min-w-[200px]"
+                    className="col-span-2 sm:col-span-1"
                   >
                     <Card 
                       className={`relative border-2 transition-all cursor-pointer hover:shadow-sm ${
@@ -206,18 +203,10 @@ export default function FluxoJornadaVisual({ etapas = [], tratativas = [], _moti
                         </div>
                       </CardContent>
                     </Card>
-
-                    {/* Seta conectora */}
-                    {index < etapas.length - 1 && (
-                      <div className="hidden lg:block absolute top-20 -right-8 z-20">
-                        <ArrowRight className="w-6 h-6 text-muted-foreground" />
-                      </div>
-                    )}
                   </motion.div>
-                );
-              })}
-          </AnimatePresence>
-        </div>
+              );
+            })}
+        </AnimatePresence>
       </div>
 
       {/* Insights e Oportunidades */}
