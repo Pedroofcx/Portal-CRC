@@ -33,7 +33,7 @@ export const CAMPOS = {
     { chave: 'csat', rotulo: 'CSAT (1 a 5)', obrigatorio: true, sinonimos: ['pergunta3 2 nota 1 a 5', 'pergunta3 2', 'pergunta 3 2', 'csat', 'nota', 'satisfacao', 'satisfação', 'avaliacao', 'avaliação', 'pesquisa'] },
   ],
   chat: [
-    { chave: 'agente', rotulo: 'Agente', obrigatorio: true, sinonimos: ['agente', 'atribuido a', 'atribuído a', 'assignee', 'atendente', 'responsavel', 'responsável'] },
+    { chave: 'agente', rotulo: 'Agente', obrigatorio: true, sinonimos: ['agente', 'atribuido', 'atribuído', 'atribuido a', 'atribuído a', 'nome do atribuido', 'assignee', 'atendente', 'responsavel', 'responsável'] },
     { chave: 'ticket', rotulo: 'Ticket', obrigatorio: true, sinonimos: ['ticket', 'id', 'id do ticket', 'numero', 'número', 'chamado', 'conversa'] },
     { chave: 'data', rotulo: 'Data', obrigatorio: true, sinonimos: ['data', 'criado em', 'created at', 'data de criacao', 'data de criação', 'solucionado em', 'atualizado em'] },
     { chave: 'bom', rotulo: 'Satisfação boa (0 ou 1)', obrigatorio: true, sinonimos: ['bom', 'boa', 'good', 'satisfacao boa', 'satisfação boa', 'positivo', 'positiva'] },

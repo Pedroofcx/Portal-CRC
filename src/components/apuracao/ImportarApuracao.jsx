@@ -4,10 +4,12 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Cartao, Linha } from '@/components/ui/Cartao';
+import TabelaResumida from '@/components/ui/TabelaResumida';
 import { lerCsv } from '@/lib/csv';
 import {
   CAMPOS, FONTES, conferirImportacao, detectarFonte, sugerirMapeamento,
 } from '@/lib/apuracao/importacao';
+import { calcularTelefone, calcularChat, calcularCX } from '@/components/apuracao/calculosApuracao';
 
 /**
  * Importar a apuração em uma tela só: escolher o arquivo, conferir o de-para
@@ -19,6 +21,42 @@ import {
  * aspas (src/lib/csv.js).
  */
 const brDate = (iso) => (iso ? String(iso).slice(0, 10).split('-').reverse().join('/') : '—');
+const pct = (v) => `${Number(v || 0).toLocaleString('pt-BR', { maximumFractionDigits: 1 })}%`;
+const nota = (v) => Number(v || 0).toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 2 });
+const CALCULO = { telefone: calcularTelefone, chat: calcularChat, cx: calcularCX };
+
+/** Colunas da prévia por pessoa, uma tabela diferente para cada canal. */
+function colunasPrevia(tipo) {
+  const nome = { chave: 'nome', rotulo: 'No arquivo', alinhar: 'esquerda', principal: true, valor: (l) => l.nomeNoArquivo };
+  if (tipo === 'telefone') {
+    return [
+      nome,
+      { chave: 'csat', rotulo: 'CSAT', principal: true, valor: (l) => <span className="font-semibold text-primary">{pct(l.r.csatPercentual)}</span> },
+      { chave: 'perf', rotulo: 'Performance', principal: true, valor: (l) => pct(l.r.performance) },
+      { chave: 'avaliadas', rotulo: 'Avaliadas', principal: true, valor: (l) => l.r.totalAvaliadas },
+      { chave: 'positivas', rotulo: 'Positivas', valor: (l) => l.r.totalPositivas },
+      { chave: 'negativas', rotulo: 'Negativas', valor: (l) => l.r.totalNegativas },
+      { chave: 'neutras', rotulo: 'Neutras (nota 3)', valor: (l) => l.r.totalNeutras || 0 },
+      { chave: 'incompletas', rotulo: 'Incompletas (sem nota)', valor: (l) => l.r.totalIncompletas || 0 },
+      { chave: 'ligacoes', rotulo: 'Ligações', valor: (l) => l.r.totalLigacoes },
+    ];
+  }
+  if (tipo === 'chat') {
+    return [
+      nome,
+      { chave: 'csat', rotulo: 'CSAT', principal: true, valor: (l) => <span className="font-semibold text-primary">{pct(l.r.csatPercentual)}</span> },
+      { chave: 'avaliados', rotulo: 'Avaliados', principal: true, valor: (l) => l.r.totalAvaliados },
+      { chave: 'positivos', rotulo: 'Positivos', principal: true, valor: (l) => l.r.totalPositivos },
+      { chave: 'negativos', rotulo: 'Negativos', valor: (l) => l.r.totalNegativos },
+      { chave: 'chats', rotulo: 'Chats', valor: (l) => l.r.totalChats },
+    ];
+  }
+  return [
+    nome,
+    { chave: 'media', rotulo: 'Média', principal: true, valor: (l) => <span className="font-semibold text-primary">{nota(l.r.mediaCX)}</span> },
+    { chave: 'avaliacoes', rotulo: 'Avaliações', principal: true, valor: (l) => l.r.totalAvaliacoes },
+  ];
+}
 
 export default function ImportarApuracao({ colaboradores, mapeamentos = [], apuracoes = [], salvando, onSalvar }) {
   const entrada = useRef(null);
@@ -41,6 +79,17 @@ export default function ImportarApuracao({ colaboradores, mapeamentos = [], apur
       apuracoesExistentes: apuracoes,
     })
     : null), [leitura, tipo, mapeamento, colaboradores, vinculos, apuracoes]);
+
+  // Prévia do cálculo, por pessoa do arquivo — para conferir CSAT, positivas
+  // e negativas ANTES de salvar, não só depois (Pedro, 29/09/2026: "não
+  // tenho uma prévia e confirmação daquelas informações"). Só calcula quando
+  // não falta coluna obrigatória, para não gastar conta com mapeamento
+  // incompleto.
+  const previa = useMemo(() => (
+    leitura && tipo && conferencia?.faltando.length === 0
+      ? CALCULO[tipo](leitura.linhas, mapeamento)
+      : null
+  ), [leitura, tipo, mapeamento, conferencia]);
 
   const escolherArquivo = async (evento) => {
     const file = evento.target.files?.[0];
@@ -189,6 +238,16 @@ export default function ImportarApuracao({ colaboradores, mapeamentos = [], apur
               </>
             )}
           </Cartao>
+
+          {previa && (
+            <Cartao titulo="Números que vão ser salvos, por pessoa" extra={<span className="text-xs text-muted-foreground">confira antes de salvar</span>}>
+              <TabelaResumida
+                linhas={Object.entries(previa).map(([nomeNoArquivo, r]) => ({ nomeNoArquivo, r }))}
+                chaveDaLinha={(l) => l.nomeNoArquivo}
+                colunas={colunasPrevia(tipo)}
+              />
+            </Cartao>
+          )}
 
           {conferencia.agentes.length > 0 && (
             <Cartao titulo="4. Quem é quem" extra={<span className="text-xs text-muted-foreground">o vínculo fica guardado para as próximas importações</span>}>

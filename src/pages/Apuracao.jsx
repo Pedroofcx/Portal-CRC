@@ -11,6 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import ImportarApuracao from '@/components/apuracao/ImportarApuracao';
 import HistoricoImportacoes from '@/components/apuracao/HistoricoImportacoes';
 import OuvidoriaChat from '@/components/apuracao/OuvidoriaChat';
+import AuditoriaTelefone from '@/components/apuracao/AuditoriaTelefone';
 import RelatoriosApuracao from './RelatoriosApuracao';
 import { calcularTelefone, calcularChat, calcularCX } from '@/components/apuracao/calculosApuracao';
 import { classificarTicket } from '@/lib/apuracao/ouvidoriaChat';
@@ -277,12 +278,31 @@ export default function Apuracao() {
           />
         </TabsContent>
 
-        <TabsContent value="ouvidoria" className="pt-4">
-          <OuvidoriaChat
-            apuracoes={apuracoes}
-            classificando={classificar.isPending}
-            onClassificar={(linha, nota) => classificar.mutate({ linha, nota })}
-          />
+        <TabsContent value="ouvidoria" className="space-y-4 pt-4">
+          <Tabs defaultValue="chat">
+            <TabsList>
+              <TabsTrigger value="chat">Chat — classificar</TabsTrigger>
+              <TabsTrigger value="telefone">Telefone — auditoria</TabsTrigger>
+            </TabsList>
+            <TabsContent value="chat" className="pt-4">
+              <p className="mb-4 text-sm text-muted-foreground">
+                O Zendesk não manda nota no arquivo, só "satisfação boa/ruim" — por isso cada ticket "ruim" precisa
+                ser revisado à mão pra dizer se é negativo de verdade (1 ou 2) ou neutro (3).
+              </p>
+              <OuvidoriaChat
+                apuracoes={apuracoes}
+                classificando={classificar.isPending}
+                onClassificar={(linha, nota) => classificar.mutate({ linha, nota })}
+              />
+            </TabsContent>
+            <TabsContent value="telefone" className="pt-4">
+              <p className="mb-4 text-sm text-muted-foreground">
+                O 55PBX já vem com FCR e CSAT no arquivo — a classificação é automática. Não há nada pra decidir
+                aqui, só conferir se bateu certo.
+              </p>
+              <AuditoriaTelefone apuracoes={apuracoes} />
+            </TabsContent>
+          </Tabs>
         </TabsContent>
 
         <TabsContent value="analise" className="pt-4">

@@ -19,6 +19,7 @@ import { detectarFonte, sugerirMapeamento, camposFaltando, periodoDoArquivo, vin
 import { normalizarData } from '../src/lib/apuracao/datas.js';
 import { turnoDoHorario } from '../src/lib/escalas.js';
 import { classificarTicket, filaDeNegativos, resumoDaFila } from '../src/lib/apuracao/ouvidoriaChat.js';
+import { ligacoesAuditoria, resumoAuditoria } from '../src/lib/apuracao/auditoriaTelefone.js';
 import path from 'node:path';
 import { carregarModuloJsx } from './lib/carregar-jsx.mjs';
 
@@ -1070,6 +1071,17 @@ console.log('\n== importacao da apuracao ==');
   checa('nada faltando quando o mapa esta completo', String(camposFaltando('telefone', mapa).length), '0');
   checa('acusa campo obrigatorio faltando', camposFaltando('telefone', { agente: 'Agente' })[0], 'Data');
 
+  // As colunas de verdade do relatorio de chat do Zendesk (2026-09-24): o
+  // agente nao vinha sendo reconhecido porque a coluna real e "Nome do
+  // atribuido", sem o " a" no final que os sinonimos tinham -- ninguem batia
+  // nem por substring, e a importacao ficava travada pedindo pra escolher
+  // Agente a mao toda vez.
+  const colunasChatReal = ['ID do ticket', 'Nome do atribuído', 'Criação do ticket - Data', 'Tickets com satisfação boa', 'Tickets com satisfação ruim'];
+  checa('reconhece o zendesk de verdade', detectarFonte(colunasChatReal), 'zendesk');
+  const mapaChatReal = sugerirMapeamento(colunasChatReal, 'chat');
+  checa('agente vem do Nome do atribuido', mapaChatReal.agente, 'Nome do atribuído');
+  checa('nada faltando no mapa do chat real', String(camposFaltando('chat', mapaChatReal).length), '0');
+
   const lembrado = sugerirMapeamento(['Quem atendeu', 'Dia', 'Origem', 'Status', 'FCR', 'CSAT'], 'telefone', { agente: 'Quem atendeu', data: 'Dia' });
   checa('o que o gestor corrigiu antes ganha da adivinhacao', lembrado.agente + '|' + lembrado.data, 'Quem atendeu|Dia');
 
@@ -1235,6 +1247,27 @@ console.log('\n== chat (Zendesk): calculo bruto, sem coluna de nota ==');
   checa('negativos brutos (todo "ruim" conta)', String(r.totalNegativos), '4');
   checa('cada historico sai com nota nula, pronto para classificar depois', String(r.historico.every((h) => h.nota === null)), 'true');
   checa('nao sobra rastro de ouvidoria no calculo (isso e so na tela)', String(r.totalNeutros), 'undefined');
+}
+
+console.log('\n== auditoria do telefone: conferir a classificacao automatica ==');
+{
+  // Diferente do chat, aqui nao ha nada pra classificar -- a fila serve so
+  // pra conferir que a formula (FCR+CSAT) classificou certo cada ligacao.
+  const mapeamento = { agente: 'Agente', data: 'Data', origem: 'Origem', status: 'Status', fcr: 'FCR', csat: 'CSAT' };
+  const linha = (fcr, csat, origem = '') => ({ Agente: 'Ana', Data: '10/09/2026', Origem: origem, Status: 'Atendida', FCR: fcr === null ? '' : String(fcr), CSAT: csat === null ? '' : String(csat) });
+  const linhas = [
+    linha(1, 5), linha(1, 1), linha(1, 3), linha(1, null), linha(2, 5),
+    linha(1, 4, '123 - transferência fila'),
+  ];
+  const resultados = calcularTelefone(linhas, mapeamento);
+  const apuracaoTel = { id: 'apt1', tipo_apuracao: 'telefone', colaborador_id: 'c1', colaborador_nome: 'Ana', historico_detalhado: resultados.Ana.historico };
+
+  const ligs = ligacoesAuditoria([apuracaoTel]);
+  checa('seis ligacoes na auditoria', String(ligs.length), '6');
+  const resumo = resumoAuditoria(ligs);
+  checa('uma de cada categoria (menos negativa, que tem duas: fcr1 csat1 e fcr2)', JSON.stringify({ p: resumo.positiva, neg: resumo.negativa, n: resumo.neutra, i: resumo.incompleta, t: resumo.transferencia }), JSON.stringify({ p: 1, neg: 2, n: 1, i: 1, t: 1 }));
+  checa('filtro por categoria funciona', String(ligacoesAuditoria([apuracaoTel], { categoria: 'transferencia' }).length), '1');
+  checa('filtro por colaborador funciona', String(ligacoesAuditoria([apuracaoTel], { colaboradorId: 'outro' }).length), '0');
 }
 
 console.log('\n== ouvidoria do chat: classificacao manual, ticket por ticket ==');

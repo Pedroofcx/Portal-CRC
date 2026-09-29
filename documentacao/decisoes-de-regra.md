@@ -710,3 +710,57 @@ pedido explicitamente por Pedro: uma linha com os 6 critérios em branco não
 entra em `totalAvaliacoes` nem em `porData`, como se a linha não existisse.
 
 **Onde vive:** `calcularCX` em `src/components/apuracao/calculosApuracao.jsx`.
+
+---
+
+## Três ajustes na importação, depois de um erro real de gravação (29/09/2026)
+
+**O gatilho.** Pedro tentou salvar uma importação e recebeu
+`[Apuracao.bulkCreate] Could not find the 'arquivo_nome' column of
+'apuracao' in the schema cache` — o cache do PostgREST no Supabase estava
+desatualizado em relação à migration 24 (ou ela não tinha rodado de fato).
+Isso é operação de banco, não de código; resolvido à parte, recarregando o
+schema (`NOTIFY pgrst, 'reload schema';`) ou rodando a migration de novo
+(ela é idempotente).
+
+**A partir daí, três pedidos de Pedro sobre a experiência de importar:**
+
+1. **"Não tenho uma prévia e confirmação daquelas informações."** A tela de
+   importação já mostrava linhas lidas e período, mas não os NÚMEROS —
+   CSAT, positivas, negativas — que vão ser gravados. Agora, entre a
+   conferência e o "quem é quem", aparece "Números que vão ser salvos, por
+   pessoa": o resultado do mesmo cálculo que roda no salvar
+   (`calcularTelefone`/`calcularChat`/`calcularCX`), mas ANTES de confirmar.
+   Onde vive: `ImportarApuracao.jsx`.
+
+2. **"A Ouvidoria... não consigo alternar entre os canais chat e 55pbx."**
+   A Ouvidoria sempre foi só do chat — o Zendesk não manda nota, por isso a
+   revisão manual. O 55PBX não tinha nada parecido porque não precisa: a
+   nota já vem no arquivo, a classificação é automática. Pedro queria poder
+   auditar o 55PBX mesmo assim — conferir, ligação por ligação, se a fórmula
+   classificou certo. A aba Ouvidoria virou duas sub-abas: **Chat —
+   classificar** (o que já existia) e **Telefone — auditoria** (nova, só
+   leitura, lista cada ligação com a classificação que a fórmula deu, com
+   filtro por pessoa). Onde vive: `src/lib/apuracao/auditoriaTelefone.js`
+   (puro, testado) e `src/components/apuracao/AuditoriaTelefone.jsx`.
+
+3. **"As avaliações do chat estão se confundindo."** A regra que Pedro
+   descreveu (`ruim=1` é ruim; `ruim=0` e `bom=0` é neutro, não conta em
+   nada) já era exatamente o que `calcularChat` fazia — a "confusão" não
+   era a fórmula, era o **de-para de colunas**. No arquivo real do Zendesk
+   (`Relatório_CSAT_CHAT_CRC...csv`), a coluna do agente se chama "Nome do
+   atribuído" — os sinônimos cadastrados só tinham "atribuido **a**" (com
+   um "a" no final), que não bate nem por igualdade nem por trecho com
+   "nome do atribuido". Sem essa coluna reconhecida, a importação travava
+   pedindo pra escolher Agente à mão toda vez — nenhum dado chegava a ser
+   calculado errado, mas a fricção dava a impressão de bagunça. Corrigido em
+   `CAMPOS.chat` (`src/lib/apuracao/importacao.js`), acrescentando
+   "atribuido"/"atribuído"/"nome do atribuido" aos sinônimos. Verificado com
+   o arquivo real: CSAT de cada pessoa bateu com a conferência manual linha
+   a linha (ex.: Sirlene 17 positivos e 1 negativo em 18 avaliados = 95%).
+
+**Fora de escopo, sinalizado à parte:** durante os testes, o mesmo bug de
+UI já registrado antes (comboboxes "Escolha a pessoa" ligando ao vínculo
+errado quando clicados em sequência rápida) apareceu de novo — confirmado
+com dois listboxes abertos ao mesmo tempo no DOM. Está sendo investigado em
+sessão separada.
