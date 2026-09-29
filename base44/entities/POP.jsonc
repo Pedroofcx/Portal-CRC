@@ -6,6 +6,11 @@
       "type": "string",
       "description": "C\u00f3digo do POP (ex: POP-001)"
     },
+    "tipo": {
+      "type": "string",
+      "default": "pop",
+      "description": "'pop' (procedimento operacional padr\u00e3o) ou 'ort' (orienta\u00e7\u00e3o t\u00e9cnica) \u2014 mesmo layout, s\u00f3 a classifica\u00e7\u00e3o muda"
+    },
     "titulo": {
       "type": "string",
       "description": "T\u00edtulo do procedimento"

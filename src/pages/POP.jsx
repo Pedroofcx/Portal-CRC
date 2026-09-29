@@ -64,6 +64,7 @@ export default function POP() {
     if (alvo) setAbertoId(alvo.id);
   }
 
+  const ehNovo = editando === 'novo-pop' || editando === 'novo-ort';
   const aberto = pops.find((p) => p.id === abertoId) ?? null;
   const grupos = useMemo(() => agruparPorCategoria(pops, busca), [pops, busca]);
   const pendentes = useMemo(
@@ -98,7 +99,7 @@ export default function POP() {
       const agora = new Date().toISOString();
       const autoria = { publicado_em: agora, publicado_por_nome: eu?.nome_completo ?? null, vigencia: todaySP() };
       let pop;
-      if (editando === 'novo') {
+      if (editando === 'novo-pop' || editando === 'novo-ort') {
         pop = await db.entities.POP.create({
           ...dados, ...autoria, versao: '1.0', ativo: true, exige_ciencia: true,
           data_criacao: agora, o_que_mudou: 'Primeira versão.',
@@ -150,9 +151,14 @@ export default function POP() {
         subtitle="Estrutura de Trabalho CRC 2026 · um procedimento por tema"
         icon={FileText}
         actions={isGestor && (
-          <Button onClick={() => setEditando('novo')}>
-            <Plus className="mr-2 h-4 w-4" aria-hidden="true" /> Novo POP
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={() => setEditando('novo-ort')}>
+              <Plus className="mr-2 h-4 w-4" aria-hidden="true" /> Novo ORT
+            </Button>
+            <Button onClick={() => setEditando('novo-pop')}>
+              <Plus className="mr-2 h-4 w-4" aria-hidden="true" /> Novo POP
+            </Button>
+          </div>
         )}
       />
 
@@ -194,7 +200,10 @@ export default function POP() {
               >
                 <span className="w-16 shrink-0 font-mono text-xs font-semibold text-muted-foreground">{p.codigo}</span>
                 <span className="min-w-0 flex-1">
-                  <span className="block truncate text-sm font-medium text-foreground">{p.titulo}</span>
+                  <span className="block truncate text-sm font-medium text-foreground">
+                    {p.tipo === 'ort' && <span className="mr-1.5 rounded bg-info-soft px-1.5 py-0.5 text-[10px] font-semibold text-info align-middle">ORT</span>}
+                    {p.titulo}
+                  </span>
                   {p.prazos?.length > 0 && (
                     <span className="block truncate text-xs text-muted-foreground">
                       {p.prazos.slice(0, 2).map((z) => `${z.rotulo}: ${z.valor}`).join(' · ')}
@@ -243,13 +252,14 @@ export default function POP() {
         open={Boolean(editando)}
         onOpenChange={(v) => { if (!v) setEditando(null); }}
         largura="2xl"
-        titulo={editando === 'novo' ? 'Novo POP' : editando ? `Editar ${editando.codigo}` : ''}
-        descricao={editando && editando !== 'novo' ? `Versão atual ${editando.versao} — salvar publica uma versão nova` : undefined}
+        titulo={editando === 'novo-pop' ? 'Novo POP' : editando === 'novo-ort' ? 'Novo ORT' : editando ? `Editar ${editando.codigo}` : ''}
+        descricao={editando && !ehNovo ? `Versão atual ${editando.versao} — salvar publica uma versão nova` : undefined}
       >
         {editando && (
           <POPForm
-            key={editando === 'novo' ? 'novo' : editando.id}
-            popInicial={editando === 'novo' ? null : editando}
+            key={ehNovo ? editando : editando.id}
+            popInicial={ehNovo ? null : editando}
+            tipoNovo={editando === 'novo-ort' ? 'ort' : 'pop'}
             tiposTratativa={tiposTratativa}
             isLoading={salvar.isPending}
             onCancel={() => setEditando(null)}

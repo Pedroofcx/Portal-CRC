@@ -29,10 +29,13 @@ const REGRAS_EDICAO = { ...REGRAS_NOVO, o_que_mudou: [obrigatorio('O resumo do q
 const RACI_VAZIA = { atividade: '', responsavel: '', aprovador: '', consultado: '', informado: '' };
 const AJUDA_TEXTO = 'Formatação: "## subtítulo", "- item", "1. passo", "**destaque**".';
 
-export default function POPForm({ popInicial = null, tiposTratativa = [], onSubmit, onCancel, isLoading }) {
+export default function POPForm({ popInicial = null, tipoNovo = 'pop', tiposTratativa = [], onSubmit, onCancel, isLoading }) {
   const editando = Boolean(popInicial?.id);
+  const tipo = popInicial?.tipo ?? tipoNovo;
+  const rotuloTipo = tipo === 'ort' ? 'ORT' : 'POP';
   const [form, setForm] = useState(() => ({
     codigo: popInicial?.codigo ?? '',
+    tipo,
     titulo: popInicial?.titulo ?? '',
     categoria: popInicial?.categoria ?? CATEGORIAS_POP[1],
     ordem: popInicial?.ordem ?? 0,
@@ -84,7 +87,7 @@ export default function POPForm({ popInicial = null, tiposTratativa = [], onSubm
     <form onSubmit={enviar} className="space-y-5" noValidate>
       <div className="grid gap-4 sm:grid-cols-[140px_minmax(0,1fr)]">
         <CampoFormulario id="pop-codigo" rotulo="Código" obrigatorio erro={validacao.erro('codigo')}>
-          <Input id="pop-codigo" value={form.codigo} onChange={(e) => set('codigo', e.target.value)} {...validacao.campo('codigo')} placeholder="POP 22" />
+          <Input id="pop-codigo" value={form.codigo} onChange={(e) => set('codigo', e.target.value)} {...validacao.campo('codigo')} placeholder={tipo === 'ort' ? 'ORT 01' : 'POP 22'} />
         </CampoFormulario>
         <CampoFormulario id="pop-titulo" rotulo="Título" obrigatorio erro={validacao.erro('titulo')}>
           <Input id="pop-titulo" value={form.titulo} onChange={(e) => set('titulo', e.target.value)} {...validacao.campo('titulo')} />
@@ -194,7 +197,7 @@ export default function POPForm({ popInicial = null, tiposTratativa = [], onSubm
       <RodapeFixo>
         <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
         <Button type="submit" disabled={isLoading}>
-          {isLoading ? 'Salvando…' : editando ? `Publicar versão ${proximaVersao(popInicial.versao, form.tipoVersao)}` : 'Publicar POP'}
+          {isLoading ? 'Salvando…' : editando ? `Publicar versão ${proximaVersao(popInicial.versao, form.tipoVersao)}` : `Publicar ${rotuloTipo}`}
         </Button>
       </RodapeFixo>
     </form>
