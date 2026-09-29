@@ -105,7 +105,6 @@ export default function ExternalImage({
           setError(true);
           setLoading(false);
         }}
-        crossOrigin="anonymous"
       />
     </div>
   );
