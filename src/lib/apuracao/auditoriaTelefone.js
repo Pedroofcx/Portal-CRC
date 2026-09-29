@@ -28,11 +28,12 @@ export function ligacoesAuditoria(apuracoes = [], { colaboradorId, categoria } =
     .filter((a) => a.tipo_apuracao === 'telefone')
     .filter((a) => !colaboradorId || a.colaborador_id === colaboradorId)
     .forEach((a) => {
-      (a.historico_detalhado ?? []).forEach((h) => {
+      (a.historico_detalhado ?? []).forEach((h, indice) => {
         const c = classificarLinha(h);
         if (categoria && c.categoria !== categoria) return;
         linhas.push({
           apuracaoId: a.id,
+          indice,
           colaboradorId: a.colaborador_id,
           colaboradorNome: a.colaborador_nome,
           data: h.data ?? null,
@@ -41,17 +42,26 @@ export function ligacoesAuditoria(apuracoes = [], { colaboradorId, categoria } =
           csat: h.csat ?? null,
           categoria: c.categoria,
           rotulo: c.rotulo,
+          revisao: h.revisao ?? null,
         });
       });
     });
   return linhas.sort((x, y) => String(y.data ?? '').localeCompare(String(x.data ?? '')));
 }
 
-/** Contagem por categoria, para o resumo do topo. */
+/** Contagem por categoria, para o resumo do topo — inclui quantas negativas já foram revisadas. */
 export function resumoAuditoria(linhas = []) {
   const resumo = {
     total: linhas.length, positiva: 0, negativa: 0, neutra: 0, incompleta: 0, transferencia: 0, nao_atendida: 0, sem_avaliacao: 0,
+    negativasNaoRevisadas: 0, negativasConfirmadas: 0, negativasRemovidas: 0,
   };
-  linhas.forEach((l) => { resumo[l.categoria] = (resumo[l.categoria] || 0) + 1; });
+  linhas.forEach((l) => {
+    resumo[l.categoria] = (resumo[l.categoria] || 0) + 1;
+    if (l.categoria === 'negativa') {
+      if (l.revisao?.status === 'confirmado') resumo.negativasConfirmadas++;
+      else if (l.revisao?.status === 'removido') resumo.negativasRemovidas++;
+      else resumo.negativasNaoRevisadas++;
+    }
+  });
   return resumo;
 }

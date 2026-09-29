@@ -15,6 +15,7 @@ import AuditoriaTelefone from '@/components/apuracao/AuditoriaTelefone';
 import RelatoriosApuracao from './RelatoriosApuracao';
 import { calcularTelefone, calcularChat, calcularCX } from '@/components/apuracao/calculosApuracao';
 import { classificarTicket } from '@/lib/apuracao/ouvidoriaChat';
+import { revisarLigacao } from '@/lib/apuracao/revisaoTelefone';
 
 /**
  * APURAÇÃO — de onde vêm o CSAT, a performance e a avaliação CX.
@@ -233,6 +234,26 @@ export default function Apuracao() {
     onError: () => toast.error('Não consegui salvar a classificação deste ticket.'),
   });
 
+  // Auditoria do telefone: confirma ou remove UMA negativa por vez. Remover
+  // MUDA o CSAT oficial (a ligação sai do cálculo) — diferente da ouvidoria
+  // do chat, que nunca toca no número oficial.
+  const revisarNegativa = useMutation({
+    mutationFn: async ({ linha, decisao, motivo }) => {
+      const apuracao = apuracoes.find((a) => a.id === linha.apuracaoId);
+      if (!apuracao) throw new Error('Apuração não encontrada.');
+      const patch = revisarLigacao(apuracao, linha.indice, decisao, motivo, eu);
+      await db.entities.Apuracao.update(linha.apuracaoId, patch);
+    },
+    onSuccess: (_r, { decisao }) => {
+      queryClient.invalidateQueries({ queryKey: ['apuracoes-equipe'] });
+      queryClient.invalidateQueries({ queryKey: ['apuracoes'] });
+      if (decisao === 'removido') toast.success('Negativa removida — o CSAT foi recalculado.');
+      else if (decisao === 'confirmado') toast.success('Negativa confirmada.');
+      else toast.success('Revisão desfeita.');
+    },
+    onError: (e) => toast.error(e?.message || 'Não consegui salvar a revisão desta ligação.'),
+  });
+
   if (isLoading) return <LoadingSpinner text="Carregando a apuração..." />;
 
   if (!isGestor) {
@@ -300,7 +321,11 @@ export default function Apuracao() {
                 O 55PBX já vem com FCR e CSAT no arquivo — a classificação é automática. Não há nada pra decidir
                 aqui, só conferir se bateu certo.
               </p>
-              <AuditoriaTelefone apuracoes={apuracoes} />
+              <AuditoriaTelefone
+                apuracoes={apuracoes}
+                revisando={revisarNegativa.isPending}
+                onRevisar={(linha, decisao, motivo) => revisarNegativa.mutate({ linha, decisao, motivo })}
+              />
             </TabsContent>
           </Tabs>
         </TabsContent>

@@ -20,6 +20,7 @@ import { normalizarData } from '../src/lib/apuracao/datas.js';
 import { turnoDoHorario } from '../src/lib/escalas.js';
 import { classificarTicket, filaDeNegativos, resumoDaFila } from '../src/lib/apuracao/ouvidoriaChat.js';
 import { ligacoesAuditoria, resumoAuditoria } from '../src/lib/apuracao/auditoriaTelefone.js';
+import { revisarLigacao } from '../src/lib/apuracao/revisaoTelefone.js';
 import path from 'node:path';
 import { carregarModuloJsx } from './lib/carregar-jsx.mjs';
 
@@ -1268,6 +1269,61 @@ console.log('\n== auditoria do telefone: conferir a classificacao automatica =='
   checa('uma de cada categoria (menos negativa, que tem duas: fcr1 csat1 e fcr2)', JSON.stringify({ p: resumo.positiva, neg: resumo.negativa, n: resumo.neutra, i: resumo.incompleta, t: resumo.transferencia }), JSON.stringify({ p: 1, neg: 2, n: 1, i: 1, t: 1 }));
   checa('filtro por categoria funciona', String(ligacoesAuditoria([apuracaoTel], { categoria: 'transferencia' }).length), '1');
   checa('filtro por colaborador funciona', String(ligacoesAuditoria([apuracaoTel], { colaboradorId: 'outro' }).length), '0');
+}
+
+console.log('\n== revisao de negativas do telefone: confirmar ou remover, com motivo ==');
+{
+  // Pedro (30/09/2026): ligacao muda (falha tecnica) e o cliente avalia
+  // negativo mesmo assim. Diferente da ouvidoria do chat, aqui a remocao
+  // MUDA o csat oficial -- a negativa contestada some da conta, como se a
+  // ligacao nunca tivesse sido avaliada.
+  const apuracaoBase = {
+    id: 'apt2',
+    tipo_apuracao: 'telefone',
+    colaborador_id: 'c1',
+    colaborador_nome: 'Ana',
+    canal_telefone: { csat: 40, fcr: 100, performance: 100, avaliados: 5, total_atendimentos: 5 },
+    dados_por_data: [
+      { data: '2026-09-10', telefone: { total_ligacoes: 3, total_atendidas: 3, total_avaliadas: 3, total_positivas: 2, total_negativas: 1, csat: 66.67 } },
+      { data: '2026-09-11', telefone: { total_ligacoes: 2, total_atendidas: 2, total_avaliadas: 2, total_positivas: 0, total_negativas: 2, csat: 0 } },
+    ],
+    historico_detalhado: [
+      { data: '2026-09-10', status: 'Atendida', fcr: 1, csat: 5, isPositiva: true, isNegativa: false },
+      { data: '2026-09-10', status: 'Atendida', fcr: 1, csat: 4, isPositiva: true, isNegativa: false },
+      { data: '2026-09-10', status: 'Atendida', fcr: 1, csat: 1, isPositiva: false, isNegativa: true },
+      { data: '2026-09-11', status: 'Atendida', fcr: 2, csat: 2, isPositiva: false, isNegativa: true },
+      { data: '2026-09-11', status: 'Atendida', fcr: 2, csat: 1, isPositiva: false, isNegativa: true },
+    ],
+  };
+  // csat oficial antes: (2+0) / (2+0+3) = 2/5 = 40%.
+  checa('csat de partida bate com o canal_telefone dado', String(apuracaoBase.canal_telefone.csat), '40');
+
+  const revisandoPositiva = revisarLigacao(apuracaoBase, 0, 'confirmado', null, { nome_completo: 'Pedro' });
+  checa('so negativa pode ser revisada -- positiva fica intacta', String(revisandoPositiva.historico_detalhado[0].revisao), 'undefined');
+
+  const semMotivo = (() => { try { revisarLigacao(apuracaoBase, 2, 'removido', '', { nome_completo: 'Pedro' }); return null; } catch (e) { return e.message; } })();
+  checa('remover exige motivo', String(!!semMotivo), 'true');
+
+  const patch = revisarLigacao(apuracaoBase, 2, 'removido', 'Ligacao muda, sem audio -- falha tecnica confirmada', { id: 'g1', nome_completo: 'Pedro Soares' });
+  const diaRevisado = patch.dados_por_data.find((d) => d.data === '2026-09-10').telefone;
+  checa('negativa removida sai do total do dia', String(diaRevisado.total_negativas), '0');
+  checa('tambem sai de avaliadas do dia (como incompleta)', String(diaRevisado.total_avaliadas), '2');
+  checa('csat do dia sobe pra 100 (so as duas positivas restam)', String(diaRevisado.csat), '100');
+  checa('o outro dia nao mudou', String(patch.dados_por_data.find((d) => d.data === '2026-09-11').telefone.total_negativas), '2');
+  // csat oficial depois: positivas=2, negativas=1 (so a do dia 11 x2 menos... espera: dia 10 negativas=0, dia 11 negativas=2) => 2/(2+2)=50%.
+  checa('csat oficial (canal_telefone) recalculado: 2/(2+2) = 50%', String(patch.canal_telefone.csat), '50');
+  checa('avaliados oficiais tambem cairam', String(patch.canal_telefone.avaliados), '4');
+  checa('a ligacao guarda quem revisou e o motivo', patch.historico_detalhado[2].revisao.motivo, 'Ligacao muda, sem audio -- falha tecnica confirmada');
+  checa('e o nome de quem revisou', patch.historico_detalhado[2].revisao.por_nome, 'Pedro Soares');
+  checa('as outras ligacoes do historico ficam intactas', String(patch.historico_detalhado[3].revisao), 'undefined');
+
+  const apuracaoComRevisao = { ...apuracaoBase, ...patch };
+  const confirmando = revisarLigacao(apuracaoComRevisao, 3, 'confirmado', null, { nome_completo: 'Pedro Soares' });
+  checa('confirmar negativo nao muda os numeros', String(confirmando.canal_telefone.csat), String(apuracaoComRevisao.canal_telefone.csat));
+  checa('mas fica registrado como confirmado', confirmando.historico_detalhado[3].revisao.status, 'confirmado');
+
+  const desfazendo = revisarLigacao({ ...apuracaoComRevisao, historico_detalhado: patch.historico_detalhado }, 2, null, null, {});
+  checa('desfazer a revisao volta o csat oficial pro original (40%)', String(desfazendo.canal_telefone.csat), '40');
 }
 
 console.log('\n== ouvidoria do chat: classificacao manual, ticket por ticket ==');

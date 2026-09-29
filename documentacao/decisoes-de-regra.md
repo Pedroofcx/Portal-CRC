@@ -764,3 +764,39 @@ UI já registrado antes (comboboxes "Escolha a pessoa" ligando ao vínculo
 errado quando clicados em sequência rápida) apareceu de novo — confirmado
 com dois listboxes abertos ao mesmo tempo no DOM. Está sendo investigado em
 sessão separada.
+
+---
+
+## Telefone (55PBX): negativa contestável, com motivo obrigatório (30/09/2026)
+
+**O problema que Pedro trouxe.** Às vezes a ligação fica muda — falha
+técnica, sem áudio — e mesmo assim o cliente avalia negativo. Não é
+insatisfação de verdade, mas contava contra a meta do agente do mesmo jeito
+que uma negativa real.
+
+**A decisão.** Na Auditoria do Telefone (Ouvidoria → Telefone — auditoria),
+toda linha classificada como **Negativa** ganha duas ações: **Confirmar
+negativo** (fica registrado que foi conferida e é real) ou **Remover**
+— que exige digitar o motivo antes de salvar, sem exceção.
+
+**Isto é diferente da Ouvidoria do chat, de propósito.** Lá (24/09/2026), a
+classificação nota 1/2/3 nunca muda o CSAT oficial — é só um comparativo
+informativo. Aqui muda: uma negativa removida **sai do CSAT oficial** (o
+mesmo número que entra na premiação, em `indicadoresCiclo.js`), como se a
+ligação nunca tivesse sido avaliada — não vira positiva nem neutra, só some
+do cálculo. É a mesma lógica de uma "incompleta" (FCR 1 sem nota válida):
+não é um sentimento real do cliente, então não deveria pontuar em nada.
+Faz sentido ser diferente do chat porque lá o "neutro" é uma opinião real
+do cliente (nota 3), só mal classificada pela empresa; aqui a negativa é o
+próprio dado que está errado, por uma falha que não é do agente.
+
+**Fica tudo registrado na própria ligação** (`historico_detalhado[].revisao`):
+quem decidiu, quando, e o motivo (quando removida). Dá pra desfazer
+("desfazer" ao lado do resultado), e o desfazer devolve os números
+exatamente aos originais — testado inclusive remover→desfazer→remover de
+novo, sem acumular nem perder nada.
+
+**Onde vive:** `src/lib/apuracao/revisaoTelefone.js` (o cálculo, puro e
+testado), `src/components/apuracao/AuditoriaTelefone.jsx` (a tela, com o
+diálogo de motivo obrigatório), mutação `revisarNegativa` em
+`src/pages/Apuracao.jsx`.
