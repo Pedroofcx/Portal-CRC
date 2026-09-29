@@ -1,0 +1,36 @@
+{
+  "name": "AgendaPessoal",
+  "type": "object",
+  "properties": {
+    "colaborador_id": {
+      "type": "string",
+      "description": "Dono do compromisso — só ele lê, cria, altera e apaga (RLS)"
+    },
+    "data": {
+      "type": "string",
+      "format": "date",
+      "description": "Dia do compromisso"
+    },
+    "hora": {
+      "type": "string",
+      "description": "Horário (opcional) — HH:MM"
+    },
+    "titulo": {
+      "type": "string",
+      "description": "O que vai fazer"
+    },
+    "descricao": {
+      "type": "string",
+      "description": "Detalhe do compromisso (opcional)"
+    },
+    "concluido": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "required": [
+    "colaborador_id",
+    "data",
+    "titulo"
+  ]
+}

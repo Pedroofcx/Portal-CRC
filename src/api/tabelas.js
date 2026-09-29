@@ -3,6 +3,7 @@
 export const TABELAS = {
   AcionamentoLiderTecnico: 'acionamento_lider_tecnico',
   AcionamentoN2: 'acionamento_n2',
+  AgendaPessoal: 'agenda_pessoal',
   AgenteN2: 'agente_n2',
   AnotacaoPessoal: 'anotacao_pessoal',
   Apuracao: 'apuracao',

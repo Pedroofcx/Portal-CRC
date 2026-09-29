@@ -68,6 +68,7 @@ import Escalas from './pages/Escalas';
 import GestaoFerias from './pages/GestaoFerias';
 import Hansei from './pages/Hansei';
 import JornadaCliente from './pages/JornadaCliente';
+import MinhaAgenda from './pages/MinhaAgenda';
 import MinhaPerformance from './pages/MinhaPerformance';
 import Observacoes from './pages/Observacoes';
 import Oraculo from './pages/Oraculo';
@@ -108,6 +109,7 @@ export const PAGES = {
     "GestaoFerias": GestaoFerias,
     "Hansei": Hansei,
     "JornadaCliente": JornadaCliente,
+    "MinhaAgenda": MinhaAgenda,
     "MinhaPerformance": MinhaPerformance,
     "Observacoes": Observacoes,
     "Oraculo": Oraculo,

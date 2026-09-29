@@ -25,6 +25,7 @@ import {
   Star,
   TrendingUp,
   ClipboardCheck,
+  CalendarClock,
   Eye,
   Map,
   Palmtree,
@@ -45,6 +46,7 @@ const menuItems = [
     section: 'Principal',
     items: [
       { name: 'Dashboard', page: 'Dashboard', icon: Home },
+      { name: 'Minha Agenda', page: 'MinhaAgenda', icon: CalendarClock },
       { name: 'Como Funciona', page: 'ComoFunciona', icon: BookOpen },
     ]
   },
