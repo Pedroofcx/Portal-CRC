@@ -40,6 +40,17 @@ export default function ConfigTiposObservacao() {
     onError: () => toast.error('Não consegui remover o tipo.'),
   });
 
+  const handleAdicionar = () => {
+    const nome = novoTipo.nome.trim();
+    if (!nome) return;
+    const jaExiste = tipos.some((t) => t.nome.trim().toLowerCase() === nome.toLowerCase());
+    if (jaExiste) {
+      toast.error(`Já existe um tipo "${nome}".`);
+      return;
+    }
+    createMutation.mutate({ ...novoTipo, nome });
+  };
+
   if (!carregandoEu && !isGestor) return <AcessoRestrito />;
 
   return (
@@ -62,7 +73,7 @@ export default function ConfigTiposObservacao() {
             onChange={(e) => setNovoTipo({ ...novoTipo, cor: e.target.value })}
             className="w-20"
           />
-          <Button onClick={() => createMutation.mutate(novoTipo)} disabled={!novoTipo.nome}>
+          <Button onClick={handleAdicionar} disabled={!novoTipo.nome}>
             <Plus className="w-4 h-4" />
           </Button>
         </div>
