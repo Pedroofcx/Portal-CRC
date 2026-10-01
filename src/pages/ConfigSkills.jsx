@@ -36,6 +36,19 @@ export default function ConfigSkills() {
     onError: () => toast.error('Erro ao criar skill'),
   });
 
+  const handleAdicionar = () => {
+    const nome = novaSkill.nome.trim();
+    if (!nome) return;
+    const jaExiste = skills.some(
+      s => s.tipo === novaSkill.tipo && s.nome.trim().toLowerCase() === nome.toLowerCase()
+    );
+    if (jaExiste) {
+      toast.error(`Já existe uma skill "${nome}" nessa categoria.`);
+      return;
+    }
+    createMutation.mutate({ ...novaSkill, nome });
+  };
+
   const deleteMutation = useMutation({
     mutationFn: (id) => db.entities.SkillMestre.update(id, { ativa: false }),
     onSuccess: () => {
@@ -76,7 +89,7 @@ export default function ConfigSkills() {
                   value={novaSkill.tipo === 'soft' ? novaSkill.nome : ''}
                   onChange={(e) => setNovaSkill({ ...novaSkill, nome: e.target.value, tipo: 'soft' })}
                 />
-                <Button onClick={() => createMutation.mutate(novaSkill)} disabled={!novaSkill.nome}>
+                <Button onClick={handleAdicionar} disabled={!novaSkill.nome}>
                   <Plus className="w-4 h-4 mr-1" />
                   Adicionar
                 </Button>
@@ -108,7 +121,7 @@ export default function ConfigSkills() {
                   value={novaSkill.tipo === 'hard' ? novaSkill.nome : ''}
                   onChange={(e) => setNovaSkill({ ...novaSkill, nome: e.target.value, tipo: 'hard' })}
                 />
-                <Button onClick={() => createMutation.mutate(novaSkill)} disabled={!novaSkill.nome}>
+                <Button onClick={handleAdicionar} disabled={!novaSkill.nome}>
                   <Plus className="w-4 h-4 mr-1" />
                   Adicionar
                 </Button>
