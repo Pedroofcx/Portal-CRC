@@ -39,7 +39,7 @@ as $$
   set "confirmado_pelo_agente" = true,
       "confirmado_em" = now()
   where "id" = id_atribuicao
-    and "agente_id" = public.meu_colaborador_id()::uuid;
+    and "agente_id" = public.meu_colaborador_id();
 $$;
 
 revoke execute on function public.confirmar_atribuicao(uuid) from anon;
