@@ -107,6 +107,88 @@ function fimDaSemana(inicioIso) {
 }
 
 /**
+ * Dia a dia e semana a semana da EQUIPE INTEIRA (soma de todos os agentes
+ * por dia, não média das pessoas — mesma regra de `resumoQualidade`). Para
+ * o Preditivo: achar o dia que puxou o melhor/pior mês ou semana da equipe.
+ */
+export function diaADiaEquipeQualidade({ apuracoes = [], colaboradores = [], periodo = {} }) {
+  const p = semLimite(periodo);
+  const agentes = colaboradores.filter((c) => c.papel === 'agente');
+  const listasPorAgente = agentes.map((a) => apuracoes.filter((x) => x.colaborador_id === a.id));
+
+  const tel = new Map();
+  const chat = new Map();
+  for (const lista of listasPorAgente) {
+    for (const { dia, dados } of diasApurados(lista, 'telefone', p)) {
+      const acc = tel.get(dia) || { positivas: 0, negativas: 0, ligacoes: 0, atendidas: 0 };
+      acc.positivas += Number(dados.total_positivas) || 0;
+      acc.negativas += Number(dados.total_negativas) || 0;
+      acc.ligacoes += Number(dados.total_ligacoes) || 0;
+      acc.atendidas += Number(dados.total_atendidas) || 0;
+      tel.set(dia, acc);
+    }
+    for (const { dia, dados } of diasApurados(lista, 'chat', p)) {
+      const acc = chat.get(dia) || { positivos: 0, avaliados: 0, chats: 0 };
+      acc.positivos += Number(dados.total_positivos) || 0;
+      acc.avaliados += Number(dados.total_avaliados) || 0;
+      acc.chats += Number(dados.total_chats) || 0;
+      chat.set(dia, acc);
+    }
+  }
+
+  const diasOrdenados = [...new Set([...tel.keys(), ...chat.keys()])].sort();
+  const dias = diasOrdenados.map((dia) => {
+    const t = tel.get(dia) ?? null;
+    const c = chat.get(dia) ?? null;
+    const baseCsatTel = t ? t.positivas + t.negativas : 0;
+    const csatTelefone = baseCsatTel > 0 ? pct(t.positivas, baseCsatTel) : null;
+    const csatChat = c && c.avaliados > 0 ? pct(c.positivos, c.avaliados) : null;
+    const canais = [csatTelefone, csatChat].filter((v) => v !== null);
+    return {
+      dia,
+      csat: canais.length ? canais.reduce((s, v) => s + v, 0) / canais.length : null,
+      csatTelefone,
+      csatChat,
+      performance: t && t.ligacoes > 0 ? pct(t.atendidas, t.ligacoes) : null,
+      volumes: { ligacoes: t?.ligacoes ?? 0, atendidas: t?.atendidas ?? 0, chats: c?.chats ?? 0 },
+    };
+  });
+
+  const porSemana = new Map();
+  diasOrdenados.forEach((dia) => {
+    const ini = inicioDaSemana(dia);
+    if (!porSemana.has(ini)) porSemana.set(ini, []);
+    porSemana.get(ini).push(dia);
+  });
+  const semanas = [...porSemana.entries()].sort(([a], [b]) => a.localeCompare(b)).map(([inicio, diasDaSemana]) => {
+    // Soma os totais brutos da semana (não os CSAT já calculados por dia —
+    // média de percentuais distorceria dias com volumes bem diferentes).
+    const t = { positivas: 0, negativas: 0, ligacoes: 0, atendidas: 0 };
+    const c = { positivos: 0, avaliados: 0, chats: 0 };
+    diasDaSemana.forEach((dia) => {
+      const dt = tel.get(dia); const dc = chat.get(dia);
+      if (dt) { t.positivas += dt.positivas; t.negativas += dt.negativas; t.ligacoes += dt.ligacoes; t.atendidas += dt.atendidas; }
+      if (dc) { c.positivos += dc.positivos; c.avaliados += dc.avaliados; c.chats += dc.chats; }
+    });
+    const csatTelefone = (t.positivas + t.negativas) > 0 ? pct(t.positivas, t.positivas + t.negativas) : null;
+    const csatChat = c.avaliados > 0 ? pct(c.positivos, c.avaliados) : null;
+    const canais = [csatTelefone, csatChat].filter((v) => v !== null);
+    return {
+      inicio,
+      fim: fimDaSemana(inicio),
+      dias: diasDaSemana.map((dia) => dias.find((d) => d.dia === dia)),
+      csat: canais.length ? canais.reduce((s, v) => s + v, 0) / canais.length : null,
+      csatTelefone,
+      csatChat,
+      performance: t.ligacoes > 0 ? pct(t.atendidas, t.ligacoes) : null,
+      volumes: { ligacoes: t.ligacoes, atendidas: t.atendidas, chats: c.chats },
+    };
+  });
+
+  return { dias, semanas };
+}
+
+/**
  * Dia a dia e semana a semana de UMA pessoa — para achar o dia (ou a semana)
  * ruim que puxou o mês. Usa `diasApurados`, a mesma fonte da premiação: cada
  * dia conta uma vez (vale a importação mais recente), sem lógica própria de

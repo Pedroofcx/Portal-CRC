@@ -46,8 +46,8 @@ import { calcularDadosConsolidados } from '../src/lib/hanseiDados.js';
 import { desfechoDaContestacao, resumoFinanceiro } from '../src/lib/relatorios/financeiro.js';
 import { pessoasNoPeriodo } from '../src/lib/relatorios/pessoas.js';
 import { filaDeHoje, entradaESaida, tempoPorCanal, diagnosticoDeCarga } from '../src/lib/relatorios/operacao.js';
-import { resumoDoCanal } from '../src/lib/relatorios/canais.js';
-import { resumoQualidade, diaADiaQualidade } from '../src/lib/relatorios/qualidade.js';
+import { resumoDoCanal, distribuicaoDeChegada } from '../src/lib/relatorios/canais.js';
+import { resumoQualidade, diaADiaQualidade, diaADiaEquipeQualidade } from '../src/lib/relatorios/qualidade.js';
 import { resumoJornada } from '../src/lib/relatorios/jornada.js';
 
 let passou = 0;
@@ -640,6 +640,31 @@ console.log('\n== relatorio de canais ==');
   checa('contestou aparece como perda', `${c.perdidas}/${c.emAndamento}`, '1/1');
 }
 
+console.log('\n== quando chegam as reclamacoes (hora e dia da semana) ==');
+{
+  // 2026-09-01 e terca-feira (confirmado: 2026-10-01 e quinta, 30 dias antes).
+  // 14h em Brasilia (UTC-3) = 17h UTC.
+  const t = (horaUTC, tipo = 'reclamacao_interna', extra = {}) => ({
+    tipo_tratativa: tipo, data_registro: `2026-09-01T${String(horaUTC).padStart(2, '0')}:00:00Z`, ...extra,
+  });
+  const tratativas = [
+    t(17), t(17), t(17), // 14h SP, 3x
+    t(12), // 09h SP, 1x
+    t(17, 'reclame_aqui'), // outro canal, mesma hora
+    t(17, 'reclamacao_interna', { excluida: true }), // excluida nao conta
+  ];
+  const todos = distribuicaoDeChegada(tratativas, { tipo: 'todos', periodo: {} });
+  checa('total soma os 4 canais, exclui a excluida', String(todos.total), '5');
+  checa('pico as 14h (3 de reclamacao_interna + 1 de reclame_aqui)', `${todos.horaPico.hora}h:${todos.horaPico.qtd}`, '14h:4');
+  checa('pico na terca-feira (todos caem no mesmo dia)', todos.diaPico.nome, 'Terça');
+
+  const soReclamacaoInterna = distribuicaoDeChegada(tratativas, { tipo: 'reclamacao_interna', periodo: {} });
+  checa('filtra por canal: so as 3+1 de reclamacao_interna (excluida fora)', String(soReclamacaoInterna.total), '4');
+
+  const semDados = distribuicaoDeChegada([], { tipo: 'todos', periodo: {} });
+  checa('sem dados nao quebra', `${semDados.total}/${semDados.horaPico}/${semDados.diaPico}`, '0/null/null');
+}
+
 console.log('\n== relatorio de qualidade ==');
 {
   const tel = (data, av, pos, neg = Math.max(0, av - pos)) => ({ data, telefone: { total_ligacoes: 10, total_atendidas: 10, total_avaliadas: av, total_positivas: pos, total_negativas: neg } });
@@ -677,6 +702,25 @@ console.log('\n== qualidade dia a dia: achar o dia ruim que puxou a semana ==');
   checa('csat da semana pondera os tres dias juntos', semanas[0].csatTelefone.toFixed(2), (14 / 15 * 100).toFixed(2));
   checa('semana comeca na segunda 14/09', semanas[0].inicio, '2026-09-14');
   checa('semana termina na sexta 18/09', semanas[0].fim, '2026-09-18');
+}
+
+console.log('\n== qualidade dia a dia da EQUIPE (preditivo): soma todo mundo, nao um agente so ==');
+{
+  const tel = (data, pos, neg) => ({ data, telefone: { total_ligacoes: pos + neg, total_atendidas: pos + neg, total_avaliadas: pos + neg, total_positivas: pos, total_negativas: neg } });
+  const colaboradores = [{ id: 'a', papel: 'agente', nome_completo: 'Ana' }, { id: 'b', papel: 'agente', nome_completo: 'Bia' }];
+  const apuracoes = [
+    // Dia 01: Ana manda muito bem (10/0), Bia so-so (1/1) -> soma 11/1
+    { colaborador_id: 'a', tipo_apuracao: 'telefone', created_date: '2026-09-20', dados_por_data: [tel('2026-09-01', 10, 0), tel('2026-09-02', 0, 10)] },
+    { colaborador_id: 'b', tipo_apuracao: 'telefone', created_date: '2026-09-20', dados_por_data: [tel('2026-09-01', 1, 1), tel('2026-09-02', 1, 1)] },
+  ];
+  const equipe = diaADiaEquipeQualidade({ apuracoes, colaboradores, periodo: {} });
+  checa('dois dias no historico inteiro (sem limite de periodo)', String(equipe.dias.length), '2');
+  const dia1 = equipe.dias.find((d) => d.dia === '2026-09-01');
+  const dia2 = equipe.dias.find((d) => d.dia === '2026-09-02');
+  checa('dia 01 soma as duas pessoas: (10+1)/(11+1) = 91.67%', dia1.csatTelefone.toFixed(2), (11 / 12 * 100).toFixed(2));
+  checa('dia 02 e o pior (Ana foi mal): (0+1)/12 = 8.33%', dia2.csatTelefone.toFixed(2), (1 / 12 * 100).toFixed(2));
+  checa('uma semana so, com os dois dias dentro', String(equipe.semanas.length), '1');
+  checa('csat da semana pondera as 4 pessoas-dia: (11+1)/24', equipe.semanas[0].csatTelefone.toFixed(2), (12 / 24 * 100).toFixed(2));
 }
 
 console.log('\n== relatorio da jornada ==');

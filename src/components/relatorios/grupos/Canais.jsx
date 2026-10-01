@@ -6,11 +6,14 @@ import { Button } from '@/components/ui/button';
 import { formatDateSP, tipoTratativaLabels, statusLabels } from '@/components/utils/helpers';
 import { Cartao, Linha } from '@/components/ui/Cartao';
 import TabelaResumida from '@/components/ui/TabelaResumida';
-import { resumoDoCanal } from '@/lib/relatorios/canais';
+import { resumoDoCanal, distribuicaoDeChegada } from '@/lib/relatorios/canais';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 import Grafico from '@/components/relatorios/hub/Grafico';
 import { SERIE_GRAFICO } from '@/lib/cores-grafico';
 import { ComoCalculamos, Pergunta, periodoPorExtenso, brl, baixarCSV } from '@/components/relatorios/hub/Pecas';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
+import { Clock } from 'lucide-react';
 
 /**
  * Relatórios › Canais — como estamos em cada canal. Substitui o antigo
@@ -42,6 +45,80 @@ function Lista({ titulo, itens, rotular = (x) => x }) {
   );
 }
 
+const OPCOES_CANAL = [{ chave: 'todos', rotulo: 'Todos os canais' }, ...ABAS.filter((a) => a.chave !== 'outros')];
+const horaRotulo = (h) => `${String(h).padStart(2, '0')}h`;
+const DIAS_CURTOS = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sáb'];
+
+/**
+ * Quando chegam as reclamações: horário do dia e dia da semana de maior
+ * volume (data_registro, hora de Brasília). Independente da aba de canal
+ * acima — tem seletor próprio, porque Pedro pediu pra poder ver somado ou
+ * separado por canal (24/09... decisão de 01/10/2026).
+ */
+function QuandoChegam({ tratativas, periodo }) {
+  const [canal, setCanal] = useState('todos');
+  const d = useMemo(() => distribuicaoDeChegada(tratativas, { tipo: canal, periodo }), [tratativas, canal, periodo]);
+
+  return (
+    <Cartao titulo="Quando chegam as reclamações" extra={<Clock className="h-4 w-4 text-muted-foreground" aria-hidden="true" />}>
+      <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
+        <p className="text-sm text-muted-foreground">Pela data de registro, {periodoPorExtenso(periodo)}.</p>
+        <div className="space-y-1">
+          <Label htmlFor="canais-chegada-canal" className="text-xs">Canal</Label>
+          <Select value={canal} onValueChange={setCanal}>
+            <SelectTrigger id="canais-chegada-canal" className="w-56 max-w-full"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              {OPCOES_CANAL.map((o) => <SelectItem key={o.chave} value={o.chave}>{o.rotulo}</SelectItem>)}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
+      {d.total === 0 ? (
+        <p className="text-sm text-muted-foreground">Nenhuma reclamação registrada {periodoPorExtenso(periodo)}.</p>
+      ) : (
+        <>
+          <p className="mb-3 text-sm text-foreground">
+            Pico de volume: <strong>{d.diaPico?.nome}</strong>, por volta das <strong>{horaRotulo(d.horaPico?.hora)}</strong>
+            {' '}({d.horaPico?.qtd} de {d.total} registros nesse horário).
+          </p>
+
+          <div className="grid gap-6 lg:grid-cols-2">
+            <div>
+              <p className="mb-1 text-xs font-medium uppercase tracking-wide text-muted-foreground">Por horário do dia</p>
+              <Grafico altura={200}>
+                <BarChart data={d.porHora.map((h) => ({ ...h, rotulo: horaRotulo(h.hora) }))} margin={{ left: -24, right: 4 }}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                  <XAxis dataKey="rotulo" tick={{ fontSize: 9 }} interval={1} />
+                  <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
+                  <Tooltip labelFormatter={(v) => `Às ${v}`} formatter={(v) => [v, 'Registros']} />
+                  <Bar dataKey="qtd" name="Registros" fill={SERIE_GRAFICO[0]} />
+                </BarChart>
+              </Grafico>
+            </div>
+            <div>
+              <p className="mb-1 text-xs font-medium uppercase tracking-wide text-muted-foreground">Por dia da semana</p>
+              <Grafico altura={200}>
+                <BarChart data={d.porDiaSemana.map((s) => ({ ...s, rotulo: DIAS_CURTOS[s.diaSemana] }))} margin={{ left: -24, right: 4 }}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                  <XAxis dataKey="rotulo" tick={{ fontSize: 11 }} />
+                  <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
+                  <Tooltip formatter={(v) => [v, 'Registros']} />
+                  <Bar dataKey="qtd" name="Registros" fill={SERIE_GRAFICO[1]} />
+                </BarChart>
+              </Grafico>
+            </div>
+          </div>
+
+          <ComoCalculamos>
+            <p>Conta pela data e hora de registro de cada tratativa (não a de encerramento), convertida pro horário de Brasília. Exclusões não entram.</p>
+          </ComoCalculamos>
+        </>
+      )}
+    </Cartao>
+  );
+}
+
 export default function Canais({ tratativas, periodo }) {
   const [aba, setAba] = useState('reclamacao_interna');
   const r = useMemo(() => resumoDoCanal(tratativas, aba, periodo), [tratativas, aba, periodo]);
@@ -63,6 +140,8 @@ export default function Canais({ tratativas, periodo }) {
   return (
     <div className="space-y-6">
       <Pergunta pergunta="Como estamos em cada canal?" explicacao={`Os números de cada canal, pelas tratativas encerradas ${periodoPorExtenso(periodo)}.`} />
+
+      <QuandoChegam tratativas={tratativas} periodo={periodo} />
 
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-wrap gap-2" role="group" aria-label="Canal">

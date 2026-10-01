@@ -15,7 +15,7 @@ import { ChevronDown, ChevronRight } from 'lucide-react';
  */
 const ALINHAR = { esquerda: 'text-left', centro: 'text-center', direita: 'text-right' };
 
-export default function TabelaResumida({ colunas, linhas, chaveDaLinha = (_, i) => i, rotuloDetalhe = 'Ver todos os números', limite = null, rotulo = 'linhas' }) {
+export default function TabelaResumida({ colunas, linhas, chaveDaLinha = (_, i) => i, rotuloDetalhe = 'Ver todos os números', limite = null, rotulo = 'linhas', classeDaLinha = () => '' }) {
   const [abertas, setAbertas] = useState(() => new Set());
   const [tudo, setTudo] = useState(false);
   const principais = colunas.filter((c) => c.principal);
@@ -49,7 +49,7 @@ export default function TabelaResumida({ colunas, linhas, chaveDaLinha = (_, i) 
           return (
             <React.Fragment key={chave}>
               <tr
-                className={`h-11 border-t border-border ${temDetalhe ? 'cursor-pointer hover:bg-muted/60' : ''} ${aberta ? 'bg-muted/40' : ''}`}
+                className={`h-11 border-t border-border ${temDetalhe ? 'cursor-pointer hover:bg-muted/60' : ''} ${aberta ? 'bg-muted/40' : classeDaLinha(linha)}`}
                 onClick={temDetalhe ? () => alternar(chave) : undefined}
               >
                 {temDetalhe && (

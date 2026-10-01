@@ -17,6 +17,7 @@ import { ComoCalculamos, FiltroPeriodo, periodoPorExtenso } from '@/components/r
 import { intervaloDoAtalho } from '@/lib/relatorios/periodo';
 import { resumoQualidade, diaADiaQualidade } from '@/lib/relatorios/qualidade';
 import { pontosDaFaixa, proximaFaixa } from '@/lib/faixasIndicadores';
+import PreditivoApuracao from '@/components/relatorios/apuracao/PreditivoApuracao';
 
 /**
  * Análise da apuração — dia a dia e semana a semana, por trás do CSAT da
@@ -89,6 +90,8 @@ export default function RelatoriosApuracao() {
       ) : (
         <VisaoPessoa pessoa={pessoa} drill={drill} periodo={periodo} linhaComPontos={linhaComPontos} />
       )}
+
+      <PreditivoApuracao apuracoes={apuracoes} colaboradores={colaboradores} />
     </div>
   );
 }

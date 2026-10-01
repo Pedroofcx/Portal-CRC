@@ -28,6 +28,49 @@ const contar = (itens, chave) => {
 
 export const CANAIS = ['reclamacao_interna', 'reclame_aqui', 'google_meu_negocio', 'contestacao'];
 
+export const DIAS_SEMANA = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
+
+/** Hora (0-23) e dia da semana (0=dom) de um instante, no fuso de Brasília. */
+function horaEDiaSemanaSP(instante) {
+  const d = new Date(instante);
+  if (Number.isNaN(d.getTime())) return null;
+  const partes = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'America/Sao_Paulo', hour: '2-digit', hour12: false, weekday: 'short',
+  }).formatToParts(d);
+  // Alguns motores devolvem "24" pra meia-noite com hour12:false.
+  const hora = Number(partes.find((p) => p.type === 'hour').value) % 24;
+  const abrev = partes.find((p) => p.type === 'weekday').value;
+  const mapa = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 };
+  return { hora, diaSemana: mapa[abrev] };
+}
+
+/**
+ * Em que horário e dia da semana chegam as reclamações (data_registro, hora
+ * de Brasília) — pra achar o pico de volume, não de resultado. `tipo` é um
+ * dos CANAIS, ou 'todos' pra somar os quatro.
+ */
+export function distribuicaoDeChegada(tratativas = [], { tipo = 'todos', periodo = {} } = {}) {
+  const relevantes = tratativas.filter((t) => !t.excluida && t.status !== 'excluida'
+    && (tipo === 'todos' ? CANAIS.includes(t.tipo_tratativa) : t.tipo_tratativa === tipo)
+    && noPeriodo(t.data_registro || t.created_date, periodo));
+
+  const porHora = Array.from({ length: 24 }, (_, hora) => ({ hora, qtd: 0 }));
+  const porDiaSemana = Array.from({ length: 7 }, (_, diaSemana) => ({ diaSemana, nome: DIAS_SEMANA[diaSemana], qtd: 0 }));
+
+  for (const t of relevantes) {
+    const info = horaEDiaSemanaSP(t.data_registro || t.created_date);
+    if (!info) continue;
+    porHora[info.hora].qtd += 1;
+    porDiaSemana[info.diaSemana].qtd += 1;
+  }
+
+  const total = relevantes.length;
+  const horaPico = total ? [...porHora].sort((a, b) => b.qtd - a.qtd)[0] : null;
+  const diaPico = total ? [...porDiaSemana].sort((a, b) => b.qtd - a.qtd)[0] : null;
+
+  return { total, porHora, porDiaSemana, horaPico, diaPico };
+}
+
 export function resumoDoCanal(tratativas = [], tipo, periodo = {}, agora = new Date()) {
   const doTipo = tratativas.filter((t) => !t.excluida && t.status !== 'excluida'
     && (tipo === 'outros' ? !CANAIS.includes(t.tipo_tratativa) : t.tipo_tratativa === tipo));
