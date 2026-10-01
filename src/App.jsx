@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react';
 import { Toaster } from "@/components/ui/toaster"
 import { Toaster as Avisos } from "@/components/ui/sonner"
 import { QueryClientProvider } from '@tanstack/react-query'
@@ -8,9 +9,17 @@ import { BrowserRouter as Router, Navigate, Route, Routes } from 'react-router-d
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
-import RelatorioJornadaDiretoria from './pages/RelatorioJornadaDiretoria';
 import Login from './pages/Login';
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
+
+const RelatorioJornadaDiretoria = lazy(() => import('./pages/RelatorioJornadaDiretoria'));
+
+/** Mesmo spinner da checagem de login, pro load de cada página não "piscar" diferente. */
+const CarregandoPagina = () => (
+  <div className="fixed inset-0 flex items-center justify-center">
+    <div className="w-8 h-8 border-4 border-border border-t-slate-800 rounded-full animate-spin"></div>
+  </div>
+);
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -46,38 +55,40 @@ const AuthenticatedApp = () => {
 
   // Render the main app
   return (
-    <Routes>
-      <Route path="/" element={
-        <LayoutWrapper currentPageName={mainPageKey}>
-          <MainPage />
-        </LayoutWrapper>
-      } />
-      {Object.entries(Pages).map(([path, Page]) => (
+    <Suspense fallback={<CarregandoPagina />}>
+      <Routes>
+        <Route path="/" element={
+          <LayoutWrapper currentPageName={mainPageKey}>
+            <MainPage />
+          </LayoutWrapper>
+        } />
+        {Object.entries(Pages).map(([path, Page]) => (
+          <Route
+            key={path}
+            path={`/${path}`}
+            element={
+              <LayoutWrapper currentPageName={path}>
+                <Page />
+              </LayoutWrapper>
+            }
+          />
+        ))}
         <Route
-          key={path}
-          path={`/${path}`}
+          path="/RelatorioJornadaDiretoria"
           element={
-            <LayoutWrapper currentPageName={path}>
-              <Page />
+            <LayoutWrapper currentPageName="RelatorioJornadaDiretoria">
+              <RelatorioJornadaDiretoria />
             </LayoutWrapper>
           }
         />
-      ))}
-      <Route
-        path="/RelatorioJornadaDiretoria"
-        element={
-          <LayoutWrapper currentPageName="RelatorioJornadaDiretoria">
-            <RelatorioJornadaDiretoria />
-          </LayoutWrapper>
-        }
-      />
-      {/* Quem já está logado e abre /login (por favorito, ou pelo "Sair" de
-          outra aba) vai para o início, e não para "Página não encontrada".
-          Sem sessão, este trecho nem é alcançado: a tela de entrada é
-          renderizada lá em cima, no lugar do app inteiro. */}
-      <Route path="/login" element={<Navigate to="/" replace />} />
-      <Route path="*" element={<PageNotFound />} />
-    </Routes>
+        {/* Quem já está logado e abre /login (por favorito, ou pelo "Sair" de
+            outra aba) vai para o início, e não para "Página não encontrada".
+            Sem sessão, este trecho nem é alcançado: a tela de entrada é
+            renderizada lá em cima, no lugar do app inteiro. */}
+        <Route path="/login" element={<Navigate to="/" replace />} />
+        <Route path="*" element={<PageNotFound />} />
+      </Routes>
+    </Suspense>
   );
 };
 

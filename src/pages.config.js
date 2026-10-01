@@ -1,90 +1,54 @@
 /**
- * pages.config.js - Page routing configuration
- * 
- * This file is AUTO-GENERATED. Do not add imports or modify PAGES manually.
- * Pages are auto-registered when you create files in the ./pages/ folder.
- * 
- * THE ONLY EDITABLE VALUE: mainPage
- * This controls which page is the landing page (shown when users visit the app).
- * 
- * Example file structure:
- * 
- *   import HomePage from './pages/HomePage';
- *   import Dashboard from './pages/Dashboard';
- *   import Settings from './pages/Settings';
- *   
- *   export const PAGES = {
- *       "HomePage": HomePage,
- *       "Dashboard": Dashboard,
- *       "Settings": Settings,
- *   }
- *   
- *   export const pagesConfig = {
- *       mainPage: "HomePage",
- *       Pages: PAGES,
- *   };
- * 
- * Example with Layout (wraps all pages):
+ * pages.config.js — registro de rotas do Portal CRC.
  *
- *   import Home from './pages/Home';
- *   import Settings from './pages/Settings';
- *   import __Layout from './Layout.jsx';
+ * Cada página é importada com React.lazy: o navegador só baixa o código da
+ * tela que a pessoa está abrindo, em vez do app inteiro de uma vez (eram
+ * 2,7MB num chunk só, porque as 38 páginas vinham todas no import inicial).
+ * App.jsx envolve as rotas num <Suspense>, então a troca é transparente —
+ * só aparece o spinner de carregamento durante o download do pedaço.
  *
- *   export const PAGES = {
- *       "Home": Home,
- *       "Settings": Settings,
- *   }
- *
- *   export const pagesConfig = {
- *       mainPage: "Home",
- *       Pages: PAGES,
- *       Layout: __Layout,
- *   };
- *
- * To change the main page from HomePage to Dashboard, use find_replace:
- *   Old: mainPage: "HomePage",
- *   New: mainPage: "Dashboard",
- *
- * The mainPage value must match a key in the PAGES object exactly.
+ * mainPage controla qual tela abre em "/".
  */
-import AuditoriaPontuacao from './pages/AuditoriaPontuacao';
-import SolucoesReplicaveis from './pages/SolucoesReplicaveis';
-import Apuracao from './pages/Apuracao';
-import Avisos from './pages/Avisos';
-import Cadastro from './pages/Cadastro';
-import ComoFunciona from './pages/ComoFunciona';
-import ConfigCategoriasTratativa from './pages/ConfigCategoriasTratativa';
-import ConfigElegibilidade from './pages/ConfigElegibilidade';
-import ConfigEtapasJornada from './pages/ConfigEtapasJornada';
-import ConfigMotivosJornada from './pages/ConfigMotivosJornada';
-import ConfigPermissoes from './pages/ConfigPermissoes';
-import ConfigSkills from './pages/ConfigSkills';
-import ConfigTiposObservacao from './pages/ConfigTiposObservacao';
-import ConfigTiposTratativa from './pages/ConfigTiposTratativa';
-import CicloColaborador from './pages/CicloColaborador';
-import Configuracoes from './pages/Configuracoes';
-import Dashboard from './pages/Dashboard';
-import Escalas from './pages/Escalas';
-import GestaoFerias from './pages/GestaoFerias';
-import Hansei from './pages/Hansei';
-import JornadaCliente from './pages/JornadaCliente';
-import MinhaAgenda from './pages/MinhaAgenda';
-import MinhaPerformance from './pages/MinhaPerformance';
-import Observacoes from './pages/Observacoes';
-import Oraculo from './pages/Oraculo';
-import PDI from './pages/PDI';
-import POP from './pages/POP';
-import Pesquisas from './pages/Pesquisas';
-import PlanoSetorial from './pages/PlanoSetorial';
-import Relatorios from './pages/Relatorios';
-import RelatoriosApuracao from './pages/RelatoriosApuracao';
+import { lazy } from 'react';
 import { redirecionarPara } from './components/relatorios/hub/Redirecionar';
 import { redirecionarParaPagina } from './components/ui/RedirecionarPagina';
-import TratativaDetalhe from './pages/TratativaDetalhe';
-import Tratativas from './pages/Tratativas';
-import UploadFoto from './pages/UploadFoto';
-import FerramentasOperacionais from './pages/FerramentasOperacionais';
 import __Layout from './Layout.jsx';
+
+const AuditoriaPontuacao = lazy(() => import('./pages/AuditoriaPontuacao'));
+const SolucoesReplicaveis = lazy(() => import('./pages/SolucoesReplicaveis'));
+const Apuracao = lazy(() => import('./pages/Apuracao'));
+const Avisos = lazy(() => import('./pages/Avisos'));
+const Cadastro = lazy(() => import('./pages/Cadastro'));
+const ComoFunciona = lazy(() => import('./pages/ComoFunciona'));
+const ConfigCategoriasTratativa = lazy(() => import('./pages/ConfigCategoriasTratativa'));
+const ConfigElegibilidade = lazy(() => import('./pages/ConfigElegibilidade'));
+const ConfigEtapasJornada = lazy(() => import('./pages/ConfigEtapasJornada'));
+const ConfigMotivosJornada = lazy(() => import('./pages/ConfigMotivosJornada'));
+const ConfigPermissoes = lazy(() => import('./pages/ConfigPermissoes'));
+const ConfigSkills = lazy(() => import('./pages/ConfigSkills'));
+const ConfigTiposObservacao = lazy(() => import('./pages/ConfigTiposObservacao'));
+const ConfigTiposTratativa = lazy(() => import('./pages/ConfigTiposTratativa'));
+const CicloColaborador = lazy(() => import('./pages/CicloColaborador'));
+const Configuracoes = lazy(() => import('./pages/Configuracoes'));
+const Dashboard = lazy(() => import('./pages/Dashboard'));
+const Escalas = lazy(() => import('./pages/Escalas'));
+const GestaoFerias = lazy(() => import('./pages/GestaoFerias'));
+const Hansei = lazy(() => import('./pages/Hansei'));
+const JornadaCliente = lazy(() => import('./pages/JornadaCliente'));
+const MinhaAgenda = lazy(() => import('./pages/MinhaAgenda'));
+const MinhaPerformance = lazy(() => import('./pages/MinhaPerformance'));
+const Observacoes = lazy(() => import('./pages/Observacoes'));
+const Oraculo = lazy(() => import('./pages/Oraculo'));
+const PDI = lazy(() => import('./pages/PDI'));
+const POP = lazy(() => import('./pages/POP'));
+const Pesquisas = lazy(() => import('./pages/Pesquisas'));
+const PlanoSetorial = lazy(() => import('./pages/PlanoSetorial'));
+const Relatorios = lazy(() => import('./pages/Relatorios'));
+const RelatoriosApuracao = lazy(() => import('./pages/RelatoriosApuracao'));
+const TratativaDetalhe = lazy(() => import('./pages/TratativaDetalhe'));
+const Tratativas = lazy(() => import('./pages/Tratativas'));
+const UploadFoto = lazy(() => import('./pages/UploadFoto'));
+const FerramentasOperacionais = lazy(() => import('./pages/FerramentasOperacionais'));
 
 export const PAGES = {
     "AnalyticsPreditivo": redirecionarPara('operacao'),
