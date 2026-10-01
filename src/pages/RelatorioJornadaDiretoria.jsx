@@ -32,8 +32,8 @@ export default function RelatorioJornadaDiretoria() {
     queryFn: () => db.entities.Tratativa.list('-created_date', 2000),
   });
   const { data: motivos = [] } = useQuery({
-    queryKey: ['motivos', "filter({ ativo: true }, 'nome', 200)"],
-    queryFn: () => db.entities.MotivoTratativa.filter({ ativo: true }, 'nome', 200),
+    queryKey: ['motivos', "filter({ ativo: true }, 'motivo', 200)"],
+    queryFn: () => db.entities.MotivoTratativa.filter({ ativo: true }, 'motivo', 200),
   });
 
   const porEtapa = useMemo(() => {

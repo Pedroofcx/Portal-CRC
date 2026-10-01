@@ -75,8 +75,8 @@ export default function JornadaCliente() {
   });
 
   const { data: motivos = [] } = useQuery({
-    queryKey: ['motivos', "filter({ ativo: true }, 'nome', 200)"],
-    queryFn: () => db.entities.MotivoTratativa.filter({ ativo: true }, 'nome', 200),
+    queryKey: ['motivos', "filter({ ativo: true }, 'motivo', 200)"],
+    queryFn: () => db.entities.MotivoTratativa.filter({ ativo: true }, 'motivo', 200),
     staleTime: 120000,
     retry: 2
   });

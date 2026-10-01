@@ -76,7 +76,6 @@ export default function Tratativas() {
     cnpj_cliente: '',
     tipo_tratativa: '',
     prioridade: '',
-    categoria: '',
     motivo_id: '',
     submotivos: [],
     // Campos específicos Contestação de Compra
@@ -372,7 +371,6 @@ export default function Tratativas() {
       cnpj_cliente: '',
       tipo_tratativa: '',
       prioridade: '',
-      categoria: '',
       motivo_id: '',
       submotivos: [],
       numero_case_contestacao: '',
