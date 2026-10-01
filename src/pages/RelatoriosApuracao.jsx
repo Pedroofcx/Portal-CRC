@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 
 import PageHeader from '@/components/ui/PageHeader';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
+import AcessoRestrito from '@/components/ui/AcessoRestrito';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Cartao, Linha } from '@/components/ui/Cartao';
@@ -52,6 +53,9 @@ export default function RelatoriosApuracao() {
   );
 
   if (!user || isLoading) return <LoadingSpinner text="Carregando a análise..." />;
+
+  const euRel = colaboradores.find((c) => c.email?.toLowerCase() === user?.email?.toLowerCase());
+  if (euRel?.papel !== 'gestor') return <AcessoRestrito mensagem="A análise da apuração é feita pela gestão." />;
 
   const linhaComPontos = (chave, rotulo, valor, formato, detalheExtra) => {
     if (valor === null || valor === undefined) return <Linha key={chave} rotulo={rotulo} valor="—" />;

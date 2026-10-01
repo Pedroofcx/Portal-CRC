@@ -9,8 +9,11 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
 import { Plus, Trash2, Brain, Wrench } from 'lucide-react';
+import { useEu } from '@/hooks/useGestor';
+import AcessoRestrito from '@/components/ui/AcessoRestrito';
 
 export default function ConfigSkills() {
+  const { isGestor, carregando: carregandoEu } = useEu();
   const [novaSkill, setNovaSkill] = useState({ nome: '', tipo: 'soft', descricao: '' });
   const queryClient = useQueryClient();
 
@@ -43,6 +46,8 @@ export default function ConfigSkills() {
 
   const softSkills = skills.filter(s => s.tipo === 'soft');
   const hardSkills = skills.filter(s => s.tipo === 'hard');
+
+  if (!carregandoEu && !isGestor) return <AcessoRestrito />;
 
   return (
     <div className="space-y-6">

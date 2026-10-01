@@ -8,8 +8,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { Plus, Trash2 } from 'lucide-react';
+import { useEu } from '@/hooks/useGestor';
+import AcessoRestrito from '@/components/ui/AcessoRestrito';
 
 export default function ConfigTiposObservacao() {
+  const { isGestor, carregando: carregandoEu } = useEu();
   const [novoTipo, setNovoTipo] = useState({ nome: '', descricao: '', cor: 'hsl(var(--chart-1))' });
   const queryClient = useQueryClient();
 
@@ -34,6 +37,8 @@ export default function ConfigTiposObservacao() {
       toast.success('Tipo removido');
     },
   });
+
+  if (!carregandoEu && !isGestor) return <AcessoRestrito />;
 
   return (
     <Card>

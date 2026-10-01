@@ -2,6 +2,8 @@ import db from '@/api/db';
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
+import { useEu } from '@/hooks/useGestor';
+import AcessoRestrito from '@/components/ui/AcessoRestrito';
 import ConfirmDialog from '@/components/ui/ConfirmDialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -15,6 +17,7 @@ import { toast } from 'sonner';
 import { Plus, Edit, Trash2, Tag, CheckCircle, AlertTriangle } from 'lucide-react';
 
 export default function ConfigCategoriasTratativa() {
+  const { isGestor, carregando: carregandoEu } = useEu();
   const [showForm, setShowForm] = useState(false);
   const [editingCategoria, setEditingCategoria] = useState(null);
   const [confirmDialog, setConfirmDialog] = useState({ open: false, id: null });
@@ -165,6 +168,8 @@ export default function ConfigCategoriasTratativa() {
   ];
 
   const categoriasAtivas = categorias.filter(c => c.ativa).length;
+
+  if (!carregandoEu && !isGestor) return <AcessoRestrito />;
 
   return (
     <div className="space-y-6">
