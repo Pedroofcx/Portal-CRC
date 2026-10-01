@@ -54,6 +54,7 @@ export default function Hansei() {
   const marcarVisualizadoMutation = useMutation({
     mutationFn: (id) => db.entities.HanseiEnvio.update(id, { visualizado: true, data_visualizacao: new Date().toISOString() }),
     onSuccess: () => queryClient.invalidateQueries(['hansei-envios']),
+    onError: () => toast.error('Não consegui marcar como visualizado.'),
   });
 
   const comentarioMutation = useMutation({

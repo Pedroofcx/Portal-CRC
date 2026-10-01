@@ -144,6 +144,7 @@ export default function Observacoes() {
       queryClient.invalidateQueries(['observacoes']);
       toast.success('Observação excluída');
     },
+    onError: () => toast.error('Erro ao excluir observação'),
   });
 
   const handleCriar = () => {

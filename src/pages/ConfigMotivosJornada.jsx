@@ -55,6 +55,7 @@ export default function ConfigMotivosJornada() {
       toast.success('Motivo criado');
       closeDialog();
     },
+    onError: () => toast.error('Não consegui criar o motivo.'),
   });
 
   const updateMutation = useMutation({
@@ -64,6 +65,7 @@ export default function ConfigMotivosJornada() {
       toast.success('Motivo atualizado');
       closeDialog();
     },
+    onError: () => toast.error('Não consegui atualizar o motivo.'),
   });
 
   const deleteMutation = useMutation({
@@ -73,14 +75,7 @@ export default function ConfigMotivosJornada() {
       toast.success('Motivo excluído');
       setDeleteDialogOpen(false);
     },
-  });
-
-  const _createEtapaMutation = useMutation({
-    mutationFn: (data) => db.entities.EtapaJornada.create(data),
-    onSuccess: () => {
-      queryClient.invalidateQueries(['etapas-jornada']);
-      toast.success('Etapa criada');
-    },
+    onError: () => toast.error('Não consegui excluir o motivo.'),
   });
 
   const openCreate = () => {

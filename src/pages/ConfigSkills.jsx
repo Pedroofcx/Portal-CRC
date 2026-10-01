@@ -42,6 +42,7 @@ export default function ConfigSkills() {
       queryClient.invalidateQueries(['skillsMestre']);
       toast.success('Skill removida');
     },
+    onError: () => toast.error('Erro ao remover skill'),
   });
 
   const softSkills = skills.filter(s => s.tipo === 'soft');

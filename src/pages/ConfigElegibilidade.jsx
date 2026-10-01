@@ -105,6 +105,7 @@ export default function ConfigElegibilidade() {
       setDialogOpen(false);
       setFormData(EMPTY_FORM);
     },
+    onError: () => toast.error('Não consegui criar a exigência.'),
   });
 
   const deleteMutation = useMutation({
@@ -113,6 +114,7 @@ export default function ConfigElegibilidade() {
       queryClient.invalidateQueries(['elegibilidades']);
       toast.success('Exigência removida');
     },
+    onError: () => toast.error('Não consegui remover a exigência.'),
   });
 
   const toggleCategoria = (value) => {

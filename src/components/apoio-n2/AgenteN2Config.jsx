@@ -79,17 +79,6 @@ export default function AgenteN2Config() {
     onError: () => toast({ title: 'Erro ao salvar', variant: 'destructive' }),
   });
 
-  const _removerMutation = useMutation({
-    mutationFn: async (agente) => {
-      await db.entities.AgenteN2.update(agente.id, { ativo: false });
-      await logAuditoria('excluir', agente.id, agente, { ativo: false });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['agentes-n2'] });
-      toast({ title: 'Agente N2 removido do rodízio', description: 'O histórico de acionamentos é preservado.' });
-    },
-  });
-
   const excluirMutation = useMutation({
     mutationFn: async (agente) => {
       const temHistorico = acionamentosHist.some(a => a.agente_n2_id === agente.id);
@@ -122,6 +111,7 @@ export default function AgenteN2Config() {
       ]);
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['agentes-n2'] }),
+    onError: () => toast({ title: 'Não consegui reordenar', variant: 'destructive' }),
   });
 
   const handleEditar = (agente) => {

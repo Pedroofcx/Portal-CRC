@@ -222,14 +222,17 @@ export default function GestaoFerias() {
   const criarMutation = useMutation({
     mutationFn: (data) => db.entities.CicloFerias.create(data),
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['ciclos-ferias'] }); toast.success('Ciclo criado!'); },
+    onError: () => toast.error('Não consegui criar o ciclo.'),
   });
   const atualizarMutation = useMutation({
     mutationFn: ({ id, data }) => db.entities.CicloFerias.update(id, data),
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['ciclos-ferias'] }); },
+    onError: () => toast.error('Não consegui atualizar o ciclo.'),
   });
   const deletarMutation = useMutation({
     mutationFn: (id) => db.entities.CicloFerias.delete(id),
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['ciclos-ferias'] }); toast.success('Removido'); },
+    onError: () => toast.error('Não consegui remover o ciclo.'),
   });
 
   // Mapa colaborador → ciclo mais relevante (ativo/vencendo/disponivel)

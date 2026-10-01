@@ -97,6 +97,7 @@ export default function FerramentasOperacionais() {
       queryClient.invalidateQueries({ queryKey: ['estornos-historico'] });
       toast({ title: 'Cálculo salvo!', description: 'Registrado no histórico com sucesso.' });
     },
+    onError: () => toast({ title: 'Erro ao salvar', description: 'Não consegui registrar o cálculo no histórico.', variant: 'destructive' }),
   });
 
   const excluirMutation = useMutation({
@@ -105,6 +106,7 @@ export default function FerramentasOperacionais() {
       queryClient.invalidateQueries({ queryKey: ['estornos-historico'] });
       toast({ title: 'Excluído', description: 'Cálculo removido do histórico.' });
     },
+    onError: () => toast({ title: 'Erro ao excluir', description: 'Não consegui remover o cálculo.', variant: 'destructive' }),
   });
 
   const salvarConfigMutation = useMutation({
@@ -124,6 +126,7 @@ export default function FerramentasOperacionais() {
       setConfigAtiva({ ...configEditada });
       toast({ title: 'Configuração salva!', description: 'Percentuais atualizados.' });
     },
+    onError: () => toast({ title: 'Erro ao salvar', description: 'Não consegui atualizar a configuração.', variant: 'destructive' }),
   });
 
   const handleSalvar = () => {

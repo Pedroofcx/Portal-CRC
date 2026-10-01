@@ -127,6 +127,7 @@ export default function Avisos() {
       return Promise.resolve();
     },
     onSuccess: () => queryClient.invalidateQueries(['avisos']),
+    onError: () => toast.error('Não consegui marcar o aviso como lido.'),
   });
 
   if (!user) {

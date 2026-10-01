@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import db from '@/api/db';
 import PageHeader from '@/components/ui/PageHeader';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
@@ -96,6 +97,7 @@ export default function JornadaCliente() {
       }));
     },
     onSuccess: () => queryClient.invalidateQueries(['configuracoes-jornada']),
+    onError: () => toast.error('Não consegui salvar a configuração.'),
   });
 
   const periodo = useMemo(() => calcularRangePeriodo(tipoPeriodo, customInicio, customFim), [tipoPeriodo, customInicio, customFim]);

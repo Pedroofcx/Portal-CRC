@@ -28,6 +28,7 @@ export default function ConfigTiposObservacao() {
       toast.success('Tipo criado');
       setNovoTipo({ nome: '', descricao: '', cor: 'hsl(var(--chart-1))' });
     },
+    onError: () => toast.error('Não consegui criar o tipo.'),
   });
 
   const deleteMutation = useMutation({
@@ -36,6 +37,7 @@ export default function ConfigTiposObservacao() {
       queryClient.invalidateQueries(['tiposObservacao']);
       toast.success('Tipo removido');
     },
+    onError: () => toast.error('Não consegui remover o tipo.'),
   });
 
   if (!carregandoEu && !isGestor) return <AcessoRestrito />;

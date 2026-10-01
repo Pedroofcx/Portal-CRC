@@ -69,6 +69,7 @@ export default function ApoioEspecializado() {
       queryClient.invalidateQueries({ queryKey: ['solicitacoes-apoio'] });
       toast({ title: 'Status atualizado!' });
     },
+    onError: () => toast({ title: 'Erro ao atualizar status', description: 'Tente novamente.', variant: 'destructive' }),
   });
 
   const handleSubmit = (dados) => {

@@ -40,6 +40,7 @@ export default function DistribuicaoTratativas({ gestorId, gestorNome, colaborad
       toast.success('Atribuição registrada com sucesso');
       setDialogOpen(false);
     },
+    onError: () => toast.error('Não consegui registrar a atribuição.'),
   });
 
   const deleteMutation = useMutation({
@@ -48,6 +49,7 @@ export default function DistribuicaoTratativas({ gestorId, gestorNome, colaborad
       queryClient.invalidateQueries(['distribuicoes-tratativas']);
       toast.success('Registro removido');
     },
+    onError: () => toast.error('Não consegui remover o registro.'),
   });
 
   const agentesAtivos = useMemo(

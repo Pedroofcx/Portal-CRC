@@ -77,17 +77,6 @@ export default function LiderTecnicoConfig() {
     onError: () => toast({ title: 'Erro ao salvar', variant: 'destructive' }),
   });
 
-  const _removerMutation = useMutation({
-    mutationFn: async (lider) => {
-      await db.entities.LiderTecnico.update(lider.id, { ativo: false });
-      await logAuditoria('excluir', lider.id, lider, { ativo: false });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['lideres-tecnicos'] });
-      toast({ title: 'Líder Técnico removido do rodízio', description: 'O histórico de tratativas vinculadas é preservado.' });
-    },
-  });
-
   const excluirMutation = useMutation({
     mutationFn: async (lider) => {
       const temHistorico = acionamentosHist.some(a => a.lider_tecnico_id === lider.id);
@@ -120,6 +109,7 @@ export default function LiderTecnicoConfig() {
       ]);
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['lideres-tecnicos'] }),
+    onError: () => toast({ title: 'Não consegui reordenar', variant: 'destructive' }),
   });
 
   const handleEditar = (lider) => {

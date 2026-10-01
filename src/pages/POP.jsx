@@ -124,11 +124,13 @@ export default function POP() {
       setEditando(null);
       setAbertoId(pop.id);
     },
+    onError: () => toast.error('Não consegui publicar. Tente de novo.'),
   });
 
   const desativar = useMutation({
     mutationFn: (id) => db.entities.POP.update(id, { ativo: false }),
     onSuccess: () => { toast.success('POP desativado'); atualizar(); setDesativando(null); setAbertoId(null); },
+    onError: () => toast.error('Não consegui desativar.'),
   });
 
   const confirmarLeitura = useMutation({
@@ -140,6 +142,7 @@ export default function POP() {
       queryClient.invalidateQueries({ queryKey: ['pop-leituras'] });
       queryClient.invalidateQueries({ queryKey: ['pop-leituras-versao'] });
     },
+    onError: () => toast.error('Não consegui confirmar a leitura.'),
   });
 
   if (isLoading) return <LoadingSpinner text="Carregando procedimentos…" />;

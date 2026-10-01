@@ -54,6 +54,7 @@ export default function ConfigCiclosTrimestral() {
       setDialogOpen(false);
       setForm({ nome: '', data_inicio: '', data_fim: '', mes_pagamento: '', descricao: '' });
     },
+    onError: () => toast.error('Não consegui criar o ciclo.'),
   });
 
   const updateMutation = useMutation({
@@ -62,6 +63,7 @@ export default function ConfigCiclosTrimestral() {
       queryClient.invalidateQueries(['ciclos-trimestrais']);
       toast.success('Ciclo atualizado');
     },
+    onError: () => toast.error('Não consegui atualizar o ciclo.'),
   });
 
   const deleteMutation = useMutation({
@@ -70,6 +72,7 @@ export default function ConfigCiclosTrimestral() {
       queryClient.invalidateQueries(['ciclos-trimestrais']);
       toast.success('Ciclo removido');
     },
+    onError: () => toast.error('Não consegui remover o ciclo.'),
   });
 
   const handleAtivar = async (ciclo) => {

@@ -45,6 +45,7 @@ export default function ConfigEtapasJornada() {
       toast.success('Etapa criada');
       closeDialog();
     },
+    onError: () => toast.error('Não consegui criar a etapa.'),
   });
 
   const updateMutation = useMutation({
@@ -54,6 +55,7 @@ export default function ConfigEtapasJornada() {
       toast.success('Etapa atualizada');
       closeDialog();
     },
+    onError: () => toast.error('Não consegui atualizar a etapa.'),
   });
 
   const deleteMutation = useMutation({
@@ -63,6 +65,7 @@ export default function ConfigEtapasJornada() {
       toast.success('Etapa excluída');
       setDeleteDialogOpen(false);
     },
+    onError: () => toast.error('Não consegui excluir a etapa.'),
   });
 
   const openCreate = () => {
