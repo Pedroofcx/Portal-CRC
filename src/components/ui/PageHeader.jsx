@@ -35,7 +35,7 @@ export default function PageHeader({
       )}
 
       <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between">
-        <div className="flex shrink-0 items-center gap-3">
+        <div className="flex min-w-[180px] flex-1 items-center gap-3">
           {Icon && (
             <span
               className="flex h-9 w-9 shrink-0 items-center justify-center rounded border border-primary/20 bg-info-soft text-primary"
@@ -55,10 +55,12 @@ export default function PageHeader({
         </div>
 
         {actions && (
-          // shrink-0 no bloco do título: com muitos botões (Jornada do Cliente),
-          // o título dividia espaço com as ações e truncava pra "Jornad...".
-          // Agora o título fica no tamanho natural e as ações quebram linha
-          // (flex-wrap no container pai) quando não cabem mais ao lado.
+          // min-w-[180px] no bloco do titulo (nao shrink-0): com muitos botoes
+          // (Jornada do Cliente), o titulo dividia espaco com eles e truncava
+          // pra "Jornad...". Com piso minimo + flex-wrap no container pai, as
+          // acoes quebram pra linha de baixo quando nao cabem mais ao lado, e
+          // o subtitulo longo (Solucoes Replicaveis) continua quebrando linha
+          // normalmente dentro do espaco que o titulo tem.
           <div className="flex min-w-0 flex-wrap items-center gap-2 sm:justify-end">{actions}</div>
         )}
       </div>
