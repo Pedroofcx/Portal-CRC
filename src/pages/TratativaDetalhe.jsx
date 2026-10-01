@@ -1,6 +1,7 @@
 import db from '@/api/db';
 import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { usePermissoes } from '@/hooks/usePermissoes';
 
 import { formatDateSP, tipoTratativaLabels, statusLabels, calculateTratativaPoints, calcularDiasRestantesReabertura, formatBRL, situacaoReplicavel } from '@/components/utils/helpers';
 import { CurrencyInput } from '@/components/ui/CurrencyInput';
@@ -149,6 +150,8 @@ export default function TratativaDetalhe({ idExterno = null, embutido = false })
 
   const colaborador = colaboradores.find(c => c.email === user?.email);
   const isGestor = colaborador?.papel === 'gestor';
+  const { temPermissao } = usePermissoes();
+  const podeVerCustoOperacional = temPermissao('ver_custo_operacional');
 
   // Atualizar contagem de dias para reabertura
   useEffect(() => {
@@ -1297,8 +1300,8 @@ export default function TratativaDetalhe({ idExterno = null, embutido = false })
 
         {/* Sidebar */}
         <div className="space-y-6">
-          {/* Impacto Financeiro — restrito a gestores */}
-          {isGestor && <CustoOperacionalCard tratativa={tratativa} />}
+          {/* Impacto Financeiro — restrito por permissão (ver_custo_operacional) */}
+          {podeVerCustoOperacional && <CustoOperacionalCard tratativa={tratativa} />}
 
           {/* Pontuação */}
           {isEncerrada && pontosPreview && (

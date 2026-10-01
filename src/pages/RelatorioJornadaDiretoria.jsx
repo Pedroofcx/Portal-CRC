@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Printer, ShieldAlert, ChevronDown, ChevronRight } from 'lucide-react';
 import { minutosDeEsforco, formatBRL, construirContextoComercialIA, calcularReceitaMensalEquivalente, calcularReceitaAnualEquivalente } from '@/components/utils/helpers';
+import { usePermissoes } from '@/hooks/usePermissoes';
 
 const isEncerradaEfetiva = (t) => !t.excluida && (t.status === 'encerrada' || t.status === 'aguardando_confirmacao_reabertura');
 const MINUTOS_POR_FTE = 13200;
@@ -26,6 +27,8 @@ export default function RelatorioJornadaDiretoria() {
   const { data: user } = useQuery({ queryKey: ['currentUser'], queryFn: () => db.auth.me() });
   const { data: colaboradores = [] } = useQuery({ queryKey: ['colaboradores', "list()"], queryFn: () => db.entities.Colaborador.list() });
   const isGestor = colaboradores.find(c => c.email === user?.email)?.papel === 'gestor';
+  const { temPermissao } = usePermissoes();
+  const podeVerCustoOperacional = temPermissao('ver_custo_operacional');
 
   const { data: tratativas = [], isLoading } = useQuery({
     queryKey: ['tratativas-jornada'],
@@ -37,8 +40,8 @@ export default function RelatorioJornadaDiretoria() {
   });
 
   const porEtapa = useMemo(() => {
-    // A busca de salário e o cálculo de custo só acontecem para gestores.
-    const colaboradoresPorId = isGestor
+    // A busca de salário e o cálculo de custo só acontecem com a permissão.
+    const colaboradoresPorId = podeVerCustoOperacional
       ? colaboradores.reduce((acc, c) => { acc[c.id] = c; return acc; }, {})
       : {};
 
@@ -48,10 +51,10 @@ export default function RelatorioJornadaDiretoria() {
       if (!mapa[etapa]) mapa[etapa] = { volumetria: 0, custoOperacional: 0, devolucaoCliente: 0, perdaReceita: 0, minutosEfetivos: 0 };
       mapa[etapa].volumetria += 1;
       // Custo operacional OFICIAL (servidor, dividido pela carga simultânea).
-      mapa[etapa].custoOperacional += isGestor ? (parseFloat(t.custo_operacional_reais) || 0) : 0;
+      mapa[etapa].custoOperacional += podeVerCustoOperacional ? (parseFloat(t.custo_operacional_reais) || 0) : 0;
       mapa[etapa].devolucaoCliente += parseFloat(t.valor_devolvido_cliente) || 0;
       mapa[etapa].perdaReceita += parseFloat(t.valor_perda_receita) || 0;
-      mapa[etapa].minutosEfetivos += isGestor ? minutosDeEsforco(t, colaboradoresPorId[t.agente_responsavel_id]) : 0;
+      mapa[etapa].minutosEfetivos += podeVerCustoOperacional ? minutosDeEsforco(t, colaboradoresPorId[t.agente_responsavel_id]) : 0;
     });
     return Object.entries(mapa)
       .map(([etapa, d]) => ({
@@ -61,7 +64,7 @@ export default function RelatorioJornadaDiretoria() {
         custoTotalDor: d.custoOperacional + d.devolucaoCliente + d.perdaReceita,
       }))
       .sort((a, b) => b.custoTotalDor - a.custoTotalDor);
-  }, [tratativas, colaboradores, isGestor]);
+  }, [tratativas, colaboradores, podeVerCustoOperacional]);
 
   // Detalhamento de causa raiz (motivos) por etapa
   const causaRaizPorEtapa = useMemo(() => {
@@ -72,7 +75,7 @@ export default function RelatorioJornadaDiretoria() {
       if (!t.motivo_id) return;
       if (!mapa[etapa]) mapa[etapa] = {};
       if (!mapa[etapa][t.motivo_id]) mapa[etapa][t.motivo_id] = { custo: 0, casos: 0 };
-      const custoOperacionalDinamico = isGestor ? (parseFloat(t.custo_operacional_reais) || 0) : 0;
+      const custoOperacionalDinamico = podeVerCustoOperacional ? (parseFloat(t.custo_operacional_reais) || 0) : 0;
       mapa[etapa][t.motivo_id].custo +=
         custoOperacionalDinamico +
         (parseFloat(t.valor_devolvido_cliente) || 0) +
@@ -89,7 +92,7 @@ export default function RelatorioJornadaDiretoria() {
         .sort((a, b) => b.custo - a.custo);
     });
     return resultado;
-  }, [tratativas, motivos, colaboradores, isGestor]);
+  }, [tratativas, motivos, colaboradores, podeVerCustoOperacional]);
 
   const totalGeral = porEtapa.reduce((acc, e) => acc + e.custoTotalDor, 0);
   const etapaMaisCustosa = porEtapa[0];
@@ -104,7 +107,7 @@ export default function RelatorioJornadaDiretoria() {
     const receitaPorCategoria = {};
 
     encerradas.forEach(t => {
-      const custoOp = isGestor ? (parseFloat(t.custo_operacional_reais) || 0) : 0;
+      const custoOp = podeVerCustoOperacional ? (parseFloat(t.custo_operacional_reais) || 0) : 0;
       const impacto = custoOp + (parseFloat(t.valor_devolvido_cliente) || 0) + (parseFloat(t.valor_perda_receita) || 0);
 
       // Receitas equivalentes calculadas dinamicamente (modalidade + valor contratado)
@@ -146,7 +149,7 @@ export default function RelatorioJornadaDiretoria() {
         .map(([chave, d]) => ({ chave, ...d }))
         .sort((a, b) => b.receitaMensal - a.receitaMensal),
     };
-  }, [tratativas, colaboradores, isGestor]);
+  }, [tratativas, colaboradores, podeVerCustoOperacional]);
 
   useEffect(() => {
     if (isLoading || porEtapa.length === 0 || insight || loadingInsight) return;

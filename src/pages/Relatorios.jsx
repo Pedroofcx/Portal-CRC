@@ -15,6 +15,7 @@ import Operacao from '@/components/relatorios/grupos/Operacao';
 import Canais from '@/components/relatorios/grupos/Canais';
 import Qualidade from '@/components/relatorios/grupos/Qualidade';
 import Jornada from '@/components/relatorios/grupos/Jornada';
+import { usePermissoes } from '@/hooks/usePermissoes';
 
 /**
  * Relatórios — organizados por PERGUNTA (padrão aprovado por Pedro em
@@ -57,6 +58,8 @@ export default function Relatorios() {
 
   const eu = colaboradores.find((c) => c.email?.toLowerCase() === user?.email?.toLowerCase());
   const ehGestor = eu?.papel === 'gestor';
+  const { temPermissao } = usePermissoes();
+  const podeVerCustoOperacional = temPermissao('ver_custo_operacional');
 
   // Período padrão: os últimos 90 dias. O ciclo é só um atalho, não uma prisão.
   const [periodo, setPeriodo] = useState(() => ({ chave: 'ultimos90', ...intervaloDoAtalho('ultimos90') }));
@@ -72,8 +75,8 @@ export default function Relatorios() {
     operacao: <Operacao tratativas={tratativas} periodo={periodo} apuracoes={apuracoes} colaboradores={colaboradores} escalasTurno={escalasTurno} />,
     canais: <Canais tratativas={tratativas} periodo={periodo} />,
     qualidade: <Qualidade periodo={periodo} colaboradores={colaboradores} />,
-    financeiro: <Financeiro tratativas={tratativas} periodo={periodo} ehGestor={ehGestor} />,
-    jornada: <Jornada tratativas={tratativas} periodo={periodo} ehGestor={ehGestor} />,
+    financeiro: <Financeiro tratativas={tratativas} periodo={periodo} ehGestor={podeVerCustoOperacional} />,
+    jornada: <Jornada tratativas={tratativas} periodo={periodo} ehGestor={podeVerCustoOperacional} />,
     pessoas: <Pessoas tratativas={tratativas} periodo={periodo} ciclos={ciclos} colaboradores={colaboradores} />,
   }[grupo.chave];
 

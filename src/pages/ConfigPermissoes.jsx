@@ -1,246 +1,228 @@
-import db from '@/api/db';
-import React, { useState } from 'react';
+import db, { supabase } from '@/api/db';
+import React, { useMemo, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 import PageHeader from '@/components/ui/PageHeader';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import AcessoRestrito from '@/components/ui/AcessoRestrito';
+import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Shield, Eye, EyeOff } from 'lucide-react';
+import { Cartao } from '@/components/ui/Cartao';
+import { Shield, Search, RotateCcw } from 'lucide-react';
 import { toast } from 'sonner';
+import { useEu } from '@/hooks/useGestor';
 
-const modulosDisponiveis = [
-  { nome: 'Dashboard', rota: 'Dashboard', icone: 'LayoutDashboard', descricao: 'Visão geral e métricas' },
-  { nome: 'Minha Performance', rota: 'MinhaPerformance', icone: 'Award', descricao: 'Desempenho individual' },
-  { nome: 'Como Funciona', rota: 'ComoFunciona', icone: 'BookOpen', descricao: 'Manual do sistema' },
-  { nome: 'Tratativas CRC', rota: 'Tratativas', icone: 'ClipboardList', descricao: 'Gestão de tratativas' },
-  { nome: 'Colaboradores', rota: 'Cadastro', icone: 'Users', descricao: 'Gestão de equipe' },
-  { nome: 'Observações', rota: 'Observacoes', icone: 'MessageSquare', descricao: 'Feedbacks e registros' },
-  { nome: 'Jornada do Cliente', rota: 'JornadaCliente', icone: 'Map', descricao: 'Análise da jornada' },
-  { nome: 'Plano Setorial', rota: 'PlanoSetorial', icone: 'TrendingUp', descricao: 'Planejamento estratégico' },
-  { nome: 'ORÁCULO CRC', rota: 'Oraculo', icone: 'Eye', descricao: 'Predição e análise' },
-  { nome: 'Apuração', rota: 'Apuracao', icone: 'Search', descricao: 'Apuração de métricas' },
-  { nome: 'POP', rota: 'POP', icone: 'FileText', descricao: 'Procedimentos operacionais' },
-  { nome: 'Escalas', rota: 'Escalas', icone: 'Calendar', descricao: 'Escalas de trabalho' },
-  { nome: 'Férias', rota: 'Ferias', icone: 'Palmtree', descricao: 'Solicitação de férias' },
-  { nome: 'Gestão de Férias', rota: 'GestaoFerias', icone: 'Users', descricao: 'Gestão de férias (gestor)' },
-  { nome: 'Avisos', rota: 'Avisos', icone: 'Bell', descricao: 'Avisos e comunicados' },
-  { nome: 'Pesquisas', rota: 'Pesquisas', icone: 'ClipboardCheck', descricao: 'Pesquisas internas' },
-  { nome: 'Hansei', rota: 'Hansei', icone: 'TrendingUp', descricao: 'Envio de resultados de desempenho' },
-  { nome: 'Relatórios', rota: 'Relatorios', icone: 'BarChart3', descricao: 'Relatórios gerenciais' },
-  { nome: 'Configurações', rota: 'Configuracoes', icone: 'Settings', descricao: 'Configurações do sistema' },
-];
-
+/**
+ * Permissões granulares (migration 35+). Por colaborador, não por módulo —
+ * o caso de uso real é "ajustar o acesso desta pessoa" (ex: um substituto
+ * que gerencia mas não vê salário), não "configurar o sistema inteiro de
+ * uma vez". Cada card é um colaborador; cada linha, uma permissão, com o
+ * padrão do papel dele e um jeito de sobrescrever.
+ *
+ * O controle de verdade é o banco (tem_permissao(), que as views mascaradas
+ * chamam direto) — esta tela só grava/apaga linhas em colaborador_permissao.
+ * Sem exceção aqui, ninguém muda de comportamento.
+ */
 export default function ConfigPermissoes() {
-  const [_selectedColaboradores, _setSelectedColaboradores] = useState([]);
+  const { eu, isGestor, carregando: carregandoEu } = useEu();
+  const [busca, setBusca] = useState('');
+  const [selecionadoId, setSelecionadoId] = useState(null);
   const queryClient = useQueryClient();
 
-  const { data: user } = useQuery({
-    queryKey: ['currentUser'],
-    queryFn: () => db.auth.me(),
-  });
-
-  const { data: colaboradores = [] } = useQuery({
+  const { data: colaboradores = [], isLoading: carregandoColaboradores } = useQuery({
     queryKey: ['colaboradores', "list()"],
     queryFn: () => db.entities.Colaborador.list(),
   });
 
-  const { data: permissoes = [], isLoading } = useQuery({
-    queryKey: ['permissoes-modulo'],
-    queryFn: () => db.entities.PermissaoModulo.list(),
+  const { data: catalogo = [], isLoading: carregandoCatalogo } = useQuery({
+    queryKey: ['permissao-catalogo'],
+    queryFn: () => db.entities.Permissao.list(),
   });
 
-  const createMutation = useMutation({
-    mutationFn: (data) => db.entities.PermissaoModulo.create(data),
-    onSuccess: () => {
-      queryClient.invalidateQueries(['permissoes-modulo']);
-      toast.success('Permissão criada');
+  const { data: excecoes = [], isLoading: carregandoExcecoes } = useQuery({
+    queryKey: ['colaborador-permissao'],
+    queryFn: () => db.entities.ColaboradorPermissao.list(),
+  });
+
+  const salvarExcecao = useMutation({
+    mutationFn: async ({ colaboradorId, chave, concedida, existente }) => {
+      if (existente) {
+        await db.entities.ColaboradorPermissao.update(existente.id, { concedida });
+      } else {
+        const { error } = await supabase.from('colaborador_permissao').insert({
+          colaborador_id: colaboradorId,
+          permissao_chave: chave,
+          concedida,
+          concedido_por_id: eu?.id,
+          concedido_por_nome: eu?.nome_completo,
+        });
+        if (error) throw new Error(error.message);
+      }
     },
-    onError: () => toast.error('Erro ao criar permissão'),
-  });
-
-  const updateMutation = useMutation({
-    mutationFn: ({ id, data }) => db.entities.PermissaoModulo.update(id, data),
     onSuccess: () => {
-      queryClient.invalidateQueries(['permissoes-modulo']);
+      queryClient.invalidateQueries({ queryKey: ['colaborador-permissao'] });
+      queryClient.invalidateQueries({ queryKey: ['minhas-permissoes'] });
       toast.success('Permissão atualizada');
     },
-    onError: () => toast.error('Erro ao atualizar permissão'),
+    onError: () => toast.error('Não consegui salvar essa permissão.'),
   });
 
-  const inicializarModulos = () => {
-    modulosDisponiveis.forEach((modulo, index) => {
-      const jaExiste = permissoes.find(p => p.modulo_rota === modulo.rota);
-      if (!jaExiste) {
-        createMutation.mutate({
-          modulo_nome: modulo.nome,
-          modulo_rota: modulo.rota,
-          visivel_para_agente: true,
-          visivel_para_gestor: true,
-          colaboradores_excecao: [],
-          ordem: index + 1,
-          icone: modulo.icone,
-          ativo: true
-        });
-      }
-    });
-  };
+  const restaurarPadrao = useMutation({
+    mutationFn: (excecaoId) => db.entities.ColaboradorPermissao.delete(excecaoId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['colaborador-permissao'] });
+      queryClient.invalidateQueries({ queryKey: ['minhas-permissoes'] });
+      toast.success('Voltou ao padrão do papel');
+    },
+    onError: () => toast.error('Não consegui restaurar o padrão.'),
+  });
 
-  const handleToggleVisibilidade = (permissaoId, tipo) => {
-    const permissao = permissoes.find(p => p.id === permissaoId);
-    if (!permissao) return;
+  const ativos = useMemo(
+    () => colaboradores.filter((c) => c.ativo !== false).sort((a, b) => (a.nome_completo || '').localeCompare(b.nome_completo || '')),
+    [colaboradores]
+  );
+  const filtrados = useMemo(() => {
+    const termo = busca.trim().toLowerCase();
+    if (!termo) return ativos;
+    return ativos.filter((c) => c.nome_completo?.toLowerCase().includes(termo) || c.email?.toLowerCase().includes(termo));
+  }, [ativos, busca]);
 
-    const updateData = tipo === 'agente' 
-      ? { visivel_para_agente: !permissao.visivel_para_agente }
-      : { visivel_para_gestor: !permissao.visivel_para_gestor };
+  const selecionado = ativos.find((c) => c.id === selecionadoId) || filtrados[0] || null;
 
-    updateMutation.mutate({ id: permissaoId, data: updateData });
-  };
+  const porModulo = useMemo(() => {
+    const grupos = new Map();
+    for (const p of [...catalogo].sort((a, b) => (a.ordem ?? 0) - (b.ordem ?? 0))) {
+      if (!grupos.has(p.modulo)) grupos.set(p.modulo, []);
+      grupos.get(p.modulo).push(p);
+    }
+    return [...grupos.entries()];
+  }, [catalogo]);
 
-  const handleToggleExcecao = (permissaoId, colaboradorId) => {
-    const permissao = permissoes.find(p => p.id === permissaoId);
-    if (!permissao) return;
+  const excecoesDoSelecionado = useMemo(
+    () => (selecionado ? excecoes.filter((e) => e.colaborador_id === selecionado.id) : []),
+    [excecoes, selecionado]
+  );
 
-    const atual = permissao.colaboradores_excecao || [];
-    const nova = atual.includes(colaboradorId)
-      ? atual.filter(id => id !== colaboradorId)
-      : [...atual, colaboradorId];
+  if (carregandoEu) return <LoadingSpinner text="Carregando..." />;
+  if (!isGestor) return <AcessoRestrito mensagem="Só a gestão configura permissões." />;
 
-    updateMutation.mutate({ 
-      id: permissaoId, 
-      data: { colaboradores_excecao: nova }
-    });
-  };
-
-  const colaboradorAtual = colaboradores.find(c => c.email === user?.email);
-  const isGestor = colaboradorAtual?.papel === 'gestor';
-
-  if (!isGestor) {
-    return (
-      <div className="text-center py-16">
-        <Shield className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-        <h2 className="text-xl font-semibold mb-2">Acesso Restrito</h2>
-        <p className="text-muted-foreground">Apenas gestores podem configurar permissões.</p>
-      </div>
-    );
-  }
-
-  if (isLoading) {
-    return <LoadingSpinner text="Carregando permissões..." />;
-  }
+  const carregando = carregandoColaboradores || carregandoCatalogo || carregandoExcecoes;
 
   return (
     <div className="space-y-6">
-      <PageHeader 
-        title="Permissões de Módulos"
-        subtitle="Configure quais módulos cada perfil pode visualizar"
+      <PageHeader
+        title="Permissões"
+        subtitle="O que cada pessoa pode ver e fazer, módulo por módulo"
         icon={Shield}
         backTo="Configuracoes"
-        actions={
-          permissoes.length === 0 && (
-            <Button onClick={inicializarModulos} className="bg-primary hover:bg-primary/90">
-              Inicializar Módulos
-            </Button>
-          )
-        }
       />
 
-      {permissoes.length === 0 ? (
-        <Card className="border-0 shadow-sm">
-          <CardContent className="py-12 text-center">
-            <Shield className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-            <p className="text-muted-foreground mb-4">Nenhuma permissão configurada ainda</p>
-            <Button onClick={inicializarModulos} className="bg-primary hover:bg-primary/90">
-              Inicializar Módulos com Permissões Padrão
-            </Button>
-          </CardContent>
-        </Card>
+      {carregando ? (
+        <LoadingSpinner text="Carregando permissões..." />
       ) : (
-        <div className="space-y-4">
-          {permissoes.sort((a, b) => (a.ordem || 0) - (b.ordem || 0)).map(permissao => (
-            <Card key={permissao.id} className="border-0 shadow-sm">
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-base">{permissao.modulo_nome}</CardTitle>
-                  <Badge variant="outline">{permissao.modulo_rota}</Badge>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {/* Visibilidade por Perfil */}
-                <div className="grid sm:grid-cols-2 gap-6">
-                  <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
-                    <div className="flex items-center gap-3">
-                      {permissao.visivel_para_agente ? (
-                        <Eye className="w-5 h-5 text-success" />
-                      ) : (
-                        <EyeOff className="w-5 h-5 text-muted-foreground" />
-                      )}
-                      <Label className="font-medium">Visível para Agentes</Label>
-                    </div>
-                    <Switch
-                      checked={permissao.visivel_para_agente}
-                      onCheckedChange={() => handleToggleVisibilidade(permissao.id, 'agente')}
-                    />
-                  </div>
-                  <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
-                    <div className="flex items-center gap-3">
-                      {permissao.visivel_para_gestor ? (
-                        <Eye className="w-5 h-5 text-primary" />
-                      ) : (
-                        <EyeOff className="w-5 h-5 text-muted-foreground" />
-                      )}
-                      <Label className="font-medium">Visível para Gestores</Label>
-                    </div>
-                    <Switch
-                      checked={permissao.visivel_para_gestor}
-                      onCheckedChange={() => handleToggleVisibilidade(permissao.id, 'gestor')}
-                    />
-                  </div>
-                </div>
+        <div className="grid gap-6 lg:grid-cols-[280px_1fr]">
+          <Cartao titulo="Colaboradores">
+            <div className="relative mb-3">
+              <Search className="pointer-events-none absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" aria-hidden="true" />
+              <Input placeholder="Buscar..." value={busca} onChange={(e) => setBusca(e.target.value)} className="pl-8" />
+            </div>
+            <div className="max-h-[60vh] space-y-1 overflow-y-auto">
+              {filtrados.map((c) => {
+                const temExcecao = excecoes.some((e) => e.colaborador_id === c.id);
+                const ativo2 = selecionado?.id === c.id;
+                return (
+                  <button
+                    key={c.id}
+                    type="button"
+                    onClick={() => setSelecionadoId(c.id)}
+                    className={`flex w-full items-center gap-2.5 rounded-lg p-2 text-left text-sm transition-colors ${
+                      ativo2 ? 'bg-info-soft text-primary' : 'hover:bg-muted'
+                    }`}
+                  >
+                    <Avatar className="h-7 w-7 shrink-0">
+                      <AvatarImage src={c.foto_url} />
+                      <AvatarFallback className="bg-muted text-xs">{c.nome_completo?.charAt(0)}</AvatarFallback>
+                    </Avatar>
+                    <span className="min-w-0 flex-1 truncate">{c.nome_completo}</span>
+                    <span className="shrink-0 text-xs text-muted-foreground">{c.papel === 'gestor' ? 'gestor' : 'agente'}</span>
+                    {temExcecao && <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-warning" title="Tem exceção" />}
+                  </button>
+                );
+              })}
+              {filtrados.length === 0 && <p className="py-4 text-center text-sm text-muted-foreground">Ninguém encontrado.</p>}
+            </div>
+          </Cartao>
 
-                {/* Exceções Individuais */}
-                <div className="p-4 bg-warning-soft border border-warning/25 rounded-lg">
-                  <Label className="font-medium text-warning mb-3 block">
-                    Exceções Individuais (sobrescreve regra do perfil)
-                  </Label>
-                  <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-2 max-h-48 overflow-y-auto">
-                    {colaboradores.filter(c => c.ativo !== false && c.papel === 'agente').map(colab => {
-                      const isExcecao = permissao.colaboradores_excecao?.includes(colab.id);
+          {!selecionado ? (
+            <Cartao><p className="text-sm text-muted-foreground">Selecione um colaborador.</p></Cartao>
+          ) : (
+            <div className="space-y-4">
+              <Cartao>
+                <div className="flex items-center gap-3">
+                  <Avatar className="h-10 w-10">
+                    <AvatarImage src={selecionado.foto_url} />
+                    <AvatarFallback className="bg-muted">{selecionado.nome_completo?.charAt(0)}</AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <p className="font-semibold text-foreground">{selecionado.nome_completo}</p>
+                    <p className="text-sm text-muted-foreground">
+                      Papel: <strong>{selecionado.papel === 'gestor' ? 'Gestor' : 'Agente'}</strong>
+                      {' '}— {selecionado.papel === 'gestor' ? 'tem tudo abaixo por padrão' : 'não tem nada abaixo por padrão'}, exceto o que for marcado aqui.
+                    </p>
+                  </div>
+                </div>
+              </Cartao>
+
+              {porModulo.map(([modulo, permissoesDoModulo]) => (
+                <Cartao key={modulo} titulo={modulo}>
+                  <div className="divide-y divide-border">
+                    {permissoesDoModulo.map((p) => {
+                      const existente = excecoesDoSelecionado.find((e) => e.permissao_chave === p.chave);
+                      const padrao = selecionado.papel === 'gestor';
+                      const efetivo = existente ? existente.concedida : padrao;
+                      const sobrescrita = !!existente;
                       return (
-                        <div 
-                          key={colab.id}
-                          className={`flex items-center gap-2 p-2 rounded-lg border transition-all cursor-pointer ${
-                            isExcecao ? 'bg-info-soft border-info/30' : 'bg-card border-border hover:border-info/25'
-                          }`}
-                          onClick={() => handleToggleExcecao(permissao.id, colab.id)}
-                        >
-                          <Checkbox 
-                            checked={isExcecao}
-                            onCheckedChange={() => handleToggleExcecao(permissao.id, colab.id)}
+                        <div key={p.chave} className="flex items-center justify-between gap-3 py-2.5">
+                          <div className="min-w-0">
+                            <p className="text-sm text-foreground">{p.rotulo}</p>
+                            {p.descricao && <p className="text-xs text-muted-foreground">{p.descricao}</p>}
+                            {sobrescrita && (
+                              <button
+                                type="button"
+                                onClick={() => restaurarPadrao.mutate(existente.id)}
+                                className="mt-0.5 inline-flex items-center gap-1 text-xs font-medium text-warning hover:underline"
+                              >
+                                <RotateCcw className="h-3 w-3" aria-hidden="true" />
+                                Exceção — restaurar padrão ({padrao ? 'teria' : 'não teria'})
+                              </button>
+                            )}
+                          </div>
+                          <Switch
+                            checked={efetivo}
+                            onCheckedChange={(novoValor) =>
+                              salvarExcecao.mutate({
+                                colaboradorId: selecionado.id,
+                                chave: p.chave,
+                                concedida: novoValor,
+                                existente,
+                              })
+                            }
                           />
-                          <Avatar className="h-6 w-6">
-                            <AvatarImage src={colab.foto_url} />
-                            <AvatarFallback className="bg-info-soft text-primary text-xs">
-                              {colab.nome_completo?.charAt(0)}
-                            </AvatarFallback>
-                          </Avatar>
-                          <span className="text-sm flex-1 truncate">{colab.nome_completo}</span>
                         </div>
                       );
                     })}
                   </div>
-                  <p className="text-xs text-warning mt-2">
-                    {permissao.colaboradores_excecao?.length || 0} colaborador(es) com acesso especial
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                </Cartao>
+              ))}
+
+              {porModulo.length === 0 && (
+                <Cartao>
+                  <p className="text-sm text-muted-foreground">Nenhuma permissão cadastrada no catálogo ainda.</p>
+                </Cartao>
+              )}
+            </div>
+          )}
         </div>
       )}
     </div>

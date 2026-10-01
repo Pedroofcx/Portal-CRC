@@ -1,6 +1,7 @@
 import db from '@/api/db';
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { usePermissoes } from '@/hooks/usePermissoes';
 
 import { formatDateSP, papelLabels, formatBRL } from '@/components/utils/helpers';
 import { CurrencyInput } from '@/components/ui/CurrencyInput';
@@ -78,13 +79,8 @@ export default function Cadastro() {
     queryFn: () => db.entities.Equipe.filter({ ativa: true }),
   });
 
-  const { data: user } = useQuery({
-    queryKey: ['currentUser'],
-    queryFn: () => db.auth.me(),
-  });
-
-  const colaboradorLogado = colaboradores.find(c => c.email === user?.email);
-  const isGestor = colaboradorLogado?.papel === 'gestor';
+  const { temPermissao } = usePermissoes();
+  const podeVerSalario = temPermissao('ver_salario');
 
   const createMutation = useMutation({
     mutationFn: (data) => db.entities.Colaborador.create(data),
@@ -400,9 +396,9 @@ export default function Cadastro() {
                         onChange={(e) => setFormData({ ...formData, data_admissao: e.target.value })}
                       />
                     </div>
-                    {isGestor && (
+                    {podeVerSalario && (
                       <div className="col-span-2">
-                        <Label>Salário (R$) - Visível apenas para Gestores</Label>
+                        <Label>Salário (R$) - Visível conforme permissão</Label>
                         <CurrencyInput
                           value={formData.salario || 0}
                           onChange={(num) => setFormData({ ...formData, salario: num })}
@@ -631,7 +627,7 @@ export default function Cadastro() {
                               Promoção #{selectedColaborador.promocoes.length - idx}
                             </Badge>
                           </div>
-                          {(prom.salario_anterior || prom.salario_novo) && isGestor && (
+                          {(prom.salario_anterior || prom.salario_novo) && podeVerSalario && (
                             <div className="mt-2 p-2 bg-card rounded border border-border">
                               <p className="text-sm text-muted-foreground">
                                 <strong>Salário:</strong> {prom.salario_anterior ? formatBRL(prom.salario_anterior) : '---'} → {prom.salario_novo ? formatBRL(prom.salario_novo) : '---'}
@@ -727,7 +723,7 @@ export default function Cadastro() {
                           <span className="font-medium">{selectedColaborador.equipe_nome}</span>
                         </div>
                       )}
-                      {isGestor && selectedColaborador.salario && (
+                      {podeVerSalario && selectedColaborador.salario && (
                         <div className="flex justify-between py-2 border-b border-border">
                           <span className="text-muted-foreground">Salário Atual:</span>
                           <span className="font-medium">{formatBRL(selectedColaborador.salario)}</span>
@@ -778,9 +774,9 @@ export default function Cadastro() {
                     onChange={(e) => setFormData({ ...formData, data_admissao: e.target.value })}
                   />
                 </div>
-                {isGestor && (
+                {podeVerSalario && (
                   <div className="col-span-2">
-                    <Label>Salário (R$) - Visível apenas para Gestores</Label>
+                    <Label>Salário (R$) - Visível conforme permissão</Label>
                     <CurrencyInput
                       value={formData.salario || 0}
                       onChange={(num) => setFormData({ ...formData, salario: num })}

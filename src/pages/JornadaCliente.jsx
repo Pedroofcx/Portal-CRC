@@ -39,6 +39,7 @@ import {
   Brain
 } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { usePermissoes } from '@/hooks/usePermissoes';
 
 export default function JornadaCliente() {
   const [visualizacao, setVisualizacao] = useState('fluxo');
@@ -58,6 +59,9 @@ export default function JornadaCliente() {
   });
 
   const isGestor = colaboradores.find(c => c.email === user?.email)?.papel === 'gestor';
+  const { temPermissao } = usePermissoes();
+  const podeVerSalario = temPermissao('ver_salario');
+  const podeVerCustoOperacional = temPermissao('ver_custo_operacional');
 
   const { data: tratativas = [], isLoading, refetch } = useQuery({
     queryKey: ['tratativas-jornada'],
@@ -329,9 +333,9 @@ export default function JornadaCliente() {
               </Button>
             </Link>
           </div>
-          <RelatorioImpactoFinanceiro tratativas={tratativas} colaboradores={colaboradores} isGestor={isGestor} />
+          <RelatorioImpactoFinanceiro tratativas={tratativas} colaboradores={colaboradores} isGestor={podeVerCustoOperacional} />
           <MatrizEsforcoImpacto tratativas={tratativas} motivos={motivos} />
-          <SalariosColaboradoresJornada colaboradores={colaboradores} />
+          {podeVerSalario && <SalariosColaboradoresJornada colaboradores={colaboradores} />}
         </div>
       ) : visualizacao === 'benchmarking' && isGestor ? (
         <div className="space-y-6">
