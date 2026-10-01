@@ -20,15 +20,23 @@
  * existe em `colaborador` e está ativo — conta de autenticação sem colaborador
  * correspondente não consome o orçamento de IA.
  *
+ * Isso barra quem não está logado, mas não quem está: qualquer colaborador
+ * ativo, pelo console do navegador com a sessão aberta, poderia chamar isto
+ * em loop com prompt arbitrário. Por isso há também um teto de chamadas por
+ * colaborador por dia (LIMITE_CHAMADAS_POR_DIA), registrado em
+ * `log_invocacao_llm` (migration 31) — sem guardar o prompt nem a resposta,
+ * só quem chamou e quando, o necessário para contar e auditar uso.
+ *
  *
  * O CONTRATO É O DO BASE44, DE PROPÓSITO
  *
  * Entrada:  { prompt, response_json_schema? }
  * Saída:    objeto (quando há schema) ou string (quando não há)
  *
- * As duas telas que usam isto — ResumoIAEtapa e RelatorioJornadaDiretoria —
- * continuam escritas do mesmo jeito. O adaptador (src/api/db.js) chama esta
- * função e devolve exatamente a forma que o código já esperava.
+ * Quatro telas chamam isto — ResumoIAEtapa, PainelLeitura (Observações),
+ * Visao360 (ORÁCULO) e RelatorioJornadaDiretoria — e continuam escritas do
+ * mesmo jeito. O adaptador (src/api/db.js) chama esta função e devolve
+ * exatamente a forma que o código já esperava.
  */
 
 /*
@@ -45,6 +53,15 @@ const CHAVE_ANON = Deno.env.get('SUPABASE_ANON_KEY')!;
 
 /** Teto de prompt. Protege o orçamento contra um envio acidental gigante. */
 const LIMITE_PROMPT = 30_000;
+
+/**
+ * Teto de chamadas por colaborador por dia. Protege o orçamento contra uso
+ * fora das quatro telas que legitimamente chamam isto (alguém script
+ * batendo na função direto, pelo console, com a sessão aberta). Generoso o
+ * bastante para o uso normal de relatório/resumo, baixo o bastante para não
+ * deixar ninguém sozinho estourar a cota do dia para todo mundo.
+ */
+const LIMITE_CHAMADAS_POR_DIA = 60;
 
 const cabecalhosCors = {
   'Access-Control-Allow-Origin': '*',
@@ -121,6 +138,21 @@ Deno.serve(async (req) => {
 
   if (!colaborador || colaborador.ativo === false) {
     return responder({ error: 'Usuário sem colaborador ativo no Portal.' }, 403);
+  }
+
+  // --- limite de uso do dia ---------------------------------------------------
+  const inicioDoDia = new Date();
+  inicioDoDia.setUTCHours(0, 0, 0, 0);
+  const { count: chamadasHoje } = await sb
+    .from('log_invocacao_llm')
+    .select('id', { count: 'exact', head: true })
+    .eq('colaborador_id', colaborador.id)
+    .gte('criado_em', inicioDoDia.toISOString());
+
+  if ((chamadasHoje ?? 0) >= LIMITE_CHAMADAS_POR_DIA) {
+    return responder({
+      error: `Você já usou a IA ${LIMITE_CHAMADAS_POR_DIA} vezes hoje, o teto diário por pessoa. Volta a liberar amanhã.`,
+    }, 429);
   }
 
   // --- o pedido -------------------------------------------------------------
@@ -209,6 +241,10 @@ ${JSON.stringify(corpo.response_json_schema)}`,
 
     return { resposta, dados, falhaRede };
   }
+
+  // Registra a tentativa antes de chamar o provedor: é o que de fato pode
+  // custar, então é isso que entra na conta do teto diário.
+  await sb.from('log_invocacao_llm').insert({ colaborador_id: colaborador.id });
 
   let via = schema ? 'schema' : 'texto';
   let { resposta, dados, falhaRede } = await pedirAoModelo(true);
