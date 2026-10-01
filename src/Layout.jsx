@@ -9,6 +9,7 @@ import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
 import BuscaGlobal from '@/components/ui/BuscaGlobal';
 import MenuUsuario from '@/components/ui/MenuUsuario';
 import TrocarSenhaDialog from '@/components/conta/TrocarSenhaDialog';
+import NotificacaoAtribuicao from '@/components/distribuicao/NotificacaoAtribuicao';
 import {
   LayoutDashboard as Home,
   Users,
@@ -412,6 +413,11 @@ export default function Layout({ children, currentPageName }) {
               obrigatoria
               aoConcluir={() => queryClient.invalidateQueries({ queryKey: ['currentUser'] })}
             />
+
+            {/* Aviso de nova atribuição de tratativa (migration 32). Mesmo
+                motivo de ficar no Layout: tem que aparecer não importa em
+                qual tela a pessoa estiver quando entrar. */}
+            <NotificacaoAtribuicao colaborador={colaborador} />
           </div>
         </div>
       </main>
