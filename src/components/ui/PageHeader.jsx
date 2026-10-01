@@ -34,8 +34,8 @@ export default function PageHeader({
         </Link>
       )}
 
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-        <div className="flex min-w-0 items-center gap-3">
+      <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between">
+        <div className="flex shrink-0 items-center gap-3">
           {Icon && (
             <span
               className="flex h-9 w-9 shrink-0 items-center justify-center rounded border border-primary/20 bg-info-soft text-primary"
@@ -55,8 +55,10 @@ export default function PageHeader({
         </div>
 
         {actions && (
-          // Sem shrink-0: com muitos botões (Jornada do Cliente), o bloco não
-          // encolhia e empurrava a página 145px para o lado. Agora quebra linha.
+          // shrink-0 no bloco do título: com muitos botões (Jornada do Cliente),
+          // o título dividia espaço com as ações e truncava pra "Jornad...".
+          // Agora o título fica no tamanho natural e as ações quebram linha
+          // (flex-wrap no container pai) quando não cabem mais ao lado.
           <div className="flex min-w-0 flex-wrap items-center gap-2 sm:justify-end">{actions}</div>
         )}
       </div>
