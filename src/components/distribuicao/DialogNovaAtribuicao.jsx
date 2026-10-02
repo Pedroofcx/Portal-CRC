@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -6,8 +6,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertTriangle, RotateCcw, User } from 'lucide-react';
-import { TIPOS_CONFIG, PRIORIDADE_CONFIG, sugerirProximoAgente } from './distribuicaoUtils';
+import { TIPOS_CONFIG, PRIORIDADE_CONFIG } from './distribuicaoUtils';
 import { turnoDoHorario, ROTULO_TURNO } from '@/lib/escalas';
+import { indisponiveisEm, filaDoCanal, MOTIVOS_OVERRIDE, montarJustificativa, dataCurta } from '@/lib/equidade';
 import PainelLateral, { RodapeFixo } from '@/components/ui/PainelLateral';
 
 // Usar fuso SP para não criar atribuição com data de ontem (ex: 23h SP = dia seguinte UTC)
@@ -18,36 +19,48 @@ function horaAgora() {
   return new Date().toLocaleTimeString('pt-BR', { timeZone: 'America/Sao_Paulo', hour: '2-digit', minute: '2-digit', hour12: false });
 }
 
-export default function DialogNovaAtribuicao({ open, onClose, onSalvar, agentes, distribuicoes, isPending }) {
-  const [form, setForm] = useState({
-    agente_id: '', ticket_id: '', tipo_tratativa: '', prioridade: 'media',
-    data_atribuicao: hoje(), horario_atribuicao: horaAgora(), observacao: '',
-  });
+const formVazio = () => ({
+  agente_id: '', ticket_id: '', tipo_tratativa: '', prioridade: 'media',
+  data_atribuicao: hoje(), horario_atribuicao: horaAgora(), observacao: '',
+});
+
+/**
+ * Nova atribuição. O sistema já tira da fila quem está de férias ou ausente
+ * na data escolhida; a lista de pessoas vem NA ORDEM do rodízio, com a última
+ * atribuição do canal e quantas já recebeu no mês — para não precisar abrir
+ * o histórico. Fora da ordem, o motivo é obrigatório.
+ */
+export default function DialogNovaAtribuicao({ open, onClose, onSalvar, agentes, distribuicoes, solicitacoes = [], atribuicoes = [], inicial, isPending }) {
+  const [form, setForm] = useState(formVazio);
   const [overrideConfirmado, setOverrideConfirmado] = useState(false);
-  const [justificativaOverride, setJustificativaOverride] = useState('');
+  const [motivo, setMotivo] = useState('');
+  const [detalhe, setDetalhe] = useState('');
+
+  // Abre já preenchido quando vem do quadro do rodízio.
+  useEffect(() => {
+    if (!open) return;
+    setForm({ ...formVazio(), tipo_tratativa: inicial?.tipo ?? '', agente_id: inicial?.agenteId ?? '' });
+    setOverrideConfirmado(false);
+    setMotivo('');
+    setDetalhe('');
+  }, [open, inicial]);
 
   const f = (k, v) => setForm(prev => ({ ...prev, [k]: v }));
 
-  const sugestao = useMemo(() => {
+  const indisponiveis = useMemo(
+    () => indisponiveisEm(form.data_atribuicao, { solicitacoes, atribuicoes }),
+    [form.data_atribuicao, solicitacoes, atribuicoes],
+  );
+
+  const rodizio = useMemo(() => {
     if (!form.tipo_tratativa) return null;
-    return sugerirProximoAgente(form.tipo_tratativa, agentes, distribuicoes);
-  }, [form.tipo_tratativa, agentes, distribuicoes]);
+    return filaDoCanal(form.tipo_tratativa, agentes, distribuicoes, indisponiveis, form.data_atribuicao);
+  }, [form.tipo_tratativa, agentes, distribuicoes, indisponiveis, form.data_atribuicao]);
 
+  const sugerido = rodizio?.sugerido ?? null;
   const agenteAtual = agentes.find(a => a.id === form.agente_id);
-  const ehOverride = sugestao && form.agente_id && sugestao.sugerido?.id !== form.agente_id;
-
-  // Última atribuição deste agente neste tipo
-  const ultimaAtribuicaoAgente = useMemo(() => {
-    if (!form.agente_id || !form.tipo_tratativa) return null;
-    const doAgenteTipo = distribuicoes
-      .filter(d => d.agente_id === form.agente_id && d.tipo_tratativa === form.tipo_tratativa)
-      .sort((a, b) => {
-        const da = `${a.data_atribuicao} ${a.horario_atribuicao || ''}`;
-        const db = `${b.data_atribuicao} ${b.horario_atribuicao || ''}`;
-        return db.localeCompare(da);
-      });
-    return doAgenteTipo[0] || null;
-  }, [form.agente_id, form.tipo_tratativa, distribuicoes]);
+  const linhaAtual = rodizio?.fila.find(l => l.agente.id === form.agente_id) ?? null;
+  const ehOverride = Boolean(sugerido && form.agente_id && sugerido.agente.id !== form.agente_id);
 
   // O turno sai do horário da atribuição (08:00–11:59 manhã, 12:00 em diante
   // tarde). Ele alimenta o relatório de produtividade por turno, e escolher à
@@ -60,17 +73,19 @@ export default function DialogNovaAtribuicao({ open, onClose, onSalvar, agentes,
       ...form,
       turno,
       override_rodizio: ehOverride && overrideConfirmado,
-      justificativa_override: ehOverride ? justificativaOverride : '',
-      agente_sugerido_id: sugestao?.sugerido?.id || '',
-      agente_sugerido_nome: sugestao?.sugerido?.nome_completo || '',
+      justificativa_override: ehOverride ? montarJustificativa(motivo, detalhe) : '',
+      agente_sugerido_id: sugerido?.agente.id || '',
+      agente_sugerido_nome: sugerido?.agente.nome_completo || '',
     });
-    // Reset
-    setForm({ agente_id: '', ticket_id: '', tipo_tratativa: '', prioridade: 'media', data_atribuicao: hoje(), horario_atribuicao: horaAgora(), observacao: '' });
-    setOverrideConfirmado(false);
-    setJustificativaOverride('');
   };
 
   const podeConfirmar = !ehOverride || overrideConfirmado;
+
+  const rotuloDaLinha = (l) => {
+    if (!l.disponivel) return `${l.agente.nome_completo} — ${l.motivo}${l.ate ? ` até ${dataCurta(l.ate)}` : ''}`;
+    const ultima = l.ultima ? `última ${dataCurta(l.ultima.data_atribuicao)}` : 'nunca recebeu';
+    return `${l.posicao}. ${l.agente.nome_completo} — ${ultima}, ${l.noMes} no mês${l.posicao === 1 ? ' (próxima)' : ''}`;
+  };
 
   return (
     <PainelLateral
@@ -82,7 +97,7 @@ export default function DialogNovaAtribuicao({ open, onClose, onSalvar, agentes,
           {/* Tipo */}
           <div>
             <Label className="text-xs">Tipo de Tratativa <span className="text-destructive">*</span></Label>
-            <Select value={form.tipo_tratativa} onValueChange={v => { f('tipo_tratativa', v); setOverrideConfirmado(false); }}>
+            <Select value={form.tipo_tratativa} onValueChange={v => { f('tipo_tratativa', v); f('agente_id', ''); setOverrideConfirmado(false); }}>
               <SelectTrigger className="mt-1"><SelectValue placeholder="Selecione o tipo" /></SelectTrigger>
               <SelectContent>
                 {Object.entries(TIPOS_CONFIG).map(([k, cfg]) => (
@@ -93,16 +108,26 @@ export default function DialogNovaAtribuicao({ open, onClose, onSalvar, agentes,
           </div>
 
           {/* Sugestão do Rodízio */}
-          {sugestao && (
-            <div className="p-3 bg-info-soft border border-primary/25 rounded-lg">
-              <p className="text-xs font-semibold text-primary flex items-center gap-1 mb-1">
-                <RotateCcw className="w-3 h-3" /> Sugestão do Rodízio Assistido
+          {rodizio && (
+            <div className="p-3 bg-info-soft border border-primary/25 rounded-lg space-y-1">
+              <p className="text-xs font-semibold text-primary flex items-center gap-1">
+                <RotateCcw className="w-3 h-3" /> Próxima do rodízio em {dataCurta(form.data_atribuicao)}
               </p>
-              <p className="text-sm font-bold text-primary">{sugestao.sugerido?.nome_completo}</p>
-              {sugestao.ultimaAtribuicao ? (
-                <p className="text-xs text-primary">Última: #{sugestao.ultimaAtribuicao.ticket_id} em {sugestao.ultimaAtribuicao.data_atribuicao}</p>
+              {sugerido ? (
+                <>
+                  <p className="text-sm font-bold text-primary">{sugerido.agente.nome_completo}</p>
+                  <p className="text-xs text-primary">
+                    {sugerido.ultima ? `Última: #${sugerido.ultima.ticket_id} em ${dataCurta(sugerido.ultima.data_atribuicao)}` : 'Nunca recebeu este tipo'}
+                    {` · ${sugerido.noMes} no mês`}
+                  </p>
+                </>
               ) : (
-                <p className="text-xs text-success">Nunca recebeu este tipo</p>
+                <p className="text-sm text-primary">Ninguém disponível nesta data.</p>
+              )}
+              {rodizio.puladosAFrente.length > 0 && (
+                <p className="text-xs text-warning">
+                  Pulada: {rodizio.puladosAFrente.map(p => `${p.agente.nome_completo} (${p.motivo.toLowerCase()}${p.ate ? `, até ${dataCurta(p.ate)}` : ''})`).join('; ')}
+                </p>
               )}
             </div>
           )}
@@ -110,46 +135,50 @@ export default function DialogNovaAtribuicao({ open, onClose, onSalvar, agentes,
           {/* Agente */}
           <div>
             <Label className="text-xs">Agente Responsável <span className="text-destructive">*</span></Label>
-            <Select value={form.agente_id} onValueChange={v => { f('agente_id', v); setOverrideConfirmado(false); }}>
-              <SelectTrigger className="mt-1"><SelectValue placeholder="Selecione o agente" /></SelectTrigger>
+            <Select value={form.agente_id} onValueChange={v => { f('agente_id', v); setOverrideConfirmado(false); }} disabled={!form.tipo_tratativa}>
+              <SelectTrigger className="mt-1"><SelectValue placeholder={form.tipo_tratativa ? 'Selecione o agente' : 'Escolha o tipo primeiro'} /></SelectTrigger>
               <SelectContent>
-                {agentes.map(a => (
-                  <SelectItem key={a.id} value={a.id}>
-                    {a.nome_completo}
-                    {sugestao?.sugerido?.id === a.id ? ' ✓ Sugerido' : ''}
+                {(rodizio?.fila ?? []).map(l => (
+                  <SelectItem key={l.agente.id} value={l.agente.id} disabled={!l.disponivel}>
+                    {rotuloDaLinha(l)}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
+            <p className="mt-1 text-xs text-muted-foreground">Na ordem do rodízio. Quem está ausente aparece no fim e não pode ser escolhida.</p>
           </div>
 
-          {/* Alerta de override */}
+          {/* Fora da ordem: motivo obrigatório */}
           {ehOverride && !overrideConfirmado && (
             <Alert className="border-warning/30 bg-warning-soft">
               <AlertTriangle className="w-4 h-4 text-warning" />
               <AlertDescription className="text-warning text-xs space-y-2">
                 <p>
-                  <strong>{agenteAtual?.nome_completo}</strong> não é o próximo no rodízio para <strong>{TIPOS_CONFIG[form.tipo_tratativa]?.label}</strong>.
+                  <strong>{agenteAtual?.nome_completo}</strong> não é a próxima do rodízio para <strong>{TIPOS_CONFIG[form.tipo_tratativa]?.label}</strong>
+                  {linhaAtual?.ultima && <> (última em {dataCurta(linhaAtual.ultima.data_atribuicao)}, {linhaAtual.noMes} no mês)</>}.
+                  A próxima é <strong>{sugerido.agente.nome_completo}</strong>.
                 </p>
-                {ultimaAtribuicaoAgente && (
-                  <p>Última atribuição deste agente neste canal: Ticket #{ultimaAtribuicaoAgente.ticket_id} em {ultimaAtribuicaoAgente.data_atribuicao} às {ultimaAtribuicaoAgente.horario_atribuicao}</p>
-                )}
-                <p>Próximo sugerido: <strong>{sugestao.sugerido?.nome_completo}</strong></p>
                 <div>
-                  <Label className="text-xs text-warning">Justificativa do override (opcional)</Label>
+                  <Label className="text-xs text-warning">Motivo <span className="text-destructive">*</span></Label>
+                  <Select value={motivo} onValueChange={setMotivo}>
+                    <SelectTrigger className="mt-1 bg-card text-foreground"><SelectValue placeholder="Por que fora da ordem?" /></SelectTrigger>
+                    <SelectContent>
+                      {MOTIVOS_OVERRIDE.map(m => <SelectItem key={m.valor} value={m.valor}>{m.rotulo}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
                   <Textarea
                     rows={2}
-                    className="mt-1 text-xs"
-                    placeholder="Ex: Agente sugerido está em reunião..."
-                    value={justificativaOverride}
-                    onChange={e => setJustificativaOverride(e.target.value)}
+                    className="mt-2 text-xs bg-card text-foreground"
+                    placeholder="Detalhe (opcional)"
+                    value={detalhe}
+                    onChange={e => setDetalhe(e.target.value)}
                   />
                 </div>
                 <div className="flex gap-2 pt-1">
-                  <Button size="sm" variant="outline" onClick={() => { f('agente_id', sugestao.sugerido?.id || ''); }}>
-                    Usar sugerido
+                  <Button size="sm" variant="outline" onClick={() => f('agente_id', sugerido.agente.id)}>
+                    Usar a próxima
                   </Button>
-                  <Button size="sm" className="bg-warning hover:bg-warning text-white" onClick={() => setOverrideConfirmado(true)}>
+                  <Button size="sm" className="bg-warning hover:bg-warning text-white" disabled={!motivo} onClick={() => setOverrideConfirmado(true)}>
                     Atribuir mesmo assim
                   </Button>
                 </div>
@@ -159,7 +188,7 @@ export default function DialogNovaAtribuicao({ open, onClose, onSalvar, agentes,
 
           {ehOverride && overrideConfirmado && (
             <div className="p-2 bg-warning-soft border border-warning/25 rounded text-xs text-warning">
-              Override confirmado — será registrado no histórico do rodízio.
+              Fora do rodízio: {montarJustificativa(motivo, detalhe)}. Fica registrado no histórico.
             </div>
           )}
 
@@ -195,7 +224,7 @@ export default function DialogNovaAtribuicao({ open, onClose, onSalvar, agentes,
           <div className="grid grid-cols-2 gap-3">
             <div>
               <Label className="text-xs">Data</Label>
-              <Input type="date" value={form.data_atribuicao} onChange={e => f('data_atribuicao', e.target.value)} className="mt-1" />
+              <Input type="date" value={form.data_atribuicao} onChange={e => { f('data_atribuicao', e.target.value); f('agente_id', ''); setOverrideConfirmado(false); }} className="mt-1" />
             </div>
             <div>
               <Label className="text-xs">Horário</Label>

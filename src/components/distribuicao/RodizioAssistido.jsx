@@ -1,138 +1,133 @@
-import React, { useState, useMemo } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { ChevronDown, ChevronUp, Clock, AlertTriangle, User } from 'lucide-react';
-import { TIPOS_CONFIG, sugerirProximoAgente } from './distribuicaoUtils';
+import React, { useMemo, useState } from 'react';
+import { ChevronDown, ChevronUp } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { TIPOS_CONFIG } from './distribuicaoUtils';
+import { filaDoCanal, dataCurta, rotuloDoMes, mesDe } from '@/lib/equidade';
 
-export default function RodizioAssistido({ agentesAtivos, distribuicoes }) {
-  const [expandido, setExpandido] = useState(true);
-  const [tipoSelecionado, setTipoSelecionado] = useState('reclamacao_interna');
+/**
+ * Rodízio assistido: para cada canal, quem é o próximo AGORA — já sem quem
+ * está de férias ou ausente. Dá para abrir a fila inteira de um canal e,
+ * com um clique, abrir a atribuição já preenchida com canal e pessoa.
+ */
+export default function RodizioAssistido({ agentesAtivos, distribuicoes, indisponiveis, hoje, onAtribuir, onIndisponivel }) {
+  const [aberto, setAberto] = useState(null);
 
-  // Memoizar sugestão — sugerirProximoAgente itera sobre todos os agentes/distribuições
-  const sugestao = useMemo(
-    () => sugerirProximoAgente(tipoSelecionado, agentesAtivos, distribuicoes),
-    [tipoSelecionado, agentesAtivos, distribuicoes]
+  const canais = useMemo(
+    () => Object.keys(TIPOS_CONFIG).map((tipo) => ({ tipo, ...filaDoCanal(tipo, agentesAtivos, distribuicoes, indisponiveis, hoje) })),
+    [agentesAtivos, distribuicoes, indisponiveis, hoje],
   );
-  if (!sugestao) return null;
 
-  const { sugerido, ultimaAtribuicao, ordenados } = sugestao;
-  const tipoConfig = TIPOS_CONFIG[tipoSelecionado];
-
-  const formatarData = (d) => {
-    if (!d) return '—';
-    return `${d.data_atribuicao} às ${d.horario_atribuicao || '—'}`;
-  };
+  const ausentes = agentesAtivos.filter((a) => indisponiveis.has(a.id));
 
   return (
-    <Card className="border-2 border-primary/25 shadow-sm">
-      <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-sm flex items-center gap-2">
-            Rodízio Assistido CRC
-            <Badge className="bg-info-soft text-primary text-xs">Sugestão Visual</Badge>
-          </CardTitle>
-          <button onClick={() => setExpandido(e => !e)} className="p-1 hover:bg-muted rounded">
-            {expandido ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-          </button>
+    <div className="space-y-4">
+      <div className="flex flex-wrap items-baseline justify-between gap-2">
+        <p className="text-sm text-muted-foreground">
+          O próximo de cada canal, por quem recebeu há mais tempo. Quem não pode receber hoje é pulado e
+          mantém a vez. Contagem do mês: {rotuloDoMes(mesDe(hoje))}.
+        </p>
+      </div>
+
+      {ausentes.length > 0 && (
+        <div className="rounded-lg border border-border bg-muted p-3 text-sm">
+          <p className="font-medium text-foreground">Fora do rodízio hoje</p>
+          <ul className="mt-1 space-y-0.5 text-muted-foreground">
+            {ausentes.map((a) => {
+              const i = indisponiveis.get(a.id);
+              return (
+                <li key={a.id} className="flex flex-wrap items-center gap-x-2">
+                  <span className="text-foreground">{a.nome_completo}</span>
+                  <span>{i.motivo}{i.ate ? `, até ${dataCurta(i.ate)}` : ''}</span>
+                  {i.escalaId && onIndisponivel && (
+                    <button className="text-xs text-primary underline" onClick={() => onIndisponivel({ voltar: a, escalaId: i.escalaId })}>
+                      Voltou
+                    </button>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
         </div>
-      </CardHeader>
-
-      {expandido && (
-        <CardContent className="space-y-4">
-          {/* Seletor de tipo */}
-          <div>
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">Selecionar canal</p>
-            <div className="flex flex-wrap gap-2">
-              {Object.entries(TIPOS_CONFIG).map(([key, cfg]) => (
-                <button
-                  key={key}
-                  onClick={() => setTipoSelecionado(key)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-medium border-2 transition-all ${
-                    tipoSelecionado === key
-                      ? 'border-primary/40 bg-info-soft text-primary'
-                      : 'border-border bg-card text-muted-foreground hover:border-border'
-                  }`}
-                >
-                  {cfg.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Sugestão principal */}
-          <div className="p-4 bg-info-soft border-2 border-primary/25 rounded-xl">
-            <p className="text-xs text-primary uppercase tracking-wide font-semibold mb-2 flex items-center gap-1">
-              <User className="w-3 h-3" /> Próximo agente sugerido — {tipoConfig.label}
-            </p>
-            <div className="flex items-center justify-between gap-3">
-              <div>
-                <p className="text-lg font-bold text-primary">{sugerido?.nome_completo || '—'}</p>
-                {ultimaAtribuicao ? (
-                  <p className="text-xs text-primary mt-0.5 flex items-center gap-1">
-                    <Clock className="w-3 h-3" />
-                    Última atribuição: Ticket #{ultimaAtribuicao.ticket_id} em {formatarData(ultimaAtribuicao)}
-                  </p>
-                ) : (
-                  <p className="text-xs text-primary mt-0.5">Nunca recebeu uma tratativa deste tipo</p>
-                )}
-              </div>
-              <Badge className="bg-primary text-white text-xs flex-shrink-0">Sugerido</Badge>
-            </div>
-          </div>
-
-          {/* Ordem do rodízio */}
-          <div>
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">Ordem do rodízio — {tipoConfig.label}</p>
-            <div className="space-y-1.5">
-              {ordenados.map((agente, idx) => {
-                const doTipo = distribuicoes.filter(d => d.agente_id === agente.id && d.tipo_tratativa === tipoSelecionado);
-                const ultimo = [...doTipo].sort((a, b) => {
-                  const da = `${a.data_atribuicao} ${a.horario_atribuicao || ''}`;
-                  const db = `${b.data_atribuicao} ${b.horario_atribuicao || ''}`;
-                  return db.localeCompare(da);
-                })[0];
-
-                return (
-                  <div
-                    key={agente.id}
-                    className={`flex items-center justify-between p-2.5 rounded-lg border text-xs transition-all ${
-                      idx === 0
-                        ? 'bg-info-soft border-primary/25 font-medium'
-                        : 'bg-card border-border'
-                    }`}
-                  >
-                    <div className="flex items-center gap-2">
-                      <span className={`w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 ${
-                        idx === 0 ? 'bg-primary text-white' : 'bg-muted text-muted-foreground'
-                      }`}>
-                        {idx + 1}
-                      </span>
-                      <span className={idx === 0 ? 'text-primary' : 'text-foreground'}>{agente.nome_completo}</span>
-                    </div>
-                    <div className="text-right text-muted-foreground">
-                      {ultimo ? (
-                        <span>{ultimo.data_atribuicao}</span>
-                      ) : (
-                        <span className="text-success font-medium">Nunca recebeu</span>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          <div className="p-3 bg-warning-soft border border-warning/25 rounded-lg">
-            <p className="text-xs text-warning flex items-start gap-1.5">
-              <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" />
-              <span>
-                <strong>Rodízio Assistido</strong> — apenas orientação visual. A decisão final de atribuição é sempre da liderança.
-                Registre a distribuição no botão "Nova Atribuição" para manter o histórico atualizado.
-              </span>
-            </p>
-          </div>
-        </CardContent>
       )}
-    </Card>
+
+      <div className="divide-y divide-border rounded-xl border border-border bg-card">
+        {canais.map(({ tipo, fila, sugerido, puladosAFrente }) => {
+          const cfg = TIPOS_CONFIG[tipo];
+          const expandido = aberto === tipo;
+          return (
+            <div key={tipo} className="p-3">
+              <div className="flex flex-wrap items-center gap-3">
+                <div className="w-44 shrink-0">
+                  <p className="text-sm font-semibold text-foreground">{cfg.label}</p>
+                </div>
+                <div className="min-w-0 flex-1">
+                  {sugerido ? (
+                    <>
+                      <p className="text-sm text-foreground">
+                        <span className="text-muted-foreground">Próximo: </span>
+                        <span className="font-semibold">{sugerido.agente.nome_completo}</span>
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {sugerido.ultima
+                          ? `última em ${dataCurta(sugerido.ultima.data_atribuicao)} (#${sugerido.ultima.ticket_id})`
+                          : 'nunca recebeu este canal'}
+                        {' · '}{sugerido.noMes} no mês
+                        {puladosAFrente.length > 0 && (
+                          <span className="text-warning">
+                            {' · '}pulou {puladosAFrente.map((p) => `${p.agente.nome_completo} (${p.motivo.toLowerCase()})`).join(', ')}
+                          </span>
+                        )}
+                      </p>
+                    </>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">Ninguém disponível hoje.</p>
+                  )}
+                </div>
+                <div className="flex shrink-0 items-center gap-2">
+                  <Button size="sm" disabled={!sugerido} onClick={() => onAtribuir({ tipo, agenteId: sugerido?.agente.id })}>
+                    Atribuir
+                  </Button>
+                  <button
+                    onClick={() => setAberto(expandido ? null : tipo)}
+                    className="rounded p-1.5 text-muted-foreground hover:bg-muted"
+                    aria-label={expandido ? 'Fechar a fila' : 'Ver a fila completa'}
+                  >
+                    {expandido ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                  </button>
+                </div>
+              </div>
+
+              {expandido && (
+                <ol className="mt-3 space-y-1 border-t border-border pt-3 text-sm">
+                  {fila.map((l) => (
+                    <li key={l.agente.id} className={`flex items-center gap-3 ${l.disponivel ? '' : 'text-muted-foreground'}`}>
+                      <span className="w-5 text-right tabular-nums text-muted-foreground">{l.posicao}</span>
+                      <span className={`w-44 truncate ${l.disponivel ? 'text-foreground' : ''} ${l.posicao === 1 && l.disponivel ? 'font-semibold' : ''}`}>
+                        {l.agente.nome_completo}
+                      </span>
+                      <span className="flex-1 text-xs">
+                        {!l.disponivel
+                          ? `${l.motivo}${l.ate ? `, até ${dataCurta(l.ate)}` : ''}`
+                          : l.ultima ? `última em ${dataCurta(l.ultima.data_atribuicao)}` : 'nunca recebeu'}
+                      </span>
+                      <span className={`w-20 text-right text-xs tabular-nums ${l.noMes === 0 ? 'font-semibold text-warning' : 'text-muted-foreground'}`}>
+                        {l.noMes} no mês
+                      </span>
+                    </li>
+                  ))}
+                </ol>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      {onIndisponivel && (
+        <div className="flex flex-wrap items-center gap-2 text-sm">
+          <span className="text-muted-foreground">Atestado ou imprevisto que não está na Escala?</span>
+          <Button size="sm" variant="outline" onClick={() => onIndisponivel({})}>Marcar alguém como indisponível</Button>
+        </div>
+      )}
+    </div>
   );
 }

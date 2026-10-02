@@ -8,29 +8,48 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
 import {
   Plus, Users, ChevronDown, ChevronUp, RotateCcw,
-  AlertTriangle, Clock, Trash2, Shield
+  AlertTriangle, Clock, CalendarDays, Shield
 } from 'lucide-react';
 import CardAgenteEquidade from '@/components/distribuicao/CardAgenteEquidade';
 import RodizioAssistido from '@/components/distribuicao/RodizioAssistido';
 import AlertasConcentracao from '@/components/distribuicao/AlertasConcentracao';
 import DialogNovaAtribuicao from '@/components/distribuicao/DialogNovaAtribuicao';
+import DialogIndisponibilidade from '@/components/distribuicao/DialogIndisponibilidade';
+import EquidadeDoMes from '@/components/distribuicao/EquidadeDoMes';
+import HistoricoDistribuicao from '@/components/distribuicao/HistoricoDistribuicao';
+import { indisponiveisEm } from '@/lib/equidade';
 import db from '@/api/db';
 import {
   TIPOS_CONFIG, calcularSaturacao,
   calcularPesoOperacional
 } from '@/components/distribuicao/distribuicaoUtils';
-import ListaResumida from '@/components/ui/ListaResumida';
 
 export default function DistribuicaoTratativas({ gestorId, gestorNome, colaboradores }) {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [expandido, setExpandido] = useState(true);
   const [periodoFiltro, setPeriodoFiltro] = useState('30');
+  const [aba, setAba] = useState('rodizio');
+  const [inicial, setInicial] = useState(null);
+  const [indisponivelAberto, setIndisponivelAberto] = useState(false);
   const queryClient = useQueryClient();
+  const hoje = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Sao_Paulo' });
 
   const { data: distribuicoes = [] } = useQuery({
     queryKey: ['distribuicoes-tratativas'],
     queryFn: () => db.entities.DistribuicaoTratativa.list('-created_date', 500),
     staleTime: 30000,
+  });
+
+  const { data: solicitacoes = [] } = useQuery({
+    queryKey: ['solicitacoes-ferias'],
+    queryFn: () => db.entities.SolicitacaoFerias.list('-data_inicio', 500),
+    staleTime: 60000,
+  });
+
+  const { data: atribuicoes = [] } = useQuery({
+    queryKey: ['escalaAtribuicoes'],
+    queryFn: () => db.entities.EscalaAtribuicao.list('-created_date', 2000),
+    staleTime: 60000,
   });
 
   const createMutation = useMutation({
@@ -50,6 +69,42 @@ export default function DistribuicaoTratativas({ gestorId, gestorNome, colaborad
       toast.success('Registro removido');
     },
     onError: () => toast.error('Não consegui remover o registro.'),
+  });
+
+  const indisponibilidadeMutation = useMutation({
+    mutationFn: async ({ agente, inicio, fim }) => db.entities.EscalaAtribuicao.create({
+      escala_id: 'direct',
+      escala_nome: 'Indisponível (rodízio)',
+      colaborador_id: agente.id,
+      colaborador_nome: agente.nome_completo,
+      data_inicio: inicio,
+      data_fim: fim,
+      tipo_evento: 'falta',
+      ativa: true,
+    }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['escalaAtribuicoes'] });
+      toast.success('Marcada como indisponível. O rodízio já a pula.');
+      setIndisponivelAberto(false);
+    },
+    onError: () => toast.error('Não consegui marcar. Só quem monta a Escala pode fazer isso.'),
+  });
+
+  // "Voltou": encerra a ausência ontem; se ela nem começou, apaga.
+  const voltouMutation = useMutation({
+    mutationFn: async (escalaId) => {
+      const marca = atribuicoes.find((a) => a.id === escalaId);
+      if (!marca) return;
+      if (String(marca.data_inicio).slice(0, 10) >= hoje) return db.entities.EscalaAtribuicao.delete(escalaId);
+      const ontem = new Date(`${hoje}T12:00:00`);
+      ontem.setDate(ontem.getDate() - 1);
+      return db.entities.EscalaAtribuicao.update(escalaId, { data_fim: ontem.toLocaleDateString('en-CA') });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['escalaAtribuicoes'] });
+      toast.success('De volta ao rodízio.');
+    },
+    onError: () => toast.error('Não consegui atualizar a ausência.'),
   });
 
   const agentesAtivos = useMemo(
@@ -90,6 +145,13 @@ export default function DistribuicaoTratativas({ gestorId, gestorNome, colaborad
     return agentesAtivos.filter(a => calcularSaturacao(a.id, distribuicoesFiltradas, []) >= 85).length;
   }, [agentesAtivos, distribuicoesFiltradas]);
 
+  const indisponiveisHoje = useMemo(
+    () => indisponiveisEm(hoje, { solicitacoes, atribuicoes }),
+    [hoje, solicitacoes, atribuicoes],
+  );
+
+  const abrirAtribuicao = (dados = null) => { setInicial(dados); setDialogOpen(true); };
+
   const handleSalvar = (formData) => {
     const agente = agentesAtivos.find(a => a.id === formData.agente_id);
     createMutation.mutate({
@@ -119,7 +181,7 @@ export default function DistribuicaoTratativas({ gestorId, gestorNome, colaborad
             )}
           </div>
           <div className="flex items-center gap-2">
-            <Button size="sm" onClick={() => setDialogOpen(true)} className="bg-primary hover:bg-primary gap-1">
+            <Button size="sm" onClick={() => abrirAtribuicao()} className="bg-primary hover:bg-primary gap-1">
               <Plus className="w-4 h-4" /> Nova Atribuição
             </Button>
             <button onClick={() => setExpandido(e => !e)} className="p-1.5 hover:bg-muted rounded transition-colors">
@@ -131,53 +193,16 @@ export default function DistribuicaoTratativas({ gestorId, gestorNome, colaborad
 
       {expandido && (
         <CardContent className="space-y-5">
-          {/* Filtro de período */}
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-xs font-medium text-muted-foreground">Período:</span>
-            {[['7', '7 dias'], ['14', '14 dias'], ['30', '30 dias'], ['90', 'Trimestre'], ['todos', 'Todo o histórico']].map(([v, l]) => (
-              <button
-                key={v}
-                onClick={() => setPeriodoFiltro(v)}
-                className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${
-                  periodoFiltro === v ? 'bg-primary text-white' : 'bg-muted text-muted-foreground hover:bg-muted'
-                }`}
-              >
-                {l}
-              </button>
-            ))}
-          </div>
-
-          {/* KPIs */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <div className="p-3 bg-muted rounded-xl text-center">
-              <p className="text-2xl font-bold text-foreground">{stats.totalTickets}</p>
-              <p className="text-xs text-muted-foreground mt-0.5">Tickets distribuídos</p>
-            </div>
-            <div className={`p-3 rounded-xl text-center ${
-              stats.indiceEquilibrio >= 80 ? 'bg-success-soft' : stats.indiceEquilibrio >= 60 ? 'bg-warning-soft' : 'bg-destructive/10'
-            }`}>
-              <p className={`text-2xl font-bold ${
-                stats.indiceEquilibrio >= 80 ? 'text-success' : stats.indiceEquilibrio >= 60 ? 'text-warning' : 'text-destructive'
-              }`}>{stats.indiceEquilibrio}%</p>
-              <p className="text-xs text-muted-foreground mt-0.5">Índice de equilíbrio</p>
-            </div>
-            <div className="p-3 bg-muted rounded-xl text-center">
-              <p className="text-2xl font-bold text-foreground">{stats.pesoTotal.toFixed(0)}</p>
-              <p className="text-xs text-muted-foreground mt-0.5">Peso operacional total</p>
-            </div>
-            <div className={`p-3 rounded-xl text-center ${stats.criticas > 0 ? 'bg-destructive/10' : 'bg-muted'}`}>
-              <p className={`text-2xl font-bold ${stats.criticas > 0 ? 'text-destructive' : 'text-foreground'}`}>{stats.criticas}</p>
-              <p className="text-xs text-muted-foreground mt-0.5">Tickets críticos</p>
-            </div>
-          </div>
-
-          <Tabs defaultValue="agentes">
+          <Tabs value={aba} onValueChange={setAba}>
             <TabsList className="h-auto flex-wrap justify-start bg-muted">
-              <TabsTrigger value="agentes" className="text-xs gap-1.5 data-[state=active]:bg-card">
-                <Users className="w-3.5 h-3.5" /> Agentes ({agentesAtivos.length})
-              </TabsTrigger>
               <TabsTrigger value="rodizio" className="text-xs gap-1.5 data-[state=active]:bg-card">
-                <RotateCcw className="w-3.5 h-3.5" /> Rodízio Assistido
+                <RotateCcw className="w-3.5 h-3.5" /> Rodízio
+              </TabsTrigger>
+              <TabsTrigger value="mes" className="text-xs gap-1.5 data-[state=active]:bg-card">
+                <CalendarDays className="w-3.5 h-3.5" /> Equidade do mês
+              </TabsTrigger>
+              <TabsTrigger value="historico" className="text-xs gap-1.5 data-[state=active]:bg-card">
+                <Clock className="w-3.5 h-3.5" /> Histórico
               </TabsTrigger>
               <TabsTrigger value="alertas" className="text-xs gap-1.5 data-[state=active]:bg-card">
                 <AlertTriangle className="w-3.5 h-3.5" /> Alertas
@@ -187,12 +212,66 @@ export default function DistribuicaoTratativas({ gestorId, gestorNome, colaborad
                   </span>
                 )}
               </TabsTrigger>
-              <TabsTrigger value="historico" className="text-xs gap-1.5 data-[state=active]:bg-card">
-                <Clock className="w-3.5 h-3.5" /> Histórico
+              <TabsTrigger value="agentes" className="text-xs gap-1.5 data-[state=active]:bg-card">
+                <Users className="w-3.5 h-3.5" /> Agentes ({agentesAtivos.length})
               </TabsTrigger>
             </TabsList>
 
-            <TabsContent value="agentes" className="mt-4">
+            <TabsContent value="rodizio" className="mt-4">
+              <RodizioAssistido
+                agentesAtivos={agentesAtivos}
+                distribuicoes={distribuicoes}
+                indisponiveis={indisponiveisHoje}
+                hoje={hoje}
+                onAtribuir={abrirAtribuicao}
+                onIndisponivel={({ voltar, escalaId }) => (voltar ? voltouMutation.mutate(escalaId) : setIndisponivelAberto(true))}
+              />
+            </TabsContent>
+
+            <TabsContent value="mes" className="mt-4">
+              <EquidadeDoMes agentesAtivos={agentesAtivos} distribuicoes={distribuicoes} hoje={hoje} indisponiveis={indisponiveisHoje} />
+            </TabsContent>
+
+            <TabsContent value="historico" className="mt-4">
+              <HistoricoDistribuicao
+                distribuicoes={distribuicoes}
+                agentesAtivos={agentesAtivos}
+                hoje={hoje}
+                onRemover={(d) => { if (window.confirm('Remover este registro?')) deleteMutation.mutate(d.id); }}
+              />
+            </TabsContent>
+
+            <TabsContent value="alertas" className="mt-4 space-y-4">
+              <FiltroPeriodo valor={periodoFiltro} onChange={setPeriodoFiltro} />
+              <AlertasConcentracao agentes={agentesAtivos} distribuicoes={distribuicoesFiltradas} />
+            </TabsContent>
+
+            <TabsContent value="agentes" className="mt-4 space-y-5">
+              <FiltroPeriodo valor={periodoFiltro} onChange={setPeriodoFiltro} />
+
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <div className="p-3 bg-muted rounded-xl text-center">
+                  <p className="text-2xl font-bold text-foreground">{stats.totalTickets}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">Tickets distribuídos</p>
+                </div>
+                <div className={`p-3 rounded-xl text-center ${
+                  stats.indiceEquilibrio >= 80 ? 'bg-success-soft' : stats.indiceEquilibrio >= 60 ? 'bg-warning-soft' : 'bg-destructive/10'
+                }`}>
+                  <p className={`text-2xl font-bold ${
+                    stats.indiceEquilibrio >= 80 ? 'text-success' : stats.indiceEquilibrio >= 60 ? 'text-warning' : 'text-destructive'
+                  }`}>{stats.indiceEquilibrio}%</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">Índice de equilíbrio</p>
+                </div>
+                <div className="p-3 bg-muted rounded-xl text-center">
+                  <p className="text-2xl font-bold text-foreground">{stats.pesoTotal.toFixed(0)}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">Peso operacional total</p>
+                </div>
+                <div className={`p-3 rounded-xl text-center ${stats.criticas > 0 ? 'bg-destructive/10' : 'bg-muted'}`}>
+                  <p className={`text-2xl font-bold ${stats.criticas > 0 ? 'text-destructive' : 'text-foreground'}`}>{stats.criticas}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">Tickets críticos</p>
+                </div>
+              </div>
+
               {agentesOrdenados.length === 0 ? (
                 <p className="text-muted-foreground text-sm text-center py-6">Nenhum agente ativo cadastrado.</p>
               ) : (
@@ -208,7 +287,7 @@ export default function DistribuicaoTratativas({ gestorId, gestorNome, colaborad
                 </div>
               )}
 
-              <div className="mt-4 pt-4 border-t border-border">
+              <div className="pt-4 border-t border-border">
                 <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">Distribuição por canal no período</p>
                 <div className="space-y-2">
                   {Object.entries(TIPOS_CONFIG).map(([key, cfg]) => {
@@ -228,71 +307,6 @@ export default function DistribuicaoTratativas({ gestorId, gestorNome, colaborad
                 </div>
               </div>
             </TabsContent>
-
-            <TabsContent value="rodizio" className="mt-4">
-              <RodizioAssistido agentesAtivos={agentesAtivos} distribuicoes={distribuicoes} />
-            </TabsContent>
-
-            <TabsContent value="alertas" className="mt-4">
-              <AlertasConcentracao agentes={agentesAtivos} distribuicoes={distribuicoesFiltradas} />
-            </TabsContent>
-
-            <TabsContent value="historico" className="mt-4">
-              {distribuicoesFiltradas.length === 0 ? (
-                <p className="text-muted-foreground text-sm text-center py-6">Nenhuma distribuição no período selecionado.</p>
-              ) : (
-                <ListaResumida
-                  className="space-y-1.5"
-                  limite={8}
-                  rotulo="distribuições"
-                  itens={[...distribuicoesFiltradas].sort((a, b) => {
-                    const da = `${a.data_atribuicao} ${a.horario_atribuicao || ''}`;
-                    const db = `${b.data_atribuicao} ${b.horario_atribuicao || ''}`;
-                    return db.localeCompare(da);
-                  })}
-                  renderItem={d => (
-                      <div key={d.id} className="flex items-center justify-between p-2.5 bg-card border border-border rounded-lg text-xs hover:bg-muted transition-colors">
-                        <div className="flex items-center gap-2 flex-wrap min-w-0">
-                          <span className="font-medium text-foreground truncate max-w-[120px]">{d.agente_nome}</span>
-                          <Badge className={`${TIPOS_CONFIG[d.tipo_tratativa]?.color || 'bg-muted text-muted-foreground'} text-xs py-0 flex-shrink-0`}>
-                            {TIPOS_CONFIG[d.tipo_tratativa]?.label?.split(' ')[0] || d.tipo_tratativa}
-                          </Badge>
-                          <span className="text-muted-foreground font-mono flex-shrink-0">#{d.ticket_id}</span>
-                          {d.override_rodizio && (
-                            <Badge className="bg-warning-soft text-warning text-xs py-0 flex-shrink-0">Override</Badge>
-                          )}
-                        </div>
-                        <div className="flex items-center gap-2 flex-shrink-0">
-                          <span className="text-muted-foreground">{d.data_atribuicao} {d.horario_atribuicao || ''}</span>
-                          <button
-                            onClick={() => { if (window.confirm('Remover este registro?')) deleteMutation.mutate(d.id); }}
-                            className="text-destructive hover:text-destructive transition-colors"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-                      </div>
-                    )}
-                />
-              )}
-
-              {distribuicoesFiltradas.filter(d => d.override_rodizio).length > 0 && (
-                <div className="mt-4 pt-4 border-t border-border">
-                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2 flex items-center gap-1">
-                    <AlertTriangle className="w-3 h-3 text-warning" /> Overrides da liderança
-                  </p>
-                  <div className="space-y-1.5">
-                    {distribuicoesFiltradas.filter(d => d.override_rodizio).map(d => (
-                      <div key={d.id} className="p-2 bg-warning-soft border border-warning/25 rounded text-xs text-warning">
-                        <span className="font-medium">{d.agente_nome}</span> recebeu <span className="font-medium">{TIPOS_CONFIG[d.tipo_tratativa]?.label}</span>
-                        {' '}(sugerido: {d.agente_sugerido_nome || '—'}) em {d.data_atribuicao}
-                        {d.justificativa_override && <span className="block text-warning italic mt-0.5">"{d.justificativa_override}"</span>}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </TabsContent>
           </Tabs>
         </CardContent>
       )}
@@ -303,8 +317,39 @@ export default function DistribuicaoTratativas({ gestorId, gestorNome, colaborad
         onSalvar={handleSalvar}
         agentes={agentesAtivos}
         distribuicoes={distribuicoes}
+        solicitacoes={solicitacoes}
+        atribuicoes={atribuicoes}
+        inicial={inicial}
         isPending={createMutation.isPending}
       />
+
+      <DialogIndisponibilidade
+        open={indisponivelAberto}
+        onClose={() => setIndisponivelAberto(false)}
+        agentes={agentesAtivos}
+        hoje={hoje}
+        onSalvar={(dados) => indisponibilidadeMutation.mutate(dados)}
+        isPending={indisponibilidadeMutation.isPending}
+      />
     </Card>
+  );
+}
+
+function FiltroPeriodo({ valor, onChange }) {
+  return (
+    <div className="flex items-center gap-2 flex-wrap">
+      <span className="text-xs font-medium text-muted-foreground">Período:</span>
+      {[['7', '7 dias'], ['14', '14 dias'], ['30', '30 dias'], ['90', 'Trimestre'], ['todos', 'Todo o histórico']].map(([v, l]) => (
+        <button
+          key={v}
+          onClick={() => onChange(v)}
+          className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${
+            valor === v ? 'bg-primary text-white' : 'bg-muted text-muted-foreground hover:bg-muted'
+          }`}
+        >
+          {l}
+        </button>
+      ))}
+    </div>
   );
 }

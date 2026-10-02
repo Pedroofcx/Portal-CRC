@@ -21,6 +21,7 @@ import { turnoDoHorario } from '../src/lib/escalas.js';
 import { classificarTicket, filaDeNegativos, resumoDaFila } from '../src/lib/apuracao/ouvidoriaChat.js';
 import { ligacoesAuditoria, resumoAuditoria } from '../src/lib/apuracao/auditoriaTelefone.js';
 import { revisarLigacao } from '../src/lib/apuracao/revisaoTelefone.js';
+import { indisponiveisEm, filaDoCanal, gradeDoMes, montarJustificativa, motivoDaJustificativa, resumoDeOverrides, filtrarHistorico, ultimosMeses } from '../src/lib/equidade.js';
 import path from 'node:path';
 import { carregarModuloJsx } from './lib/carregar-jsx.mjs';
 
@@ -1479,6 +1480,69 @@ console.log('\n== ouvidoria do chat: classificacao manual, ticket por ticket =='
 
   const filaFinal = filaDeNegativos([atual], { apenasNaoClassificados: true });
   checa('so falta o que nunca foi tocado', String(filaFinal.length), '0');
+}
+
+console.log('\n== equidade: rodizio que pula quem esta ausente ==');
+{
+  const ag = (id, nome) => ({ id, nome_completo: nome });
+  const A = [ag('sir', 'Sirlene'), ag('ana', 'Ana'), ag('bia', 'Bia'), ag('cla', 'Clara')];
+  const d = (agente_id, tipo, data, extra = {}) => ({ agente_id, tipo_tratativa: tipo, data_atribuicao: data, horario_atribuicao: '10:00', ...extra });
+  const hist = [
+    d('sir', 'reclame_aqui', '2026-08-01'), d('ana', 'reclame_aqui', '2026-08-05'),
+    d('bia', 'reclame_aqui', '2026-08-10'), d('cla', 'reclame_aqui', '2026-09-02'),
+  ];
+  const semAusencia = filaDoCanal('reclame_aqui', A, hist, new Map(), '2026-10-02');
+  checa('sem ausencia, o mais antigo e o proximo', semAusencia.sugerido.agente.nome_completo, 'Sirlene');
+
+  const ferias = [{ colaborador_id: 'sir', status: 'aprovada', data_inicio: '2026-09-28', data_fim: '2026-10-10' }];
+  const ind = indisponiveisEm('2026-10-02', { solicitacoes: ferias });
+  const comFerias = filaDoCanal('reclame_aqui', A, hist, ind, '2026-10-02');
+  checa('ferias aprovadas pulam para a proxima', comFerias.sugerido.agente.nome_completo, 'Ana');
+  checa('quem esta de ferias vai para o fim da fila', comFerias.fila[3].agente.nome_completo, 'Sirlene');
+  checa('fila explica o motivo', comFerias.fila[3].motivo, 'Férias');
+  checa('fila diz ate quando', comFerias.fila[3].ate, '2026-10-10');
+  checa('lista quem foi pulado a frente', comFerias.puladosAFrente[0].agente.nome_completo, 'Sirlene');
+
+  const emAnalise = indisponiveisEm('2026-10-02', { solicitacoes: [{ ...ferias[0], status: 'em_analise' }] });
+  checa('ferias so em analise nao pulam', String(emAnalise.size), '0');
+  const depois = indisponiveisEm('2026-10-11', { solicitacoes: ferias });
+  checa('depois das ferias volta a valer', String(depois.size), '0');
+  checa('ao voltar e a primeira da fila', filaDoCanal('reclame_aqui', A, hist, depois, '2026-10-11').sugerido.agente.nome_completo, 'Sirlene');
+
+  const escala = [{ colaborador_id: 'ana', tipo_evento: 'falta', data_inicio: '2026-10-02', data_fim: '2026-10-03', created_date: '2026-10-02T09:00:00Z' }];
+  checa('falta na escala pula', indisponiveisEm('2026-10-02', { atribuicoes: escala }).get('ana').motivo, 'Ausente');
+  const voltou = [...escala, { colaborador_id: 'ana', tipo_evento: 'presencial', data_inicio: '2026-10-02', data_fim: '2026-10-02', created_date: '2026-10-02T10:00:00Z' }];
+  checa('marcacao mais recente (presencial) libera', String(indisponiveisEm('2026-10-02', { atribuicoes: voltou }).has('ana')), 'false');
+  checa('escala inativa e ignorada', String(indisponiveisEm('2026-10-02', { atribuicoes: [{ ...escala[0], ativa: false }] }).size), '0');
+
+  checa('quem nunca recebeu vem antes', filaDoCanal('procon', A, hist, new Map(), '2026-10-02').sugerido.agente.nome_completo, 'Ana');
+  checa('conta o mes do canal', String(filaDoCanal('reclame_aqui', A, hist, new Map(), '2026-09-15').fila.find((l) => l.agente.id === 'cla').noMes), '1');
+  checa('mes sem atribuicao conta zero', String(filaDoCanal('reclame_aqui', A, hist, new Map(), '2026-10-02').fila.find((l) => l.agente.id === 'cla').noMes), '0');
+
+  const grade = gradeDoMes('2026-09', A, hist, ['reclame_aqui', 'procon']);
+  checa('grade: quem recebeu no mes', String(grade.find((g) => g.agente.id === 'cla').porCanal.reclame_aqui), '1');
+  checa('grade: zerados do mes', grade.find((g) => g.agente.id === 'ana').zerados.join(','), 'reclame_aqui,procon');
+
+  console.log('\n== equidade: overrides e historico ==');
+  checa('justificativa com motivo e texto', montarJustificativa('carga', 'muitas abertas'), 'Carga do dia: muitas abertas');
+  checa('justificativa so com motivo', montarJustificativa('atestado'), 'Indisponível (atestado ou imprevisto)');
+  checa('motivo volta do texto gravado', motivoDaJustificativa('Carga do dia: x').valor, 'carga');
+  checa('texto antigo livre', motivoDaJustificativa('estava em reuniao').valor, 'texto-livre');
+  checa('vazio vira sem motivo', motivoDaJustificativa('').valor, 'sem');
+  const ov = [
+    d('ana', 'procon', '2026-09-03', { override_rodizio: true, justificativa_override: 'Carga do dia', agente_sugerido_nome: 'Bia' }),
+    d('ana', 'procon', '2026-09-04', { override_rodizio: true, justificativa_override: '', agente_sugerido_nome: 'Bia' }),
+    d('bia', 'procon', '2026-09-05'),
+  ];
+  const res = resumoDeOverrides(ov);
+  checa('resumo: total', String(res.total), '2');
+  checa('resumo: percentual', String(res.percentual), '67');
+  checa('resumo: quem foi pulado', `${res.porPulado[0].rotulo}=${res.porPulado[0].qtd}`, 'Bia=2');
+  checa('historico: so override', String(filtrarHistorico(ov, { soOverride: true }).length), '2');
+  checa('historico: por agente', String(filtrarHistorico(ov, { agenteId: 'bia' }).length), '1');
+  checa('historico: mais recente primeiro', filtrarHistorico(ov)[0].data_atribuicao, '2026-09-05');
+  checa('historico: busca ticket', String(filtrarHistorico([{ ...ov[0], ticket_id: '975357' }], { busca: '9753' }).length), '1');
+  checa('ultimos meses atravessam o ano', ultimosMeses('2026-02-10', 3).join(','), '2026-02,2026-01,2025-12');
 }
 
 console.log('\n== conferencia de cores (o verificador pega o que deve) ==');
