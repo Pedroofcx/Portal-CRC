@@ -6,7 +6,11 @@ import { Label } from '@/components/ui/label';
 import { Snowflake, Play, AlertTriangle } from 'lucide-react';
 import { formatDateSP } from '@/components/utils/helpers';
 
-export default function CongelamentoSLA({ tratativa, _user, onCongelar, onDescongelar, isLoading }) {
+/**
+ * `semAcoes`: os botões de congelar e reativar moram na barra de estado do topo
+ * da tratativa; aqui só fica o painel que mostra a situação do congelamento.
+ */
+export default function CongelamentoSLA({ tratativa, _user, onCongelar, onDescongelar, isLoading, semAcoes = false }) {
   const [dataDefesa, setDataDefesa] = useState('');
   const [showForm, setShowForm] = useState(false);
 
@@ -72,14 +76,16 @@ export default function CongelamentoSLA({ tratativa, _user, onCongelar, onDescon
             Esta tratativa está fora da fila de produtividade e SLA. A pontuação será atribuída após o desfecho final.
           </div>
 
-          <Button
-            onClick={onDescongelar}
-            disabled={isLoading}
-            className="bg-success hover:bg-success/90 w-full"
-          >
-            <Play className="w-4 h-4 mr-2" />
-            {isLoading ? 'Processando...' : 'Retorno do Financeiro — Reativar Tratativa'}
-          </Button>
+          {!semAcoes && (
+            <Button
+              onClick={onDescongelar}
+              disabled={isLoading}
+              className="bg-success hover:bg-success/90 w-full"
+            >
+              <Play className="w-4 h-4 mr-2" />
+              {isLoading ? 'Processando...' : 'Retorno do Financeiro — Reativar Tratativa'}
+            </Button>
+          )}
         </CardContent>
       </Card>
     );
@@ -88,7 +94,7 @@ export default function CongelamentoSLA({ tratativa, _user, onCongelar, onDescon
   // Pode congelar (tratativa iniciada, em andamento ou dependencia)
   const podeCongelar = ['tratativa_iniciada', 'em_andamento', 'dependencia_externa'].includes(tratativa.status);
 
-  if (!podeCongelar) return null;
+  if (!podeCongelar || semAcoes) return null;
 
   return (
     <Card className="border-0 shadow-sm border-l-4 border-l-slate-300">

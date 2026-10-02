@@ -106,6 +106,8 @@ export default function TratativaDetalhe({ idExterno = null, embutido = false })
 
   const [_diasRestantes, setDiasRestantes] = useState(null);
   const [aba, setAba] = useState('informacoes');
+  const [congelarAberto, setCongelarAberto] = useState(false);
+  const [dataDefesa, setDataDefesa] = useState('');
 
   const urlParams = new URLSearchParams(window.location.search);
   const tratativaId = idExterno || urlParams.get('id');
@@ -573,6 +575,51 @@ export default function TratativaDetalhe({ idExterno = null, embutido = false })
   const reabertura = reaberturaDe(tratativa, todasTratativas);
   const pontosPreview = isEncerrada ? calculateTratativaPoints(comReaberturaApurada(tratativa, todasTratativas)) : null;
 
+  /*
+   * Barra de estado: os botões que mudam o estado da tratativa ficam SEMPRE
+   * à vista (no cabeçalho, ao lado de "Excluir"), em qualquer guia. Iniciar a
+   * tratativa dispara o contador de SLA, e pausar (dependência externa) ou
+   * congelar também mexe nele — não podem ficar escondidos dentro de uma guia.
+   */
+  const podeMudarEstado = !isEncerrada && !isAguardandoReabertura && !isExcluida && !isAguardandoFinanceiro;
+  const ehContestacao = tratativa.tipo_tratativa === 'contestacao';
+  const podeCongelar = ehContestacao && ['tratativa_iniciada', 'em_andamento', 'dependencia_externa'].includes(tratativa.status);
+  const ocupado = updateMutation.isPending;
+  const barraDeEstado = !isExcluida && (podeMudarEstado || isAguardandoFinanceiro) && (
+    <div className="flex flex-wrap items-center gap-2">
+      {podeMudarEstado && tratativa.status === 'registrada' && canTransitionTo('tratativa_iniciada') && (
+        <Button size="sm" onClick={() => handleStatusChange('tratativa_iniciada')} disabled={ocupado}>
+          <Play className="w-4 h-4 mr-2" />
+          {ocupado ? 'Iniciando...' : 'Iniciar Tratativa'}
+        </Button>
+      )}
+      {podeMudarEstado && canTransitionTo('em_andamento') && (
+        <Button size="sm" variant="outline" onClick={() => handleStatusChange('em_andamento')} disabled={ocupado}>
+          <Play className="w-4 h-4 mr-2" />
+          Em Andamento
+        </Button>
+      )}
+      {podeMudarEstado && canTransitionTo('dependencia_externa') && (
+        <Button size="sm" variant="outline" onClick={() => handleStatusChange('dependencia_externa')} disabled={ocupado}>
+          <Pause className="w-4 h-4 mr-2" />
+          Dependência Externa
+        </Button>
+      )}
+      {podeCongelar && (
+        <Button size="sm" variant="outline" onClick={() => setCongelarAberto(true)} disabled={ocupado}>
+          <Snowflake className="w-4 h-4 mr-2" />
+          Congelar SLA
+        </Button>
+      )}
+      {isAguardandoFinanceiro && (
+        <Button size="sm" className="bg-success hover:bg-success/90" onClick={handleDescongelarSLA} disabled={ocupado}>
+          <Play className="w-4 h-4 mr-2" />
+          {ocupado ? 'Processando...' : 'Retorno do Financeiro — Reativar'}
+        </Button>
+      )}
+    </div>
+  );
+
   return (
     <div className="space-y-6">
       {!embutido && (
@@ -582,19 +629,24 @@ export default function TratativaDetalhe({ idExterno = null, embutido = false })
         icon={ClipboardList}
         backTo="Tratativas"
         actions={
-          !isExcluida && (
-            <Button 
-              variant="destructive" 
-              size="sm"
-              onClick={() => setDialogExclusao(true)}
-            >
-              <Trash2 className="w-4 h-4 mr-2" />
-              Excluir Tratativa
-            </Button>
-          )
+          <div className="flex flex-wrap items-center justify-end gap-2">
+            {barraDeEstado}
+            {!isExcluida && (
+              <Button 
+                variant="destructive" 
+                size="sm"
+                onClick={() => setDialogExclusao(true)}
+              >
+                <Trash2 className="w-4 h-4 mr-2" />
+                Excluir Tratativa
+              </Button>
+            )}
+          </div>
         }
       />
       )}
+
+      {embutido && barraDeEstado}
 
       {/* Alerta de Tratativa Excluída */}
       {isExcluida && (
@@ -913,6 +965,7 @@ export default function TratativaDetalhe({ idExterno = null, embutido = false })
             user={user}
             onCongelar={handleCongelarSLA}
             onDescongelar={handleDescongelarSLA}
+            semAcoes
             isLoading={updateMutation.isPending}
           />
 
@@ -923,45 +976,10 @@ export default function TratativaDetalhe({ idExterno = null, embutido = false })
             isLoading={updateMutation.isPending}
           />
 
-          {/* Ações de Status (FSM) */}
-          {!isEncerrada && !isAguardandoReabertura && !isExcluida && !isAguardandoFinanceiro && (
+          {/* Encerramento. Os botões de mudar de estado ficam na barra do topo. */}
+          {!isEncerrada && !isAguardandoReabertura && !isExcluida && !isAguardandoFinanceiro && canTransitionTo('encerrada') && (
             <Card className="border-0 shadow-sm">
               <CardContent className="space-y-4 pt-6">
-                <div className="flex flex-wrap gap-2">
-                  {tratativa.status === 'registrada' && canTransitionTo('tratativa_iniciada') && (
-                    <Button 
-                      onClick={() => handleStatusChange('tratativa_iniciada')}
-                      className="bg-primary hover:bg-primary/90"
-                      disabled={updateMutation.isPending}
-                    >
-                      <Play className="w-4 h-4 mr-2" />
-                      {updateMutation.isPending ? 'Iniciando...' : 'Iniciar Tratativa'}
-                    </Button>
-                  )}
-
-                  {canTransitionTo('em_andamento') && (
-                    <Button 
-                      variant="outline"
-                      onClick={() => handleStatusChange('em_andamento')}
-                      disabled={updateMutation.isPending}
-                    >
-                      <Play className="w-4 h-4 mr-2" />
-                      {updateMutation.isPending ? 'Atualizando...' : 'Marcar Em Andamento'}
-                    </Button>
-                  )}
-
-                  {canTransitionTo('dependencia_externa') && (
-                    <Button 
-                      variant="outline"
-                      onClick={() => handleStatusChange('dependencia_externa')}
-                      disabled={updateMutation.isPending}
-                    >
-                      <Pause className="w-4 h-4 mr-2" />
-                      {updateMutation.isPending ? 'Atualizando...' : 'Dependência Externa'}
-                    </Button>
-                  )}
-                </div>
-
                 {canTransitionTo('encerrada') && (
                   <>
                     <div className="grid gap-4 md:grid-cols-2">
@@ -1391,6 +1409,45 @@ export default function TratativaDetalhe({ idExterno = null, embutido = false })
         onConfirm={confirmDialog.action === 'encerrar' ? handleEncerrar : confirmDialog.action}
         variant="warning"
       />
+
+      {/* Congelar SLA (contestação): pede a data de envio da defesa */}
+      <Dialog open={congelarAberto} onOpenChange={(abrir) => { setCongelarAberto(abrir); if (!abrir) setDataDefesa(''); }}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Snowflake className="w-5 h-5" />
+              Congelar SLA — aguardando o financeiro
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 mt-2">
+            <div className="p-3 bg-warning-soft border border-warning/25 rounded-lg text-sm text-warning">
+              <strong>Atenção:</strong> o SLA será pausado e a tratativa sairá da fila de produtividade enquanto aguarda o setor financeiro.
+            </div>
+            <div>
+              <Label htmlFor="data-defesa">Data de envio da defesa *</Label>
+              <Input
+                id="data-defesa"
+                type="date"
+                value={dataDefesa}
+                onChange={(e) => setDataDefesa(e.target.value)}
+                max={new Date().toISOString().split('T')[0]}
+                className="mt-1"
+              />
+              <p className="text-xs text-muted-foreground mt-1">Confirme que a defesa foi enviada antes de congelar.</p>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => { setCongelarAberto(false); setDataDefesa(''); }}>Cancelar</Button>
+              <Button
+                disabled={!dataDefesa || updateMutation.isPending}
+                onClick={() => { handleCongelarSLA(dataDefesa); setCongelarAberto(false); setDataDefesa(''); }}
+              >
+                <Snowflake className="w-4 h-4 mr-2" />
+                {updateMutation.isPending ? 'Congelando...' : 'Confirmar congelamento'}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Dialog de Exclusão com Justificativa */}
       <Dialog open={dialogExclusao} onOpenChange={setDialogExclusao}>
