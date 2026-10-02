@@ -6,32 +6,38 @@ contraditório ou irreproduzível.
 
 ---
 
-## Pontuação — o dia em que um ciclo termina e outro começa (02/10/2026)
+## Ciclos 1 e 2 estão congelados; as correções valem do Ciclo 3 em diante (02/10/2026)
 
-**Regra de Pedro:** tratativa que atravessa ciclos não prejudica o agente. A
-**abertura** (0,5 por ticket, qualquer categoria) conta no trimestre do
-**registro**; o **encerramento** conta no trimestre da **conclusão**,
-independentemente de quando a tratativa começou.
+**Decisão (Pedro):** os ciclos 1 e 2 já foram apurados, e a premiação do Ciclo 2
+(pagamento em 2026-10) tem decisões humanas em cima desses números. Nada que
+foi corrigido em 02/10/2026 pode alterar esses ciclos. As correções valem **só
+do Ciclo 3 em diante**.
 
-**O problema.** Os ciclos se tocam na data (Ciclo 1 termina em 16/06 e o 2
-começa em 16/06; o 2 termina em 16/09 e o 3 começa em 16/09). O que acontecia
-nesse dia contava nos dois ciclos: 5 encerramentos (7,5 pts) e 6 aberturas
-(3 pts) pontuavam duas vezes.
+**Por que isso virou regra.** A migration 38 recalculou o SLA do histórico
+inteiro e, no Ciclo 2, a Ana passou à frente da Sirlene. A migration 40 devolve
+o SLA gravado antes (cópia em `sla_recalculo_38`) para tudo encerrado até
+16/09/2026. A regra nova de SLA fica valendo para encerramentos de 17/09 em
+diante.
 
-**Decisão:** o dia 16 pertence ao ciclo que **termina**. O dia de início de um
-ciclo fica de fora, para cada evento pontuar em um ciclo só. Vale para pontos
-de encerramento, pontos de abertura, registros por canal (elegibilidade) e para
-o ciclo escolhido no Hansei. Os **indicadores** (CSAT, performance, CX) seguem
-dia a dia como antes: a decisão é sobre tratativas.
+**Regra da tratativa que atravessa ciclos:** a **abertura** (0,5 por ticket,
+qualquer categoria) conta no trimestre do **registro**; o **encerramento**
+conta no trimestre da **conclusão**, independentemente de quando começou.
 
-**Efeito medido:** Ciclo 1 não muda (230). Ciclo 2 perde 2 pontos de
-encerramento (Dayane, TRT-0180, encerrada em 16/06, que já conta no Ciclo 1).
-Ciclo 3, ainda aberto, perde 5,5 de encerramento (Ana e Bárbara, encerradas em
-16/09) e as aberturas de 16/09.
+**Dia de virada (16/09):** do Ciclo 3 em diante, o dia em que um ciclo termina
+e o outro começa pertence ao ciclo que **termina**; o dia de início fica de
+fora, para cada evento pontuar em um ciclo só. Vale para pontos de
+encerramento, pontos de abertura, registros por canal e o ciclo do Hansei. O
+16/06 (entre os ciclos 1 e 2) **continua contando nos dois**, como foi apurado.
+Os indicadores (CSAT, performance, CX) seguem dia a dia, como antes.
 
-**Onde vive:** `instanteNoCiclo` em `src/lib/pontuacaoCiclo.js`,
-`registrosNoCiclo` em `src/lib/cicloEquipe.js`, `cicloDaData` em
-`src/lib/hanseiDados.js`.
+**Replicáveis dos ciclos 1 e 2:** todas aprovadas (migration 40), exceto as 3 que
+a gestão já **contestou** — decisão humana anterior, mantida. Cópia do que mudou
+em `replicaveis_aprovacao_40`.
+
+**Onde vive:** `DIA_DE_VIRADA_VALE_DESDE` e `instanteNoCiclo` em
+`src/lib/pontuacaoCiclo.js`; `registrosNoCiclo` em `src/lib/cicloEquipe.js`;
+`cicloDaData` em `src/lib/hanseiDados.js`;
+`supabase/migrations/40_congelar_ciclos_fechados.sql`.
 
 ---
 

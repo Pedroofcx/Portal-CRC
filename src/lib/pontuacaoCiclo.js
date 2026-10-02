@@ -34,18 +34,28 @@ export function tratativaNosCiclo(tratativa, ciclo) {
 }
 
 /**
- * O instante cai no ciclo? O dia em que um ciclo termina é o mesmo em que o
- * seguinte começa (16/06, 16/09), e esse dia pertence ao ciclo que TERMINA
- * (decisão de Pedro em 02/10/2026): o dia de início fica de fora, para cada
- * evento pontuar em um ciclo só. O primeiro ciclo cadastrado perde, em teoria,
- * o seu dia 1; na prática ninguém tinha tratativa nesse dia.
+ * A regra do dia de virada (16/06, 16/09) vale só a partir do Ciclo 3.
+ * Os ciclos 1 e 2 já foram apurados e a premiação do Ciclo 2 tem decisões
+ * humanas em cima desses números (Pedro, 02/10/2026): eles seguem exatamente
+ * como eram, com o dia de início contando.
+ */
+export const DIA_DE_VIRADA_VALE_DESDE = '2026-09-16';
+
+/**
+ * O instante cai no ciclo? Do Ciclo 3 em diante, o dia em que um ciclo termina
+ * é o mesmo em que o seguinte começa, e esse dia pertence ao ciclo que TERMINA:
+ * o dia de início fica de fora, para cada evento pontuar em um ciclo só. Nos
+ * ciclos anteriores o dia de início continua contando (ver acima).
  */
 export function instanteNoCiclo(instante, ciclo) {
   if (!instante || !ciclo?.data_inicio || !ciclo?.data_fim) return false;
   const t = new Date(instante).getTime();
   if (Number.isNaN(t)) return false;
-  return t > new Date(`${ciclo.data_inicio}T23:59:59.999`).getTime()
-    && t <= new Date(`${ciclo.data_fim}T23:59:59.999`).getTime();
+  const inicioExclusivo = ciclo.data_inicio >= DIA_DE_VIRADA_VALE_DESDE;
+  const comecou = inicioExclusivo
+    ? t > new Date(`${ciclo.data_inicio}T23:59:59.999`).getTime()
+    : t >= new Date(`${ciclo.data_inicio}T00:00:00`).getTime();
+  return comecou && t <= new Date(`${ciclo.data_fim}T23:59:59.999`).getTime();
 }
 
 const clienteDe = (t) => String(t?.id_base_cliente ?? '').trim();

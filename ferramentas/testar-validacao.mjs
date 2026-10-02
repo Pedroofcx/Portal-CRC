@@ -250,19 +250,22 @@ checa('um dia no singular', descreverPrazo(emH(30), ag), '1 dia');
 checa('varios dias', descreverPrazo(emH(72), ag), '3 dias');
 checa('metade do prazo consumida', String(consumoDoPrazo({ data_registro: emH(-12).toISOString(), sla_atribuido: 24 }, ag)), '0.5');
 
-console.log('\n== dia de virada: cada evento pontua em um ciclo so (decisao de 02/10/2026) ==');
+console.log('\n== dia de virada: so do Ciclo 3 em diante (decisao de 02/10/2026) ==');
 {
+  const c1 = { id: 'c1', nome: 'Ciclo 1', data_inicio: '2026-03-14', data_fim: '2026-06-16' };
   const c2 = { id: 'c2', nome: 'Ciclo 2', data_inicio: '2026-06-16', data_fim: '2026-09-16' };
   const c3 = { id: 'c3', nome: 'Ciclo 3', data_inicio: '2026-09-16', data_fim: '2026-12-16' };
   const enc = (iso) => ({ id: 'x', status: 'encerrada', data_encerramento: iso, data_registro: iso });
-  checa('encerrada no dia 16/09 fica no ciclo que termina', String(tratativaNosCiclo(enc('2026-09-16T15:00:00'), c2)), 'true');
-  checa('e sai do ciclo que comeca', String(tratativaNosCiclo(enc('2026-09-16T15:00:00'), c3)), 'false');
-  checa('dia 17/09 ja e do ciclo novo', String(tratativaNosCiclo(enc('2026-09-17T15:00:00'), c3)), 'true');
+  checa('16/09 continua no Ciclo 2', String(tratativaNosCiclo(enc('2026-09-16T15:00:00'), c2)), 'true');
+  checa('16/09 sai do Ciclo 3 (so conta no que termina)', String(tratativaNosCiclo(enc('2026-09-16T15:00:00'), c3)), 'false');
+  checa('17/09 ja e do Ciclo 3', String(tratativaNosCiclo(enc('2026-09-17T15:00:00'), c3)), 'true');
   checa('ultimo segundo do dia 16 ainda e do ciclo que termina', String(tratativaNosCiclo(enc('2026-09-16T23:59:59.500'), c2)), 'true');
+  checa('CICLO FECHADO NAO MUDA: 16/06 continua nos dois', `${tratativaNosCiclo(enc('2026-06-16T15:00:00'), c1)}/${tratativaNosCiclo(enc('2026-06-16T15:00:00'), c2)}`, 'true/true');
   const ab = { id: 'a', agente_responsavel_id: 'ag', data_registro: '2026-09-16T15:00:00' };
   checa('abertura de 16/09 conta so no Ciclo 2', `${aberturasNoCiclo([ab], c2).length}/${aberturasNoCiclo([ab], c3).length}`, '1/0');
-  checa('Hansei acha o ciclo que termina', cicloDaData([c3, c2], '2026-09-16').id, 'c2');
-  checa('e no dia seguinte o novo', cicloDaData([c3, c2], '2026-09-17').id, 'c3');
+  checa('Hansei: 16/09 vai para o ciclo que termina', cicloDaData([c3, c2], '2026-09-16').id, 'c2');
+  checa('Hansei: 17/09 e do novo', cicloDaData([c3, c2], '2026-09-17').id, 'c3');
+  checa('Hansei: 16/06 segue a ordem de sempre', cicloDaData([c2, c1], '2026-06-16').id, 'c2');
 }
 
 console.log('\n== SLA conta do inicio e pausa em dependencia externa (decisao de 02/10/2026) ==');
@@ -347,13 +350,12 @@ console.log('\n== tela do gestor: vencidas, registros e acompanhamento ==');
 
   const cicloR = { data_inicio: '2026-06-16', data_fim: '2026-09-16' };
   const vol = registrosNoCiclo([
-    { tipo_tratativa: 'reclame_aqui', data_registro: '2026-06-17T08:00:00' },
     { tipo_tratativa: 'reclame_aqui', data_registro: '2026-06-16T08:00:00' },
     { tipo_tratativa: 'reclame_aqui', data_registro: '2026-06-15T23:00:00' },
     { tipo_tratativa: 'contestacao_compra', data_registro: '2026-09-16T20:00:00' },
     { tipo_tratativa: 'contestacao', data_registro: '2026-09-17T08:00:00' },
   ], cicloR);
-  checa('registro no 1o dia fica com o ciclo anterior; o dia seguinte conta', String(vol.reclame_aqui), '1');
+  checa('registro no 1o dia do ciclo conta', String(vol.reclame_aqui), '1');
   checa('ultimo dia conta; contestacao_compra vira contestacao', String(vol.contestacao), '1');
   checa('sem ciclo, nada conta', String(registrosNoCiclo([{ tipo_tratativa: 'reclame_aqui', data_registro: '2026-07-01' }], null).reclame_aqui), '0');
 
