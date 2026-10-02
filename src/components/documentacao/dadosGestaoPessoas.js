@@ -91,6 +91,7 @@ export const modulosGestaoPessoas = [
       'src/pages/Oraculo.jsx',
       'src/components/oraculo/CartaoColaboradorOraculo.jsx',
       'src/components/oraculo/Visao360.jsx',
+      'src/components/oraculo/FotoDaPessoa.jsx',
       'src/lib/contextoColaborador.js',
     ],
     entidades: ['Observacao', 'OraculoPalavra', 'Colaborador', 'Tratativa', 'Apuracao', 'PDI', 'HanseiEnvio', 'Pontuacao'],

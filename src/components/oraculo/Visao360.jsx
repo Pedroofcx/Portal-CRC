@@ -15,6 +15,7 @@ import TabelaResumida from '@/components/ui/TabelaResumida';
 import Grafico from '@/components/relatorios/hub/Grafico';
 import { SERIE_GRAFICO } from '@/lib/cores-grafico';
 import { formatDateSP } from '@/components/utils/helpers';
+import FotoDaPessoa from './FotoDaPessoa';
 import {
   GRUPOS_COMPETENCIA, pontosDoRadar, evolucaoDasLeituras, palavrasRecorrentes, mediaDasCompetencias,
 } from '@/lib/competencias';
@@ -113,8 +114,15 @@ export default function Visao360({ colaborador, leituras, mediasEquipe, processo
       </div>
 
       <div className="grid items-start gap-6 xl:grid-cols-5">
-        <Cartao titulo={colaborador.nome_completo} className="xl:col-span-2">
-          <div className="divide-y divide-border">
+        <Cartao className="xl:col-span-2">
+          <div className="mb-3 flex items-center gap-4">
+            <FotoDaPessoa colaborador={colaborador} className="h-24 w-20 shrink-0" textoClassName="text-2xl" />
+            <div className="min-w-0">
+              <h2 className="truncate text-base font-semibold text-foreground">{colaborador.nome_completo}</h2>
+              <p className="text-xs text-muted-foreground">{colaborador.cargo_atual || 'Agente'}</p>
+            </div>
+          </div>
+          <div className="divide-y divide-border border-t border-border">
             <Linha rotulo="Leituras registradas" valor={leituras.length} />
             <Linha rotulo="Visão humana" detalhe="média das seis competências" valor={nota(medias.humanas_geral)} />
             <Linha rotulo="Visão de processo" detalhe="média das seis competências" valor={nota(medias.tecnicas_geral)} />
