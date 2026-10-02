@@ -22,6 +22,7 @@ import { classificarTicket, filaDeNegativos, resumoDaFila } from '../src/lib/apu
 import { ligacoesAuditoria, resumoAuditoria } from '../src/lib/apuracao/auditoriaTelefone.js';
 import { revisarLigacao } from '../src/lib/apuracao/revisaoTelefone.js';
 import { indisponiveisEm, filaDoCanal, gradeDoMes, montarJustificativa, motivoDaJustificativa, resumoDeOverrides, filtrarHistorico, ultimosMeses } from '../src/lib/equidade.js';
+import { vazioViraNulo } from '../src/lib/camposVazios.js';
 import path from 'node:path';
 import { carregarModuloJsx } from './lib/carregar-jsx.mjs';
 
@@ -1543,6 +1544,17 @@ console.log('\n== equidade: rodizio que pula quem esta ausente ==');
   checa('historico: mais recente primeiro', filtrarHistorico(ov)[0].data_atribuicao, '2026-09-05');
   checa('historico: busca ticket', String(filtrarHistorico([{ ...ov[0], ticket_id: '975357' }], { busca: '9753' }).length), '1');
   checa('ultimos meses atravessam o ano', ultimosMeses('2026-02-10', 3).join(','), '2026-02,2026-01,2025-12');
+}
+
+console.log('\n== campos vazios viram nulo antes de gravar ==');
+{
+  const r = vazioViraNulo('Tratativa', { categoria_contestacao: '', prioridade: 'alta', link_intranet: '', data_primeira_contratacao: '' });
+  checa('lista fechada vazia vira nulo', String(r.categoria_contestacao), 'null');
+  checa('data vazia vira nulo', String(r.data_primeira_contratacao), 'null');
+  checa('valor preenchido fica', r.prioridade, 'alta');
+  checa('texto livre vazio continua vazio', JSON.stringify(r.link_intranet), '""');
+  checa('entidade sem regra nao muda', vazioViraNulo('Aviso', { titulo: '' }).titulo, '');
+  checa('nao altera o objeto de entrada', (() => { const o = { categoria_contestacao: '' }; vazioViraNulo('Tratativa', o); return JSON.stringify(o); })(), '""');
 }
 
 console.log('\n== conferencia de cores (o verificador pega o que deve) ==');

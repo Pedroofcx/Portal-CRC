@@ -19,6 +19,7 @@
  */
 
 import { createClient } from '@supabase/supabase-js';
+import { vazioViraNulo } from '../lib/camposVazios.js';
 import { TABELAS } from './tabelas';
 
 const URL = import.meta.env.VITE_SUPABASE_URL;
@@ -141,7 +142,7 @@ function criarEntidade(entidade) {
 
     async create(dados) {
       const { data, error } = await supabase
-        .from(tabela).insert(limpar(dados)).select().single();
+        .from(tabela).insert(limpar(vazioViraNulo(entidade, dados))).select().single();
       if (error) erro('create', entidade, error);
       return data;
     },
@@ -149,7 +150,7 @@ function criarEntidade(entidade) {
     async update(id, dados) {
       const { data, error } = await supabase
         .from(tabela)
-        .update({ ...limpar(dados), updated_date: new Date().toISOString(), atualizado_em: new Date().toISOString() })
+        .update({ ...limpar(vazioViraNulo(entidade, dados)), updated_date: new Date().toISOString(), atualizado_em: new Date().toISOString() })
         .eq('id', id).select().single();
       if (error) erro('update', entidade, error);
       return data;
@@ -166,7 +167,7 @@ function criarEntidade(entidade) {
       const criados = [];
       // Em lotes, para não estourar o limite de tamanho da requisição.
       for (let i = 0; i < registros.length; i += 500) {
-        const lote = registros.slice(i, i + 500).map(limpar);
+        const lote = registros.slice(i, i + 500).map((r) => limpar(vazioViraNulo(entidade, r)));
         const { data, error } = await supabase.from(tabela).insert(lote).select();
         if (error) erro('bulkCreate', entidade, error);
         criados.push(...data);

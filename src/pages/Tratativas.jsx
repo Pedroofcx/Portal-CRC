@@ -39,6 +39,38 @@ import ImportExportCSV from '@/components/tratativas/ImportExportCSV';
 import AdminBulkActions from '@/components/tratativas/AdminBulkActions';
 import DadosComerciaisForm from '@/components/tratativas/DadosComerciaisForm';
 import PainelLateral from '@/components/ui/PainelLateral';
+import { traduzirErro } from '@/lib/erros';
+
+/**
+ * O formulário em branco — a MESMA função abre a tela e limpa depois de salvar.
+ * Antes, o estado inicial e o "limpar" eram dois blocos escritos à mão, e o
+ * segundo trazia um campo a mais (categoria_contestacao vazia). A primeira
+ * tratativa depois de abrir a página gravava; a segunda mandava o campo vazio,
+ * o banco recusava ("fora do permitido") e só recarregar a página resolvia.
+ */
+const formularioVazio = () => ({
+  link_zendesk: '',
+  link_intranet: '',
+  id_base_cliente: '',
+  nome_cliente: '',
+  cnpj_cliente: '',
+  tipo_tratativa: '',
+  prioridade: '',
+  motivo_id: '',
+  submotivos: [],
+  // Campos específicos Contestação de Compra
+  numero_case_contestacao: '',
+  motivo_contestacao: '',
+  valor_contestado_inicial: '',
+  prazo_sla_dias: '',
+  // Dados Comerciais do Cliente
+  plano_cliente: '',
+  modalidade_plano: '',
+  valor_contratacao_plano_atual: '',
+  data_primeira_contratacao: '',
+  data_contratacao_plano_atual: '',
+  segmento_cliente: '',
+});
 
 export default function Tratativas() {
   // ?nova=1 abre o formulário direto: é para onde leva o "Registrar tratativa"
@@ -68,29 +100,7 @@ export default function Tratativas() {
     url.searchParams.delete('agente');
     window.history.replaceState({}, '', url);
   };
-  const [formData, setFormData] = useState({
-    link_zendesk: '',
-    link_intranet: '',
-    id_base_cliente: '',
-    nome_cliente: '',
-    cnpj_cliente: '',
-    tipo_tratativa: '',
-    prioridade: '',
-    motivo_id: '',
-    submotivos: [],
-    // Campos específicos Contestação de Compra
-    numero_case_contestacao: '',
-    motivo_contestacao: '',
-    valor_contestado_inicial: '',
-    prazo_sla_dias: '',
-    // Dados Comerciais do Cliente
-    plano_cliente: '',
-    modalidade_plano: '',
-    valor_contratacao_plano_atual: '',
-    data_primeira_contratacao: '',
-    data_contratacao_plano_atual: '',
-    segmento_cliente: ''
-  });
+  const [formData, setFormData] = useState(formularioVazio);
   /*
    * Regras do formulário de nova tratativa.
    *
@@ -332,6 +342,8 @@ export default function Tratativas() {
         data_registro: now,
         agente_responsavel_id: colaborador?.id,
         agente_responsavel_nome: colaborador?.nome_completo || user?.full_name,
+        // Campo com lista fechada no banco: vazio não é valor, é ausência.
+        categoria_contestacao: data.categoria_contestacao || undefined,
         // Garantir que valores numéricos sejam salvos corretamente
         valor_contestado_inicial: data.valor_contestado_inicial ? parseFloat(data.valor_contestado_inicial) : undefined,
         prazo_sla_dias: data.prazo_sla_dias ? parseInt(data.prazo_sla_dias) : undefined,
@@ -359,32 +371,11 @@ export default function Tratativas() {
       setDialogOpen(false);
       resetForm();
     },
-    onError: () => toast.error('Erro ao registrar tratativa'),
+    onError: (erro) => toast.error(`Não consegui registrar a tratativa: ${traduzirErro(erro)}`),
   });
 
   const resetForm = () => {
-    setFormData({
-      link_zendesk: '',
-      link_intranet: '',
-      id_base_cliente: '',
-      nome_cliente: '',
-      cnpj_cliente: '',
-      tipo_tratativa: '',
-      prioridade: '',
-      motivo_id: '',
-      submotivos: [],
-      numero_case_contestacao: '',
-      motivo_contestacao: '',
-      categoria_contestacao: '',
-      valor_contestado_inicial: '',
-      prazo_sla_dias: '',
-      plano_cliente: '',
-      modalidade_plano: '',
-      valor_contratacao_plano_atual: '',
-      data_primeira_contratacao: '',
-      data_contratacao_plano_atual: '',
-      segmento_cliente: ''
-    });
+    setFormData(formularioVazio());
     setClienteRecorrente(false);
     setNumeroOcorrencias(0);
     validacao.limpar();
