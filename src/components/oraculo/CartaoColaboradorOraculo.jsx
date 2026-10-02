@@ -1,7 +1,6 @@
 import React from 'react';
 import { Cartao, Linha } from '@/components/ui/Cartao';
 import { formatDateSP } from '@/components/utils/helpers';
-import FotoDaPessoa from './FotoDaPessoa';
 
 /**
  * Uma pessoa na entrada do Oráculo — mesmo padrão de Observações e do Hansei:
@@ -15,9 +14,7 @@ export default function CartaoColaboradorOraculo({ colaborador, leituras, medias
   return (
     <button type="button" onClick={onClick} className="w-full text-left">
       <Cartao className="transition-colors hover:bg-muted/40">
-        <FotoDaPessoa colaborador={colaborador} className="h-36 w-full" textoClassName="text-4xl" />
-
-        <div className="mt-3 min-w-0">
+        <div className="min-w-0">
           <p className="truncate font-semibold text-foreground">{colaborador.nome_completo}</p>
           <p className="text-xs text-muted-foreground">{colaborador.cargo_atual || 'Agente'}</p>
         </div>
