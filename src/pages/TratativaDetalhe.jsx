@@ -563,9 +563,9 @@ export default function TratativaDetalhe({ idExterno = null, embutido = false })
   const pontosPreview = isEncerrada ? calculateTratativaPoints(comReaberturaApurada(tratativa, todasTratativas)) : null;
 
   return (
-    <div className="space-y-6">
+    <div className="mx-auto w-full max-w-4xl space-y-6">
       {!embutido && (
-      <PageHeader 
+      <PageHeader
         title="Detalhe da Tratativa"
         subtitle={tratativa.id_interno || `#${tratativa.id?.substring(0, 8)}`}
         icon={ClipboardList}
@@ -614,9 +614,9 @@ export default function TratativaDetalhe({ idExterno = null, embutido = false })
       {/* Perfil Comercial do Cliente — contexto comercial da ocorrência */}
       <PerfilComercialCliente tratativa={tratativa} />
 
-      <div className="grid lg:grid-cols-3 gap-6">
-        {/* Coluna Principal */}
-        <div className="lg:col-span-2 space-y-6">
+      {/* Coluna única, centralizada: histórico e registro ficam junto das informações,
+          não numa lateral separada. */}
+      <div className="space-y-6">
           {/* Info Card */}
           <Card className="border-0 shadow-sm">
             <CardHeader>
@@ -839,6 +839,55 @@ export default function TratativaDetalhe({ idExterno = null, embutido = false })
                   </div>
                 </div>
               )}
+            </CardContent>
+          </Card>
+
+          {/* Impacto Financeiro — restrito por permissão (ver_custo_operacional) */}
+          {podeVerCustoOperacional && <CustoOperacionalCard tratativa={tratativa} />}
+
+          {/* Pontuação */}
+          {isEncerrada && pontosPreview && (
+            <Card className="border border-warning/25 shadow-none bg-warning-soft">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium text-warning flex items-center gap-2">
+                  Pontuação Gerada
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-4xl font-bold mb-3 text-foreground">{pontosPreview.pontos.toFixed(1)}</div>
+                <div className="space-y-1">
+                  {pontosPreview.detalhes.map((d, i) => (
+                    <div key={i} className="text-sm text-foreground flex justify-between">
+                      <span>{d.tipo}</span>
+                      <span>+{d.pontos}</span>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Registro e linha do tempo.
+              A regra pede que o campo de registro seja o elemento de maior
+              destaque da área de ação — por isso ele vem ANTES do histórico. */}
+          <Card className="border shadow-none">
+            <CardContent className="pt-6">
+              <RegistrarNota
+                onRegistrar={registrarNota}
+                salvando={updateMutation.isPending}
+                desabilitado={isExcluida}
+              />
+            </CardContent>
+          </Card>
+
+          <Card className="border shadow-none">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-base">
+                Histórico
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <LinhaDoTempo entradas={tratativa.historico_estados} />
             </CardContent>
           </Card>
 
@@ -1297,60 +1346,6 @@ export default function TratativaDetalhe({ idExterno = null, embutido = false })
             </Card>
           )}
         </div>
-
-        {/* Sidebar */}
-        <div className="space-y-6">
-          {/* Impacto Financeiro — restrito por permissão (ver_custo_operacional) */}
-          {podeVerCustoOperacional && <CustoOperacionalCard tratativa={tratativa} />}
-
-          {/* Pontuação */}
-          {isEncerrada && pontosPreview && (
-            <Card className="border border-warning/25 shadow-none bg-warning-soft">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-warning flex items-center gap-2">
-                  Pontuação Gerada
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-4xl font-bold mb-3 text-foreground">{pontosPreview.pontos.toFixed(1)}</div>
-                <div className="space-y-1">
-                  {pontosPreview.detalhes.map((d, i) => (
-                    <div key={i} className="text-sm text-foreground flex justify-between">
-                      <span>{d.tipo}</span>
-                      <span>+{d.pontos}</span>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Registro e linha do tempo.
-              A regra pede que o campo de registro seja o elemento de maior
-              destaque da área de ação — por isso ele vem ANTES do histórico,
-              e não no fim da página. */}
-          <Card className="border shadow-none">
-            <CardContent className="pt-6">
-              <RegistrarNota
-                onRegistrar={registrarNota}
-                salvando={updateMutation.isPending}
-                desabilitado={isExcluida}
-              />
-            </CardContent>
-          </Card>
-
-          <Card className="border shadow-none">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-base">
-                Histórico
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <LinhaDoTempo entradas={tratativa.historico_estados} />
-            </CardContent>
-          </Card>
-        </div>
-      </div>
 
       <ConfirmDialog
         open={confirmDialog.open}

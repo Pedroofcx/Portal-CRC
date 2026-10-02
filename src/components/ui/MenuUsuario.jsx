@@ -10,8 +10,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Award, ChevronDown, KeyRound, LogOut } from 'lucide-react';
+import { Award, Camera, ChevronDown, KeyRound, LogOut } from 'lucide-react';
 import TrocarSenhaDialog from '@/components/conta/TrocarSenhaDialog';
+import TrocarFotoDialog from '@/components/conta/TrocarFotoDialog';
 
 /**
  * Identificação de quem está usando o sistema, com o menu da conta.
@@ -24,6 +25,7 @@ import TrocarSenhaDialog from '@/components/conta/TrocarSenhaDialog';
  */
 export default function MenuUsuario({ user, colaborador, compacto = false }) {
   const [trocandoSenha, setTrocandoSenha] = useState(false);
+  const [trocandoFoto, setTrocandoFoto] = useState(false);
 
   return (
     <>
@@ -70,6 +72,10 @@ export default function MenuUsuario({ user, colaborador, compacto = false }) {
               Minha Performance
             </Link>
           </DropdownMenuItem>
+          <DropdownMenuItem onSelect={() => setTrocandoFoto(true)} className="flex items-center gap-2">
+            <Camera className="h-4 w-4" aria-hidden="true" />
+            Alterar foto
+          </DropdownMenuItem>
           <DropdownMenuItem onSelect={() => setTrocandoSenha(true)} className="flex items-center gap-2">
             <KeyRound className="h-4 w-4" aria-hidden="true" />
             Trocar senha
@@ -83,6 +89,12 @@ export default function MenuUsuario({ user, colaborador, compacto = false }) {
       </DropdownMenu>
 
       <TrocarSenhaDialog aberto={trocandoSenha} aoFechar={() => setTrocandoSenha(false)} />
+      <TrocarFotoDialog
+        aberto={trocandoFoto}
+        aoFechar={() => setTrocandoFoto(false)}
+        colaborador={colaborador}
+        nome={user?.full_name}
+      />
     </>
   );
 }
