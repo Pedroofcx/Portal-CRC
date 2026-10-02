@@ -18,9 +18,15 @@ export default function ModuloDocCard({ modulo }) {
       <AccordionContent className="space-y-4 pb-4">
         <p className="text-sm text-foreground">{modulo.objetivo}</p>
 
+        {modulo.acesso && (
+          <p className="text-sm text-muted-foreground">
+            <span className="font-semibold text-foreground">Quem acessa: </span>{modulo.acesso}
+          </p>
+        )}
+
         <div className="flex flex-wrap gap-4 text-xs">
           <div>
-            <p className="font-semibold text-muted-foreground uppercase mb-1">Páginas / Componentes</p>
+            <p className="font-semibold text-muted-foreground uppercase mb-1">Arquivos</p>
             <div className="flex flex-wrap gap-1">
               {modulo.paginas.map((p) => (
                 <code key={p} className="bg-muted px-1.5 py-0.5 rounded text-foreground">{p}</code>
@@ -30,7 +36,7 @@ export default function ModuloDocCard({ modulo }) {
           <div>
             <p className="font-semibold text-muted-foreground uppercase mb-1">Entidades</p>
             <div className="flex flex-wrap gap-1">
-              {modulo.entidades.map((e) => (
+              {(modulo.entidades ?? []).map((e) => (
                 <Badge key={e} className="bg-info-soft text-primary border-info/25 text-xs">{e}</Badge>
               ))}
             </div>

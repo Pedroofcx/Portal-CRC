@@ -1,240 +1,233 @@
 import React, { useMemo, useState } from 'react';
+import { Search, Download } from 'lucide-react';
 import { Input } from '@/components/ui/input';
-import { Accordion } from '@/components/ui/accordion';
-import { Search, FileText, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Accordion } from '@/components/ui/accordion';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import ModuloDocCard from './ModuloDocCard';
-import { modulosOperacoes } from './dadosOperacoes';
-import { modulosGestaoPessoas } from './dadosGestaoPessoas';
-import { modulosComunicacao } from './dadosComunicacao';
-import { modulosSistema } from './dadosSistema';
+import {
+  CATEGORIAS, TODOS_MODULOS, gerarMarkdown, gerarJson,
+  resumoDoSistema, secoesArquitetura, secoesDeRegras, secoesDeOperacao, legadoParaRemover,
+  gruposDeTabelas, tabelasSemEntidade, funcoesDoBanco, gatilhosDoBanco, objetosEspeciais,
+  migracoes, pontosDeAtencao,
+} from './gerarMarkdown';
 
-const TODOS_MODULOS = [
-  ...modulosOperacoes,
-  ...modulosGestaoPessoas,
-  ...modulosComunicacao,
-  ...modulosSistema,
-];
+const contem = (objeto, termo) => !termo || JSON.stringify(objeto).toLowerCase().includes(termo);
 
-const CATEGORIAS = ['Operações', 'Gestão de Pessoas', 'Comunicação', 'Sistema'];
+function baixar(conteudo, tipo, extensao) {
+  const blob = new Blob([conteudo], { type: `${tipo};charset=utf-8` });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `documentacao_tecnica_portal_crc_${new Date().toISOString().slice(0, 10)}.${extensao}`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
 
-export default function DocumentacaoTecnica() {
-  const [busca, setBusca] = useState('');
+function Tabela({ colunas, linhas }) {
+  return (
+    <div className="overflow-x-auto rounded-lg border border-border">
+      <table className="w-full text-sm">
+        <thead className="bg-muted text-left text-xs uppercase text-muted-foreground">
+          <tr>{colunas.map((c) => <th key={c} className="px-3 py-2 font-semibold">{c}</th>)}</tr>
+        </thead>
+        <tbody>
+          {linhas.map((l, i) => (
+            <tr key={i} className="border-t border-border align-top">
+              {l.map((c, j) => (
+                <td key={j} className={`px-3 py-2 ${j === 0 ? 'font-medium text-foreground' : 'text-muted-foreground'}`}>{c}</td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
 
-  const modulosFiltrados = useMemo(() => {
-    const termo = busca.trim().toLowerCase();
-    if (!termo) return TODOS_MODULOS;
-    return TODOS_MODULOS.filter((m) => {
-      const texto = JSON.stringify(m).toLowerCase();
-      return texto.includes(termo);
-    });
-  }, [busca]);
+function Secao({ secao }) {
+  return (
+    <section id={secao.id} className="space-y-3 rounded-lg border border-border bg-card p-4">
+      <h3 className="text-base font-semibold text-foreground">{secao.titulo}</h3>
+      {secao.fonte && <p className="text-xs text-muted-foreground">Fonte no código: {secao.fonte}</p>}
+      {(secao.paragrafos ?? []).map((p, i) => <p key={i} className="text-sm text-foreground">{p}</p>)}
+      {secao.itens?.length > 0 && (
+        <ul className="space-y-2 text-sm">
+          {secao.itens.map((i) => (
+            <li key={i.rotulo}>
+              <span className="font-medium text-foreground">{i.rotulo}.</span>{' '}
+              <span className="text-muted-foreground">{i.texto}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+      {secao.tabela && <Tabela {...secao.tabela} />}
+    </section>
+  );
+}
 
-  const handleExportar = () => {
-    const json = JSON.stringify(TODOS_MODULOS, null, 2);
-    const blob = new Blob([json], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `documentacao_tecnica_portal_crc_${Date.now()}.json`;
-    a.click();
-  };
+const Vazio = ({ busca }) => (
+  <p className="py-10 text-center text-muted-foreground">Nada encontrado para "{busca}"</p>
+);
 
-  const gerarMarkdown = () => {
-    const todasEntidades = [...new Set(TODOS_MODULOS.flatMap((m) => m.entidades || []))].sort();
-    const dataGeracao = new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' });
+function ListaDeSecoes({ secoes, busca }) {
+  if (!secoes.length) return <Vazio busca={busca} />;
+  return <div className="space-y-4">{secoes.map((s) => <Secao key={s.id} secao={s} />)}</div>;
+}
 
-    let md = `# Documentação Técnica — Portal CRC\n\n`;
-    md += `> Central de Relacionamento e Conformidade — Plataforma de gestão de desempenho, desenvolvimento de colaboradores e conformidade operacional.\n\n`;
-    md += `**Gerado em:** ${dataGeracao}\n`;
-    md += `**Total de módulos documentados:** ${TODOS_MODULOS.length}\n`;
-    md += `**Total de entidades:** ${todasEntidades.length}\n\n`;
-    md += `---\n\n`;
-
-    // Sumário
-    md += `## Sumário\n\n`;
-    CATEGORIAS.forEach((cat) => {
-      const mods = TODOS_MODULOS.filter((m) => m.categoria === cat);
-      if (mods.length === 0) return;
-      md += `### ${cat}\n\n`;
-      mods.forEach((m) => {
-        md += `- [${m.nome}](#${m.id})\n`;
-      });
-      md += `\n`;
-    });
-
-    // Índice de Entidades
-    md += `---\n\n## Índice de Entidades\n\n`;
-    md += `| Entidade | Módulos que utilizam |\n|---|---|\n`;
-    todasEntidades.forEach((ent) => {
-      const modsUsam = TODOS_MODULOS.filter((m) => (m.entidades || []).includes(ent)).map((m) => m.nome);
-      md += `| **${ent}** | ${modsUsam.join(', ')} |\n`;
-    });
-    md += `\n`;
-
-    // Visão Geral da Arquitetura
-    md += `---\n\n## Visão Geral da Arquitetura\n\n`;
-    md += `### Stack Tecnológico\n\n`;
-    md += `- **Frontend:** React 18 + Vite + Tailwind CSS + shadcn/ui (Radix UI)\n`;
-    md += `- **Roteamento:** React Router DOM v6\n`;
-    md += `- **Cache/Estado servidor:** TanStack React Query v5\n`;
-    md += `- **Gráficos:** Recharts\n`;
-    md += `- **Ícones:** lucide-react\n`;
-    md += `- **Datas:** date-fns\n`;
-    md += `- **Backend (BaaS):** Base44 SDK — entidades (JSON schemas), auth, integrações (InvokeLLM, UploadFile, SendEmail, GenerateImage, etc.)\n`;
-    md += `- **Drag-and-drop:** @hello-pangea/dnd\n`;
-    md += `- **Editor rich-text:** react-quill-new\n`;
-    md += `- **Mapas:** react-leaflet\n`;
-    md += `- **3D:** three.js\n\n`;
-    md += `### Padrões de Arquitetura\n\n`;
-    md += `1. **Vínculo usuário↔colaborador por email:** não há FK no banco; o registro Colaborador é criado manualmente com o mesmo email do usuário autenticado.\n`;
-    md += `2. **Segregação de acesso no cliente:** sem RLS no banco — toda lógica de permissão (gestorOnly, PermissaoModulo, filtro por colaborador_id) é no frontend.\n`;
-    md += `3. **Pontuação sempre recalculada ao vivo:** calculateTratativaPoints() é a única fonte de verdade — não há persistência de pontos por tratativa (entidade Pontuacao é código morto para isso).\n`;
-    md += `4. **Cálculo financeiro dinâmico:** custo operacional e impacto financeiro sempre recalculados com salário atual do colaborador — campos estáticos gravados são ignorados nos relatórios.\n`;
-    md += `5. **Fuso horário São Paulo:** datas persistidas em ISO (UTC), exibição sempre via formatDateSP/todaySP (America/Sao_Paulo).\n`;
-    md += `6. **Input monetário:** CurrencyInput com acumulador de centavos — contrato de dado sempre number (centavos), nunca string.\n`;
-    md += `7. **Máquina de estados (FSM) de Tratativa:** transições fixas no código (FSM_TRANSITIONS em TratativaDetalhe.jsx), historico_estados[] é append-only.\n`;
-    md += `8. **ErrorBoundary aninhado:** Layout envolve children em ErrorBoundary → uma página quebrada não derruba o app.\n\n`;
-
-    // Módulos por categoria
-    CATEGORIAS.forEach((cat) => {
-      const mods = TODOS_MODULOS.filter((m) => m.categoria === cat);
-      if (mods.length === 0) return;
-      md += `---\n\n## ${cat}\n\n`;
-      mods.forEach((m) => {
-        md += `### ${m.nome}\n\n`;
-        md += `**ID:** \`${m.id}\`\n\n`;
-        if (m.objetivo) md += `**Objetivo:** ${m.objetivo}\n\n`;
-        if (m.paginas?.length) {
-          md += `**Páginas / Componentes:**\n\n`;
-          m.paginas.forEach((p) => { md += `- \`${p}\`\n`; });
-          md += `\n`;
-        }
-        if (m.entidades?.length) {
-          md += `**Entidades:** ${m.entidades.map((e) => `\`${e}\``).join(', ')}\n\n`;
-        }
-        if (m.fluxo) {
-          md += `**Fluxo / Lógica:**\n\n`;
-          md += `${m.fluxo}\n\n`;
-        }
-        if (m.campos_chave?.length) {
-          md += `**Campos-chave:**\n\n`;
-          m.campos_chave.forEach((c) => {
-            md += `- \`${c.campo}\` — ${c.descricao}\n`;
-          });
-          md += `\n`;
-        }
-        if (m.regras_negocio?.length) {
-          md += `**Regras de negócio:**\n\n`;
-          m.regras_negocio.forEach((r) => { md += `- ${r}\n`; });
-          md += `\n`;
-        }
-        if (m.integracoes?.length) {
-          md += `**Integrações com outros módulos:**\n\n`;
-          m.integracoes.forEach((r) => { md += `- ${r}\n`; });
-          md += `\n`;
-        }
-      });
-    });
-
-    // Entidades e schemas
-    md += `---\n\n## Entidades e Schemas de Dados\n\n`;
-    md += `> As entidades são definidas como JSON schemas em \`base44/entities/<Nome>.jsonc\`. Campos built-in em todo registro: \`id\`, \`created_date\`, \`updated_date\`, \`created_by_id\`.\n\n`;
-    md += `Lista completa de entidades do sistema:\n\n`;
-    todasEntidades.forEach((ent) => {
-      md += `- \`${ent}\`\n`;
-    });
-    md += `\n`;
-
-    // Integrações Base44
-    md += `---\n\n## Integrações Base44 (Core)\n\n`;
-    md += `- **InvokeLLM:** Geração de respostas com LLM (usado em Observações, ORÁCULO, Jornada do Cliente, Relatório Diretoria). Suporta \`add_context_from_internet\` (apenas modelos gemini_3_flash/gemini_3_1_pro), \`file_urls\` e \`response_json_schema\`.\n`;
-    md += `- **UploadFile:** Upload de arquivos (retorna \`{file_url}\`).\n`;
-    md += `- **UploadPrivateFile / CreateFileSignedUrl:** Armazenamento privado com URL assinada temporária.\n`;
-    md += `- **SendEmail:** Envio de e-mail (atinge usuários registrados sempre; não registrados requer plano pago + domínio customizado).\n`;
-    md += `- **SendPushNotification:** Push nativo mobile (apenas app nativo iOS/Android com credenciais configuradas; server-side via asServiceRole).\n`;
-    md += `- **GenerateImage / GenerateVideo / GenerateSpeech:** Geração de mídia via IA.\n`;
-    md += `- **TranscribeAudio:** Transcrição de áudio (Whisper).\n`;
-    md += `- **ExtractDataFromUploadedFile:** Extração estruturada de CSV/Excel/JSON/PDF/imagens para um JSON schema alvo.\n\n`;
-
-    // Convenções de código
-    md += `---\n\n## Convenções de Código\n\n`;
-    md += `- **Imports:** alias \`@/\` (ex: \`@/components/ui/button\`), nunca paths relativos \`src/\`.\n`;
-    md += `- **cn (class merge):** import de \`@/lib/utils\`.\n`;
-    md += `- **createPageUrl:** import de \`@/utils\`.\n`;
-    md += `- **shadcn/ui:** cada componente em \`@/components/ui/<nome>.jsx\` — importar cada primitiva do seu próprio arquivo.\n`;
-    md += `- **Ícones:** apenas lucide-react, apenas ícones que existem.\n`;
-    md += `- **JSX:** apenas em arquivos \`.jsx\`/\\\`.tsx\`.\n`;
-    md += `- **Hooks:** chamados apenas no top-level do componente, nunca condicional ou em loops.\n`;
-    md += `- **Classes Tailwind:** sempre strings literais (o build purga classes dinâmicas \`bg-\${cor}-500\`).\n`;
-    md += `- **Entidades SDK:** \`db.entities.<Nome>.list()\`, \`.filter()\`, \`.create()\`, \`.update()\`, \`.delete()\`, \`.bulkCreate()\`, \`.bulkUpdate()\`, \`.updateMany()\`, \`.deleteMany()\`.\n\n`;
-    md += `---\n\n*Fim da documentação técnica — Portal CRC.*\n`;
-
-    return md;
-  };
-
-  const handleExportarMarkdown = () => {
-    const md = gerarMarkdown();
-    const blob = new Blob([md], { type: 'text/markdown;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `documentacao_tecnica_portal_crc_${Date.now()}.md`;
-    a.click();
-    URL.revokeObjectURL(url);
-  };
+function AbaBanco({ termo, busca }) {
+  const grupos = gruposDeTabelas
+    .map((g) => ({ ...g, tabelas: g.tabelas.filter((t) => contem(t, termo)) }))
+    .filter((g) => g.tabelas.length);
+  const funcoes = funcoesDoBanco.filter((f) => contem(f, termo));
+  const gatilhos = gatilhosDoBanco.filter((g) => contem(g, termo));
+  const objetos = objetosEspeciais.filter((o) => contem(o, termo));
+  const migs = migracoes.filter((m) => contem(m, termo));
+  const pontos = pontosDeAtencao.filter((p) => contem(p, termo));
+  if (![grupos, funcoes, gatilhos, objetos, migs, pontos].some((l) => l.length)) return <Vazio busca={busca} />;
 
   return (
     <div className="space-y-6">
-      <div className="p-4 bg-info-soft border border-info/25 rounded-lg flex items-start gap-3">
-        <FileText className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
-        <p className="text-sm text-primary">
-          Documentação técnica de todos os módulos do sistema: objetivo, páginas/componentes, entidades,
-          fluxo de negócio, campos-chave e integrações entre módulos. Use como referência ao planejar
-          novas funcionalidades ou repassar contexto a um consultor.
+      {pontos.length > 0 && (
+        <section className="space-y-2 rounded-lg border border-border bg-card p-4">
+          <h3 className="text-base font-semibold text-foreground">Pontos de atenção</h3>
+          <ul className="list-disc space-y-1 pl-5 text-sm text-foreground">{pontos.map((p, i) => <li key={i}>{p}</li>)}</ul>
+        </section>
+      )}
+      {grupos.map((g) => (
+        <section key={g.id} className="space-y-2">
+          <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">{g.nome}</h3>
+          <Tabela
+            colunas={['Tabela', 'O que guarda', 'Quem lê', 'Quem escreve']}
+            linhas={g.tabelas.map((t) => [t.tabela, t.descricao, t.leitura, t.escrita])}
+          />
+        </section>
+      ))}
+      {!termo && (
+        <p className="text-sm text-muted-foreground">
+          Sem entidade na API (só pelo SQL): {tabelasSemEntidade.join(', ')}.
         </p>
-      </div>
+      )}
+      {funcoes.length > 0 && (
+        <section className="space-y-2">
+          <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Funções</h3>
+          <Tabela colunas={['Função', 'Migration', 'O que faz']} linhas={funcoes.map((f) => [f.nome, f.migration, f.descricao])} />
+        </section>
+      )}
+      {gatilhos.length > 0 && (
+        <section className="space-y-2">
+          <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Gatilhos</h3>
+          <Tabela
+            colunas={['Gatilho', 'Tabela e momento', 'O que faz']}
+            linhas={gatilhos.map((g) => [g.nome, `${g.tabela}, ${g.quando} (migration ${g.migration})`, g.descricao])}
+          />
+        </section>
+      )}
+      {objetos.length > 0 && (
+        <section className="space-y-2">
+          <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Objetos especiais</h3>
+          <Tabela colunas={['Objeto', 'Descrição']} linhas={objetos.map((o) => [o.nome, o.descricao])} />
+        </section>
+      )}
+      {migs.length > 0 && (
+        <section className="space-y-2">
+          <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Migrations</h3>
+          <Tabela colunas={['Nº', 'Título', 'O que faz']} linhas={migs.map((m) => [m.n, m.titulo, m.descricao])} />
+        </section>
+      )}
+    </div>
+  );
+}
 
-      <div className="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
+export default function DocumentacaoTecnica() {
+  const [busca, setBusca] = useState('');
+  const termo = busca.trim().toLowerCase();
+
+  const modulos = useMemo(() => TODOS_MODULOS.filter((m) => contem(m, termo)), [termo]);
+  const arquitetura = useMemo(() => secoesArquitetura.filter((s) => contem(s, termo)), [termo]);
+  const regras = useMemo(() => secoesDeRegras.filter((s) => contem(s, termo)), [termo]);
+  const operacao = useMemo(() => secoesDeOperacao.filter((s) => contem(s, termo)), [termo]);
+  const legado = useMemo(() => legadoParaRemover.filter((l) => contem(l, termo)), [termo]);
+
+  return (
+    <div className="space-y-5">
+      <p className="text-sm text-muted-foreground">
+        Como o sistema é hoje: módulos, banco de dados, regras de negócio e operação. Escrita para quem
+        vai mantê-lo. Um teste (npm run lint) falha se algo aqui citar o que não existe ou se algo
+        existir sem estar descrito.
+      </p>
+
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="relative w-full sm:max-w-sm">
-          <Search className="w-4 h-4 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2" />
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             value={busca}
             onChange={(e) => setBusca(e.target.value)}
-            placeholder="Buscar módulo, entidade, campo, regra..."
+            placeholder="Buscar módulo, tabela, função, regra..."
             className="pl-9"
           />
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={handleExportar}>
-            <Download className="w-4 h-4 mr-2" />
+          <Button variant="outline" onClick={() => baixar(JSON.stringify(gerarJson(), null, 2), 'application/json', 'json')}>
+            <Download className="mr-2 h-4 w-4" />
             Exportar JSON
           </Button>
-          <Button onClick={handleExportarMarkdown}>
-            <Download className="w-4 h-4 mr-2" />
-            Baixar .md (para IA)
+          <Button onClick={() => baixar(gerarMarkdown(), 'text/markdown', 'md')}>
+            <Download className="mr-2 h-4 w-4" />
+            Baixar .md
           </Button>
         </div>
       </div>
 
-      {CATEGORIAS.map((categoria) => {
-        const modulosDaCategoria = modulosFiltrados.filter((m) => m.categoria === categoria);
-        if (modulosDaCategoria.length === 0) return null;
-        return (
-          <div key={categoria}>
-            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-2">{categoria}</h3>
-            <Accordion type="multiple" className="space-y-0">
-              {modulosDaCategoria.map((modulo) => (
-                <ModuloDocCard key={modulo.id} modulo={modulo} />
-              ))}
-            </Accordion>
-          </div>
-        );
-      })}
+      <Tabs defaultValue="geral" className="space-y-4">
+        <TabsList className="flex-wrap">
+          <TabsTrigger value="geral">Visão geral</TabsTrigger>
+          <TabsTrigger value="modulos">Módulos</TabsTrigger>
+          <TabsTrigger value="banco">Banco de dados</TabsTrigger>
+          <TabsTrigger value="regras">Regras</TabsTrigger>
+          <TabsTrigger value="operacao">Operação</TabsTrigger>
+        </TabsList>
 
-      {modulosFiltrados.length === 0 && (
-        <p className="text-center text-muted-foreground py-10">Nenhum módulo encontrado para "{busca}"</p>
-      )}
+        <TabsContent value="geral" className="space-y-4">
+          {!termo && (
+            <section className="rounded-lg border border-border bg-card p-4">
+              <h3 className="text-base font-semibold text-foreground">{resumoDoSistema.nome}</h3>
+              <p className="mt-1 text-sm text-foreground">{resumoDoSistema.descricao}</p>
+            </section>
+          )}
+          <ListaDeSecoes secoes={arquitetura} busca={busca} />
+        </TabsContent>
+
+        <TabsContent value="modulos" className="space-y-6">
+          {modulos.length === 0 && <Vazio busca={busca} />}
+          {CATEGORIAS.map((categoria) => {
+            const daCategoria = modulos.filter((m) => m.categoria === categoria);
+            if (!daCategoria.length) return null;
+            return (
+              <div key={categoria}>
+                <h3 className="mb-2 text-sm font-semibold uppercase tracking-wider text-muted-foreground">{categoria}</h3>
+                <Accordion type="multiple">
+                  {daCategoria.map((m) => <ModuloDocCard key={m.id} modulo={m} />)}
+                </Accordion>
+              </div>
+            );
+          })}
+        </TabsContent>
+
+        <TabsContent value="banco"><AbaBanco termo={termo} busca={busca} /></TabsContent>
+
+        <TabsContent value="regras"><ListaDeSecoes secoes={regras} busca={busca} /></TabsContent>
+
+        <TabsContent value="operacao" className="space-y-4">
+          <ListaDeSecoes secoes={operacao} busca={busca} />
+          {legado.length > 0 && (
+            <section className="space-y-2">
+              <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Legado para remover</h3>
+              <Tabela colunas={['Item', 'Por quê']} linhas={legado.map((l) => [l.item, l.motivo])} />
+            </section>
+          )}
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

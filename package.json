@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "lint": "eslint . --quiet && node ferramentas/conferir-cores.mjs",
+    "lint": "eslint . --quiet && node ferramentas/conferir-cores.mjs && node ferramentas/conferir-documentacao.mjs",
     "lint:fix": "eslint . --fix",
     "typecheck": "tsc -p ./jsconfig.json",
     "preview": "vite preview",
@@ -24,7 +24,8 @@
     "apagar-hansei": "node ferramentas/apagar-hansei.mjs",
     "previa-operador": "node ferramentas/gerar-previa-operador.mjs",
     "previa-sistema": "node ferramentas/gerar-previa-sistema.mjs",
-    "conferir-cores": "node ferramentas/conferir-cores.mjs"
+    "conferir-cores": "node ferramentas/conferir-cores.mjs",
+    "conferir-documentacao": "node ferramentas/conferir-documentacao.mjs"
   },
   "dependencies": {
     "@hello-pangea/dnd": "^17.0.0",
