@@ -20,7 +20,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
 import {
   Dialog,
@@ -927,10 +926,7 @@ export default function TratativaDetalhe({ idExterno = null, embutido = false })
           {/* Ações de Status (FSM) */}
           {!isEncerrada && !isAguardandoReabertura && !isExcluida && !isAguardandoFinanceiro && (
             <Card className="border-0 shadow-sm">
-              <CardHeader>
-                <CardTitle>Ações</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-4 pt-6">
                 <div className="flex flex-wrap gap-2">
                   {tratativa.status === 'registrada' && canTransitionTo('tratativa_iniciada') && (
                     <Button 
@@ -968,9 +964,8 @@ export default function TratativaDetalhe({ idExterno = null, embutido = false })
 
                 {canTransitionTo('encerrada') && (
                   <>
-                    <Separator />
-                    <div className="space-y-4">
-                      <h4 className="font-medium">Encerrar Tratativa</h4>
+                    <div className="grid gap-4 md:grid-cols-2">
+                      <h4 className="font-medium md:col-span-2">Encerrar Tratativa</h4>
                       
                       <div>
                         <Label>Descrição da Solução</Label>
@@ -978,7 +973,7 @@ export default function TratativaDetalhe({ idExterno = null, embutido = false })
                           value={solucaoForm.descricao_solucao}
                           onChange={(e) => setSolucaoForm({ ...solucaoForm, descricao_solucao: e.target.value })}
                           placeholder="Descreva a solução aplicada..."
-                          rows={3}
+                          rows={5}
                         />
                       </div>
 
@@ -991,7 +986,7 @@ export default function TratativaDetalhe({ idExterno = null, embutido = false })
                           <div className="flex-1">
                             <Label className="font-medium">Solução Replicável Documentada (+0,5 pts)</Label>
                             <p className="text-xs text-primary mt-1">
-                              Marque se a solução pode ser replicada em outras tratativas E foi corretamente documentada, incluindo processos, fluxos e solução aplicada. Este item pode ser auditado pelo gestor.
+                              Marque se a solução pode ser replicada em outras tratativas e está documentada (processos, fluxos e solução). O gestor pode auditar.
                             </p>
                           </div>
                         </div>
@@ -1043,7 +1038,7 @@ export default function TratativaDetalhe({ idExterno = null, embutido = false })
 
                       {/* Campos específicos por tipo */}
                       {tratativa.tipo_tratativa === 'reclame_aqui' && (
-                        <div className="p-4 bg-muted rounded-lg space-y-4">
+                        <div className="p-4 bg-muted rounded-lg space-y-4 md:col-span-2">
                           <h5 className="font-medium text-sm">Dados do Reclame Aqui</h5>
                           <div>
                             <Label>Categoria da Reclamação</Label>
@@ -1082,7 +1077,7 @@ export default function TratativaDetalhe({ idExterno = null, embutido = false })
                       )}
 
                       {tratativa.tipo_tratativa === 'contestacao' && (
-                        <div className="p-4 bg-info-soft border border-info/25 rounded-lg space-y-4">
+                        <div className="p-4 bg-info-soft border border-info/25 rounded-lg space-y-4 md:col-span-2">
                           <h5 className="font-medium text-sm text-primary">Encerramento Contestação de Compra</h5>
                           
                           <div>
@@ -1181,7 +1176,7 @@ export default function TratativaDetalhe({ idExterno = null, embutido = false })
                       )}
 
                       {tratativa.tipo_tratativa === 'google_meu_negocio' && (
-                        <div className="p-4 bg-muted rounded-lg space-y-3">
+                        <div className="p-4 bg-muted rounded-lg space-y-3 md:col-span-2">
                           <h5 className="font-medium text-sm">Resultado Google Meu Negócio</h5>
                           <div>
                             <Label>Situação do Comentário *</Label>
@@ -1228,7 +1223,7 @@ export default function TratativaDetalhe({ idExterno = null, embutido = false })
                       )}
 
                       {/* Confirmação de Motivo/Submotivo */}
-                      <div className="p-4 bg-info-soft border border-info/25 rounded-lg space-y-3">
+                      <div className="p-4 bg-info-soft border border-info/25 rounded-lg space-y-3 md:row-span-2">
                         <h5 className="font-medium text-sm">Confirmação de Motivo e Submotivos</h5>
                         <div className="p-3 bg-card rounded border">
                           <p className="text-xs text-muted-foreground mb-1">Motivo registrado</p>
@@ -1313,7 +1308,7 @@ export default function TratativaDetalhe({ idExterno = null, embutido = false })
                           title: 'Encerrar Tratativa',
                           description: 'Tem certeza que deseja encerrar esta tratativa? Esta ação é definitiva e não pode ser desfeita.'
                         })}
-                        className="bg-success hover:bg-success/90"
+                        className="bg-success hover:bg-success/90 md:col-span-2 md:justify-self-start"
                         disabled={updateMutation.isPending}
                       >
                         <CheckCircle className="w-4 h-4 mr-2" />
