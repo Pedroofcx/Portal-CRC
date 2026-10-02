@@ -387,6 +387,7 @@ export default function Tratativas() {
     });
     setClienteRecorrente(false);
     setNumeroOcorrencias(0);
+    validacao.limpar();
   };
 
   const _categoriaContestacaoLabels = {
@@ -906,15 +907,17 @@ export default function Tratativas() {
             </CampoFormulario>
 
             {/* Dados Comerciais do Cliente */}
-            <DadosComerciaisForm formData={formData} setFormData={setFormData} />
+            <DadosComerciaisForm formData={formData} setFormData={setFormData} validacao={validacao} />
             <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label>Tipo de Tratativa *</Label>
+              <CampoFormulario id="tipo_tratativa" rotulo="Tipo de Tratativa" obrigatorio erro={validacao.erro('tipo_tratativa')}>
                 <Select
                   value={formData.tipo_tratativa || ''}
-                  onValueChange={(value) => setFormData(prev => ({ ...prev, tipo_tratativa: value }))}
+                  onValueChange={(value) => {
+                    setFormData(prev => ({ ...prev, tipo_tratativa: value }));
+                    validacao.aoMudar('tipo_tratativa', value);
+                  }}
                 >
-                  <SelectTrigger className="mt-1">
+                  <SelectTrigger id="tipo_tratativa" {...validacao.campo('tipo_tratativa')}>
                     <SelectValue placeholder="Selecione o tipo" />
                   </SelectTrigger>
                   <SelectContent>
@@ -923,14 +926,16 @@ export default function Tratativas() {
                     ))}
                   </SelectContent>
                 </Select>
-              </div>
-              <div>
-                <Label>Prioridade *</Label>
+              </CampoFormulario>
+              <CampoFormulario id="prioridade" rotulo="Prioridade" obrigatorio erro={validacao.erro('prioridade')}>
                 <Select
                   value={formData.prioridade || ''}
-                  onValueChange={(value) => setFormData(prev => ({ ...prev, prioridade: value }))}
+                  onValueChange={(value) => {
+                    setFormData(prev => ({ ...prev, prioridade: value }));
+                    validacao.aoMudar('prioridade', value);
+                  }}
                 >
-                  <SelectTrigger className="mt-1">
+                  <SelectTrigger id="prioridade" {...validacao.campo('prioridade')}>
                     <SelectValue placeholder="Selecione a prioridade" />
                   </SelectTrigger>
                   <SelectContent>
@@ -939,24 +944,24 @@ export default function Tratativas() {
                     ))}
                   </SelectContent>
                 </Select>
-              </div>
+              </CampoFormulario>
             </div>
 
             {/* Motivo e Submotivos */}
             <div className="p-4 bg-warning-soft border border-warning/25 rounded-lg space-y-4">
-              <div>
-                <Label>Motivo Principal * (apenas 1)</Label>
+              <CampoFormulario id="motivo_id" rotulo="Motivo Principal (apenas 1)" obrigatorio erro={validacao.erro('motivo_id')}>
                 <Select
                   value={formData.motivo_id || ''}
                   onValueChange={(value) => {
-                    setFormData(prev => ({ 
-                      ...prev, 
+                    setFormData(prev => ({
+                      ...prev,
                       motivo_id: value,
                       submotivos: []
                     }));
+                    validacao.aoMudar('motivo_id', value);
                   }}
                 >
-                  <SelectTrigger className="mt-2">
+                  <SelectTrigger id="motivo_id" {...validacao.campo('motivo_id')}>
                     <SelectValue placeholder="Selecione o motivo principal" />
                   </SelectTrigger>
                   <SelectContent>
@@ -967,11 +972,10 @@ export default function Tratativas() {
                     ))}
                   </SelectContent>
                 </Select>
-              </div>
+              </CampoFormulario>
 
               {formData.motivo_id && (
-                <div>
-                  <Label>Submotivos * (até 3)</Label>
+                <CampoFormulario id="submotivos" rotulo="Submotivos (até 3)" obrigatorio erro={validacao.erro('submotivos')}>
                   <p className="text-xs text-warning mb-2">
                     Selecione até 3 submotivos relacionados ao motivo principal
                   </p>
@@ -986,15 +990,13 @@ export default function Tratativas() {
                           type="button"
                           onClick={() => {
                             if (isSelected) {
-                              setFormData({
-                                ...formData,
-                                submotivos: formData.submotivos.filter(s => s !== sub)
-                              });
+                              const novos = formData.submotivos.filter(s => s !== sub);
+                              setFormData({ ...formData, submotivos: novos });
+                              validacao.aoMudar('submotivos', novos);
                             } else if (canSelect) {
-                              setFormData({
-                                ...formData,
-                                submotivos: [...formData.submotivos, sub]
-                              });
+                              const novos = [...formData.submotivos, sub];
+                              setFormData({ ...formData, submotivos: novos });
+                              validacao.aoMudar('submotivos', novos);
                             }
                           }}
                           className={`w-full text-left p-2 border rounded-lg transition-all ${
@@ -1017,7 +1019,7 @@ export default function Tratativas() {
                   <p className="text-xs text-muted-foreground mt-2">
                     {formData.submotivos.length}/3 selecionados
                   </p>
-                  </div>
+                </CampoFormulario>
                   )}
                   </div>
 

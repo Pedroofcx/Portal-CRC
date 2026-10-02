@@ -1,8 +1,8 @@
 import React from 'react';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { CurrencyInput } from '@/components/ui/CurrencyInput';
+import CampoFormulario from '@/components/ui/CampoFormulario';
 import { Building2 } from 'lucide-react';
 import { PLANOS_CLIENTE } from '@/components/utils/helpers';
 
@@ -15,12 +15,20 @@ const SEGMENTOS_SUGERIDOS = [
 const MODALIDADES = ['Mensal', 'Trimestral', 'Semestral', 'Anual'];
 
 // Componente de seção "Dados Comerciais do Cliente" para o formulário de Nova Tratativa.
-// Recebe formData e setFormData do pai.
+// Recebe formData e setFormData do pai, e `validacao` (useValidacao) para destacar
+// os campos que faltam.
 // Campos obrigatórios: plano, modalidade_plano, valor_contratacao_plano_atual,
 // data_primeira_contratacao, data_contratacao_plano_atual.
 // A fonte de verdade é sempre o contrato firmado — valores mensal/anual equivalentes
 // são calculados dinamicamente pela aplicação, nunca persistidos.
-export default function DadosComerciaisForm({ formData, setFormData }) {
+export default function DadosComerciaisForm({ formData, setFormData, validacao }) {
+  const atualizar = (nome, valor) => {
+    setFormData({ ...formData, [nome]: valor });
+    validacao?.aoMudar(nome, valor);
+  };
+  const erro = (nome) => validacao?.erro(nome) || null;
+  const ligar = (nome) => validacao?.campo(nome) || {};
+
   return (
     <div className="p-4 bg-success-soft border border-success/25 rounded-lg space-y-4">
       <h4 className="font-semibold text-success flex items-center gap-2">
@@ -29,13 +37,12 @@ export default function DadosComerciaisForm({ formData, setFormData }) {
       </h4>
 
       <div className="grid grid-cols-2 gap-4">
-        <div>
-          <Label>Plano do Cliente *</Label>
+        <CampoFormulario id="plano_cliente" rotulo="Plano do Cliente" obrigatorio erro={erro('plano_cliente')}>
           <Select
             value={formData.plano_cliente || ''}
-            onValueChange={(value) => setFormData({ ...formData, plano_cliente: value })}
+            onValueChange={(value) => atualizar('plano_cliente', value)}
           >
-            <SelectTrigger className="mt-1">
+            <SelectTrigger id="plano_cliente" {...ligar('plano_cliente')}>
               <SelectValue placeholder="Selecione o plano" />
             </SelectTrigger>
             <SelectContent>
@@ -44,14 +51,13 @@ export default function DadosComerciaisForm({ formData, setFormData }) {
               ))}
             </SelectContent>
           </Select>
-        </div>
-        <div>
-          <Label>Segmento do Cliente</Label>
+        </CampoFormulario>
+        <CampoFormulario id="segmento_cliente" rotulo="Segmento do Cliente">
           <Select
             value={formData.segmento_cliente || ''}
             onValueChange={(value) => setFormData({ ...formData, segmento_cliente: value })}
           >
-            <SelectTrigger className="mt-1">
+            <SelectTrigger id="segmento_cliente">
               <SelectValue placeholder="Selecione o segmento" />
             </SelectTrigger>
             <SelectContent>
@@ -60,17 +66,16 @@ export default function DadosComerciaisForm({ formData, setFormData }) {
               ))}
             </SelectContent>
           </Select>
-        </div>
+        </CampoFormulario>
       </div>
 
       <div className="grid grid-cols-2 gap-4">
-        <div>
-          <Label>Modalidade do Plano *</Label>
+        <CampoFormulario id="modalidade_plano" rotulo="Modalidade do Plano" obrigatorio erro={erro('modalidade_plano')}>
           <Select
             value={formData.modalidade_plano || ''}
-            onValueChange={(value) => setFormData({ ...formData, modalidade_plano: value })}
+            onValueChange={(value) => atualizar('modalidade_plano', value)}
           >
-            <SelectTrigger className="mt-1">
+            <SelectTrigger id="modalidade_plano" {...ligar('modalidade_plano')}>
               <SelectValue placeholder="Selecione a modalidade" />
             </SelectTrigger>
             <SelectContent>
@@ -79,42 +84,48 @@ export default function DadosComerciaisForm({ formData, setFormData }) {
               ))}
             </SelectContent>
           </Select>
-        </div>
-        <div>
-          <Label>Valor da Contratação do Plano Atual (R$) *</Label>
+        </CampoFormulario>
+        <CampoFormulario id="valor_contratacao_plano_atual" rotulo="Valor da Contratação do Plano Atual (R$)" obrigatorio erro={erro('valor_contratacao_plano_atual')}>
           <CurrencyInput
+            id="valor_contratacao_plano_atual"
             value={formData.valor_contratacao_plano_atual || 0}
-            onChange={(num) => setFormData({ ...formData, valor_contratacao_plano_atual: num })}
-            className="mt-1"
+            onChange={(num) => atualizar('valor_contratacao_plano_atual', num)}
+            {...ligar('valor_contratacao_plano_atual')}
           />
-        </div>
+        </CampoFormulario>
       </div>
 
       <div className="grid grid-cols-2 gap-4">
-        <div>
-          <Label>Data da Primeira Contratação *</Label>
+        <CampoFormulario
+          id="data_primeira_contratacao"
+          rotulo="Data da Primeira Contratação"
+          obrigatorio
+          erro={erro('data_primeira_contratacao')}
+          ajuda="Início do relacionamento comercial do cliente com a empresa."
+        >
           <Input
+            id="data_primeira_contratacao"
             type="date"
             value={formData.data_primeira_contratacao || ''}
-            onChange={(e) => setFormData({ ...formData, data_primeira_contratacao: e.target.value })}
-            className="mt-1"
+            onChange={(e) => atualizar('data_primeira_contratacao', e.target.value)}
+            {...ligar('data_primeira_contratacao')}
           />
-          <p className="text-xs text-success mt-1">
-            Início do relacionamento comercial do cliente com a empresa.
-          </p>
-        </div>
-        <div>
-          <Label>Data da Contratação do Plano Atual *</Label>
+        </CampoFormulario>
+        <CampoFormulario
+          id="data_contratacao_plano_atual"
+          rotulo="Data da Contratação do Plano Atual"
+          obrigatorio
+          erro={erro('data_contratacao_plano_atual')}
+          ajuda="Aderiu ao plano atual (permite identificar upgrades/downgrades)."
+        >
           <Input
+            id="data_contratacao_plano_atual"
             type="date"
             value={formData.data_contratacao_plano_atual || ''}
-            onChange={(e) => setFormData({ ...formData, data_contratacao_plano_atual: e.target.value })}
-            className="mt-1"
+            onChange={(e) => atualizar('data_contratacao_plano_atual', e.target.value)}
+            {...ligar('data_contratacao_plano_atual')}
           />
-          <p className="text-xs text-success mt-1">
-            Aderiu ao plano atual (permite identificar upgrades/downgrades).
-          </p>
-        </div>
+        </CampoFormulario>
       </div>
 
       <p className="text-xs text-success">

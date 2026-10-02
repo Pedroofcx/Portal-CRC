@@ -13,7 +13,8 @@ const apenasDigitos = (v) => String(v ?? '').replace(/\D/g, '');
 export const obrigatorio = (rotulo) => (valor) => {
   const vazio = valor === null || valor === undefined || String(valor).trim() === ''
     || (Array.isArray(valor) && valor.length === 0);
-  return vazio ? `${rotulo} é obrigatório.` : null;
+  const feminino = /^(A|As)\s/.test(String(rotulo).trim());
+  return vazio ? `${rotulo} é obrigatóri${feminino ? 'a' : 'o'}.` : null;
 };
 
 export const email = (valor) => {

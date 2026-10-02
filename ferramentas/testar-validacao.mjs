@@ -61,6 +61,7 @@ function checa(nome, real, esperado) {
 
 console.log('\n== obrigatorio ==');
 checa('vazio acusa', obrigatorio('O nome')(''), 'O nome é obrigatório');
+checa('rotulo feminino concorda', obrigatorio('A prioridade')(''), 'A prioridade é obrigatória.');
 checa('so espacos acusa', obrigatorio('O nome')('   '), 'obrigatório');
 checa('array vazio acusa', obrigatorio('Um item')([]), 'obrigatório');
 checa('preenchido passa', obrigatorio('O nome')('Pedro'), null);
