@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import GradeTrabalho from '@/components/escalas/GradeTrabalho';
 import GradeTurno from '@/components/escalas/GradeTurno';
+import { usePermissoes } from '@/hooks/usePermissoes';
 
 import {
   TRABALHANDO, diasDaSemana, segundaDaSemana, semanaDeReferencia, somarDias,
@@ -62,7 +63,8 @@ export default function Escalas() {
   });
 
   const eu = colaboradores.find((c) => c.email === user?.email);
-  const isGestor = eu?.papel === 'gestor';
+  const { temPermissao } = usePermissoes();
+  const isGestor = temPermissao('gerenciar_escalas');
 
   const pessoas = useMemo(() => colaboradores
     .filter((c) => c.ativo !== false && c.papel === 'agente')

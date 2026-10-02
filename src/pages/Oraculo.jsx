@@ -15,6 +15,7 @@ import { contextoDoColaborador } from '@/lib/contextoColaborador';
 import { totalNoCiclo } from '@/lib/hanseiDados';
 import { tratativaNosCiclo, reaberturaDe } from '@/lib/pontuacaoCiclo';
 import { situacaoReplicavel } from '@/components/utils/helpers';
+import { usePermissoes } from '@/hooks/usePermissoes';
 
 /**
  * ORÁCULO CRC — a visão 360º de cada pessoa.
@@ -78,7 +79,8 @@ export default function OraculoPage() {
   });
 
   const eu = colaboradores.find((c) => c.email === user?.email);
-  const isGestor = eu?.papel === 'gestor';
+  const { temPermissao } = usePermissoes();
+  const isGestor = temPermissao('acessar_oraculo');
   const cicloAtivo = useMemo(() => ciclos.find((c) => c.ativo) ?? null, [ciclos]);
 
   const agentes = useMemo(() => colaboradores

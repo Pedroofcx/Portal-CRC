@@ -2,6 +2,7 @@ import db from '@/api/db';
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { usePermissoes } from '@/hooks/usePermissoes';
+import AcessoRestrito from '@/components/ui/AcessoRestrito';
 
 import { formatDateSP, papelLabels, formatBRL } from '@/components/utils/helpers';
 import { CurrencyInput } from '@/components/ui/CurrencyInput';
@@ -81,6 +82,7 @@ export default function Cadastro() {
 
   const { temPermissao } = usePermissoes();
   const podeVerSalario = temPermissao('ver_salario');
+  const podeGerenciar = temPermissao('gerenciar_colaboradores');
 
   const createMutation = useMutation({
     mutationFn: (data) => db.entities.Colaborador.create(data),
@@ -320,6 +322,8 @@ export default function Cadastro() {
       )
     }
   ];
+
+  if (!podeGerenciar) return <AcessoRestrito mensagem="O cadastro de colaboradores é feito pela gestão." />;
 
   return (
     <div className="space-y-6">

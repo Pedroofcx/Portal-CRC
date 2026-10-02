@@ -28,6 +28,7 @@ import {
 } from 'lucide-react';
 import PainelLateral, { RodapeFixo } from '@/components/ui/PainelLateral';
 import { avisosVisiveis as filtrarAvisosVisiveis } from '@/lib/pendencias';
+import { usePermissoes } from '@/hooks/usePermissoes';
 
 const tipoConfig = {
   informativo: { icon: Info, color: 'bg-info-soft text-primary border-info/25' },
@@ -76,7 +77,8 @@ export default function Avisos() {
     colaboradores.find(c => c.email === user?.email),
     [colaboradores, user]
   );
-  const isGestor = colaborador?.papel === 'gestor';
+  const { temPermissao } = usePermissoes();
+  const isGestor = temPermissao('gerenciar_avisos');
 
   // Cleanup ao desmontar - CRITICAL
   React.useEffect(() => {

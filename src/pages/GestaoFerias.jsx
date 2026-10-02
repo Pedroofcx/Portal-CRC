@@ -19,6 +19,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Palmtree, Search, Download, AlertTriangle, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
 import { differenceInDays, format, parseISO, addYears, addDays } from 'date-fns';
+import { usePermissoes } from '@/hooks/usePermissoes';
 
 // ── Utilitários ──────────────────────────────────────────────────────────────
 
@@ -160,7 +161,8 @@ export default function GestaoFerias() {
   });
 
   const colaboradorAtual = colaboradores.find(c => c.email === user?.email);
-  const isGestor = colaboradorAtual?.papel === 'gestor' || user?.role === 'admin';
+  const { temPermissao } = usePermissoes();
+  const isGestor = temPermissao('aprovar_ferias') || user?.role === 'admin';
   const [pedirAberto, setPedirAberto] = useState(false);
 
   // ── Pedido de férias: o agente pede, a gestão responde aqui no Portal ──

@@ -2,7 +2,6 @@ import db from '@/api/db';
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
-import { useEu } from '@/hooks/useGestor';
 import AcessoRestrito from '@/components/ui/AcessoRestrito';
 import ConfirmDialog from '@/components/ui/ConfirmDialog';
 import { Button } from '@/components/ui/button';
@@ -15,9 +14,11 @@ import DataTable from '@/components/ui/DataTable';
 import EmptyState from '@/components/ui/EmptyState';
 import { toast } from 'sonner';
 import { Plus, Edit, Trash2, Tag, CheckCircle, AlertTriangle } from 'lucide-react';
+import { usePermissoes } from '@/hooks/usePermissoes';
 
 export default function ConfigCategoriasTratativa() {
-  const { isGestor, carregando: carregandoEu } = useEu();
+  const { temPermissao, carregando: carregandoEu } = usePermissoes();
+  const isGestor = temPermissao('gerenciar_tipos_tratativa');
   const [showForm, setShowForm] = useState(false);
   const [editingCategoria, setEditingCategoria] = useState(null);
   const [confirmDialog, setConfirmDialog] = useState({ open: false, id: null });

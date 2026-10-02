@@ -8,11 +8,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { Plus, Trash2 } from 'lucide-react';
-import { useEu } from '@/hooks/useGestor';
 import AcessoRestrito from '@/components/ui/AcessoRestrito';
+import { usePermissoes } from '@/hooks/usePermissoes';
 
 export default function ConfigTiposObservacao() {
-  const { isGestor, carregando: carregandoEu } = useEu();
+  const { temPermissao, carregando: carregandoEu } = usePermissoes();
+  const isGestor = temPermissao('gerenciar_configuracoes');
   const [novoTipo, setNovoTipo] = useState({ nome: '', descricao: '', cor: 'hsl(var(--chart-1))' });
   const queryClient = useQueryClient();
 

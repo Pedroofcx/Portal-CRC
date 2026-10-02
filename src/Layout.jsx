@@ -10,6 +10,8 @@ import BuscaGlobal from '@/components/ui/BuscaGlobal';
 import MenuUsuario from '@/components/ui/MenuUsuario';
 import TrocarSenhaDialog from '@/components/conta/TrocarSenhaDialog';
 import NotificacaoAtribuicao from '@/components/distribuicao/NotificacaoAtribuicao';
+import { usePermissoes } from '@/hooks/usePermissoes';
+import { PERMISSOES_DO_PLANO_SETORIAL, PERMISSOES_DE_CONFIGURACAO } from '@/lib/permissoesPaginas';
 import {
   LayoutDashboard as Home,
   Users,
@@ -54,18 +56,18 @@ const menuItems = [
   { 
     section: 'Gestão',
     items: [
-      { name: 'Colaboradores', page: 'Cadastro', icon: Users, gestorOnly: true },
-      { name: 'Observações', page: 'Observacoes', icon: MessageSquare, gestorOnly: true },
+      { name: 'Colaboradores', page: 'Cadastro', icon: Users, permissao: 'gerenciar_colaboradores' },
+      { name: 'Observações', page: 'Observacoes', icon: MessageSquare, permissao: 'ver_observacoes_equipe' },
       { name: 'Jornada do Cliente', page: 'JornadaCliente', icon: Map, gestorOnly: true },
-      { name: 'Plano Setorial', page: 'PlanoSetorial', icon: TrendingUp, gestorOnly: true },
-      { name: 'ORÁCULO CRC', page: 'Oraculo', icon: Eye, gestorOnly: true },
+      { name: 'Plano Setorial', page: 'PlanoSetorial', icon: TrendingUp, permissoes: PERMISSOES_DO_PLANO_SETORIAL },
+      { name: 'ORÁCULO CRC', page: 'Oraculo', icon: Eye, permissao: 'acessar_oraculo' },
     ]
   },
   { 
     section: 'Operações',
     items: [
       { name: 'Tratativas CRC', page: 'Tratativas', icon: ClipboardList },
-      { name: 'Apuração', page: 'Apuracao', icon: Search, gestorOnly: true },
+      { name: 'Apuração', page: 'Apuracao', icon: Search, permissao: 'gerenciar_apuracao' },
       { name: 'Ferramentas Operacionais', page: 'FerramentasOperacionais', icon: Wrench },
     ]
   },
@@ -81,7 +83,7 @@ const menuItems = [
     section: 'Comunicação',
     items: [
       { name: 'Avisos', page: 'Avisos', icon: Bell },
-      { name: 'Pesquisas', page: 'Pesquisas', icon: ClipboardCheck, gestorOnly: true },
+      { name: 'Pesquisas', page: 'Pesquisas', icon: ClipboardCheck, permissao: 'gerenciar_pesquisas' },
       { name: 'Hansei', page: 'Hansei', icon: TrendingUp },
     ]
   },
@@ -89,9 +91,9 @@ const menuItems = [
     section: 'Admin',
     items: [
       { name: 'Relatórios', page: 'Relatorios', icon: BarChart3, gestorOnly: true },
-      { name: 'Soluções replicáveis', page: 'SolucoesReplicaveis', icon: Lightbulb, gestorOnly: true },
-      { name: 'Auditoria de Pontuação', page: 'AuditoriaPontuacao', icon: ShieldCheck, gestorOnly: true },
-      { name: 'Configurações', page: 'Configuracoes', icon: Settings, gestorOnly: true },
+      { name: 'Soluções replicáveis', page: 'SolucoesReplicaveis', icon: Lightbulb, permissao: 'aprovar_solucao_replicavel' },
+      { name: 'Auditoria de Pontuação', page: 'AuditoriaPontuacao', icon: ShieldCheck, permissao: 'gerenciar_premiacao' },
+      { name: 'Configurações', page: 'Configuracoes', icon: Settings, gestorOnly: true, permissoes: PERMISSOES_DE_CONFIGURACAO },
     ]
   }
 ];
@@ -99,6 +101,15 @@ const menuItems = [
 function Sidebar({ _user, colaborador, currentPageName, onNavigate, isMobile = false, permissoesModulo = [], recolhido = false, onAlternar }) {
   const isGestor = colaborador?.papel === 'gestor';
   const isFI = colaborador?.is_facilitador_interno;
+  const { temPermissao, temAlguma } = usePermissoes();
+
+  // Item com permissão própria vale pela permissão (um agente pode receber, um
+  // gestor pode perder); sem permissão própria, vale o papel como sempre valeu.
+  const itemLiberado = (item) => {
+    if (item.permissao) return temPermissao(item.permissao);
+    if (item.permissoes) return temAlguma(item.permissoes) || (item.gestorOnly && isGestor);
+    return !item.gestorOnly || isGestor;
+  };
 
   const podeVerModulo = (itemPage) => {
     const permissao = permissoesModulo.find(p => p.modulo_rota === itemPage);
@@ -159,8 +170,10 @@ function Sidebar({ _user, colaborador, currentPageName, onNavigate, isMobile = f
         <nav className="space-y-6">
           {menuItems.map((section) => {
             const visibleItems = section.items.filter(item => {
-              if (item.gestorOnly && !isGestor) return false;
-              if (!podeVerModulo(item.page)) return false;
+              if (!itemLiberado(item)) return false;
+              // Item com permissão própria: ela manda. O interruptor antigo por módulo
+              // (permissao_modulo) só vale para os que ainda não têm permissão.
+              if (!item.permissao && !item.permissoes && !podeVerModulo(item.page)) return false;
               return true;
             });
 

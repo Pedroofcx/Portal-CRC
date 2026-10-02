@@ -12,6 +12,7 @@ import {
   ShieldCheck, Search, AlertTriangle, User, Star, ChevronDown, ChevronRight, Filter
 } from 'lucide-react';
 import AuditoriaDetalheTabela from '@/components/auditoria/AuditoriaDetalheTabela';
+import { usePermissoes } from '@/hooks/usePermissoes';
 
 const TIPOS_TRATATIVA = [
   { value: 'reclamacao_interna', label: 'Reclamação Interna', color: 'bg-info-soft text-primary border-info/30' },
@@ -37,7 +38,8 @@ export default function AuditoriaPontuacao() {
     queryFn: () => db.entities.Colaborador.list(),
   });
   const eu = colaboradores.find((c) => c.email === user?.email);
-  const isGestor = eu?.papel === 'gestor';
+  const { temPermissao } = usePermissoes();
+  const isGestor = temPermissao('gerenciar_premiacao');
 
   const { data: ciclos = [] } = useQuery({
     queryKey: ['ciclos-trimestrais', "list()"],

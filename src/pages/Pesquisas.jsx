@@ -19,6 +19,7 @@ import FormularioPesquisa from '@/components/pesquisas/FormularioPesquisa';
 import { formatDateSP } from '@/components/utils/helpers';
 import { obrigatoriasSemResposta, montarResposta, pesquisasVisiveis } from '@/lib/pendencias';
 import { montarParticipacao, quemRespondeu, situacaoDaPesquisa, SITUACOES } from '@/lib/pesquisas';
+import { usePermissoes } from '@/hooks/usePermissoes';
 
 /**
  * PESQUISAS — a lista de pesquisas e o resultado de cada uma.
@@ -73,7 +74,8 @@ export default function Pesquisas() {
   });
 
   const eu = colaboradores.find((c) => c.email === user?.email);
-  const isGestor = eu?.papel === 'gestor';
+  const { temPermissao } = usePermissoes();
+  const isGestor = temPermissao('gerenciar_pesquisas');
 
   /** Quem entra na conta de "quem respondeu": colaborador ativo. */
   const pessoas = useMemo(() => colaboradores

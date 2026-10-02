@@ -9,11 +9,12 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
 import { Plus, Trash2, Brain, Wrench } from 'lucide-react';
-import { useEu } from '@/hooks/useGestor';
 import AcessoRestrito from '@/components/ui/AcessoRestrito';
+import { usePermissoes } from '@/hooks/usePermissoes';
 
 export default function ConfigSkills() {
-  const { isGestor, carregando: carregandoEu } = useEu();
+  const { temPermissao, carregando: carregandoEu } = usePermissoes();
+  const isGestor = temPermissao('gerenciar_configuracoes');
   const [novaSkill, setNovaSkill] = useState({ nome: '', tipo: 'soft', descricao: '' });
   const queryClient = useQueryClient();
 

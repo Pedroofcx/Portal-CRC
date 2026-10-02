@@ -18,6 +18,7 @@ import { intervaloDoAtalho } from '@/lib/relatorios/periodo';
 import { resumoQualidade, diaADiaQualidade } from '@/lib/relatorios/qualidade';
 import { pontosDaFaixa, proximaFaixa } from '@/lib/faixasIndicadores';
 import PreditivoApuracao from '@/components/relatorios/apuracao/PreditivoApuracao';
+import { usePermissoes } from '@/hooks/usePermissoes';
 
 /**
  * Análise da apuração — dia a dia e semana a semana, por trás do CSAT da
@@ -47,6 +48,8 @@ export default function RelatoriosApuracao() {
 
   const agentes = useMemo(() => colaboradores.filter((c) => c.papel === 'agente' && c.ativo !== false), [colaboradores]);
   const q = useMemo(() => resumoQualidade({ apuracoes, colaboradores, periodo }), [apuracoes, colaboradores, periodo]);
+  const { temPermissao } = usePermissoes();
+  const podeApurar = temPermissao('gerenciar_apuracao');
   const pessoa = filtroColaborador !== 'todos' ? q.pessoas.find((p) => p.id === filtroColaborador) : null;
   const drill = useMemo(
     () => (filtroColaborador !== 'todos' ? diaADiaQualidade({ apuracoes, colaboradorId: filtroColaborador, periodo }) : null),
@@ -55,8 +58,7 @@ export default function RelatoriosApuracao() {
 
   if (!user || isLoading) return <LoadingSpinner text="Carregando a análise..." />;
 
-  const euRel = colaboradores.find((c) => c.email?.toLowerCase() === user?.email?.toLowerCase());
-  if (euRel?.papel !== 'gestor') return <AcessoRestrito mensagem="A análise da apuração é feita pela gestão." />;
+  if (!podeApurar) return <AcessoRestrito mensagem="A análise da apuração é feita pela gestão." />;
 
   const linhaComPontos = (chave, rotulo, valor, formato, detalheExtra) => {
     if (valor === null || valor === undefined) return <Linha key={chave} rotulo={rotulo} valor="—" />;

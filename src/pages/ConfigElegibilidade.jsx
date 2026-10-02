@@ -16,8 +16,8 @@ import { Plus, Trash2, Award, CalendarDays, Info, AlertTriangle, CheckCircle2 } 
 import { format, parseISO } from 'date-fns';
 import ConfigCiclosTrimestral from '@/components/elegibilidade/ConfigCiclosTrimestral';
 import PainelLateral, { RodapeFixo } from '@/components/ui/PainelLateral';
-import { useEu } from '@/hooks/useGestor';
 import AcessoRestrito from '@/components/ui/AcessoRestrito';
+import { usePermissoes } from '@/hooks/usePermissoes';
 
 function fmtDate(d) {
   try { return format(parseISO(d), 'dd/MM/yyyy'); } catch { return d || '—'; }
@@ -74,7 +74,8 @@ const EMPTY_FORM = {
 };
 
 export default function ConfigElegibilidade() {
-  const { isGestor, carregando: carregandoEu } = useEu();
+  const { temPermissao, carregando: carregandoEu } = usePermissoes();
+  const isGestor = temPermissao('gerenciar_premiacao');
   const [dialogOpen, setDialogOpen] = useState(false);
   const [formData, setFormData] = useState(EMPTY_FORM);
   const [activeSection, setActiveSection] = useState('criterios'); // 'criterios' | 'ciclos'

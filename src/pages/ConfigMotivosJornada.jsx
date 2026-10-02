@@ -15,6 +15,7 @@ import { toast } from 'sonner';
 import { Settings, Plus, Pencil, Trash2, Tag } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import PainelLateral, { RodapeFixo } from '@/components/ui/PainelLateral';
+import { usePermissoes } from '@/hooks/usePermissoes';
 
 export default function ConfigMotivosJornada() {
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -36,7 +37,8 @@ export default function ConfigMotivosJornada() {
   const { data: user } = useQuery({ queryKey: ['currentUser'], queryFn: () => db.auth.me() });
   const { data: colaboradoresAcesso = [] } = useQuery({ queryKey: ['colaboradores', "list()"], queryFn: () => db.entities.Colaborador.list() });
   const eu = colaboradoresAcesso.find((c) => c.email === user?.email);
-  const isGestor = eu?.papel === 'gestor';
+  const { temPermissao } = usePermissoes();
+  const isGestor = temPermissao('gerenciar_tipos_tratativa');
 
   const { data: motivos = [], isLoading } = useQuery({
     queryKey: ['motivos', "list()"],

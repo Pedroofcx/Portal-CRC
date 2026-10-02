@@ -6,6 +6,45 @@ contraditório ou irreproduzível.
 
 ---
 
+## Permissão por área, não só "é gestor" (02/10/2026)
+
+**Decisão (Pedro):** permissão granular de verdade, por módulo e por ação, para
+poder ter um substituto que gerencia uma área sem ver salário nem mexer em
+outra.
+
+**Como funciona.** Cada área tem uma chave no catálogo (tabela `permissao`).
+Sem exceção cadastrada vale o padrão do papel (gestor tem tudo, agente nada);
+a exceção (tela Configurações > Permissões) dá a um agente ou tira de um
+gestor. As políticas do banco usam `tem_permissao('<chave>')`; a tela só segue
+o que o banco já decidiu.
+
+**Áreas:** colaboradores, tipos de tratativa, configurações gerais, premiação
+(ciclos, elegibilidade, bônus), POP, escalas, férias, avisos, pesquisas,
+respostas de pesquisa, PDI da equipe, observações da equipe, Oráculo, log de
+auditoria, apuração, operação, aprovar replicável, corrigir tratativa
+encerrada, ver salário e ver custo operacional.
+
+**Duas travas de segurança:**
+- `permissao` e `colaborador_permissao` continuam só para gestor de verdade. Se
+  quem edita permissões dependesse de permissão, quem a perdesse sem querer
+  nunca mais poderia devolvê-la.
+- Quem recebe `gerenciar_colaboradores` **não** altera papel, e-mail, vínculo de
+  conta nem Facilitador Interno (o sistema reconhece a pessoa pelo e-mail).
+  Sem isso, a permissão seria uma escada para virar gestor.
+
+**Fica por papel, de propósito:** Dashboard, Hansei, Relatórios, Jornada do
+Cliente e as ferramentas de acionamento de supervisor — telas em que gestor e
+agente veem coisas diferentes, e não uma capacidade isolada.
+
+**O interruptor antigo por módulo** (`permissao_modulo`) só vale para itens do
+menu que não têm permissão própria; antes ele escondia "Colaboradores" mesmo de
+quem tinha recebido a permissão.
+
+**Onde vive:** migrations 35, 36 e 41; `src/hooks/usePermissoes.js`;
+`src/lib/permissoesPaginas.js`.
+
+---
+
 ## Ciclos 1 e 2 estão congelados; as correções valem do Ciclo 3 em diante (02/10/2026)
 
 **Decisão (Pedro):** os ciclos 1 e 2 já foram apurados, e a premiação do Ciclo 2

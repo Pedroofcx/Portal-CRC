@@ -14,6 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { formatDateSP, situacaoReplicavel } from '@/components/utils/helpers';
 import { tratativaNosCiclo } from '@/hooks/usePontuacaoAgente';
 import { ciclosEmOrdem, STATUS_ENCERRADOS } from '@/lib/bonusManual';
+import { usePermissoes } from '@/hooks/usePermissoes';
 
 /**
  * Soluções replicáveis — o gestor aprova ou contesta, uma por uma.
@@ -72,7 +73,8 @@ export default function SolucoesReplicaveis() {
   });
 
   const eu = colaboradores.find((c) => c.email?.toLowerCase() === user?.email?.toLowerCase());
-  const ehGestor = eu?.papel === 'gestor';
+  const { temPermissao } = usePermissoes();
+  const ehGestor = temPermissao('aprovar_solucao_replicavel');
 
   // Só ciclos em que a aprovação vale (do Ciclo 2 em diante).
   const ciclosComAprovacao = useMemo(

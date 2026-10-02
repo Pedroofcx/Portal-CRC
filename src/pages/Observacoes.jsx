@@ -18,6 +18,7 @@ import RichTextEditor from '@/components/ui/RichTextEditor';
 import PainelLateral, { RodapeFixo } from '@/components/ui/PainelLateral';
 import PainelLeitura from '@/components/observacoes/PainelLeitura';
 import { contextoDoColaborador } from '@/lib/contextoColaborador';
+import { usePermissoes } from '@/hooks/usePermissoes';
 
 const TIPOS_OBS = [
   { value: 'observacao_diaria', label: 'Observação Diária' },
@@ -103,7 +104,8 @@ export default function Observacoes() {
   });
 
   const colaboradorAtual = colaboradores.find(c => c.email === user?.email);
-  const isGestor = colaboradorAtual?.papel === 'gestor';
+  const { temPermissao } = usePermissoes();
+  const isGestor = temPermissao('ver_observacoes_equipe');
 
   const idNaUrl = parametros.get('colaborador');
   useEffect(() => {

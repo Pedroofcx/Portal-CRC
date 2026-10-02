@@ -27,6 +27,8 @@ import AgenteN2Config from '@/components/apoio-n2/AgenteN2Config';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import ListaResumida from '@/components/ui/ListaResumida';
+import { usePermissoes } from '@/hooks/usePermissoes';
+import { PERMISSOES_DE_CONFIGURACAO } from '@/lib/permissoesPaginas';
 
 export default function Configuracoes() {
   const [metas, setMetas] = useState({
@@ -44,7 +46,8 @@ export default function Configuracoes() {
   const { data: user } = useQuery({ queryKey: ['currentUser'], queryFn: () => db.auth.me() });
   const { data: colaboradoresAcesso = [] } = useQuery({ queryKey: ['colaboradores', "list()"], queryFn: () => db.entities.Colaborador.list() });
   const eu = colaboradoresAcesso.find((c) => c.email === user?.email);
-  const isGestor = eu?.papel === 'gestor';
+  const { temAlguma } = usePermissoes();
+  const isGestor = eu?.papel === 'gestor' || temAlguma(PERMISSOES_DE_CONFIGURACAO);
 
   const { data: configuracoes = [], isLoading } = useQuery({
     queryKey: ['configuracoes'],

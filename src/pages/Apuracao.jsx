@@ -16,6 +16,7 @@ import RelatoriosApuracao from './RelatoriosApuracao';
 import { calcularTelefone, calcularChat, calcularCX } from '@/components/apuracao/calculosApuracao';
 import { classificarTicket } from '@/lib/apuracao/ouvidoriaChat';
 import { revisarLigacao } from '@/lib/apuracao/revisaoTelefone';
+import { usePermissoes } from '@/hooks/usePermissoes';
 
 /**
  * APURAÇÃO — de onde vêm o CSAT, a performance e a avaliação CX.
@@ -166,7 +167,8 @@ export default function Apuracao() {
   });
 
   const eu = colaboradores.find((c) => c.email === user?.email);
-  const isGestor = eu?.papel === 'gestor';
+  const { temPermissao } = usePermissoes();
+  const isGestor = temPermissao('gerenciar_apuracao');
 
   const salvarImportacao = useMutation({
     mutationFn: async ({ arquivo, fonte, tipo, mapeamento, vinculos, leitura, conferencia }) => {

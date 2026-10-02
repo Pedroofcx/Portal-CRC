@@ -30,6 +30,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import PainelLateral, { RodapeFixo } from '@/components/ui/PainelLateral';
+import { usePermissoes } from '@/hooks/usePermissoes';
 
 export default function PlanoSetorial() {
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -76,7 +77,9 @@ export default function PlanoSetorial() {
   });
 
   const colaborador = colaboradores.find(c => c.email === user?.email);
-  const isGestor = colaborador?.papel === 'gestor';
+  const { temPermissao } = usePermissoes();
+  const podePlano = temPermissao('gerenciar_operacao');
+  const podePdi = temPermissao('ver_pdi_equipe');
 
   const createMutation = useMutation({
     mutationFn: (data) => db.entities.PlanoSetorial.create({
@@ -269,7 +272,7 @@ export default function PlanoSetorial() {
     });
   };
 
-  const pdisFiltrados = isGestor ? pdis : pdis.filter(p => p.colaborador_id === colaborador?.id);
+  const pdisFiltrados = podePdi ? pdis : pdis.filter(p => p.colaborador_id === colaborador?.id);
 
   if (isLoading) {
     return <LoadingSpinner text="Carregando planos..." />;
@@ -282,16 +285,20 @@ export default function PlanoSetorial() {
         subtitle="Planejamento estratégico e desenvolvimento individual"
         icon={BarChart3}
         actions={
-          isGestor && (
+          (podePdi || podePlano) && (
             <div className="flex gap-2">
-              <Button onClick={() => setPdiDialogOpen(true)} variant="outline">
-                <Target className="w-4 h-4 mr-2" />
-                Novo PDI
-              </Button>
-              <Button onClick={() => setDialogOpen(true)} className="bg-primary hover:bg-primary/90">
-                <Plus className="w-4 h-4 mr-2" />
-                Novo Plano Setorial
-              </Button>
+              {podePdi && (
+                <Button onClick={() => setPdiDialogOpen(true)} variant="outline">
+                  <Target className="w-4 h-4 mr-2" />
+                  Novo PDI
+                </Button>
+              )}
+              {podePlano && (
+                <Button onClick={() => setDialogOpen(true)} className="bg-primary hover:bg-primary/90">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Novo Plano Setorial
+                </Button>
+              )}
             </div>
           )
         }
@@ -429,8 +436,8 @@ export default function PlanoSetorial() {
               <CardContent className="py-16 text-center">
                 <Target className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
                 <h3 className="text-lg font-semibold mb-2">Nenhum PDI encontrado</h3>
-                <p className="text-muted-foreground mb-4">{isGestor ? 'Crie o primeiro PDI para um colaborador' : 'Você não possui PDI ativo'}</p>
-                {isGestor && (
+                <p className="text-muted-foreground mb-4">{podePdi ? 'Crie o primeiro PDI para um colaborador' : 'Você não possui PDI ativo'}</p>
+                {podePdi && (
                   <Button onClick={() => setPdiDialogOpen(true)} className="bg-primary hover:bg-primary/90">
                     <Plus className="w-4 h-4 mr-2" />
                     Criar PDI

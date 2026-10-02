@@ -13,6 +13,7 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { toast } from 'sonner';
 import { Plus, Pencil, Trash2, Map } from 'lucide-react';
+import { usePermissoes } from '@/hooks/usePermissoes';
 
 export default function ConfigEtapasJornada() {
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -31,7 +32,8 @@ export default function ConfigEtapasJornada() {
   const { data: user } = useQuery({ queryKey: ['currentUser'], queryFn: () => db.auth.me() });
   const { data: colaboradoresAcesso = [] } = useQuery({ queryKey: ['colaboradores', "list()"], queryFn: () => db.entities.Colaborador.list() });
   const eu = colaboradoresAcesso.find((c) => c.email === user?.email);
-  const isGestor = eu?.papel === 'gestor';
+  const { temPermissao } = usePermissoes();
+  const isGestor = temPermissao('gerenciar_configuracoes');
 
   const { data: etapas = [], isLoading } = useQuery({
     queryKey: ['etapas-jornada', "list()"],

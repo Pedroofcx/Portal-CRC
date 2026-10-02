@@ -14,11 +14,12 @@ import DataTable from '@/components/ui/DataTable';
 import EmptyState from '@/components/ui/EmptyState';
 import { toast } from 'sonner';
 import { Plus, Edit, Trash2, FileText, CheckCircle } from 'lucide-react';
-import { useEu } from '@/hooks/useGestor';
 import AcessoRestrito from '@/components/ui/AcessoRestrito';
+import { usePermissoes } from '@/hooks/usePermissoes';
 
 export default function ConfigTiposTratativa() {
-  const { isGestor, carregando: carregandoEu } = useEu();
+  const { temPermissao, carregando: carregandoEu } = usePermissoes();
+  const isGestor = temPermissao('gerenciar_tipos_tratativa');
   const [showForm, setShowForm] = useState(false);
   const [editingTipo, setEditingTipo] = useState(null);
   const [confirmDialog, setConfirmDialog] = useState({ open: false, id: null });

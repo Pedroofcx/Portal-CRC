@@ -14,6 +14,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { todaySP } from '@/components/utils/helpers';
 import { agruparPorCategoria, fotografia, popsParaCiencia, proximaVersao } from '@/lib/pops';
+import { usePermissoes } from '@/hooks/usePermissoes';
 
 /**
  * POP — a biblioteca de procedimentos da Estrutura de Trabalho CRC 2026.
@@ -38,7 +39,8 @@ export default function POP() {
     queryFn: () => db.entities.Colaborador.list(),
   });
   const eu = colaboradores.find((c) => c.email?.toLowerCase() === user?.email?.toLowerCase());
-  const isGestor = eu?.papel === 'gestor';
+  const { temPermissao } = usePermissoes();
+  const isGestor = temPermissao('gerenciar_pop');
 
   const { data: pops = [], isLoading } = useQuery({
     queryKey: ['pops', 'ativos'],
