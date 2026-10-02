@@ -351,7 +351,7 @@ export default function Layout({ children, currentPageName }) {
   }
 
   return (
-    <ErrorBoundary>
+    <ErrorBoundary resetKey={currentPageName}>
       {/* Espera o cadastro carregar: o nome e o resumo do dia vêm dele. */}
       {showWelcome && user && colaborador && (
         <SequenciaBoasVindas colaborador={colaborador} aoConcluir={handleWelcomeComplete} />

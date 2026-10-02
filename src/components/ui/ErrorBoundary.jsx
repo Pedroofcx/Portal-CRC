@@ -19,6 +19,15 @@ export class ErrorBoundary extends React.Component {
     return { hasError: true };
   }
 
+  // O erro é da página em que aconteceu: ao trocar de página (resetKey), a
+  // tela de erro sai e a nova página carrega. Antes ela ficava presa e só
+  // o "Voltar ao Dashboard" resolvia.
+  componentDidUpdate(prevProps) {
+    if (this.state.hasError && prevProps.resetKey !== this.props.resetKey) {
+      this.setState({ hasError: false, error: null, errorInfo: null, errorCount: 0, lastErrorTime: null });
+    }
+  }
+
   componentDidCatch(error, errorInfo) {
     const now = Date.now();
     const { lastErrorTime, errorCount } = this.state;
@@ -27,6 +36,19 @@ export class ErrorBoundary extends React.Component {
     const isErrorLoop = lastErrorTime && (now - lastErrorTime) < 5000;
     const newErrorCount = isErrorLoop ? errorCount + 1 : 1;
     
+    // Página nova que não existe mais no servidor (publicação feita com o
+    // Portal aberto): uma recarga resolve. Uma vez só, para não entrar em laço.
+    const arquivoSumiu = /dynamically imported module|Importing a module script failed|Loading chunk|error loading dynamically/i.test(String(error?.message ?? error));
+    if (arquivoSumiu) {
+      try {
+        if (Date.now() - Number(sessionStorage.getItem('portal_recarregou_chunk') || 0) > 60000) {
+          sessionStorage.setItem('portal_recarregou_chunk', String(Date.now()));
+          window.location.reload();
+          return;
+        }
+      } catch { /* segue para a tela de erro */ }
+    }
+
     console.error('ErrorBoundary caught:', error, errorInfo);
     console.error('Error count:', newErrorCount);
 
