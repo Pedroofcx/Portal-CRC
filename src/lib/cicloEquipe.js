@@ -7,6 +7,7 @@
  * e os testes (npm run testar) conferem cada uma.
  */
 import { prazoDaTratativa } from './prazoSla.js';
+import { instanteNoCiclo } from './pontuacaoCiclo.js';
 import { volumePorCanal } from './elegibilidade.js';
 
 /** Estados em que a tratativa já saiu da fila de trabalho. */
@@ -75,12 +76,7 @@ export function vencidasDaEquipe(tratativas = [], agora = new Date()) {
  */
 export function registrosNoCiclo(tratativas = [], ciclo) {
   if (!ciclo) return volumePorCanal([]);
-  const inicio = new Date(`${ciclo.data_inicio}T00:00:00`);
-  const fim = new Date(`${ciclo.data_fim}T23:59:59`);
-  return volumePorCanal(tratativas.filter((t) => {
-    const d = t?.data_registro ? new Date(t.data_registro) : null;
-    return d && d >= inicio && d <= fim;
-  }));
+  return volumePorCanal(tratativas.filter((t) => instanteNoCiclo(t?.data_registro, ciclo)));
 }
 
 /**

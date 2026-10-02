@@ -6,6 +6,35 @@ contraditório ou irreproduzível.
 
 ---
 
+## Pontuação — o dia em que um ciclo termina e outro começa (02/10/2026)
+
+**Regra de Pedro:** tratativa que atravessa ciclos não prejudica o agente. A
+**abertura** (0,5 por ticket, qualquer categoria) conta no trimestre do
+**registro**; o **encerramento** conta no trimestre da **conclusão**,
+independentemente de quando a tratativa começou.
+
+**O problema.** Os ciclos se tocam na data (Ciclo 1 termina em 16/06 e o 2
+começa em 16/06; o 2 termina em 16/09 e o 3 começa em 16/09). O que acontecia
+nesse dia contava nos dois ciclos: 5 encerramentos (7,5 pts) e 6 aberturas
+(3 pts) pontuavam duas vezes.
+
+**Decisão:** o dia 16 pertence ao ciclo que **termina**. O dia de início de um
+ciclo fica de fora, para cada evento pontuar em um ciclo só. Vale para pontos
+de encerramento, pontos de abertura, registros por canal (elegibilidade) e para
+o ciclo escolhido no Hansei. Os **indicadores** (CSAT, performance, CX) seguem
+dia a dia como antes: a decisão é sobre tratativas.
+
+**Efeito medido:** Ciclo 1 não muda (230). Ciclo 2 perde 2 pontos de
+encerramento (Dayane, TRT-0180, encerrada em 16/06, que já conta no Ciclo 1).
+Ciclo 3, ainda aberto, perde 5,5 de encerramento (Ana e Bárbara, encerradas em
+16/09) e as aberturas de 16/09.
+
+**Onde vive:** `instanteNoCiclo` em `src/lib/pontuacaoCiclo.js`,
+`registrosNoCiclo` em `src/lib/cicloEquipe.js`, `cicloDaData` em
+`src/lib/hanseiDados.js`.
+
+---
+
 ## SLA — passa a contar do início e a pausar em dependência externa (02/10/2026)
 
 **Decisão (Pedro):** o tempo de SLA conta do **início da tratativa** ao

@@ -276,6 +276,15 @@ export default function TratativaDetalhe({ idExterno = null, embutido = false })
       return;
     }
 
+    // A nota gera a pontuação do Reclame Aqui; sem ela a tratativa pontuaria 0 sem aviso.
+    if (tratativa.tipo_tratativa === 'reclame_aqui') {
+      const nota = parseFloat(solucaoForm.nota_reclame_aqui);
+      if (solucaoForm.nota_reclame_aqui === '' || Number.isNaN(nota) || nota < 0 || nota > 10) {
+        toast.error('Informe a nota recebida no Reclame Aqui (de 0 a 10).');
+        return;
+      }
+    }
+
     // Devolução financeira OBRIGATÓRIA para reclamação interna, reclame aqui e google
     const tiposComEstorno = ['reclamacao_interna', 'reclame_aqui', 'google_meu_negocio'];
     if (tiposComEstorno.includes(tratativa.tipo_tratativa)) {
@@ -1047,10 +1056,10 @@ export default function TratativaDetalhe({ idExterno = null, embutido = false })
                           </div>
                           <div className="grid grid-cols-2 gap-4">
                             <div>
-                              <Label>Nota recebida (7-10)</Label>
+                              <Label>Nota recebida (0 a 10) *</Label>
                               <Input
                                 type="number"
-                                min="7"
+                                min="0"
                                 max="10"
                                 value={solucaoForm.nota_reclame_aqui}
                                 onChange={(e) => setSolucaoForm({ ...solucaoForm, nota_reclame_aqui: e.target.value })}

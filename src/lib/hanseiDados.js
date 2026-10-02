@@ -40,7 +40,10 @@ export function totalNoCiclo({ tratativas = [], apuracoes = [], bonus = [], cicl
  * ainda não foi aberto), vale o ativo; antes do primeiro, nenhum.
  */
 export function cicloDaData(ciclos = [], data) {
-  const dentro = ciclos.find((c) => data >= c.data_inicio && data <= c.data_fim);
+  // No dia em que um ciclo termina e o outro começa, vale o que termina.
+  const dentro = [...ciclos]
+    .sort((a, b) => (a.data_fim < b.data_fim ? -1 : 1))
+    .find((c) => data >= c.data_inicio && data <= c.data_fim);
   if (dentro) return dentro;
   const depoisDeTodos = ciclos.length && ciclos.every((c) => data > c.data_fim);
   return depoisDeTodos ? (ciclos.find((c) => c.ativo) ?? null) : null;

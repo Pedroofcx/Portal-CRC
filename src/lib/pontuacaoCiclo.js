@@ -30,10 +30,22 @@ export function tratativaNosCiclo(tratativa, ciclo) {
   if (!ciclo) return false;
   const dataRef = tratativa.data_encerramento || tratativa.data_registro;
   if (!dataRef) return false;
-  const data = new Date(dataRef);
-  const inicio = new Date(ciclo.data_inicio + 'T00:00:00');
-  const fim = new Date(ciclo.data_fim + 'T23:59:59');
-  return data >= inicio && data <= fim;
+  return instanteNoCiclo(dataRef, ciclo);
+}
+
+/**
+ * O instante cai no ciclo? O dia em que um ciclo termina é o mesmo em que o
+ * seguinte começa (16/06, 16/09), e esse dia pertence ao ciclo que TERMINA
+ * (decisão de Pedro em 02/10/2026): o dia de início fica de fora, para cada
+ * evento pontuar em um ciclo só. O primeiro ciclo cadastrado perde, em teoria,
+ * o seu dia 1; na prática ninguém tinha tratativa nesse dia.
+ */
+export function instanteNoCiclo(instante, ciclo) {
+  if (!instante || !ciclo?.data_inicio || !ciclo?.data_fim) return false;
+  const t = new Date(instante).getTime();
+  if (Number.isNaN(t)) return false;
+  return t > new Date(`${ciclo.data_inicio}T23:59:59.999`).getTime()
+    && t <= new Date(`${ciclo.data_fim}T23:59:59.999`).getTime();
 }
 
 const clienteDe = (t) => String(t?.id_base_cliente ?? '').trim();
@@ -73,11 +85,7 @@ export function comReaberturaApurada(tratativa, todas, agora) {
   return { ...tratativa, status_reabertura: status };
 }
 
-const dentro = (valor, ciclo) => {
-  if (!valor || !ciclo) return false;
-  const t = ms(valor);
-  return t >= new Date(`${ciclo.data_inicio}T00:00:00`).getTime() && t <= new Date(`${ciclo.data_fim}T23:59:59`).getTime();
-};
+const dentro = (valor, ciclo) => instanteNoCiclo(valor, ciclo);
 
 /** O ciclo paga 0,5 por abertura? Só os que começam no Ciclo 2 ou depois. */
 export const cicloPagaAbertura = (ciclo) => !!ciclo?.data_inicio && ciclo.data_inicio >= ABERTURA_PONTUA_DESDE;
