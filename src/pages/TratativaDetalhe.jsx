@@ -18,6 +18,7 @@ import RegistrarNota from '@/components/tratativas/RegistrarNota';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
@@ -105,6 +106,7 @@ export default function TratativaDetalhe({ idExterno = null, embutido = false })
   });
 
   const [_diasRestantes, setDiasRestantes] = useState(null);
+  const [aba, setAba] = useState('informacoes');
 
   const urlParams = new URLSearchParams(window.location.search);
   const tratativaId = idExterno || urlParams.get('id');
@@ -441,6 +443,7 @@ export default function TratativaDetalhe({ idExterno = null, embutido = false })
   const isAguardandoReabertura = tratativa.status === 'aguardando_confirmacao_reabertura';
   const isExcluida = tratativa.status === 'excluida';
   const isAguardandoFinanceiro = tratativa.status === 'aguardando_financeiro';
+  const temSolucao = (isEncerrada || isAguardandoReabertura) && !!tratativa.descricao_solucao;
 
   // ── Congelamento de SLA (contestações) ──────────────────────────────────
   const handleCongelarSLA = (dataDefesa) => {
@@ -563,7 +566,7 @@ export default function TratativaDetalhe({ idExterno = null, embutido = false })
   const pontosPreview = isEncerrada ? calculateTratativaPoints(comReaberturaApurada(tratativa, todasTratativas)) : null;
 
   return (
-    <div className="mx-auto w-full max-w-4xl space-y-6">
+    <div className="space-y-6">
       {!embutido && (
       <PageHeader
         title="Detalhe da Tratativa"
@@ -611,12 +614,21 @@ export default function TratativaDetalhe({ idExterno = null, embutido = false })
         </Card>
       )}
 
+      <div className="grid lg:grid-cols-3 gap-6">
+        {/* Coluna central: guias, para a tela não virar uma rolagem longa */}
+        <div className="lg:col-span-2 min-w-0">
+          <Tabs value={aba} onValueChange={setAba}>
+            <TabsList className="mb-4 flex h-auto w-full flex-wrap justify-start gap-1">
+              <TabsTrigger value="informacoes">Informações</TabsTrigger>
+              <TabsTrigger value="andamento">Andamento</TabsTrigger>
+              <TabsTrigger value="acoes">Ações</TabsTrigger>
+              {temSolucao && <TabsTrigger value="solucao">Solução</TabsTrigger>}
+            </TabsList>
+
+            <TabsContent value="informacoes" className="mt-0 space-y-6">
       {/* Perfil Comercial do Cliente — contexto comercial da ocorrência */}
       <PerfilComercialCliente tratativa={tratativa} />
 
-      {/* Coluna única, centralizada: histórico e registro ficam junto das informações,
-          não numa lateral separada. */}
-      <div className="space-y-6">
           {/* Info Card */}
           <Card className="border-0 shadow-sm">
             <CardHeader>
@@ -841,32 +853,10 @@ export default function TratativaDetalhe({ idExterno = null, embutido = false })
               )}
             </CardContent>
           </Card>
+            </TabsContent>
 
-          {/* Impacto Financeiro — restrito por permissão (ver_custo_operacional) */}
-          {podeVerCustoOperacional && <CustoOperacionalCard tratativa={tratativa} />}
-
-          {/* Pontuação */}
-          {isEncerrada && pontosPreview && (
-            <Card className="border border-warning/25 shadow-none bg-warning-soft">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-warning flex items-center gap-2">
-                  Pontuação Gerada
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-4xl font-bold mb-3 text-foreground">{pontosPreview.pontos.toFixed(1)}</div>
-                <div className="space-y-1">
-                  {pontosPreview.detalhes.map((d, i) => (
-                    <div key={i} className="text-sm text-foreground flex justify-between">
-                      <span>{d.tipo}</span>
-                      <span>+{d.pontos}</span>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
+            <TabsContent value="andamento" className="mt-0">
+              <div className="grid gap-6 md:grid-cols-2 md:items-start">
           {/* Registro e linha do tempo.
               A regra pede que o campo de registro seja o elemento de maior
               destaque da área de ação — por isso ele vem ANTES do histórico. */}
@@ -886,11 +876,14 @@ export default function TratativaDetalhe({ idExterno = null, embutido = false })
                 Histórico
               </CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="max-h-[55vh] overflow-y-auto">
               <LinhaDoTempo entradas={tratativa.historico_estados} />
             </CardContent>
           </Card>
+              </div>
+            </TabsContent>
 
+            <TabsContent value="acoes" className="mt-0 space-y-6">
           {/* Timer de Reabertura — componente dedicado */}
           <TimerReobertura
             tratativa={tratativa}
@@ -1323,7 +1316,13 @@ export default function TratativaDetalhe({ idExterno = null, embutido = false })
               </CardContent>
             </Card>
           )}
+              <p className="hidden only:block text-sm text-muted-foreground">
+                Nada a fazer por aqui: esta tratativa já foi encerrada.
+              </p>
+            </TabsContent>
 
+            {temSolucao && (
+              <TabsContent value="solucao" className="mt-0">
           {/* Solução (se encerrada) */}
           {(isEncerrada || isAguardandoReabertura) && tratativa.descricao_solucao && (
             <Card className="border-0 shadow-sm">
@@ -1345,7 +1344,39 @@ export default function TratativaDetalhe({ idExterno = null, embutido = false })
               </CardContent>
             </Card>
           )}
+              </TabsContent>
+            )}
+          </Tabs>
         </div>
+
+        {/* Lateral: só o que é resumo (impacto e pontuação) */}
+        <div className="space-y-6">
+          {/* Impacto Financeiro — restrito por permissão (ver_custo_operacional) */}
+          {podeVerCustoOperacional && <CustoOperacionalCard tratativa={tratativa} />}
+
+          {/* Pontuação */}
+          {isEncerrada && pontosPreview && (
+            <Card className="border border-warning/25 shadow-none bg-warning-soft">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium text-warning flex items-center gap-2">
+                  Pontuação Gerada
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-4xl font-bold mb-3 text-foreground">{pontosPreview.pontos.toFixed(1)}</div>
+                <div className="space-y-1">
+                  {pontosPreview.detalhes.map((d, i) => (
+                    <div key={i} className="text-sm text-foreground flex justify-between">
+                      <span>{d.tipo}</span>
+                      <span>+{d.pontos}</span>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      </div>
 
       <ConfirmDialog
         open={confirmDialog.open}

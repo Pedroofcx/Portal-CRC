@@ -11,7 +11,7 @@ import { pontosDaFaixa, proximaFaixa } from '../src/lib/faixasIndicadores.js';
 import { avaliarExigencia, volumePorCanal } from '../src/lib/elegibilidade.js';
 import { pontosPorSemana, fimDoRitmo } from '../src/lib/ritmoSemanal.js';
 import { posicaoNoRanking } from '../src/lib/posicaoRanking.js';
-import { prazoDaTratativa, descreverPrazo, consumoDoPrazo } from '../src/lib/prazoSla.js';
+import { prazoDaTratativa, descreverPrazo, consumoDoPrazo, tempoEmPausa } from '../src/lib/prazoSla.js';
 import { indicadoresDoCiclo } from '../src/lib/indicadoresCiclo.js';
 import { conferirLinha } from './conferir-cores.mjs';
 import { lerCsv, descobrirSeparador } from '../src/lib/csv.js';
@@ -249,6 +249,35 @@ checa('23h nao vira 1 dia', descreverPrazo(emH(23.9), ag), '23h');
 checa('um dia no singular', descreverPrazo(emH(30), ag), '1 dia');
 checa('varios dias', descreverPrazo(emH(72), ag), '3 dias');
 checa('metade do prazo consumida', String(consumoDoPrazo({ data_registro: emH(-12).toISOString(), sla_atribuido: 24 }, ag)), '0.5');
+
+console.log('\n== SLA conta do inicio e pausa em dependencia externa (decisao de 02/10/2026) ==');
+{
+  const h = (hh, mm = 0) => new Date(Date.UTC(2026, 8, 22, hh, mm)).toISOString();
+  const mudou = (de, para, quando) => ({ estado_anterior: de, estado_novo: para, data_mudanca: quando });
+  // registrada 22/09 08:00, iniciada 10:00, 4h em dependencia externa (12h-16h), prazo 24h
+  const t = {
+    data_registro: h(8), data_inicio_tratativa: h(10), sla_atribuido: 24,
+    historico_estados: [
+      mudou(null, 'registrada', h(8)), mudou('registrada', 'tratativa_iniciada', h(10)),
+      mudou('tratativa_iniciada', 'dependencia_externa', h(12)),
+      { estado_anterior: 'dependencia_externa', estado_novo: 'dependencia_externa', data_mudanca: h(13), observacao: 'nota livre' },
+      mudou('dependencia_externa', 'em_andamento', h(16)),
+    ],
+  };
+  const ini = Date.parse(h(10));
+  checa('conta do inicio, nao do registro', String(prazoDaTratativa({ ...t, historico_estados: [] }, new Date(h(11))).toISOString()), '2026-09-23T10:00:00');
+  checa('pausa de 4h empurra o prazo', String(prazoDaTratativa(t, new Date(h(20))).toISOString()), '2026-09-23T14:00:00');
+  checa('nota livre nao interrompe a pausa', String(tempoEmPausa(t.historico_estados, ini, Date.parse(h(20))) / 3600e3), '4');
+  // dentro da pausa o prazo anda junto com o relogio: nunca vence enquanto pausada
+  const parada = { ...t, historico_estados: t.historico_estados.slice(0, 3) };
+  checa('pausada agora: prazo acompanha o relogio', String(prazoDaTratativa(parada, new Date(h(14))).toISOString()), '2026-09-23T12:00:00');
+  // TRT-0363: dependencia externa 2s depois de iniciar ate encerrar => ~0 de tempo contado
+  const trt0363 = [mudou('tratativa_iniciada', 'dependencia_externa', '2026-09-22T17:56:01.910Z'), mudou('dependencia_externa', 'encerrada', '2026-09-25T14:35:12.039Z')];
+  const emPausa = tempoEmPausa(trt0363, Date.parse('2026-09-22T17:55:59.089Z'), Date.parse('2026-09-25T14:35:12.039Z'));
+  const bruto = Date.parse('2026-09-25T14:35:12.039Z') - Date.parse('2026-09-22T17:55:59.089Z');
+  checa('TRT-0363 conta so 2s de trabalho', String(Math.round((bruto - emPausa) / 1000)), '3');
+  checa('historico ilegivel nao quebra', String(tempoEmPausa('x', 0, 10)), '0');
+}
 
 console.log('\n== indicadores do ciclo (ciclo inteiro, dia a dia) ==');
 {

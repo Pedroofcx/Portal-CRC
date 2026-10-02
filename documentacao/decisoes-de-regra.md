@@ -6,7 +6,39 @@ contraditório ou irreproduzível.
 
 ---
 
-## SLA — como o tempo é contado (15/09/2026)
+## SLA — passa a contar do início e a pausar em dependência externa (02/10/2026)
+
+**Decisão (Pedro):** o tempo de SLA conta do **início da tratativa** ao
+encerramento, e **pausa** enquanto ela está em `dependencia_externa` ou
+`aguardando_financeiro`. **Substitui a regra de 15/09 abaixo**, que contava do
+registro e só pausava no congelamento formal.
+
+**Gatilho:** a TRT-0363 foi encerrada "no prazo" pela visão da operação, mas o
+sistema a marcava fora (6,8 dias contra 24h), porque quase todo o tempo foi em
+dependência externa.
+
+**Efeito medido (349 encerradas, simulado antes de aplicar):** dentro do SLA
+sobe de 39,3% para 61,9%; 79 passam para "dentro", nenhuma para "fora". Como o
+ponto de "encerramento no SLA" é calculado a partir de `encerrado_no_sla`, o
+recálculo do histórico muda também a pontuação de reclamações internas
+(85 → 140 dentro do prazo).
+
+**Risco aceito, sem teto:** tratativa parada em dependência externa por tempo
+indefinido conta como dentro do SLA. 72 das 349 passaram mais de 90% do tempo
+em pausa; a TRT-0075 ficou 3.217 h (134 dias) em pausa e passa a contar 0 h.
+Foi oferecido um teto de dias de pausa e Pedro preferiu **sem teto**. Se o
+número ficar bom demais e esconder fila parada, o teto é o primeiro ajuste.
+
+**Como funciona.** O histórico é lido como linha do tempo de estados; nota
+livre (estado igual ao anterior) não interrompe a pausa. Banco: migration 38
+(`minutos_pausados`, `tempo_sla_efetivo_minutos`, gatilho do encerramento e
+recálculo, com cópia em `sla_recalculo_38` para desfazer). Tela:
+`src/lib/prazoSla.js`. Tratativa **ainda não iniciada** conta do registro, para
+a fila seguir acusando o que ninguém pegou.
+
+---
+
+## SLA — como o tempo é contado (15/09/2026) — SUBSTITUÍDA em 02/10/2026
 
 **Decisão:** tempo de SLA é o corrido do registro ao encerramento, descontando
 apenas os períodos em que o SLA esteve **formalmente congelado**.
