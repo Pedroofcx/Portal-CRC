@@ -117,13 +117,12 @@ export default function Configuracoes() {
       let dados = {};
       
       if (tipo === 'completo') {
-        const [tratativas, colaboradores, pontuacoes, observacoes, pdis, cursos, pops, avisos] = await Promise.all([
+        const [tratativas, colaboradores, pontuacoes, observacoes, pdis, pops, avisos] = await Promise.all([
           db.entities.Tratativa.list(),
           db.entities.Colaborador.list(),
           db.entities.Pontuacao.list(),
           db.entities.Observacao.list(),
           db.entities.PDI.list(),
-          db.entities.Curso.list(),
           db.entities.POP.list(),
           db.entities.Aviso.list(),
         ]);
@@ -134,7 +133,6 @@ export default function Configuracoes() {
           pontuacoes,
           observacoes,
           pdis,
-          cursos,
           pops,
           avisos,
           configuracoes,

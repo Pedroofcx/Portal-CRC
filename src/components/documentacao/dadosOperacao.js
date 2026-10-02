@@ -95,9 +95,8 @@ export const secoesDeOperacao = [
 ];
 
 export const legadoParaRemover = [
-  { item: 'src/pages/UploadFoto.jsx', motivo: 'Resto do Base44, sem nenhuma referência no código. A troca de foto agora é o diálogo do menu da conta.' },
-  { item: 'src/components/utils/SafeRoute.jsx e RouteGuard.jsx', motivo: 'Guardas de rota do Base44, sem nenhuma importação no código atual.' },
-  { item: 'src/pages/OAuthConsent.jsx', motivo: 'Tela de consentimento OAuth do Base44 (em inglês), sem uso.' },
-  { item: 'Tabelas escala, saldo_ferias, configuracao_home_office, solicitacao_home_office, curso, curso_matricula, oraculo_lancamento', motivo: 'Sem uso no código atual; dados mantidos por decisão (histórico). Removê-las exige uma migration e atualizar o backup.' },
-  { item: 'Funções minutos_congelados e tempo_sla_minutos, pontos_da_tratativa e pontos_do_colaborador', motivo: 'As duas primeiras foram substituídas pela migration 38; as outras não são usadas pelas telas.' },
+  { item: 'Tabelas arquivadas (migration 42)', motivo: 'escala, saldo_ferias, configuracao_home_office, solicitacao_home_office, curso, curso_matricula e oraculo_lancamento ficam no esquema arquivo_legado, com os dados, fora da API.' },
+  { item: 'Funções apagadas (migration 42)', motivo: 'minutos_congelados e tempo_sla_minutos (substituídas pela migration 38) e pontos_da_tratativa e pontos_do_colaborador (espelho em SQL que as telas nunca usaram).' },
+  { item: 'Telas e guardas do Base44', motivo: 'UploadFoto, OAuthConsent, SafeRoute e RouteGuard foram removidas do código.' },
+  { item: 'permissao_modulo', motivo: 'Interruptor antigo de menu, ainda lido pelo Layout para itens sem permissão própria. Sai quando todo item do menu tiver permissão.' },
 ];

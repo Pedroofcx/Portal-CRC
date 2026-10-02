@@ -65,7 +65,6 @@ export const gruposDeTabelas = [
       { entidade: 'TipoObservacao', tabela: 'tipo_observacao', descricao: 'Vocabulário dos tipos de observação.', leitura: COLAB, escrita: 'permissão gerenciar_configuracoes' },
       { entidade: 'SkillMestre', tabela: 'skill_mestre', descricao: 'Lista de soft e hard skills disponíveis para avaliar.', leitura: COLAB, escrita: 'permissão gerenciar_configuracoes' },
       { entidade: 'OraculoPalavra', tabela: 'oraculo_palavra', descricao: 'Dicionário de palavras-chave das leituras de pessoas (ativa, em validação).', leitura: 'permissão acessar_oraculo', escrita: 'permissão acessar_oraculo' },
-      { entidade: 'OraculoLancamento', tabela: 'oraculo_lancamento', descricao: 'LEGADO do Base44: os 31 lançamentos viraram observações do tipo leitura na migration 22. A tabela não recebe mais escrita.', leitura: 'permissão acessar_oraculo', escrita: 'permissão acessar_oraculo (sem uso)' },
       { entidade: 'PDI', tabela: 'pdi', descricao: 'Plano de Desenvolvimento Individual: etapas, prazos e percentual de conclusão.', leitura: 'permissão ver_pdi_equipe, ou o dono (migration 28: o PDI é individual)', escrita: 'permissão ver_pdi_equipe' },
       { entidade: 'PlanoSetorial', tabela: 'plano_setorial', descricao: 'Planejamento estratégico do setor (objetivos, ações, indicadores). Digitação manual, sem leitura de outros módulos.', leitura: COLAB, escrita: 'permissão gerenciar_operacao' },
       { entidade: 'HanseiEnvio', tabela: 'hansei_envio', descricao: 'Cada Hansei enviado: a foto dos números do período (calculada pelo sistema) e o comentário do gestor.', leitura: COLAB, escrita: COLAB + ' (a tela só deixa o gestor enviar; ver Pontos de atenção)' },
@@ -78,11 +77,7 @@ export const gruposDeTabelas = [
     tabelas: [
       { entidade: 'EscalaAtribuicao', tabela: 'escala_atribuicao', descricao: 'Escala de Trabalho: um registro por pessoa e dia (presencial, home office, folga, férias...).', leitura: COLAB, escrita: 'permissão gerenciar_escalas' },
       { entidade: 'EscalaTurno', tabela: 'escala_turno', descricao: 'Escala de Turno: quem atende e quem analisa tickets em cada metade do dia.', leitura: COLAB, escrita: 'permissão gerenciar_escalas' },
-      { entidade: 'Escala', tabela: 'escala', descricao: 'LEGADO. Tabela de escalas do Base44, sem uso no código atual.', leitura: COLAB, escrita: 'permissão gerenciar_escalas' },
-      { entidade: 'ConfiguracaoHomeOffice', tabela: 'configuracao_home_office', descricao: 'LEGADO. Regras do antigo módulo de escolha de Home Office, removido; dados mantidos.', leitura: COLAB, escrita: 'permissão gerenciar_configuracoes' },
-      { entidade: 'SolicitacaoHomeOffice', tabela: 'solicitacao_home_office', descricao: 'LEGADO. Pedidos do antigo módulo de Home Office, removido; dados mantidos.', leitura: COLAB, escrita: COLAB },
       { entidade: 'CicloFerias', tabela: 'ciclo_ferias', descricao: 'O saldo de férias: um por período aquisitivo, com dias de direito, abono, dias usados, vencimento e os fragmentos já aprovados.', leitura: COLAB, escrita: 'permissão aprovar_ferias' },
-      { entidade: 'SaldoFerias', tabela: 'saldo_ferias', descricao: 'LEGADO. Saldo antigo, substituído por CicloFerias. Sem uso no código atual.', leitura: COLAB, escrita: 'permissão aprovar_ferias' },
       { entidade: 'SolicitacaoFerias', tabela: 'solicitacao_ferias', descricao: 'O pedido de férias do agente e a resposta da gestão (em análise, aprovada, recusada, sugestão de nova data, cancelada).', leitura: COLAB, escrita: COLAB + ' (o agente pede; a aprovação baixa o saldo em CicloFerias, que exige aprovar_ferias)' },
     ],
   },
@@ -115,8 +110,6 @@ export const gruposDeTabelas = [
     tabelas: [
       { entidade: 'Configuracao', tabela: 'configuracao', descricao: 'Chave/valor genérico (valor sempre texto, JSON quando preciso). Guarda metas de performance, visibilidade do ranking, parâmetros financeiros da Jornada e a posição dos rodízios.', leitura: COLAB, escrita: 'permissão gerenciar_configuracoes' },
       { entidade: 'LogAuditoria', tabela: 'log_auditoria', descricao: 'Trilha de ações (acao, módulo, dados). Hoje só os acionamentos de Líder Técnico e N2 gravam nela.', leitura: 'permissão ver_log_auditoria', escrita: COLAB + ' (insere; o próprio agente gera o registro)' },
-      { entidade: 'Curso', tabela: 'curso', descricao: 'LEGADO. Módulo Universidade removido; dados mantidos e incluídos no backup manual.', leitura: COLAB, escrita: COLAB },
-      { entidade: 'CursoMatricula', tabela: 'curso_matricula', descricao: 'LEGADO. Matrículas da Universidade, removida.', leitura: COLAB, escrita: COLAB },
     ],
   },
   {
@@ -143,8 +136,6 @@ export const funcoesDoBanco = [
   { nome: 'transicao_de_status_permitida', migration: 8, descricao: 'A matriz da máquina de estados da tratativa: de qual estado para quais é permitido ir.' },
   { nome: 'validar_transicao_tratativa', migration: 8, descricao: 'Função do gatilho valida_transicao_tratativa: recusa transição fora da matriz.' },
   { nome: 'sla_horas', migration: 9, descricao: 'Prazo de SLA em horas por tipo (24, 48, 72; contestação usa o prazo informado em dias).' },
-  { nome: 'minutos_congelados', migration: 9, descricao: 'LEGADO (regra de 15/09): minutos em aguardando_financeiro. Substituída por minutos_pausados na migration 38.' },
-  { nome: 'tempo_sla_minutos', migration: 9, descricao: 'LEGADO (regra de 15/09): tempo do registro ao encerramento menos o congelamento. Substituída por tempo_sla_efetivo_minutos.' },
   { nome: 'minutos_pausados', migration: 38, descricao: 'Minutos em dependência externa ou aguardando financeiro dentro de [início, fim], lendo o histórico como linha do tempo de estados (nota livre não interrompe a pausa).' },
   { nome: 'tempo_sla_efetivo_minutos', migration: 38, descricao: 'O tempo de SLA: do início da tratativa ao encerramento, menos as pausas. Base de encerrado_no_sla.' },
   { nome: 'calcular_sla_ao_encerrar', migration: 39, descricao: 'Função do gatilho calcula_sla_ao_encerrar: grava tempo_total_minutos e encerrado_no_sla na entrada em encerrada OU em aguardando_confirmacao_reabertura.' },
@@ -158,8 +149,6 @@ export const funcoesDoBanco = [
   { nome: 'congelar_campos_de_pontuacao', migration: 19, descricao: 'Função do gatilho ab_congela_pontuacao: depois de encerrada, os campos que geram ponto só mudam por quem tem corrigir_tratativa_encerrada.' },
   { nome: 'proteger_auditoria_replicavel', migration: 20, descricao: 'Função do gatilho ab_protege_auditoria_replicavel: só quem tem aprovar_solucao_replicavel grava a aprovação ou contestação de uma solução replicável.' },
   { nome: 'proteger_papel_do_colaborador', migration: 41, descricao: 'Função do gatilho ac_protege_papel_colaborador: impede quem gerencia colaboradores de se promover ou trocar e-mail (identidade).' },
-  { nome: 'pontos_da_tratativa', migration: 20, descricao: 'Espelho em SQL do cálculo de pontos de uma tratativa. NÃO é usada pelas telas (elas calculam no navegador); serve de conferência. Não aplica a regra de reabertura por dados.' },
-  { nome: 'pontos_do_colaborador', migration: 20, descricao: 'Soma de pontos de um colaborador num período, em SQL. Mesmo aviso de pontos_da_tratativa.' },
   { nome: 'confirmar_atribuicao', migration: 32, descricao: 'O agente confirma ("OK") que viu a atribuição nova. Altera só a própria linha.' },
   { nome: 'atualizar_minha_foto', migration: 37, descricao: 'Troca a foto de perfil de quem está logado, e só ela. Aceita só endereço do nosso bucket. Existe porque o agente não pode editar a própria linha de colaborador.' },
   { nome: 'auditoria_rls', migration: 29, descricao: 'Lista cada política de RLS e o que ela usa (eh_gestor, eh_colaborador, dono). Só service_role. Serve para conferir se o banco real bate com as migrations.' },
@@ -179,6 +168,7 @@ export const objetosEspeciais = [
   { nome: 'Views mascaradas', descricao: 'colaborador e tratativa são VIEWS (security_invoker) sobre colaborador_base e tratativa_base. A view troca por nulo o salário, as promoções e o custo operacional de quem não tem a permissão. Gravações passam por gatilhos INSTEAD OF (colaborador_gravar, tratativa_gravar) que, para quem não tem a permissão, mantêm o valor antigo. Para criar coluna nova é preciso recriar a view (só se acrescenta no fim) e a função de gravação.' },
   { nome: 'Storage', descricao: 'Um bucket público, "arquivos" (migration 27). Qualquer pessoa autenticada envia; a leitura da URL é pública. As fotos de perfil ficam aqui.' },
   { nome: 'Edge Function', descricao: 'invocar-llm (supabase/functions/invocar-llm): a chamada à IA, com a chave no servidor.' },
+  { nome: 'Esquema arquivo_legado', descricao: 'Onde ficam, desde a migration 42, as tabelas do Base44 que nenhuma tela usa (escala, saldo_ferias, configuracao_home_office, solicitacao_home_office, curso, curso_matricula, oraculo_lancamento). Os dados estão preservados, fora da API e sem acesso para o app. Para trazer uma de volta: alter table arquivo_legado.<tabela> set schema public.' },
   { nome: 'Cadastro público', descricao: 'Desligado no Supabase. Só entra quem teve a conta criada por npm run criar-contas, e só vê dado quem também tem cadastro ativo em colaborador.' },
 ];
 
@@ -224,12 +214,12 @@ export const migracoes = [
   { n: 39, titulo: 'SLA na reclamação interna', descricao: 'SLA e custo calculados já na entrada em aguardando confirmação de reabertura.' },
   { n: 40, titulo: 'Ciclos 1 e 2 congelados', descricao: 'Devolve o SLA dos ciclos fechados e aprova as replicáveis deles.' },
   { n: 41, titulo: 'Permissão por área', descricao: 'eh_gestor() vira tem_permissao(<área>) em ~40 tabelas, mais a trava contra escalada.' },
+  { n: 42, titulo: 'Arquivar o legado', descricao: 'Move 7 tabelas sem uso para o esquema arquivo_legado (sem apagar dados) e apaga 4 funções antigas.' },
   { n: 99, titulo: 'Restrições pós-importação', descricao: 'Só se aplica depois da carga de dados do Base44.' },
 ];
 
 export const pontosDeAtencao = [
   'Várias tabelas aceitam escrita de qualquer colaborador ativo (tratativa, solicitacao_ferias, hansei_envio, hansei_comentario, solicitacao_apoio, estorno_parcial, acionamentos, frase_motivacional): quem pode fazer o quê vem da TELA, não do banco. Duas têm efeito: um agente conseguiria marcar o próprio pedido de férias como aprovado (sem baixar o saldo, que exige aprovar_ferias) e enviar um Hansei. Fechar isso é o próximo passo natural das permissões.',
-  'O espelho SQL pontos_da_tratativa() não aplica a regra de reabertura por dados nem o dia de virada; as telas não o usam. Não confie nele para conferir ranking.',
   'Os números de tratativa (TRT-0000) são gerados no navegador (maior + 1): sob concorrência, dois registros podem receber o mesmo número (35 repetidos hoje). O identificador real é o id (uuid).',
   'Não há backup automático do banco (decisão de Pedro). O backup em Configurações é uma exportação manual e não há restauração automática.',
 ];

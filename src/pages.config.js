@@ -47,7 +47,6 @@ const Relatorios = lazy(() => import('./pages/Relatorios'));
 const RelatoriosApuracao = lazy(() => import('./pages/RelatoriosApuracao'));
 const TratativaDetalhe = lazy(() => import('./pages/TratativaDetalhe'));
 const Tratativas = lazy(() => import('./pages/Tratativas'));
-const UploadFoto = lazy(() => import('./pages/UploadFoto'));
 const FerramentasOperacionais = lazy(() => import('./pages/FerramentasOperacionais'));
 
 export const PAGES = {
@@ -87,7 +86,6 @@ export const PAGES = {
     "TratativaDetalhe": TratativaDetalhe,
     "Tratativas": Tratativas,
     "Turnos": redirecionarParaPagina('Escalas'),
-    "UploadFoto": UploadFoto,
     "FerramentasOperacionais": FerramentasOperacionais,
 }
 

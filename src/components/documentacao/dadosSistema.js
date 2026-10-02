@@ -175,20 +175,4 @@ export const modulosSistema = [
     ],
     integracoes: ['Todas as páginas e componentes.'],
   },
-  {
-    id: 'legado-base44',
-    categoria: 'Sistema',
-    nome: 'Resíduos do Base44 (para remover)',
-    acesso: 'Sem uso: nada no menu aponta para estas telas.',
-    paginas: ['src/pages/UploadFoto.jsx', 'src/pages/OAuthConsent.jsx', 'src/components/utils/SafeRoute.jsx', 'src/components/utils/RouteGuard.jsx'],
-    entidades: [],
-    objetivo: 'Arquivos herdados da plataforma antiga que sobraram na migração. Estão listados para não serem confundidos com funcionalidade viva.',
-    campos_chave: [
-      { campo: 'UploadFoto.jsx', descricao: 'Troca de foto do Base44. A troca atual é o diálogo "Alterar foto" do menu da conta.' },
-      { campo: 'OAuthConsent.jsx', descricao: 'Tela de consentimento OAuth do Base44 (em inglês).' },
-      { campo: 'SafeRoute.jsx / RouteGuard.jsx', descricao: 'Guardas de rota do Base44, não importadas por ninguém.' },
-    ],
-    regras_negocio: ['Remover é seguro, mas é decisão de limpeza, não de correção. A lista completa está em Operação > Legado.'],
-    integracoes: ['Nenhuma.'],
-  },
 ];

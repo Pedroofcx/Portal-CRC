@@ -67,6 +67,7 @@ export default function FluxoJornadaVisual({ etapas = [], tratativas = [], _moti
   };
 
   const maxTotal = Math.max(...Object.values(metricasPorEtapa).map(m => m.total), 1);
+  const totalGeral = Object.values(metricasPorEtapa).reduce((soma, m) => soma + m.total, 0);
 
   // Identificar etapa com mais atrito
   const etapaCritica = useMemo(() => {
@@ -168,7 +169,7 @@ export default function FluxoJornadaVisual({ etapas = [], tratativas = [], _moti
                               />
                             </div>
                             <p className="text-xs text-muted-foreground">
-                              {intensidade}% do volume total
+                              {totalGeral > 0 ? Math.round(((metricas.total || 0) / totalGeral) * 100) : 0}% do volume total
                             </p>
                           </div>
 

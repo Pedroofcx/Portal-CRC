@@ -113,6 +113,11 @@ const sqlTodo = readdirSync(caminho('supabase/migrations'))
   .map((f) => readFileSync(caminho('supabase/migrations', f), 'utf8').replace(/--[^\n]*/g, ''))
   .join('\n');
 const funcoes = new Set([...sqlTodo.matchAll(/create or replace function\s+public\.([a-z_0-9]+)/gi)].map((m) => m[1]));
+// Funções que uma migration apagou (a 42 lista os nomes em "proname in (...)").
+const apagadas = new Set(
+  [...sqlTodo.matchAll(/proname in \(([^)]*)\)/gi)].flatMap((m) => [...m[1].matchAll(/'([a-z_0-9]+)'/g)].map((x) => x[1])),
+);
+for (const f of apagadas) funcoes.delete(f);
 const gatilhos = new Set([...sqlTodo.matchAll(/create trigger\s+([a-z_0-9]+)/gi)].map((m) => m[1]));
 const funcoesDocumentadas = new Set(banco.funcoesDoBanco.map((f) => f.nome));
 const gatilhosDocumentados = new Set(banco.gatilhosDoBanco.map((g) => g.nome));
