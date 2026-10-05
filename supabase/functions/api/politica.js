@@ -109,7 +109,7 @@ export function decidir({ geral, chave, integracao, recurso, acao, agora, usoNoU
 /** Só estes campos de tratativa saem. O custo operacional nunca. */
 export const CAMPOS_TRATATIVA = [
   'id', 'id_interno', 'tipo_tratativa', 'prioridade', 'status',
-  'nome_cliente', 'id_base_cliente', 'cnpj_cliente', 'link_zendesk', 'link_intranet',
+  'nome_cliente', 'id_base_cliente', 'cnpj_cliente', 'cliente_sem_cnpj', 'link_zendesk', 'link_intranet',
   'motivo_nome', 'plano_cliente', 'modalidade_plano', 'segmento_cliente',
   'agente_responsavel_id', 'agente_responsavel_nome',
   'data_registro', 'data_inicio_tratativa', 'data_encerramento',
@@ -180,7 +180,7 @@ const CAMPOS_ACEITOS = [
   'valor_contratacao_plano_atual', 'data_primeira_contratacao', 'data_contratacao_plano_atual',
   'segmento_cliente', 'numero_case_contestacao', 'motivo_contestacao',
   'valor_contestado_inicial', 'prazo_sla_dias', 'observacao',
-  'ticket_zendesk', 'ticket_clickdesk', 'dados_clickdesk', 'resumo_whatsapp',
+  'ticket_zendesk', 'ticket_clickdesk', 'dados_clickdesk', 'resumo_whatsapp', 'cliente_sem_cnpj',
 ];
 
 /** Resumo para o cliente: o mesmo teto da coluna no banco. */
@@ -250,9 +250,20 @@ export function validarNovaTratativa(corpo) {
   const tipo = lista('tipo_tratativa', TIPOS, true);
   const prioridade = lista('prioridade', PRIORIDADES, true);
 
+  // O CNPJ é obrigatório em tratativa nova: é a senha da consulta do cliente no WhatsApp.
+  // Cliente sem CNPJ marca cliente_sem_cnpj: true (e então não envia o CNPJ). Esse
+  // cliente não consegue consultar pelo WhatsApp.
+  const semCnpj = corpo.cliente_sem_cnpj;
+  if (semCnpj !== undefined && typeof semCnpj !== 'boolean') erros.push('cliente_sem_cnpj deve ser true ou false');
   const cnpj = texto('cnpj_cliente', 30);
   const cnpjNumeros = cnpj ? cnpj.replace(/\D/g, '') : undefined;
-  if (cnpj && cnpjNumeros.length !== 14) erros.push('cnpj_cliente deve ter 14 dígitos');
+  if (semCnpj === true) {
+    if (cnpj) erros.push('envie o CNPJ ou marque cliente_sem_cnpj, não os dois');
+  } else if (!cnpj) {
+    erros.push('cnpj_cliente é obrigatório (ou envie cliente_sem_cnpj: true quando o cliente não tem CNPJ)');
+  } else if (!cnpjValido(cnpj)) {
+    erros.push('cnpj_cliente inválido: use 14 dígitos com os dígitos verificadores corretos');
+  }
 
   const link = (campo) => {
     const v = texto(campo, 500);
@@ -267,7 +278,8 @@ export function validarNovaTratativa(corpo) {
     link_zendesk: link('link_zendesk'),
     link_intranet: link('link_intranet'),
     id_base_cliente: texto('id_base_cliente', 100),
-    cnpj_cliente: cnpjNumeros,
+    cnpj_cliente: semCnpj === true ? undefined : cnpjNumeros,
+    cliente_sem_cnpj: semCnpj === true ? true : undefined,
     plano_cliente: lista('plano_cliente', PLANOS),
     modalidade_plano: lista('modalidade_plano', MODALIDADES),
     valor_contratacao_plano_atual: numero('valor_contratacao_plano_atual'),

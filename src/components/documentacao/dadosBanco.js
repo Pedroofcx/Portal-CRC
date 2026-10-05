@@ -231,6 +231,7 @@ export const migracoes = [
   { n: 42, titulo: 'Arquivar o legado', descricao: 'Move 7 tabelas sem uso para o esquema arquivo_legado (sem apagar dados) e apaga 4 funções antigas.' },
   { n: 43, titulo: 'Integrações (base da API)', descricao: 'Chave geral, integrações, chaves, registro de uso e a permissão gerenciar_integracoes.' },
   { n: 44, titulo: 'Tickets, ClickDesk e resumo do WhatsApp', descricao: 'Seis colunas novas em tratativa (ticket_zendesk, ticket_clickdesk, dados_clickdesk, resumo_whatsapp e os dois carimbos do resumo) e o gatilho do carimbo.' },
+  { n: 45, titulo: 'Cliente sem CNPJ', descricao: 'Coluna cliente_sem_cnpj em tratativa (padrão false), com regra que impede CNPJ e "sem CNPJ" ao mesmo tempo.' },
   { n: 99, titulo: 'Restrições pós-importação', descricao: 'Só se aplica depois da carga de dados do Base44.' },
 ];
 

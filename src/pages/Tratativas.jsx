@@ -54,6 +54,7 @@ const formularioVazio = () => ({
   id_base_cliente: '',
   nome_cliente: '',
   cnpj_cliente: '',
+  cliente_sem_cnpj: false,
   ticket_zendesk: '',
   ticket_clickdesk: '',
   tipo_tratativa: '',
@@ -115,7 +116,8 @@ export default function Tratativas() {
     link_intranet:   [obrigatorio('O link da Intranet'), url('O link da Intranet')],
     id_base_cliente: [obrigatorio('O ID da base do cliente')],
     nome_cliente:    [obrigatorio('O nome do cliente')],
-    cnpj_cliente:    [validarCnpj],
+    // Obrigatório, salvo quando o cliente não tem CNPJ (caixa marcada). É a senha da consulta no WhatsApp.
+    cnpj_cliente:    formData.cliente_sem_cnpj ? [] : [obrigatorio('O CNPJ do cliente'), validarCnpj],
     tipo_tratativa:  [obrigatorio('O tipo de tratativa')],
     prioridade:      [obrigatorio('A prioridade')],
     motivo_id:       [obrigatorio('O motivo')],
@@ -130,7 +132,7 @@ export default function Tratativas() {
                                     dataNaoFutura('A data da primeira contratação')],
     data_contratacao_plano_atual:  [obrigatorio('A data de contratação do plano atual'),
                                     dataNaoFutura('A data de contratação do plano atual')],
-  }), []);
+  }), [formData.cliente_sem_cnpj]);
 
   const [clienteRecorrente, setClienteRecorrente] = useState(false);
   const [numeroOcorrencias, setNumeroOcorrencias] = useState(0);
@@ -876,12 +878,16 @@ export default function Tratativas() {
             <CampoFormulario
               id="cnpj_cliente"
               rotulo="CNPJ do Cliente"
-              erro={validacao.erro('cnpj_cliente')}
-              ajuda="Opcional. Se preenchido, é conferido ao sair do campo."
+              obrigatorio={!formData.cliente_sem_cnpj}
+              erro={formData.cliente_sem_cnpj ? undefined : validacao.erro('cnpj_cliente')}
+              ajuda={formData.cliente_sem_cnpj
+                ? 'Sem CNPJ, o cliente não consegue consultar a tratativa pelo WhatsApp.'
+                : 'É conferido ao sair do campo. O cliente usa o CNPJ para consultar a tratativa pelo WhatsApp.'}
             >
               <Input
                 id="cnpj_cliente"
                 value={formData.cnpj_cliente}
+                disabled={formData.cliente_sem_cnpj}
                 onChange={(e) => {
                   setFormData({ ...formData, cnpj_cliente: e.target.value });
                   validacao.aoMudar('cnpj_cliente', e.target.value);
@@ -889,6 +895,17 @@ export default function Tratativas() {
                 {...validacao.campo('cnpj_cliente')}
                 placeholder="00.000.000/0000-00"
               />
+              <label className="mt-2 flex items-center gap-2 text-sm text-foreground">
+                <input
+                  type="checkbox"
+                  className="h-4 w-4"
+                  checked={formData.cliente_sem_cnpj}
+                  onChange={(e) => {
+                    setFormData({ ...formData, cliente_sem_cnpj: e.target.checked, cnpj_cliente: e.target.checked ? '' : formData.cnpj_cliente });
+                  }}
+                />
+                Cliente não possui CNPJ
+              </label>
               {clienteRecorrente && (
                 <div className="mt-2 p-2 bg-warning-soft border border-warning/25 rounded-lg flex items-center gap-2">
                   <div className="w-2 h-2 bg-warning rounded-full animate-pulse" />

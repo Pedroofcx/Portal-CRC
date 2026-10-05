@@ -33,23 +33,25 @@ const formatarCnpj = (v) => {
  */
 export default function AtendimentoAoCliente({ tratativa, colaborador }) {
   const queryClient = useQueryClient();
-  const [form, setForm] = useState({ cnpj_cliente: '', ticket_zendesk: '', ticket_clickdesk: '', resumo_whatsapp: '' });
+  const [form, setForm] = useState({ cnpj_cliente: '', cliente_sem_cnpj: false, ticket_zendesk: '', ticket_clickdesk: '', resumo_whatsapp: '' });
 
   useEffect(() => {
     setForm({
       cnpj_cliente: tratativa.cnpj_cliente?.trim() ?? '',
+      cliente_sem_cnpj: tratativa.cliente_sem_cnpj === true,
       ticket_zendesk: tratativa.ticket_zendesk ?? '',
       ticket_clickdesk: tratativa.ticket_clickdesk ?? '',
       resumo_whatsapp: tratativa.resumo_whatsapp ?? '',
     });
-  }, [tratativa.id, tratativa.cnpj_cliente, tratativa.ticket_zendesk, tratativa.ticket_clickdesk, tratativa.resumo_whatsapp]);
+  }, [tratativa.id, tratativa.cnpj_cliente, tratativa.cliente_sem_cnpj, tratativa.ticket_zendesk, tratativa.ticket_clickdesk, tratativa.resumo_whatsapp]);
 
   const salvar = useMutation({
     mutationFn: () => {
       const resumo = form.resumo_whatsapp.trim();
       const mudouResumo = resumo !== (tratativa.resumo_whatsapp ?? '');
       return db.entities.Tratativa.update(tratativa.id, {
-        cnpj_cliente: formatarCnpj(form.cnpj_cliente) || null,
+        cnpj_cliente: form.cliente_sem_cnpj ? null : (formatarCnpj(form.cnpj_cliente) || null),
+        cliente_sem_cnpj: form.cliente_sem_cnpj,
         ticket_zendesk: form.ticket_zendesk.trim() || null,
         ticket_clickdesk: form.ticket_clickdesk.trim() || null,
         resumo_whatsapp: resumo || null,
@@ -64,11 +66,12 @@ export default function AtendimentoAoCliente({ tratativa, colaborador }) {
     onError: (e) => toast.error(`Não consegui salvar: ${traduzirErro(e)}`),
   });
 
-  const erroCnpj = validarCnpj(form.cnpj_cliente);
-  const semCnpj = !soDigitos(form.cnpj_cliente);
+  const erroCnpj = form.cliente_sem_cnpj ? null : validarCnpj(form.cnpj_cliente);
+  const semCnpj = form.cliente_sem_cnpj || !soDigitos(form.cnpj_cliente);
   const codigosOk = CODIGO.test(form.ticket_zendesk) && CODIGO.test(form.ticket_clickdesk);
   const restantes = LIMITE_RESUMO - form.resumo_whatsapp.length;
   const mudou = form.cnpj_cliente.trim() !== (tratativa.cnpj_cliente?.trim() ?? '')
+    || form.cliente_sem_cnpj !== (tratativa.cliente_sem_cnpj === true)
     || form.ticket_zendesk !== (tratativa.ticket_zendesk ?? '')
     || form.ticket_clickdesk !== (tratativa.ticket_clickdesk ?? '')
     || form.resumo_whatsapp !== (tratativa.resumo_whatsapp ?? '');
@@ -81,11 +84,17 @@ export default function AtendimentoAoCliente({ tratativa, colaborador }) {
         <div>
           <Label htmlFor="cnpj_cliente_atendimento" className="text-xs text-muted-foreground">CNPJ do cliente</Label>
           <Input id="cnpj_cliente_atendimento" className="mt-1 max-w-xs font-mono" value={form.cnpj_cliente} placeholder="00.000.000/0000-00"
+            disabled={form.cliente_sem_cnpj}
             onChange={(e) => setForm({ ...form, cnpj_cliente: e.target.value })} />
+          <label className="mt-2 flex items-center gap-2 text-sm text-foreground">
+            <input type="checkbox" className="h-4 w-4" checked={form.cliente_sem_cnpj}
+              onChange={(e) => setForm({ ...form, cliente_sem_cnpj: e.target.checked, cnpj_cliente: e.target.checked ? '' : form.cnpj_cliente })} />
+            Cliente não possui CNPJ
+          </label>
           {erroCnpj
             ? <p className="mt-1 text-xs text-destructive">{erroCnpj}</p>
             : semCnpj
-              ? <p className="mt-1 text-xs text-warning">Sem CNPJ cadastrado, o cliente não consegue consultar esta tratativa pelo WhatsApp: o CNPJ é a senha da consulta.</p>
+              ? <p className="mt-1 text-xs text-warning">Sem CNPJ, o cliente não consegue consultar esta tratativa pelo WhatsApp: o CNPJ é a senha da consulta.</p>
               : <p className="mt-1 text-xs text-muted-foreground">O cliente precisa informar este CNPJ para consultar a tratativa pelo WhatsApp.</p>}
         </div>
 

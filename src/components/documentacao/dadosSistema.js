@@ -88,7 +88,7 @@ export const modulosSistema = [
       'A chave geral nasce DESLIGADA. Nenhum sistema de fora entra até o gestor ligar.',
       'A chave nunca é guardada: só o hash SHA-256 (integracao_chave_segredo, fechada ao app). Perdeu, cria outra.',
       'Consultar e gravar são liberados separadamente em cada recurso.',
-      'Acompanhamento exige o CNPJ do cliente (?cnpj=). O número TRT e o ticket são sequenciais e não provam quem pergunta; o CNPJ é a senha. Ele precisa ser válido (dígitos verificadores) e igual ao cadastrado na tratativa. Código inexistente, CNPJ errado e tratativa sem CNPJ cadastrado dão a mesma resposta (404). Cinco erros seguidos no mesmo código travam a consulta por 15 minutos (429). Tratativa sem CNPJ não pode ser consultada pelo WhatsApp.',
+      'Acompanhamento exige o CNPJ do cliente (?cnpj=). O número TRT e o ticket são sequenciais e não provam quem pergunta; o CNPJ é a senha. Ele precisa ser válido (dígitos verificadores) e igual ao cadastrado na tratativa. Código inexistente, CNPJ errado e tratativa sem CNPJ cadastrado dão a mesma resposta (404). Cinco erros seguidos no mesmo código travam a consulta por 15 minutos (429). Tratativa sem CNPJ cadastrado (as antigas e as de cliente marcado como sem CNPJ) não pode ser consultada pelo WhatsApp. O CNPJ é obrigatório em tratativa nova, salvo "cliente não possui CNPJ".',
       'A função usa a chave de serviço do banco, então as travas por linha (RLS) NÃO valem para ela: quem decide o que sai e o que entra é politica.js. Mudou um recurso, mude lá e teste.',
       'Publicação da função: ver o cabeçalho de supabase/functions/api/index.ts (dois arquivos e "Verify JWT" desligado).',
     ],
