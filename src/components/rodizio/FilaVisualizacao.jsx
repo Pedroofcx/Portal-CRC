@@ -32,7 +32,7 @@ export default function FilaVisualizacao({ titulo, participantes, statusLabels }
                   <tr key={p.id} className={`border-b border-border ${p.isProximo ? 'bg-info-soft border-info/25' : 'hover:bg-muted'}`}>
                     <td className="py-3 px-3">
                       <div className="flex items-center gap-2">
-                        <span className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold ${p.isProximo ? 'bg-primary text-white' : 'bg-muted text-muted-foreground'}`}>
+                        <span className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold ${p.isProximo ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}>
                           {p.ordem}
                         </span>
                         {p.isProximo && <Badge className="bg-info-soft text-primary border-info/25 text-xs">← Próximo</Badge>}

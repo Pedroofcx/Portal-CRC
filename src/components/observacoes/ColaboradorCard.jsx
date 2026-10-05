@@ -27,7 +27,7 @@ export default function ColaboradorCard({ colaborador, observacoes, pdis, onClic
         <div className="flex items-start gap-4">
           <Avatar className="h-14 w-14 flex-shrink-0">
             <AvatarImage src={colaborador.foto_url} />
-            <AvatarFallback className="bg-primary text-white text-lg font-semibold">
+            <AvatarFallback className="bg-primary text-primary-foreground text-lg font-semibold">
               {colaborador.nome_completo?.charAt(0)}
             </AvatarFallback>
           </Avatar>

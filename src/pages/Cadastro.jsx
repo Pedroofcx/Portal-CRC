@@ -679,7 +679,7 @@ export default function Cadastro() {
                             <p className="font-medium text-foreground">{selectedColaborador.cargo_atual}</p>
                             <p className="text-xs text-muted-foreground mt-1">Cargo Atual</p>
                           </div>
-                          <Badge className="bg-primary text-white">Atual</Badge>
+                          <Badge className="bg-primary text-primary-foreground">Atual</Badge>
                         </div>
                       </div>
 

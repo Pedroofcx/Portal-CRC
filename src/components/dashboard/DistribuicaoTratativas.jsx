@@ -207,7 +207,7 @@ export default function DistribuicaoTratativas({ gestorId, gestorNome, colaborad
               <TabsTrigger value="alertas" className="text-xs gap-1.5 data-[state=active]:bg-card">
                 <AlertTriangle className="w-3.5 h-3.5" /> Alertas
                 {alertasGlobaisCriticos > 0 && (
-                  <span className="ml-1 bg-destructive text-white rounded-full w-4 h-4 text-[10px] flex items-center justify-center">
+                  <span className="ml-1 bg-destructive text-destructive-foreground rounded-full w-4 h-4 text-[10px] flex items-center justify-center">
                     {alertasGlobaisCriticos}
                   </span>
                 )}
@@ -344,7 +344,7 @@ function FiltroPeriodo({ valor, onChange }) {
           key={v}
           onClick={() => onChange(v)}
           className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${
-            valor === v ? 'bg-primary text-white' : 'bg-muted text-muted-foreground hover:bg-muted'
+            valor === v ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground hover:bg-muted'
           }`}
         >
           {l}

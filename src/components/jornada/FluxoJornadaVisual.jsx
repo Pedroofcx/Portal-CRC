@@ -124,7 +124,7 @@ export default function FluxoJornadaVisual({ etapas = [], tratativas = [], _moti
                     >
                       {isCritica && (
                         <div className="absolute -top-2 -right-2">
-                          <Badge className="bg-destructive text-white animate-pulse">
+                          <Badge className="bg-destructive text-destructive-foreground animate-pulse">
                             <AlertTriangle className="w-3 h-3 mr-1" />
                             Crítico
                           </Badge>

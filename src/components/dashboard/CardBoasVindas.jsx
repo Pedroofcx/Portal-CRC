@@ -38,7 +38,7 @@ export default function CardBoasVindas({ nome, papel, facilitadorInterno, fiExpi
   const saudacao = hora < 12 ? 'Bom dia' : hora < 18 ? 'Boa tarde' : 'Boa noite';
 
   return (
-    <section className="overflow-hidden rounded-xl bg-gradient-to-br from-primary to-[hsl(221_83%_44%)] text-primary-foreground">
+    <section className="overflow-hidden rounded-xl bg-gradient-to-br from-primary to-[hsl(221_83%_44%)] text-primary-foreground dark:to-[hsl(205_95%_58%)]">
       <div className="flex flex-col gap-5 p-6 lg:flex-row lg:items-center lg:justify-between lg:gap-8">
 
         <div className="min-w-0">

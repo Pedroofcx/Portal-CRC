@@ -213,7 +213,7 @@ export default function MinhasAnotacoes({ colaboradorId }) {
             <CardTitle className="text-sm font-semibold flex items-center gap-2">
               Minhas Anotações
               {avisosPendentes.length > 0 && (
-                <span className="bg-destructive text-white text-xs font-bold px-1.5 py-0.5 rounded-full leading-none">
+                <span className="bg-destructive text-destructive-foreground text-xs font-bold px-1.5 py-0.5 rounded-full leading-none">
                   {avisosPendentes.length}
                 </span>
               )}

@@ -46,11 +46,11 @@ const SOLIDOS = {
   critico:    "bg-critical text-critical-foreground",
   sucesso:    "bg-success text-success-foreground",
   destrutivo: "bg-destructive text-destructive-foreground",
-  cat1: "bg-chart-1 text-white",
-  cat2: "bg-chart-2 text-white",
-  cat3: "bg-chart-3 text-white",
-  cat4: "bg-chart-4 text-white",
-  cat5: "bg-chart-5 text-white",
+  cat1: "bg-chart-1 text-primary-foreground",
+  cat2: "bg-chart-2 text-primary-foreground",
+  cat3: "bg-chart-3 text-primary-foreground",
+  cat4: "bg-chart-4 text-primary-foreground",
+  cat5: "bg-chart-5 text-primary-foreground",
 };
 
 const statusConfig = {

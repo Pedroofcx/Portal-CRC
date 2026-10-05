@@ -103,7 +103,7 @@ export default function ConfigCiclosTrimestral() {
               Avaliação: {fmtDate(cicloAtivo.data_inicio)} → {fmtDate(cicloAtivo.data_fim)} &nbsp;•&nbsp; Pagamento: {fmtMes(cicloAtivo.mes_pagamento)}
             </p>
           </div>
-          <Badge className="bg-success text-white">Ciclo Ativo</Badge>
+          <Badge className="bg-success text-success-foreground">Ciclo Ativo</Badge>
         </div>
       )}
 
@@ -166,7 +166,7 @@ export default function ConfigCiclosTrimestral() {
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    {ciclo.ativo && <Badge className="bg-success text-white text-xs">Ativo</Badge>}
+                    {ciclo.ativo && <Badge className="bg-success text-success-foreground text-xs">Ativo</Badge>}
                     <Button
                       variant="ghost"
                       size="icon"

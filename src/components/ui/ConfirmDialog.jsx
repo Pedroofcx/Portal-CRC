@@ -22,9 +22,9 @@ export default function ConfirmDialog({
   variant = "danger" // danger, warning, info
 }) {
   const variants = {
-    danger: "bg-destructive hover:bg-destructive/90 text-white",
-    warning: "bg-warning hover:bg-warning text-white",
-    info: "bg-primary hover:bg-primary/90 text-white"
+    danger: "bg-destructive hover:bg-destructive/90 text-destructive-foreground",
+    warning: "bg-warning hover:bg-warning text-warning-foreground",
+    info: "bg-primary hover:bg-primary/90 text-primary-foreground"
   };
 
   return (

@@ -40,7 +40,7 @@ export default function ColaboradorFeriasCard({ colaborador, cicloAtivo, onClick
         <div className="flex items-start gap-3 mb-4">
           <Avatar className="h-12 w-12 flex-shrink-0">
             <AvatarImage src={colaborador.foto_url} />
-            <AvatarFallback className="bg-primary text-white font-semibold">
+            <AvatarFallback className="bg-primary text-primary-foreground font-semibold">
               {colaborador.nome_completo?.charAt(0)}
             </AvatarFallback>
           </Avatar>

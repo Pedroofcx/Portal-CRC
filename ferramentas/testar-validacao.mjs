@@ -24,6 +24,7 @@ import { revisarLigacao } from '../src/lib/apuracao/revisaoTelefone.js';
 import { indisponiveisEm, filaDoCanal, gradeDoMes, montarJustificativa, motivoDaJustificativa, resumoDeOverrides, filtrarHistorico, ultimosMeses } from '../src/lib/equidade.js';
 import { vazioViraNulo } from '../src/lib/camposVazios.js';
 import { decidir, permitido, extrairChave, sha256hex, validarNovaTratativa, slaDoTipo, paginacao, filtrosDeTratativas, CAMPOS_TRATATIVA, CAMPOS_COLABORADOR, RECURSOS, validarAtualizacaoTratativa, validarExclusao, ESTADOS_QUE_NAO_EXCLUEM, filtrosDeApuracao, resumoPorEtapa, CAMPOS_APURACAO, validarLoteApuracao, prepararImportacaoApi, ehIdDeLoteApi, novoIdDeLoteApi, MAXIMO_LINHAS_APURACAO, situacaoParaCliente, montarAcompanhamento, interpretarCodigo, cnpjValido, apenasDigitos, escolherDoCliente } from '../supabase/functions/api/politica.js';
+import { montarNotificacoes, agruparPorCategoria as agruparNotificacoes, rotuloDoSelo, CATEGORIAS } from '../src/lib/notificacoes.js';
 import path from 'node:path';
 import { carregarModuloJsx } from './lib/carregar-jsx.mjs';
 
@@ -1833,6 +1834,89 @@ console.log('\n== api de integracoes: quem passa ==');
   checa('CNPJ informado incompleto nao casa', String(escolherDoCliente(linhas, '62781329')), 'null');
   checa('CNPJ informado vazio nao casa com cadastro vazio', String(escolherDoCliente([{ cnpj_cliente: '' }], '')), 'null');
 
+}
+
+console.log('\n== sino de notificacoes ==');
+{
+  const agora = new Date('2026-10-05T15:00:00Z');
+  const agente = { id: 'a1', papel: 'agente', nome_completo: 'Ana', created_date: '2026-01-01T00:00:00Z' };
+  const gestor = { id: 'g1', papel: 'gestor', nome_completo: 'Pedro', created_date: '2026-01-01T00:00:00Z' };
+  const titulos = (lista) => lista.map((n) => n.titulo).join(' | ');
+  const base = (extra = {}) => montarNotificacoes({ colaborador: agente, agora, ...extra });
+
+  checa('sem colaborador, sem sino', String(montarNotificacoes({ agora }).length), '0');
+  checa('sem nada pendente', String(base().length), '0');
+
+  const atr = [{ id: 'd1', agente_id: 'a1', confirmado_pelo_agente: false, ticket_id: '123', tipo_tratativa: 'reclame_aqui', prioridade: 'alta' }];
+  checa('ticket atribuido aparece com canal e prioridade', titulos(base({ atribuicoes: atr })) + ' / ' + base({ atribuicoes: atr })[0].detalhe, 'Ticket #123 / Reclame Aqui · prioridade alta');
+  checa('atribuicao de outra pessoa nao aparece', String(base({ atribuicoes: [{ ...atr[0], agente_id: 'outra' }] }).length), '0');
+  checa('atribuicao ja confirmada nao aparece', String(base({ atribuicoes: [{ ...atr[0], confirmado_pelo_agente: true }] }).length), '0');
+
+  const hans = [{ id: 'h1', periodo_inicio: '2026-09-17', periodo_fim: '2026-09-30' }];
+  checa('hansei novo para o agente, com o periodo', base({ hanseis: hans })[0].detalhe, 'Período 17/09 a 30/09');
+  checa('o gestor nao recebe hansei novo', String(montarNotificacoes({ colaborador: gestor, hanseis: hans, agora }).length), '0');
+
+  const aviso = { id: 'av1', titulo: 'Troca de turno', ativo: true, destinatarios: 'todos', tipo: 'informativo', data_publicacao: '2026-09-01' };
+  checa('aviso a confirmar aparece', titulos(base({ avisos: [aviso] })), 'Troca de turno');
+  checa('aviso confirmado some (continua pendente ate agir)', String(base({ avisos: [aviso], leituras: [{ aviso_id: 'av1', colaborador_id: 'a1', confirmou: true }] }).length), '0');
+  checa('aviso para gestores nao chega ao agente', String(base({ avisos: [{ ...aviso, destinatarios: 'gestores' }] }).length), '0');
+  checa('aviso anterior ao cadastro nao chega (regra da central)', String(base({ avisos: [{ ...aviso, data_publicacao: '2025-12-01' }] }).length), '0');
+  checa('aviso expirado nao chega', String(base({ avisos: [{ ...aviso, data_expiracao: '2026-09-15' }] }).length), '0');
+  checa('aviso urgente vem primeiro dentro da categoria', titulos(base({ avisos: [aviso, { ...aviso, id: 'av2', titulo: 'Queda do sistema', tipo: 'urgente' }] })).split(' | ')[0], 'Queda do sistema');
+
+  const pesq = { id: 'p1', titulo: 'Clima de outubro', ativa: true, data_inicio: '2026-09-20', data_fim: '2026-10-20' };
+  checa('pesquisa a responder, com o prazo', titulos(base({ pesquisas: [pesq] })) + ' / ' + base({ pesquisas: [pesq] })[0].detalhe, 'Clima de outubro / Responda até 20/10');
+  checa('pesquisa respondida some', String(base({ pesquisas: [pesq], participacoes: [{ pesquisa_id: 'p1', colaborador_id: 'a1' }] }).length), '0');
+  checa('pesquisa fora do periodo nao aparece', String(base({ pesquisas: [{ ...pesq, data_fim: '2026-10-01' }] }).length), '0');
+
+  const pop = { id: 'pop1', titulo: 'POP 11 - Reclame Aqui', versao: 3, ativo: true, exige_ciencia: true, publicado_em: '2026-09-10', ordem: 1 };
+  checa('pop com versao nova pede ciencia', base({ pops: [pop] })[0].detalhe, 'Versão 3 · confirme a leitura');
+  checa('pop ja lido na versao atual some', String(base({ pops: [pop], leiturasPop: [{ pop_id: 'pop1', versao: 3, colaborador_id: 'a1' }] }).length), '0');
+  checa('pop lido numa versao antiga volta', String(base({ pops: [pop], leiturasPop: [{ pop_id: 'pop1', versao: 2, colaborador_id: 'a1' }] }).length), '1');
+  checa('gestor nao confirma pop', String(montarNotificacoes({ colaborador: gestor, pops: [pop], agora }).length), '0');
+
+  const mk = (id, horas, extra = {}) => ({ id, status: 'em_andamento', agente_responsavel_id: 'a1', agente_responsavel_nome: 'Ana', sla_atribuido: horas, data_registro: '2026-10-01T12:00:00Z', historico_estados: [], ...extra });
+  const vencida = mk('t1', 24);
+  const deOutra = mk('t2', 24, { agente_responsavel_id: 'outra' });
+  const noPrazo = mk('t3', 24 * 30);
+  const fechada = mk('t4', 24, { status: 'encerrada' });
+  const ag1 = base({ tratativasAbertas: [vencida, deOutra, noPrazo, fechada] });
+  checa('agente: so as vencidas DELE', ag1[0].titulo, '1 tratativa sua com o prazo vencido');
+  checa('agente: link ja filtrado nele', ag1[0].para, '/Tratativas?situacao=vencidas&agente=a1');
+  checa('tratativa encerrada nao conta como vencida', String(base({ tratativasAbertas: [fechada] }).length), '0');
+  checa('gestor: as vencidas da equipe', montarNotificacoes({ colaborador: gestor, tratativasAbertas: [vencida, deOutra, noPrazo], agora })[0].titulo, '2 tratativas da equipe com o prazo vencido');
+  checa('gestor: link sem filtro de pessoa', montarNotificacoes({ colaborador: gestor, tratativasAbertas: [vencida], agora })[0].para, '/Tratativas?situacao=vencidas');
+  const hoje = mk('t5', 24 * 4 + 4);
+  checa('vence hoje aparece', titulos(base({ tratativasAbertas: [hoje] })), '1 tratativa sua vence hoje');
+
+  const fer = (id, status, extra = {}) => ({ id, status, colaborador_id: 'a1', data_inicio: '2026-12-10', data_fim: '2026-12-20', updated_date: '2026-10-03T00:00:00Z', ...extra });
+  checa('ferias aprovadas avisam', titulos(base({ solicitacoesFerias: [fer('f1', 'aprovada')] })), 'Férias aprovadas (10/12 a 20/12)');
+  checa('ferias recusadas avisam', titulos(base({ solicitacoesFerias: [fer('f1', 'recusada')] })), 'Pedido de férias recusado (10/12 a 20/12)');
+  checa('sugestao de outra data avisa', titulos(base({ solicitacoesFerias: [fer('f1', 'sugestao_nova_data')] })), 'Outra data sugerida para as suas férias (10/12 a 20/12)');
+  checa('ferias em analise nao avisam o agente', String(base({ solicitacoesFerias: [fer('f1', 'em_analise')] }).length), '0');
+  checa('ferias de outra pessoa nao aparecem', String(base({ solicitacoesFerias: [fer('f1', 'aprovada', { colaborador_id: 'outra' })] }).length), '0');
+  checa('decisao antiga (mais de 30 dias) nao e novidade', String(base({ solicitacoesFerias: [fer('f1', 'aprovada', { updated_date: '2026-08-01T00:00:00Z' })] }).length), '0');
+  checa('novidade marcada como vista some', String(base({ solicitacoesFerias: [fer('f1', 'aprovada')], vistas: new Set(['ferias-f1-aprovada']) }).length), '0');
+  checa('ferias e informativa (pode ser marcada como vista)', String(base({ solicitacoesFerias: [fer('f1', 'aprovada')] })[0].informativa), 'true');
+  checa('ticket atribuido NAO e informativo (so some quando confirma)', String(base({ atribuicoes: atr })[0].informativa), 'false');
+
+  const pedidos = [fer('f2', 'em_analise', { colaborador_id: 'x' }), fer('f3', 'em_analise', { colaborador_id: 'y' }), fer('f4', 'em_analise', { colaborador_id: 'g1' })];
+  checa('gestor com permissao: pedidos de ferias para aprovar (nao conta o proprio)', titulos(montarNotificacoes({ colaborador: gestor, permissoes: ['aprovar_ferias'], solicitacoesFerias: pedidos, agora })), '2 pedidos de férias para aprovar');
+  checa('sem a permissao, nao ve pedidos de outros', String(montarNotificacoes({ colaborador: gestor, permissoes: [], solicitacoesFerias: pedidos, agora }).length), '0');
+  checa('replicaveis para aprovar (com permissao)', titulos(montarNotificacoes({ colaborador: gestor, permissoes: ['aprovar_solucao_replicavel'], replicaveisPendentes: 3, agora })), '3 soluções replicáveis para aprovar');
+  checa('replicaveis sem permissao: nada', String(montarNotificacoes({ colaborador: gestor, permissoes: [], replicaveisPendentes: 3, agora }).length), '0');
+  checa('permissoes tambem aceitam Set', String(montarNotificacoes({ colaborador: gestor, permissoes: new Set(['aprovar_solucao_replicavel']), replicaveisPendentes: 1, agora }).length), '1');
+
+  const tudo = base({ atribuicoes: atr, hanseis: hans, avisos: [aviso], pesquisas: [pesq], pops: [pop], tratativasAbertas: [vencida], solicitacoesFerias: [fer('f1', 'aprovada')] });
+  checa('ordem do sino: atribuicao, tratativa, hansei, pesquisa, aviso, pop, ferias', tudo.map((n) => n.categoria).join(','), 'atribuicao,tratativa,hansei,pesquisa,aviso,pop,ferias');
+  checa('todo id e unico', String(new Set(tudo.map((n) => n.id)).size === tudo.length), 'true');
+  checa('todo item leva a uma tela', String(tudo.every((n) => n.para.startsWith('/'))), 'true');
+  checa('agrupa por categoria na ordem do sino', agruparNotificacoes(tudo).map((g) => g.chave).join(','), 'atribuicao,tratativa,hansei,pesquisa,aviso,pop,ferias');
+  checa('categoria vazia nao aparece', String(agruparNotificacoes(base({ hanseis: hans })).length), '1');
+  checa('toda categoria tem rotulo', String(CATEGORIAS.every((c) => c.rotulo)), 'true');
+  checa('selo vazio', rotuloDoSelo(0), '');
+  checa('selo com numero', rotuloDoSelo(7), '7');
+  checa('selo 9+', rotuloDoSelo(10), '9+');
 }
 
 console.log('\n== conferencia de cores (o verificador pega o que deve) ==');

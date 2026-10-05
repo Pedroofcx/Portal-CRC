@@ -399,8 +399,8 @@ export default function PlanoSetorial() {
                         >
                           <div className="flex items-center gap-3">
                             <div className={`w-6 h-6 rounded-full flex items-center justify-center ${
-                              acao.status === 'concluida' ? 'bg-success text-white' : 
-                              acao.status === 'em_andamento' ? 'bg-warning text-white' : 
+                              acao.status === 'concluida' ? 'bg-success text-success-foreground' : 
+                              acao.status === 'em_andamento' ? 'bg-warning text-warning-foreground' : 
                               'bg-muted'
                             }`}>
                               {acao.status === 'concluida' && <CheckCircle className="w-4 h-4" />}

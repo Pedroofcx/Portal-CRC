@@ -178,7 +178,7 @@ export default function DialogNovaAtribuicao({ open, onClose, onSalvar, agentes,
                   <Button size="sm" variant="outline" onClick={() => f('agente_id', sugerido.agente.id)}>
                     Usar a próxima
                   </Button>
-                  <Button size="sm" className="bg-warning hover:bg-warning text-white" disabled={!motivo} onClick={() => setOverrideConfirmado(true)}>
+                  <Button size="sm" className="bg-warning hover:bg-warning text-warning-foreground" disabled={!motivo} onClick={() => setOverrideConfirmado(true)}>
                     Atribuir mesmo assim
                   </Button>
                 </div>

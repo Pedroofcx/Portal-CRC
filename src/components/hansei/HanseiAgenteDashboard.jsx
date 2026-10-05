@@ -150,7 +150,7 @@ export default function HanseiAgenteDashboard({ meusEnvios, onVerDetalhes }) {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <Badge variant="outline" className="text-xs capitalize">{envio.periodicidade}</Badge>
-                    {!envio.visualizado && <Badge className="bg-primary text-white text-xs">Novo</Badge>}
+                    {!envio.visualizado && <Badge className="bg-primary text-primary-foreground text-xs">Novo</Badge>}
                     <span className="text-sm text-foreground">
                       {formatDateSP(envio.periodo_inicio, 'DD/MM/YY')} – {formatDateSP(envio.periodo_fim, 'DD/MM/YY')}
                     </span>

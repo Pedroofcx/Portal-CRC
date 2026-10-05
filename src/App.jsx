@@ -1,6 +1,7 @@
 import { lazy, Suspense } from 'react';
 import { Toaster } from "@/components/ui/toaster"
 import { Toaster as Avisos } from "@/components/ui/sonner"
+import { ThemeProvider } from 'next-themes'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
 import NavigationTracker from '@/lib/NavigationTracker'
@@ -100,6 +101,8 @@ function App() {
   // via só uma página em branco, com a explicação escondida no console.
   return (
     <ErrorBoundary>
+      {/* Tema claro (padrão) ou escuro, escolhido por cada pessoa. A classe "dark" no <html> liga o bloco .dark de src/index.css. */}
+      <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false} storageKey="portal_crc_tema">
       <AuthProvider>
         <QueryClientProvider client={queryClientInstance}>
           <Router>
@@ -113,6 +116,7 @@ function App() {
           <Avisos position="bottom-right" richColors closeButton />
         </QueryClientProvider>
       </AuthProvider>
+      </ThemeProvider>
     </ErrorBoundary>
   )
 }

@@ -124,7 +124,7 @@ export default function PDIPage() {
                             etapa.concluida ? 'bg-success' : 'bg-muted'
                           }`}>
                             {etapa.concluida ? (
-                              <CheckCircle className="w-4 h-4 text-white" />
+                              <CheckCircle className="w-4 h-4 text-success-foreground" />
                             ) : (
                               <Clock className="w-4 h-4 text-muted-foreground" />
                             )}

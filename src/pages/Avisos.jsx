@@ -227,7 +227,7 @@ export default function Avisos() {
                               {aviso.tipo}
                             </Badge>
                             {!lido && (
-                              <Badge className="bg-primary text-white">Novo</Badge>
+                              <Badge className="bg-primary text-primary-foreground">Novo</Badge>
                             )}
                           </div>
                           <p className="text-sm text-muted-foreground line-clamp-2">{aviso.conteudo}</p>

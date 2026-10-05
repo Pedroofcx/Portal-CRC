@@ -20,16 +20,16 @@ export default function CardHorasImplantacao({ utilizadosMinutos = 0 }) {
 
   return (
     <Link to={createPageUrl('FerramentasOperacionais')}>
-      <Card className={`cursor-pointer border-0 shadow-none ${tom} text-white transition-colors`}>
+      <Card className={`cursor-pointer border-0 shadow-none ${tom} text-primary-foreground transition-colors`}>
         <CardContent className="p-4">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-white/90 text-sm font-medium">Horas de Implantação</span>
-            <LifeBuoy className="w-4 h-4 text-white/80" />
+            <span className="text-primary-foreground/90 text-sm font-medium">Horas de Implantação</span>
+            <LifeBuoy className="w-4 h-4 text-primary-foreground/80" />
           </div>
           <div className="text-2xl font-bold">
             {formatMinutos(utilizadosMinutos)} / {formatMinutos(LIMITE_MENSAL_MINUTOS)}
           </div>
-          <p className="text-white/80 text-xs mt-1">
+          <p className="text-primary-foreground/80 text-xs mt-1">
             {isZero ? 'Todas as horas foram utilizadas neste mês' : `${formatMinutos(disponivelMinutos)} disponíveis`}
           </p>
           <div className="mt-2 h-1.5 w-full bg-card/20 rounded-full overflow-hidden">

@@ -169,7 +169,7 @@ export default function InteligenciaFinanceiraJornada({ tratativas, colaboradore
                 key={key}
                 onClick={() => setSubDim(key)}
                 className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                  subDim === key ? 'bg-primary text-white' : 'bg-muted text-muted-foreground hover:bg-muted'
+                  subDim === key ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground hover:bg-muted'
                 }`}
               >
                 {cfg.label}

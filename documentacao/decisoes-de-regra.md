@@ -906,3 +906,60 @@ novo, sem acumular nem perder nada.
 testado), `src/components/apuracao/AuditoriaTelefone.jsx` (a tela, com o
 diálogo de motivo obrigatório), mutação `revisarNegativa` em
 `src/pages/Apuracao.jsx`.
+
+---
+
+## 05/10/2026 — Modo escuro igual ao do Windows 11 e o sino de notificações
+
+### Modo escuro
+**Pedido de Pedro:** modo escuro "igual ao do Windows 11, com a mesma paleta e
+tonalidade", ativado por um alternador com **sol** (modo normal) e **lua**
+(modo escuro), ao lado do perfil, no canto superior.
+
+**Decisões:**
+- **A paleta é a do tema escuro do Windows 11 (Fluent / WinUI 3):** fundo
+  `#202020`, cartões `#2B2B2B`, controles `#323232`, texto branco com o
+  secundário em `#C5C5C5`, divisórias `#3A3A3A`, destaque azul-claro `#60CDFF`
+  e, para os estados, os verdes, amarelos e vermelhos-claros do sistema
+  (`#6CCB5F`, `#FCE100`, `#FF99A4`) com os fundos suaves do próprio Windows. O
+  comentário de cada linha do bloco `.dark` de `src/index.css` traz o hexadecimal
+  original.
+- **Texto sobre cor de destaque é preto no escuro** (como no Windows) e branco no
+  claro. Por isso o texto branco que estava fixo em botões e selos de cor cheia
+  (`bg-primary text-white` e parentes) passou a usar o token `text-*-foreground`:
+  no claro continua branco, no escuro vira preto. 24 arquivos.
+- **O padrão continua o claro.** O modo escuro é uma escolha de cada pessoa,
+  guardada no navegador dela (`portal_crc_tema`). Não segue o tema do Windows
+  sozinho: ninguém acorda com a tela trocada.
+- **Exceções que ficam como estão:** a tela de entrada e a abertura do dia
+  (têm desenho próprio, sempre escuros) e os blocos `superficie-escura` (agora
+  em cinza do Windows quando o tema é escuro).
+- **Gráficos** (recharts) seguem o tema pelas regras globais no fim de
+  `src/index.css`.
+
+### Sino de notificações
+**Pedido de Pedro:** um sino, ao lado do perfil, "com foco em Hansei, pesquisas,
+tickets atribuídos e outras questões que têm notificação, para facilitar".
+
+**Decisões:**
+- **O sino não é um canal novo: é um resumo do que o sistema já pede.** As
+  regras de quem recebe o quê são as mesmas das telas de origem (central de
+  pendências, atribuição de ticket, faixa de vencidas). Nenhuma tabela nova.
+- **Pendente não se marca como lido.** Aviso a confirmar, pesquisa a responder,
+  POP a ler, Hansei novo, ticket a confirmar: continuam no sino até a pessoa
+  fazer o que foi pedido, e somem sozinhos quando faz.
+- **Informativo se marca como visto** (hoje: decisão sobre pedido de férias,
+  por 30 dias). A marca fica no navegador da pessoa.
+- **Para o agente:** tickets atribuídos, as suas tratativas com prazo vencido ou
+  que vencem hoje, Hansei novo, pesquisas, avisos, POPs e a resposta aos seus
+  pedidos de férias.
+- **Para a gestão:** as tratativas da equipe com prazo vencido ou vencendo hoje,
+  e, conforme a permissão, pedidos de férias para aprovar
+  (`aprovar_ferias`) e soluções replicáveis para aprovar
+  (`aprovar_solucao_replicavel`).
+- **Onde vive:** `src/lib/notificacoes.js` (as regras, puras e testadas),
+  `src/hooks/useNotificacoes.js` (as consultas, com as mesmas chaves das telas
+  de origem), `src/components/ui/SinoDeNotificacoes.jsx` e
+  `src/components/ui/AlternarTema.jsx`.
+- **Fica para depois, se fizer falta:** aviso fora do sistema (e-mail, push) e
+  histórico de notificações já vistas.

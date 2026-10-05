@@ -556,7 +556,7 @@ export default function GestaoFerias() {
               <button
                 key={key}
                 onClick={() => setFiltroStatus(key)}
-                className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${filtroStatus === key ? 'bg-primary text-white' : 'bg-muted text-muted-foreground hover:bg-muted'}`}
+                className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${filtroStatus === key ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground hover:bg-muted'}`}
               >
                 {label}
                 {key !== 'todos' && (

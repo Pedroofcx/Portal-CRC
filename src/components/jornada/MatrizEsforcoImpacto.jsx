@@ -89,7 +89,7 @@ export default function MatrizEsforcoImpacto({ tratativas, motivos }) {
                   <p className="text-xs text-muted-foreground">{linha.casos} caso(s)</p>
                 </div>
                 {linha.quickWin && (
-                  <Badge className="bg-success text-white flex items-center gap-1 flex-shrink-0">
+                  <Badge className="bg-success text-success-foreground flex items-center gap-1 flex-shrink-0">
                     <Sparkles className="w-3 h-3" />
                     Quick Win
                   </Badge>

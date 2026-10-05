@@ -291,7 +291,7 @@ export default function HanseiVisualizarDialog({
                         onClick={() => setAcaoSelecionada(acaoSelecionada === acao ? '' : acao)}
                         className={`text-xs px-3 py-1.5 rounded-full border transition-all ${
                           acaoSelecionada === acao
-                            ? 'bg-warning border-warning/40 text-white font-medium'
+                            ? 'bg-warning border-warning/40 text-warning-foreground font-medium'
                             : 'bg-card border-warning/30 text-warning hover:bg-warning-soft'
                         }`}
                       >

@@ -62,7 +62,7 @@ export default function ResultadoCards({ resultado, valorNota, aplicarMulta, onT
             onClick={() => onToggleMulta(true)}
             className={`px-3 py-2.5 text-sm font-medium transition-all ${
               aplicarMulta
-                ? 'bg-destructive text-white'
+                ? 'bg-destructive text-destructive-foreground'
                 : 'bg-card text-muted-foreground hover:bg-muted'
             }`}
           >
@@ -72,7 +72,7 @@ export default function ResultadoCards({ resultado, valorNota, aplicarMulta, onT
             onClick={() => onToggleMulta(false)}
             className={`px-3 py-2.5 text-sm font-medium transition-all ${
               !aplicarMulta
-                ? 'bg-success text-white'
+                ? 'bg-success text-success-foreground'
                 : 'bg-card text-muted-foreground hover:bg-muted'
             }`}
           >

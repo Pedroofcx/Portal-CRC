@@ -114,7 +114,7 @@ function RegistrarFeriasDialog({ open, onOpenChange, ciclos, onSalvar, loading }
                   onClick={() => setForm(f => ({ ...f, abono_dias: dias }))}
                   className={`flex-1 py-2.5 rounded-lg border-2 text-sm font-semibold transition-all ${
                     form.abono_dias === dias
-                      ? 'border-warning/40 bg-warning text-white'
+                      ? 'border-warning/40 bg-warning text-warning-foreground'
                       : 'border-border bg-card text-foreground hover:border-warning/30'
                   }`}
                 >
@@ -187,7 +187,7 @@ export default function DetalheColaboradorFerias({ colaborador, ciclos, onBack, 
         <div className="flex flex-col sm:flex-row sm:items-center gap-4">
           <Avatar className="h-16 w-16">
             <AvatarImage src={colaborador.foto_url} />
-            <AvatarFallback className="bg-primary text-white text-xl font-semibold">
+            <AvatarFallback className="bg-primary text-primary-foreground text-xl font-semibold">
               {colaborador.nome_completo?.charAt(0)}
             </AvatarFallback>
           </Avatar>

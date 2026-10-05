@@ -187,7 +187,7 @@ export default function FerramentasOperacionais() {
           onClick={() => setFerramentaAtiva('estorno')}
           className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold flex-shrink-0 transition-all ${
             ferramentaAtiva === 'estorno'
-              ? 'bg-primary text-white shadow'
+              ? 'bg-primary text-primary-foreground shadow'
               : 'bg-card border border-border text-muted-foreground hover:border-primary/25'
           }`}
         >
@@ -198,7 +198,7 @@ export default function FerramentasOperacionais() {
           onClick={() => setFerramentaAtiva('apoio')}
           className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold flex-shrink-0 transition-all ${
             ferramentaAtiva === 'apoio'
-              ? 'bg-primary text-white shadow'
+              ? 'bg-primary text-primary-foreground shadow'
               : 'bg-card border border-border text-muted-foreground hover:border-primary/25'
           }`}
         >
@@ -209,7 +209,7 @@ export default function FerramentasOperacionais() {
           onClick={() => setFerramentaAtiva('lider')}
           className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold flex-shrink-0 transition-all ${
             ferramentaAtiva === 'lider'
-              ? 'bg-primary text-white shadow'
+              ? 'bg-primary text-primary-foreground shadow'
               : 'bg-card border border-border text-muted-foreground hover:border-primary/25'
           }`}
         >
@@ -220,7 +220,7 @@ export default function FerramentasOperacionais() {
           onClick={() => setFerramentaAtiva('n2')}
           className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold flex-shrink-0 transition-all ${
             ferramentaAtiva === 'n2'
-              ? 'bg-primary text-white shadow'
+              ? 'bg-primary text-primary-foreground shadow'
               : 'bg-card border border-border text-muted-foreground hover:border-primary/25'
           }`}
         >
@@ -495,7 +495,7 @@ export default function FerramentasOperacionais() {
                             aplicarMulta={aplicarMulta}
                           />
                           <Button
-                            className="w-full gap-2 bg-primary hover:bg-primary text-white"
+                            className="w-full gap-2 bg-primary hover:bg-primary text-primary-foreground"
                             onClick={handleSalvar}
                             disabled={salvarMutation.isPending}
                           >
@@ -567,7 +567,7 @@ export default function FerramentasOperacionais() {
                   <ImpostosPanel config={configEditada} onChange={(k, v) => setConfigEditada(c => ({ ...c, [k]: v }))} isAdmin />
                   <div className="flex gap-2 pt-2 border-t border-border">
                     <Button
-                      className="gap-2 bg-primary hover:bg-primary text-white"
+                      className="gap-2 bg-primary hover:bg-primary text-primary-foreground"
                       onClick={() => salvarConfigMutation.mutate(configEditada)}
                       disabled={salvarConfigMutation.isPending}
                     >

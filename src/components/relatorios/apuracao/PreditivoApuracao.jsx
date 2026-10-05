@@ -139,8 +139,8 @@ export default function PreditivoApuracao({ apuracoes, colaboradores }) {
                 valor: (d) => (
                   <span className="flex items-center gap-1.5 whitespace-nowrap">
                     {dataCurta(d.dia)} <span className="text-xs text-muted-foreground">{diaSemanaCurto(d.dia)}</span>
-                    {d.dia === melhorDia?.dia && <Badge className="bg-success text-white text-[10px]">melhor</Badge>}
-                    {d.dia === piorDia?.dia && d.dia !== melhorDia?.dia && <Badge className="bg-destructive text-white text-[10px]">pior</Badge>}
+                    {d.dia === melhorDia?.dia && <Badge className="bg-success text-success-foreground text-[10px]">melhor</Badge>}
+                    {d.dia === piorDia?.dia && d.dia !== melhorDia?.dia && <Badge className="bg-destructive text-destructive-foreground text-[10px]">pior</Badge>}
                   </span>
                 ),
               },

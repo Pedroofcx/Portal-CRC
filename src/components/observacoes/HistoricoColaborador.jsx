@@ -153,7 +153,7 @@ export default function HistoricoColaborador({
         <div className="flex flex-col sm:flex-row sm:items-center gap-4">
           <Avatar className="h-16 w-16">
             <AvatarImage src={colaborador.foto_url} />
-            <AvatarFallback className="bg-primary text-white text-xl font-semibold">
+            <AvatarFallback className="bg-primary text-primary-foreground text-xl font-semibold">
               {colaborador.nome_completo?.charAt(0)}
             </AvatarFallback>
           </Avatar>
