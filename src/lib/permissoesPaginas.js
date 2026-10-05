@@ -28,4 +28,5 @@ export const PERMISSOES_DE_CONFIGURACAO = [
   'gerenciar_premiacao',
   'gerenciar_permissoes',
   'gerenciar_apuracao',
+  'gerenciar_integracoes',
 ];

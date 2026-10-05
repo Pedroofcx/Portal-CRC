@@ -28,6 +28,7 @@ import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import ListaResumida from '@/components/ui/ListaResumida';
 import { usePermissoes } from '@/hooks/usePermissoes';
+import PainelIntegracoes from '@/components/integracoes/PainelIntegracoes';
 import { PERMISSOES_DE_CONFIGURACAO } from '@/lib/permissoesPaginas';
 
 export default function Configuracoes() {
@@ -46,7 +47,7 @@ export default function Configuracoes() {
   const { data: user } = useQuery({ queryKey: ['currentUser'], queryFn: () => db.auth.me() });
   const { data: colaboradoresAcesso = [] } = useQuery({ queryKey: ['colaboradores', "list()"], queryFn: () => db.entities.Colaborador.list() });
   const eu = colaboradoresAcesso.find((c) => c.email === user?.email);
-  const { temAlguma } = usePermissoes();
+  const { temAlguma, temPermissao } = usePermissoes();
   const isGestor = eu?.papel === 'gestor' || temAlguma(PERMISSOES_DE_CONFIGURACAO);
 
   const { data: configuracoes = [], isLoading } = useQuery({
@@ -266,8 +267,16 @@ export default function Configuracoes() {
           <TabsTrigger value="backup">Backup</TabsTrigger>
           <TabsTrigger value="exclusao">Exclusão de Dados</TabsTrigger>
           <TabsTrigger value="logs">Logs</TabsTrigger>
+          {temPermissao('gerenciar_integracoes') && <TabsTrigger value="integracoes">Integrações</TabsTrigger>}
           <TabsTrigger value="documentacao">Documentação Técnica</TabsTrigger>
         </TabsList>
+
+        {/* INTEGRAÇÕES */}
+        {temPermissao('gerenciar_integracoes') && (
+          <TabsContent value="integracoes" className="mt-6">
+            <PainelIntegracoes />
+          </TabsContent>
+        )}
 
         {/* TIPOS DE TRATATIVA */}
         <TabsContent value="tipos-tratativa" className="mt-6">

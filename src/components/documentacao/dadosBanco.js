@@ -113,10 +113,21 @@ export const gruposDeTabelas = [
     ],
   },
   {
+    id: 'integracoes',
+    nome: 'Integrações (API para outros sistemas)',
+    tabelas: [
+      { entidade: 'IntegracaoGeral', tabela: 'integracao_geral', descricao: 'A CHAVE GERAL: uma única linha, habilitada ou não. Desligada, a API recusa toda chamada de fora. Nasce desligada.', leitura: 'permissão gerenciar_integracoes', escrita: 'permissão gerenciar_integracoes' },
+      { entidade: 'Integracao', tabela: 'integracao', descricao: 'Cada sistema que se conecta: ligada ou não, sentido (entrada, saída, ambos), limite de chamadas por minuto e o que acessa (recursos: por recurso, ler e gravar separados).', leitura: 'permissão gerenciar_integracoes', escrita: 'permissão gerenciar_integracoes' },
+      { entidade: 'IntegracaoChave', tabela: 'integracao_chave', descricao: 'As chaves de cada integração (nome, prefixo, ativa, validade, último uso). O texto da chave NÃO fica aqui: só o hash, em integracao_chave_segredo.', leitura: 'permissão gerenciar_integracoes', escrita: 'ligar, desligar e apagar: permissão gerenciar_integracoes; criar só pela função criar_chave_integracao' },
+      { entidade: 'IntegracaoLog', tabela: 'integracao_log', descricao: 'O registro de cada chamada reconhecida à API: quando, qual integração e chave, rota, aceita ou recusada, código e tempo. Chamada sem chave válida não é registrada.', leitura: 'permissão gerenciar_integracoes', escrita: 'só a Edge Function api (chave de serviço)' },
+    ],
+  },
+  {
     id: 'apoio',
     nome: 'Tabelas de apoio (sem entidade no código)',
     tabelas: [
       { entidade: 'log_invocacao_llm', tabela: 'log_invocacao_llm', descricao: 'Uma linha por chamada à IA (quem e quando, sem prompt nem resposta). Alimenta o limite de 60 chamadas por pessoa por dia (migration 31).', leitura: 'só o dono', escrita: 'só o dono (a Edge Function grava em nome da pessoa)' },
+      { entidade: 'integracao_chave_segredo', tabela: 'integracao_chave_segredo', descricao: 'O hash (SHA-256) de cada chave de API. Fechada para o app, até para o gestor: só a Edge Function api lê, com a chave de serviço.', leitura: 'ninguém pelo app', escrita: 'só a função criar_chave_integracao' },
       { entidade: 'sla_recalculo_38', tabela: 'sla_recalculo_38', descricao: 'Cópia do SLA gravado ANTES do recálculo da migration 38. Usada pela migration 40 para devolver os ciclos fechados ao que foi apurado. Sem acesso pela API.', leitura: 'ninguém pela API', escrita: 'ninguém pela API' },
       { entidade: 'replicaveis_aprovacao_40', tabela: 'replicaveis_aprovacao_40', descricao: 'Cópia do estado das soluções replicáveis antes da aprovação em lote dos ciclos 1 e 2 (migration 40). Permite desfazer. Sem acesso pela API.', leitura: 'ninguém pela API', escrita: 'ninguém pela API' },
     ],
@@ -124,7 +135,7 @@ export const gruposDeTabelas = [
 ];
 
 /** Tabelas que existem no banco mas não têm entrada em src/api/tabelas.js. */
-export const tabelasSemEntidade = ['log_invocacao_llm', 'sla_recalculo_38', 'replicaveis_aprovacao_40'];
+export const tabelasSemEntidade = ['integracao_chave_segredo', 'log_invocacao_llm', 'sla_recalculo_38', 'replicaveis_aprovacao_40'];
 
 export const funcoesDoBanco = [
   { nome: 'eh_gestor', migration: 4, descricao: 'O papel da pessoa logada é gestor? (por e-mail, colaborador ativo). A base de quase toda trava de gestão.' },
@@ -132,6 +143,7 @@ export const funcoesDoBanco = [
   { nome: 'papel_atual', migration: 13, descricao: 'Devolve o papel (agente, gestor, fi) da pessoa logada, ou nulo.' },
   { nome: 'meu_colaborador_id', migration: 14, descricao: 'O id (TEXTO, não uuid) do colaborador logado. Base de tudo que é "só do dono". Atenção ao tipo: comparar com uuid dá erro.' },
   { nome: 'tem_permissao', migration: 35, descricao: 'tem_permissao(chave): vale a exceção cadastrada em colaborador_permissao; sem exceção, o padrão do papel (gestor sim, agente não).' },
+  { nome: 'criar_chave_integracao', migration: 43, descricao: 'Gera uma chave de API para uma integração (exige gerenciar_integracoes), devolve o texto UMA vez e guarda só o hash.' },
   { nome: 'minhas_permissoes', migration: 35, descricao: 'Lista as chaves de permissão que a pessoa logada tem agora. O front chama uma vez por sessão (usePermissoes).' },
   { nome: 'transicao_de_status_permitida', migration: 8, descricao: 'A matriz da máquina de estados da tratativa: de qual estado para quais é permitido ir.' },
   { nome: 'validar_transicao_tratativa', migration: 8, descricao: 'Função do gatilho valida_transicao_tratativa: recusa transição fora da matriz.' },
@@ -215,6 +227,7 @@ export const migracoes = [
   { n: 40, titulo: 'Ciclos 1 e 2 congelados', descricao: 'Devolve o SLA dos ciclos fechados e aprova as replicáveis deles.' },
   { n: 41, titulo: 'Permissão por área', descricao: 'eh_gestor() vira tem_permissao(<área>) em ~40 tabelas, mais a trava contra escalada.' },
   { n: 42, titulo: 'Arquivar o legado', descricao: 'Move 7 tabelas sem uso para o esquema arquivo_legado (sem apagar dados) e apaga 4 funções antigas.' },
+  { n: 43, titulo: 'Integrações (base da API)', descricao: 'Chave geral, integrações, chaves, registro de uso e a permissão gerenciar_integracoes.' },
   { n: 99, titulo: 'Restrições pós-importação', descricao: 'Só se aplica depois da carga de dados do Base44.' },
 ];
 

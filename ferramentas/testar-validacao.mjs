@@ -3,7 +3,7 @@ import {
   numeroPositivo, dataNaoFutura, maximoItens, minimoCaracteres,
   emailCorporativo,
 } from '../src/lib/validacao.js';
-import { formatBRL, sanitizeSalario, temSalarioCadastrado } from '../src/components/utils/helpers.js';
+import { formatBRL, sanitizeSalario, temSalarioCadastrado, getSLAByType } from '../src/components/utils/helpers.js';
 import { saudacao } from '../src/lib/saudacao.js';
 import { primeiroNome } from '../src/lib/nomes.js';
 import { resumoDoDia } from '../src/lib/resumoDoDia.js';
@@ -23,6 +23,7 @@ import { ligacoesAuditoria, resumoAuditoria } from '../src/lib/apuracao/auditori
 import { revisarLigacao } from '../src/lib/apuracao/revisaoTelefone.js';
 import { indisponiveisEm, filaDoCanal, gradeDoMes, montarJustificativa, motivoDaJustificativa, resumoDeOverrides, filtrarHistorico, ultimosMeses } from '../src/lib/equidade.js';
 import { vazioViraNulo } from '../src/lib/camposVazios.js';
+import { decidir, permitido, extrairChave, sha256hex, validarNovaTratativa, slaDoTipo, paginacao, filtrosDeTratativas, CAMPOS_TRATATIVA, CAMPOS_COLABORADOR, RECURSOS } from '../supabase/functions/api/politica.js';
 import path from 'node:path';
 import { carregarModuloJsx } from './lib/carregar-jsx.mjs';
 
@@ -1555,6 +1556,79 @@ console.log('\n== campos vazios viram nulo antes de gravar ==');
   checa('texto livre vazio continua vazio', JSON.stringify(r.link_intranet), '""');
   checa('entidade sem regra nao muda', vazioViraNulo('Aviso', { titulo: '' }).titulo, '');
   checa('nao altera o objeto de entrada', (() => { const o = { categoria_contestacao: '' }; vazioViraNulo('Tratativa', o); return JSON.stringify(o); })(), '""');
+}
+
+console.log('\n== api de integracoes: quem passa ==');
+{
+  const agora = new Date('2026-10-05T12:00:00Z');
+  const chaveOk = { ativa: true, expira_em: null };
+  const integ = (extra = {}) => ({ ativa: true, recursos: { tratativas: { ler: true, gravar: false }, colaboradores: { ler: true } }, limite_por_minuto: 5, ...extra });
+  const dec = (extra) => decidir({ geral: true, chave: chaveOk, integracao: integ(), recurso: 'tratativas', acao: 'ler', agora, usoNoUltimoMinuto: 0, ...extra });
+  const cod = (r) => (r.ok ? 'ok' : `${r.status} ${r.codigo}`);
+
+  checa('tudo certo passa', cod(dec()), 'ok');
+  checa('chave geral desligada derruba tudo (503)', cod(dec({ geral: false })), '503 integracoes_desligadas');
+  checa('chave inexistente (401)', cod(dec({ chave: null, integracao: null })), '401 chave_invalida');
+  checa('chave desativada (401)', cod(dec({ chave: { ativa: false } })), '401 chave_desativada');
+  checa('chave vencida (401)', cod(dec({ chave: { ativa: true, expira_em: '2026-10-01T00:00:00Z' } })), '401 chave_expirada');
+  checa('chave que ainda nao venceu passa', cod(dec({ chave: { ativa: true, expira_em: '2026-12-01T00:00:00Z' } })), 'ok');
+  checa('integracao desligada (403)', cod(dec({ integracao: integ({ ativa: false }) })), '403 integracao_desligada');
+  checa('ler liberado, gravar nao: gravar recusa', cod(dec({ acao: 'gravar' })), '403 sem_permissao');
+  checa('ler e gravar separados: so gravar liberado, ler recusa', cod(dec({ integracao: integ({ recursos: { tratativas: { ler: false, gravar: true } } }) })), '403 sem_permissao');
+  checa('ler e gravar juntos: os dois passam', cod(dec({ acao: 'gravar', integracao: integ({ recursos: { tratativas: { ler: true, gravar: true } } }) })), 'ok');
+  checa('recurso nao liberado recusa', cod(dec({ recurso: 'ciclos' })), '403 sem_permissao');
+  checa('ping nao exige recurso', cod(dec({ recurso: null, acao: null, integracao: integ({ recursos: {} }) })), 'ok');
+  checa('limite por minuto (429)', cod(dec({ usoNoUltimoMinuto: 5 })), '429 limite_excedido');
+  checa('abaixo do limite passa', cod(dec({ usoNoUltimoMinuto: 4 })), 'ok');
+  checa('geral desligada vence tudo, ate chave invalida', cod(dec({ geral: false, chave: null, integracao: null })), '503 integracoes_desligadas');
+  checa('permitido: so true libera', String(permitido({ x: { ler: 'sim' } }, 'x', 'ler')), 'false');
+
+  const cab = (mapa) => (n) => mapa[n] ?? null;
+  const chaveTeste = `crc_${'a1'.repeat(24)}`;
+  checa('chave por Authorization Bearer', extrairChave(cab({ authorization: `Bearer ${chaveTeste}` })), chaveTeste);
+  checa('chave por x-api-key', extrairChave(cab({ 'x-api-key': chaveTeste })), chaveTeste);
+  checa('chave com formato errado e ignorada', String(extrairChave(cab({ authorization: 'Bearer abc' }))), 'null');
+  checa('sem cabecalho nenhum', String(extrairChave(cab({}))), 'null');
+  checa('sha256 conhecido', await sha256hex('abc'), 'ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad');
+
+  console.log('\n== api de integracoes: o que entra e o que sai ==');
+  const ok = { nome_cliente: 'Cliente X', tipo_tratativa: 'reclame_aqui', prioridade: 'alta' };
+  const val = (corpo) => validarNovaTratativa(corpo);
+  checa('minimo valido', String(val(ok).erros.length), '0');
+  checa('obrigatorios faltando', val({}).erros.join(' | '), 'nome_cliente é obrigatório');
+  checa('tipo invalido', val({ ...ok, tipo_tratativa: 'x' }).erros.join(' | '), 'tipo_tratativa: valor inválido');
+  checa('prioridade invalida', val({ ...ok, prioridade: 'urgente' }).erros.join(' | '), 'prioridade: valor inválido');
+  checa('campo desconhecido e recusado', val({ ...ok, custo_operacional_reais: 10 }).erros.join(' | '), 'campos não aceitos: custo_operacional_reais');
+  checa('status nao pode ser enviado', val({ ...ok, status: 'encerrada' }).erros.join(' | '), 'campos não aceitos: status');
+  checa('pontuacao nao pode ser enviada', val({ ...ok, encerrado_no_sla: true }).erros.join(' | '), 'encerrado_no_sla');
+  checa('link sem http', val({ ...ok, link_zendesk: 'zendesk.com/1' }).erros.join(' | '), 'http');
+  checa('cnpj precisa de 14 digitos', val({ ...ok, cnpj_cliente: '123' }).erros.join(' | '), '14 dígitos');
+  checa('cnpj formatado vira so digitos', val({ ...ok, cnpj_cliente: '11.222.333/0001-81' }).dados.cnpj_cliente, '11222333000181');
+  checa('plano invalido', val({ ...ok, plano_cliente: 'Diamante' }).erros.join(' | '), 'plano_cliente: valor inválido');
+  checa('data invalida', val({ ...ok, data_primeira_contratacao: '01/02/2024' }).erros.join(' | '), 'AAAA-MM-DD');
+  checa('valor negativo', val({ ...ok, valor_contratacao_plano_atual: -1 }).erros.join(' | '), 'valor_contratacao_plano_atual');
+  checa('corpo que nao e objeto', val([]).erros.join(' | '), 'objeto JSON');
+  checa('vazio nao vira chave', JSON.stringify(Object.keys(val({ ...ok, link_intranet: '' }).dados)), '["nome_cliente","tipo_tratativa","prioridade"]');
+  checa('contestacao exige o case', val({ ...ok, tipo_tratativa: 'contestacao' }).erros.join(' | '), 'numero_case_contestacao é obrigatório');
+  checa('contestacao completa passa', String(val({ ...ok, tipo_tratativa: 'contestacao', numero_case_contestacao: 'C1', motivo_contestacao: 'x', valor_contestado_inicial: 100, prazo_sla_dias: 5 }).erros.length), '0');
+  checa('campo de contestacao fora de contestacao', val({ ...ok, numero_case_contestacao: 'C1' }).erros.join(' | '), 'só vale para contestação');
+  checa('motivo de contestacao limita 150', val({ ...ok, tipo_tratativa: 'contestacao', numero_case_contestacao: 'C1', motivo_contestacao: 'x'.repeat(151), valor_contestado_inicial: 1, prazo_sla_dias: 5 }).erros.join(' | '), 'no máximo 150');
+
+  for (const tipo of ['reclamacao_interna', 'reclame_aqui', 'google_meu_negocio', 'contestacao', 'procon', 'administrativas']) {
+    checa(`prazo da API = prazo da tela (${tipo})`, String(slaDoTipo(tipo)), String(getSLAByType(tipo)));
+  }
+
+  checa('campos de saida: custo nunca sai', String(CAMPOS_TRATATIVA.some((c) => /custo|perda|churn/.test(c))), 'false');
+  checa('campos de colaborador: sem salario nem e-mail', String(CAMPOS_COLABORADOR.some((c) => /salario|email|promocoes/.test(c))), 'false');
+
+  const q = (s) => new URLSearchParams(s);
+  checa('paginacao padrao', JSON.stringify(paginacao(q(''))), '{"limite":50,"pagina":1,"de":0,"ate":49}');
+  checa('paginacao limita a 200', String(paginacao(q('limite=9999')).limite), '200');
+  checa('paginacao pagina 3', String(paginacao(q('limite=10&pagina=3')).de), '20');
+  checa('filtro de status invalido vira erro', filtrosDeTratativas(q('status=banana')).erros.join(' | '), 'status inválido');
+  checa('filtro valido', filtrosDeTratativas(q('tipo=procon&desde=2026-09-01')).filtros.tipo, 'procon');
+  checa('data de filtro invalida', filtrosDeTratativas(q('ate=ontem')).erros.join(' | '), 'AAAA-MM-DD');
+  checa('todo recurso tem ao menos a acao ler', String(Object.values(RECURSOS).every((r) => r.acoes.ler)), 'true');
 }
 
 console.log('\n== conferencia de cores (o verificador pega o que deve) ==');
