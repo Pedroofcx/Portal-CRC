@@ -17,6 +17,8 @@ export const TABELAS = {
   ColaboradorPermissao: 'colaborador_permissao',
   ConfigEstorno: 'config_estorno',
   Configuracao: 'configuracao',
+  Conector: 'conector',
+  ConectorExecucao: 'conector_execucao',
   DistribuicaoTratativa: 'distribuicao_tratativa',
   ElegibilidadePremio: 'elegibilidade_premio',
   Equipe: 'equipe',

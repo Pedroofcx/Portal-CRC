@@ -144,6 +144,8 @@ export function montarNotificacoes({
     const limite = agora.getTime() - DIAS_DE_NOVIDADE_FERIAS * 86400000;
     solicitacoesFerias
       .filter((s) => s.colaborador_id === colaborador.id && ['aprovada', 'recusada', 'sugestao_nova_data'].includes(s.status))
+      // férias que vieram do Gestão Click não são "decisão nova": não geram aviso
+      .filter((s) => s.origem !== 'gestaoclick')
       .filter((s) => new Date(s.updated_date ?? s.created_date ?? 0).getTime() >= limite)
       .forEach((s) => {
         const id = `ferias-${s.id}-${s.status}`;

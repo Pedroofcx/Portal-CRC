@@ -963,3 +963,27 @@ tickets atribuídos e outras questões que têm notificação, para facilitar".
   `src/components/ui/AlternarTema.jsx`.
 - **Fica para depois, se fizer falta:** aviso fora do sistema (e-mail, push) e
   histórico de notificações já vistas.
+
+---
+
+## 05/10/2026 — Férias vêm do Gestão Click (fonte oficial)
+
+**Contexto:** a empresa tem um sistema, o Gestão Click, com saldo, períodos
+aquisitivos e férias de cada pessoa (API de leitura). O Portal tinha o próprio
+controle de saldo, lançado à mão.
+
+**Decisões de Pedro:**
+1. **O Gestão Click é a fonte OFICIAL** de saldo, períodos e gozo. O Portal
+   busca e espelha (só leitura: o token não escreve, e o Portal nunca escreve lá).
+2. **As férias planejadas (futuras) travam a Escala e o rodízio.** Por isso as
+   parcelas que ainda não terminaram viram férias APROVADAS no Portal, marcadas
+   como vindas do Gestão Click.
+
+**Consequências:**
+- Férias aprovadas no Portal precisam ser lançadas também no Gestão Click; a
+  sincronização avisa quando encontra uma que não existe lá.
+- A pessoa é ligada pelo e-mail. Na primeira análise, 6 de 6 casaram.
+- Dos 10 períodos que o Gestão Click tem, 7 já batiam exatamente com o Portal
+  (direito, gozados e abono): foram adotados, não duplicados.
+- O token foi colado numa conversa na criação do conector: deve ser trocado por
+  quem administra o Gestão Click e guardado só como segredo da Edge Function.

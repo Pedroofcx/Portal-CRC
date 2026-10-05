@@ -77,7 +77,7 @@ export const gruposDeTabelas = [
     tabelas: [
       { entidade: 'EscalaAtribuicao', tabela: 'escala_atribuicao', descricao: 'Escala de Trabalho: um registro por pessoa e dia (presencial, home office, folga, férias...).', leitura: COLAB, escrita: 'permissão gerenciar_escalas' },
       { entidade: 'EscalaTurno', tabela: 'escala_turno', descricao: 'Escala de Turno: quem atende e quem analisa tickets em cada metade do dia.', leitura: COLAB, escrita: 'permissão gerenciar_escalas' },
-      { entidade: 'CicloFerias', tabela: 'ciclo_ferias', descricao: 'O saldo de férias: um por período aquisitivo, com dias de direito, abono, dias usados, vencimento e os fragmentos já aprovados.', leitura: COLAB, escrita: 'permissão aprovar_ferias' },
+      { entidade: 'CicloFerias', tabela: 'ciclo_ferias', descricao: 'O saldo de férias: um por período aquisitivo, com dias de direito, abono, dias usados, vencimento e os fragmentos. Desde a migration 46 o Gestão Click é a fonte oficial: gestaoclick_id, origem e sincronizado_em dizem o que veio de lá.', leitura: COLAB, escrita: 'permissão aprovar_ferias' },
       { entidade: 'SolicitacaoFerias', tabela: 'solicitacao_ferias', descricao: 'O pedido de férias do agente e a resposta da gestão (em análise, aprovada, recusada, sugestão de nova data, cancelada).', leitura: COLAB, escrita: COLAB + ' (o agente pede; a aprovação baixa o saldo em CicloFerias, que exige aprovar_ferias)' },
     ],
   },
@@ -119,6 +119,8 @@ export const gruposDeTabelas = [
       { entidade: 'IntegracaoGeral', tabela: 'integracao_geral', descricao: 'A CHAVE GERAL: uma única linha, habilitada ou não. Desligada, a API recusa toda chamada de fora. Nasce desligada.', leitura: 'permissão gerenciar_integracoes', escrita: 'permissão gerenciar_integracoes' },
       { entidade: 'Integracao', tabela: 'integracao', descricao: 'Cada sistema que se conecta: ligada ou não, sentido (entrada, saída, ambos), limite de chamadas por minuto e o que acessa (recursos: por recurso, ler e gravar separados).', leitura: 'permissão gerenciar_integracoes', escrita: 'permissão gerenciar_integracoes' },
       { entidade: 'IntegracaoChave', tabela: 'integracao_chave', descricao: 'As chaves de cada integração (nome, prefixo, ativa, validade, último uso). O texto da chave NÃO fica aqui: só o hash, em integracao_chave_segredo.', leitura: 'permissão gerenciar_integracoes', escrita: 'ligar, desligar e apagar: permissão gerenciar_integracoes; criar só pela função criar_chave_integracao' },
+      { entidade: 'Conector', tabela: 'conector', descricao: 'Um conector externo por linha (hoje: gestaoclick_ferias): ligado ou não, quando rodou, se deu certo, o resumo e o erro. Nasce DESLIGADO. O token do outro sistema NÃO fica aqui: é segredo da Edge Function.', leitura: COLAB, escrita: 'ligar e desligar: permissão gerenciar_integracoes; o resultado da execução quem grava é a Edge Function' },
+      { entidade: 'ConectorExecucao', tabela: 'conector_execucao', descricao: 'O registro de cada sincronização: quem disparou, resultado, números, avisos (ex.: "lance no Gestão Click") e erro.', leitura: 'permissão gerenciar_integracoes', escrita: 'só a Edge Function (chave de serviço)' },
       { entidade: 'IntegracaoLog', tabela: 'integracao_log', descricao: 'O registro de cada chamada reconhecida à API: quando, qual integração e chave, rota, aceita ou recusada, código e tempo. Chamada sem chave válida não é registrada.', leitura: 'permissão gerenciar_integracoes', escrita: 'só a Edge Function api (chave de serviço)' },
     ],
   },
@@ -232,6 +234,7 @@ export const migracoes = [
   { n: 43, titulo: 'Integrações (base da API)', descricao: 'Chave geral, integrações, chaves, registro de uso e a permissão gerenciar_integracoes.' },
   { n: 44, titulo: 'Tickets, ClickDesk e resumo do WhatsApp', descricao: 'Seis colunas novas em tratativa (ticket_zendesk, ticket_clickdesk, dados_clickdesk, resumo_whatsapp e os dois carimbos do resumo) e o gatilho do carimbo.' },
   { n: 45, titulo: 'Cliente sem CNPJ', descricao: 'Coluna cliente_sem_cnpj em tratativa (padrão false), com regra que impede CNPJ e "sem CNPJ" ao mesmo tempo.' },
+  { n: 46, titulo: 'Conector do Gestão Click (férias)', descricao: 'gestaoclick_id e origem em ciclo_ferias e solicitacao_ferias, e as tabelas conector e conector_execucao.' },
   { n: 99, titulo: 'Restrições pós-importação', descricao: 'Só se aplica depois da carga de dados do Base44.' },
 ];
 

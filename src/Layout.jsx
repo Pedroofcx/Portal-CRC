@@ -10,6 +10,7 @@ import BuscaGlobal from '@/components/ui/BuscaGlobal';
 import MenuUsuario from '@/components/ui/MenuUsuario';
 import AlternarTema from '@/components/ui/AlternarTema';
 import SinoDeNotificacoes from '@/components/ui/SinoDeNotificacoes';
+import useSincronizacaoAutomatica from '@/hooks/useSincronizacaoAutomatica';
 import TrocarSenhaDialog from '@/components/conta/TrocarSenhaDialog';
 import NotificacaoAtribuicao from '@/components/distribuicao/NotificacaoAtribuicao';
 import { usePermissoes } from '@/hooks/usePermissoes';
@@ -279,6 +280,9 @@ export default function Layout({ children, currentPageName }) {
     colaboradores.find(c => c.email === user?.email),
     [colaboradores, user]
   );
+
+  // Mantém as férias do Gestão Click em dia: roda sozinho quando a gestão abre o Portal e os dados passam de 6h.
+  useSincronizacaoAutomatica(colaborador);
 
   // Aguardar carregamento completo antes de renderizar
   const isLoading = loadingUser || (user && loadingColaboradores) || (user && loadingPermissoes);

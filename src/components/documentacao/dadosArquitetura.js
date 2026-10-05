@@ -25,6 +25,8 @@ export const secoesArquitetura = [
       { rotulo: 'Supabase — Postgres', texto: 'Dados, regras (funções e gatilhos), segurança por linha (RLS) e views mascaradas. É a fonte da verdade das regras que não podem depender do navegador.' },
       { rotulo: 'Supabase — Auth', texto: 'Login por e-mail e senha. Cadastro público desligado; as contas são criadas por npm run criar-contas.' },
       { rotulo: 'Supabase — Storage', texto: 'Um bucket público, "arquivos" (fotos de perfil).' },
+      { rotulo: 'Supabase — Edge Function sincronizar-gestaoclick', texto: 'Busca as férias no Gestão Click (só leitura) e espelha no Portal. O token fica como segredo (GESTAOCLICK_TOKEN). Chamada pela tela (botão e atualização automática) por quem tem gerenciar_integracoes ou aprovar_ferias.' },
+      { rotulo: 'Supabase — Edge Function api', texto: 'A API de integrações: outros sistemas consultam e gravam no Portal com chave própria (migrations 43 a 45).' },
       { rotulo: 'Supabase — Edge Function invocar-llm', texto: 'Chama o modelo de IA (Google Gemini) com a chave guardada como segredo do projeto.' },
       { rotulo: 'Cloudflare Workers (arquivos estáticos)', texto: 'Serve o resultado de npm run build (pasta dist/). Publica sozinho a cada push no ramo main do GitHub. Configuração em wrangler.jsonc.' },
     ],

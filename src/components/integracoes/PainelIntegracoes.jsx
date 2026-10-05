@@ -11,6 +11,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Cartao } from '@/components/ui/Cartao';
 import ConfirmDialog from '@/components/ui/ConfirmDialog';
+import PainelConectores from '@/components/integracoes/PainelConectores';
 import PainelLateral, { RodapeFixo } from '@/components/ui/PainelLateral';
 import { traduzirErro } from '@/lib/erros';
 import { RECURSOS } from '../../../supabase/functions/api/politica.js';
@@ -141,6 +142,9 @@ export default function PainelIntegracoes() {
 
   return (
     <div className="space-y-6">
+      {/* CONECTORES: o Portal buscando em outros sistemas */}
+      <PainelConectores />
+
       {/* CHAVE GERAL */}
       <Cartao titulo="Chave geral">
         <div className="flex flex-wrap items-center justify-between gap-4">

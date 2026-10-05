@@ -25,6 +25,8 @@ import { indisponiveisEm, filaDoCanal, gradeDoMes, montarJustificativa, motivoDa
 import { vazioViraNulo } from '../src/lib/camposVazios.js';
 import { decidir, permitido, extrairChave, sha256hex, validarNovaTratativa, slaDoTipo, paginacao, filtrosDeTratativas, CAMPOS_TRATATIVA, CAMPOS_COLABORADOR, RECURSOS, validarAtualizacaoTratativa, validarExclusao, ESTADOS_QUE_NAO_EXCLUEM, filtrosDeApuracao, resumoPorEtapa, CAMPOS_APURACAO, validarLoteApuracao, prepararImportacaoApi, ehIdDeLoteApi, novoIdDeLoteApi, MAXIMO_LINHAS_APURACAO, situacaoParaCliente, montarAcompanhamento, interpretarCodigo, cnpjValido, apenasDigitos, escolherDoCliente } from '../supabase/functions/api/politica.js';
 import { montarNotificacoes, agruparPorCategoria as agruparNotificacoes, rotuloDoSelo, CATEGORIAS } from '../src/lib/notificacoes.js';
+import { planejarSincronizacao, statusDoCiclo, fragmentosDasParcelas, normalizarEmail } from '../supabase/functions/sincronizar-gestaoclick/plano.js';
+import { precisaSincronizar, HORAS_ATE_ATUALIZAR } from '../src/lib/sincronizacao.js';
 import path from 'node:path';
 import { carregarModuloJsx } from './lib/carregar-jsx.mjs';
 
@@ -1917,6 +1919,145 @@ console.log('\n== sino de notificacoes ==');
   checa('selo vazio', rotuloDoSelo(0), '');
   checa('selo com numero', rotuloDoSelo(7), '7');
   checa('selo 9+', rotuloDoSelo(10), '9+');
+}
+
+console.log('\n== conector Gestao Click: ferias ==');
+{
+  const HOJE = '2026-10-05';
+  const AGORA = '2026-10-05T15:00:00.000Z';
+
+  // o status do ciclo tem que ser o MESMO que a tela calcula
+  const amostras = [
+    { aquisitivo_fim: '2026-11-03', dias_direito: 30, abono_dias: 0, dias_utilizados: 0, concessivo_fim: '2027-11-03' },
+    { aquisitivo_fim: '2025-11-03', dias_direito: 30, abono_dias: 0, dias_utilizados: 30, concessivo_fim: '2026-10-25' },
+    { aquisitivo_fim: '2025-11-03', dias_direito: 30, abono_dias: 10, dias_utilizados: 20, concessivo_fim: '2026-10-25' },
+    { aquisitivo_fim: '2025-03-17', dias_direito: 30, abono_dias: 0, dias_utilizados: 10, concessivo_fim: '2026-03-01' },
+    { aquisitivo_fim: '2025-03-17', dias_direito: 30, abono_dias: 0, dias_utilizados: 10, concessivo_fim: '2026-12-01' },
+    { aquisitivo_fim: '2025-03-17', dias_direito: 30, abono_dias: 0, dias_utilizados: 10, concessivo_fim: '2028-12-01' },
+    { aquisitivo_fim: '2025-03-17', dias_direito: 30, abono_dias: 0, dias_utilizados: 0, concessivo_fim: '2028-12-01' },
+    { aquisitivo_fim: '2025-03-17', dias_direito: 30, abono_dias: 0, dias_utilizados: 0, concessivo_fim: '2026-03-01' },
+  ];
+  checa('status do ciclo igual ao da tela (8 amostras)', amostras.map((a) => statusDoCiclo(a, HOJE) === situacaoDoCiclo(a, HOJE)).join(','), 'true,true,true,true,true,true,true,true');
+  checa('e-mail comparado sem maiuscula nem espaco', normalizarEmail(' Ana@Click.COM.br '), 'ana@click.com.br');
+
+  const fr = fragmentosDasParcelas('P1', [{ ordem: 2, dias: 15, inicio: '2026-10-13', fim: '2026-10-27', status: 'planejada' }, { ordem: 1, dias: 15, inicio: '2026-01-12', fim: '2026-01-26', status: 'concluida' }]);
+  checa('parcelas viram fragmentos na ordem', fr.map((f) => f.id).join(','), 'gc-P1-1,gc-P1-2');
+  checa('fragmento planejado e marcado', fr[1].observacao, 'Gestão Click (planejada)');
+  checa('fragmento com os dias da parcela', String(fr[0].dias + fr[1].dias), '30');
+
+  // --- um cenario inteiro -------------------------------------------------------
+  const empresaColabs = [
+    { id: 'e1', nome: 'Ana', email: 'ana@click.com', departamento: 'CRC', cargo: 'Analista', salario: null },
+    { id: 'e2', nome: 'Bia', email: 'BIA@click.com', departamento: 'CRC', cargo: 'Analista' },
+    { id: 'e3', nome: 'Caio', email: 'caio@click.com', departamento: 'CX' },
+    { id: 'e4', nome: 'Duda', email: 'duda@click.com', departamento: 'CRC' },
+  ];
+  const portalColabs = [
+    { id: 'pa', nome_completo: 'Ana Souza', email: 'ana@click.com', data_admissao: '2022-11-02', cargo_atual: 'Analista II' },
+    { id: 'pb', nome_completo: 'Bia Lima', email: 'bia@click.com', data_admissao: '2023-03-18' },
+    { id: 'pd1', nome_completo: 'Duda A', email: 'duda@click.com' },
+    { id: 'pd2', nome_completo: 'Duda B', email: 'duda@click.com' },
+  ];
+  const f1 = { id: 'G1', colaborador: { id: 'e1', departamento: 'CRC' }, aquisitivo: { inicio: '2024-11-04', fim: '2025-11-03' }, vencimento: '2026-10-25', dias_direito: 30, dias_gozados: 30, saldo: 0, abono: false, abono_dias: 0, parcelas: [
+    { ordem: 1, dias: 10, inicio: '2025-12-29', fim: '2026-01-07', status: 'concluida' }, { ordem: 2, dias: 10, inicio: '2026-02-10', fim: '2026-02-20', status: 'concluida' }, { ordem: 3, dias: 10, inicio: '2026-09-23', fim: '2026-10-02', status: 'concluida' }] };
+  const f2 = { id: 'G2', colaborador: { id: 'e1' }, aquisitivo: { inicio: '2025-11-04', fim: '2026-11-03' }, vencimento: '2027-11-03', dias_direito: 30, dias_gozados: 0, saldo: 30, abono: false, parcelas: [] };
+  const f3 = { id: 'G3', colaborador: { id: 'e2' }, aquisitivo: { inicio: '2024-11-04', fim: '2025-11-03' }, vencimento: '2026-10-20', dias_direito: 30, dias_gozados: 30, saldo: 0, abono: false, parcelas: [
+    { ordem: 1, dias: 15, inicio: '2026-01-12', fim: '2026-01-26', status: 'concluida' }, { ordem: 2, dias: 15, inicio: '2026-10-13', fim: '2026-10-27', status: 'planejada' }] };
+  const f4 = { id: 'G4', colaborador: { id: 'e3' }, aquisitivo: { inicio: '2025-01-01', fim: '2025-12-31' }, vencimento: '2026-12-31', dias_direito: 30, dias_gozados: 0, parcelas: [] };
+  const f5 = { id: 'G5', colaborador: { id: 'e9-desligado' }, aquisitivo: { inicio: '2024-01-01', fim: '2024-12-31' }, vencimento: '2025-12-31', dias_direito: 30, dias_gozados: 0, parcelas: [] };
+  const ciclosPortal = [
+    { id: 'c-antigo', colaborador_id: 'pa', aquisitivo_inicio: '2024-11-04', aquisitivo_fim: '2025-11-03', concessivo_fim: '2026-10-25', dias_direito: 30, abono_dias: 0, dias_utilizados: 30, fragmentos: [], status: 'utilizado', colaborador_setor: 'CRC' },
+    { id: 'c-so-portal', colaborador_id: 'pa', aquisitivo_inicio: '2018-01-01', aquisitivo_fim: '2018-12-31', concessivo_fim: '2019-12-31', dias_direito: 30, abono_dias: 0, dias_utilizados: 30, fragmentos: [], status: 'utilizado' },
+  ];
+  const rodar = (extra = {}) => planejarSincronizacao({
+    empresaColaboradores: empresaColabs, empresaFerias: [f1, f2, f3, f4, f5], portalColaboradores: portalColabs,
+    portalCiclos: ciclosPortal, portalSolicitacoes: [], hoje: HOJE, agoraIso: AGORA, ...extra,
+  });
+  const { plano, resumo } = rodar();
+
+  checa('liga as pessoas pelo e-mail (Bia em maiuscula casa)', String(resumo.colaboradores_ligados), '2');
+  checa('sem correspondente e e-mail repetido nao sao ligados', String(resumo.colaboradores_sem_correspondente), '2');
+  checa('aviso de e-mail repetido', String(plano.avisos.some((a) => a.tipo === 'email_repetido')), 'true');
+  checa('aviso de quem nao esta no Portal', String(plano.avisos.some((a) => a.tipo === 'sem_correspondente' && /caio/i.test(a.mensagem))), 'true');
+  checa('periodo de pessoa nao ligada e ignorado (Caio e o desligado)', String(resumo.periodos_ignorados), '2');
+  checa('ciclo igual ao que ja existia e ADOTADO (nao duplica)', plano.ciclosAtualizar.map((c) => c.id).join(','), 'c-antigo');
+  checa('o ciclo adotado ganha o id do Gestao Click', plano.ciclosAtualizar[0].dados.gestaoclick_id, 'G1');
+  checa('ciclo adotado traz as 3 parcelas como fragmentos', String(plano.ciclosAtualizar[0].dados.fragmentos.length), '3');
+  checa('criou 2 ciclos novos (periodo em aquisicao e o da Bia)', String(plano.ciclosCriar.length), '2');
+  const novoBia = plano.ciclosCriar.find((c) => c.colaborador_id === 'pb');
+  checa('ciclo novo: direito, dias usados e vencimento do Gestao Click', `${novoBia.dias_direito}/${novoBia.dias_utilizados}/${novoBia.concessivo_fim}`, '30/30/2026-10-20');
+  checa('ciclo novo: setor, nome e admissao do Portal', `${novoBia.colaborador_setor}/${novoBia.colaborador_nome}/${novoBia.data_admissao}`, 'CRC/Bia Lima/2023-03-18');
+  checa('ciclo novo: status calculado (tudo usado = utilizado)', novoBia.status, 'utilizado');
+  checa('periodo em aquisicao fica em_aquisicao', plano.ciclosCriar.find((c) => c.gestaoclick_id === 'G2').status, 'em_aquisicao');
+  checa('ciclo que so existe no Portal nao e tocado', String(plano.ciclosAtualizar.concat(plano.ciclosCriar).some((c) => c.id === 'c-so-portal')), 'false');
+  checa('so a parcela PLANEJADA vira ferias aprovada (as de antes nao)', plano.solicitacoesCriar.map((s) => `${s.colaborador_id}:${s.data_inicio}`).join(','), 'pb:2026-10-13');
+  const sol = plano.solicitacoesCriar[0];
+  checa('ferias importada: aprovada, origem e chave', `${sol.status}/${sol.origem}/${sol.gestaoclick_id}`, 'aprovada/gestaoclick/G3:2');
+  checa('ferias importada: periodo aquisitivo e dias', `${sol.periodo_aquisitivo_inicio}/${sol.dias_corridos}/${sol.venda_dias}`, '2024-11-04/15/0');
+  checa('nunca leva salario', String(JSON.stringify(plano).includes('salario')), 'false');
+
+  // aplica o plano num "banco" de mentira para provar que rodar de novo nao muda nada
+  const aplicar = (pl, ciclos, sols) => {
+    const c = ciclos.map((x) => ({ ...x }));
+    pl.ciclosAtualizar.forEach((u) => Object.assign(c.find((x) => x.id === u.id), u.dados));
+    pl.ciclosCriar.forEach((n, i) => c.push({ id: `novo-${c.length + i}`, ...n }));
+    const t = sols.map((x) => ({ ...x }));
+    pl.solicitacoesAtualizar.forEach((u) => Object.assign(t.find((x) => x.id === u.id), u.dados));
+    pl.solicitacoesCancelar.forEach((u) => Object.assign(t.find((x) => x.id === u.id), u.dados));
+    pl.solicitacoesCriar.forEach((n, i) => t.push({ id: `sol-${t.length + i}`, ...n }));
+    return { c, t };
+  };
+  const estado1 = aplicar(plano, ciclosPortal, []);
+  const seg = rodar({ portalCiclos: estado1.c, portalSolicitacoes: estado1.t });
+  checa('rodar de novo: nenhum ciclo criado nem alterado', `${seg.plano.ciclosCriar.length}/${seg.plano.ciclosAtualizar.length}`, '0/0');
+  checa('rodar de novo: nenhuma ferias nova, alterada ou cancelada', `${seg.plano.solicitacoesCriar.length}/${seg.plano.solicitacoesAtualizar.length}/${seg.plano.solicitacoesCancelar.length}`, '0/0/0');
+  checa('rodar de novo: o resumo diz sem mudanca', String(seg.resumo.ciclos_sem_mudanca), '3');
+
+  // a data da parcela mudou la
+  const f3b = { ...f3, parcelas: [f3.parcelas[0], { ordem: 2, dias: 15, inicio: '2026-10-20', fim: '2026-11-03', status: 'planejada' }] };
+  const mudou = rodar({ empresaFerias: [f1, f2, f3b, f4, f5], portalCiclos: estado1.c, portalSolicitacoes: estado1.t });
+  checa('parcela remarcada atualiza as datas das ferias', mudou.plano.solicitacoesAtualizar.map((u) => `${u.dados.data_inicio}..${u.dados.data_fim}`).join(','), '2026-10-20..2026-11-03');
+  checa('e nao cria uma segunda', String(mudou.plano.solicitacoesCriar.length), '0');
+
+  // a parcela sumiu la
+  const f3c = { ...f3, dias_gozados: 15, parcelas: [f3.parcelas[0]] };
+  const sumiu = rodar({ empresaFerias: [f1, f2, f3c, f4, f5], portalCiclos: estado1.c, portalSolicitacoes: estado1.t });
+  checa('parcela que sumiu de la deixa de travar (cancelada)', sumiu.plano.solicitacoesCancelar.map((u) => u.dados.status).join(','), 'cancelada');
+  checa('o ciclo reflete os dias gozados novos', String(sumiu.plano.ciclosAtualizar.find((c) => c.dados.gestaoclick_id === 'G3').dados.dias_utilizados), '15');
+
+  // pedido do Portal com as mesmas datas e adotado, nao duplicado
+  const pedidoPortal = { id: 'ped1', colaborador_id: 'pb', colaborador_nome: 'Bia Lima', data_inicio: '2026-10-13', data_fim: '2026-10-27', status: 'em_analise', origem: 'portal' };
+  const adotou = rodar({ portalSolicitacoes: [pedidoPortal] });
+  checa('pedido do Portal com as mesmas datas e adotado', `${adotou.plano.solicitacoesCriar.length}/${adotou.plano.solicitacoesAtualizar[0].id}/${adotou.plano.solicitacoesAtualizar[0].dados.status}`, '0/ped1/aprovada');
+
+  // aprovado so no Portal: avisa para lancar la
+  const soNoPortal = { id: 'ped2', colaborador_id: 'pa', colaborador_nome: 'Ana Souza', data_inicio: '2026-12-10', data_fim: '2026-12-20', status: 'aprovada', origem: 'portal' };
+  const avisou = rodar({ portalSolicitacoes: [soNoPortal] });
+  checa('aprovada so no Portal gera aviso para lancar no Gestao Click', String(avisou.plano.avisos.some((a) => a.tipo === 'lancar_no_gestaoclick' && /10\/12 a 20\/12/.test(a.mensagem))), 'true');
+  checa('e nao e cancelada nem mexida (o Portal nao e apagado)', String(avisou.plano.solicitacoesCancelar.length + avisou.plano.solicitacoesAtualizar.length), '0');
+
+  // ferias ja encerradas no Portal nao geram aviso
+  const antiga = rodar({ portalSolicitacoes: [{ ...soNoPortal, id: 'ped3', data_inicio: '2026-01-10', data_fim: '2026-01-20' }] });
+  checa('ferias passadas do Portal nao geram aviso', String(antiga.plano.avisos.some((a) => a.tipo === 'lancar_no_gestaoclick')), 'false');
+
+  // abono e divergencia de parcelas
+  const abono5 = rodar({ empresaFerias: [{ ...f2, abono: true, abono_dias: 5 }] });
+  checa('abono fora de 0 ou 10 vira aviso e e gravado como 0', `${abono5.plano.avisos.some((a) => a.tipo === 'abono_invalido')}/${abono5.plano.ciclosCriar[0].abono_dias}`, 'true/0');
+  const abono10 = rodar({ empresaFerias: [{ ...f2, abono: true, abono_dias: 10 }] });
+  checa('abono de 10 dias e aceito', String(abono10.plano.ciclosCriar[0].abono_dias), '10');
+  const diverge = rodar({ empresaFerias: [{ ...f3, dias_gozados: 20 }] });
+  checa('parcelas que nao somam os dias gozados viram aviso', String(diverge.plano.avisos.some((a) => a.tipo === 'parcelas_divergentes')), 'true');
+  const agoraS = new Date('2026-10-05T15:00:00Z');
+  const horas = (h) => new Date(agoraS.getTime() - h * 3600000).toISOString();
+  checa('sync automatica: conector desligado nao roda', String(precisaSincronizar({ ativo: false, ultimo_sucesso_em: null }, agoraS)), 'false');
+  checa('sync automatica: nunca rodou, roda', String(precisaSincronizar({ ativo: true, ultimo_sucesso_em: null }, agoraS)), 'true');
+  checa('sync automatica: dados de 1h nao rodam', String(precisaSincronizar({ ativo: true, ultimo_sucesso_em: horas(1) }, agoraS)), 'false');
+  checa('sync automatica: dados de 5h59 nao rodam', String(precisaSincronizar({ ativo: true, ultimo_sucesso_em: horas(HORAS_ATE_ATUALIZAR - 0.02) }, agoraS)), 'false');
+  checa('sync automatica: dados de mais de 6h rodam', String(precisaSincronizar({ ativo: true, ultimo_sucesso_em: horas(7) }, agoraS)), 'true');
+  checa('sync automatica: nao roda por cima de uma em andamento', String(precisaSincronizar({ ativo: true, ultimo_sucesso_em: horas(9), ultimo_resultado: 'rodando', ultima_execucao_em: horas(0.02) }, agoraS)), 'false');
+  checa('sync automatica: execucao travada ha mais de 5 min nao bloqueia', String(precisaSincronizar({ ativo: true, ultimo_sucesso_em: horas(9), ultimo_resultado: 'rodando', ultima_execucao_em: horas(0.5) }, agoraS)), 'true');
+  checa('sync automatica: depois de erro, tenta de novo se os dados estao velhos', String(precisaSincronizar({ ativo: true, ultimo_sucesso_em: horas(30), ultimo_resultado: 'erro' }, agoraS)), 'true');
+  checa('sem periodos, nada a fazer', JSON.stringify(rodar({ empresaFerias: [] }).resumo.periodos_recebidos), '0');
 }
 
 console.log('\n== conferencia de cores (o verificador pega o que deve) ==');

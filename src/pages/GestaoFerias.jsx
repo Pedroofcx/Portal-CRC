@@ -3,6 +3,7 @@ import React, { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 import PageHeader from '@/components/ui/PageHeader';
+import FonteDasFerias from '@/components/ferias/FonteDasFerias';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import ColaboradorFeriasCard from '@/components/ferias/ColaboradorFeriasCard';
 import DetalheColaboradorFerias from '@/components/ferias/DetalheColaboradorFerias';
@@ -419,6 +420,7 @@ export default function GestaoFerias() {
     return (
       <div className="space-y-6">
         <PageHeader title="Férias" subtitle="Seu saldo, seus pedidos e quem está de férias" icon={Palmtree} />
+        <FonteDasFerias />
         <MinhasFerias
           colaborador={colaboradorAtual}
           ciclos={ciclos}
@@ -472,6 +474,7 @@ export default function GestaoFerias() {
           </div>
         }
       />
+      <FonteDasFerias gestao />
 
       {alertasVencimento.length > 0 && (
         <Alert className="border-warning/30 bg-warning-soft">
