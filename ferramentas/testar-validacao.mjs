@@ -23,7 +23,7 @@ import { ligacoesAuditoria, resumoAuditoria } from '../src/lib/apuracao/auditori
 import { revisarLigacao } from '../src/lib/apuracao/revisaoTelefone.js';
 import { indisponiveisEm, filaDoCanal, gradeDoMes, montarJustificativa, motivoDaJustificativa, resumoDeOverrides, filtrarHistorico, ultimosMeses } from '../src/lib/equidade.js';
 import { vazioViraNulo } from '../src/lib/camposVazios.js';
-import { decidir, permitido, extrairChave, sha256hex, validarNovaTratativa, slaDoTipo, paginacao, filtrosDeTratativas, CAMPOS_TRATATIVA, CAMPOS_COLABORADOR, RECURSOS, validarAtualizacaoTratativa, situacaoParaCliente, montarAcompanhamento, interpretarCodigo, cnpjValido, apenasDigitos, escolherDoCliente } from '../supabase/functions/api/politica.js';
+import { decidir, permitido, extrairChave, sha256hex, validarNovaTratativa, slaDoTipo, paginacao, filtrosDeTratativas, CAMPOS_TRATATIVA, CAMPOS_COLABORADOR, RECURSOS, validarAtualizacaoTratativa, validarExclusao, ESTADOS_QUE_NAO_EXCLUEM, filtrosDeApuracao, resumoPorEtapa, CAMPOS_APURACAO, situacaoParaCliente, montarAcompanhamento, interpretarCodigo, cnpjValido, apenasDigitos, escolherDoCliente } from '../supabase/functions/api/politica.js';
 import path from 'node:path';
 import { carregarModuloJsx } from './lib/carregar-jsx.mjs';
 
@@ -1689,8 +1689,50 @@ console.log('\n== api de integracoes: quem passa ==');
   checa('criar: CNPJ invalido e recusado', val({ ...ok, cnpj_cliente: '11222333000182' }).erros.join(' | '), 'cnpj_cliente inválido');
   checa('criar: CNPJ valido vira so digitos', val({ ...ok, cnpj_cliente: '11.222.333/0001-81' }).dados.cnpj_cliente, '11222333000181');
   checa('acompanhamento: cliente sem CNPJ nunca e entregue', String(escolherDoCliente([{ cnpj_cliente: null, cliente_sem_cnpj: true }], '11222333000181')), 'null');
+
+  console.log('\n== api: excluir, apuracao e jornada ==');
+  checa('excluir exige justificativa', validarExclusao({}).erros.join(' | '), 'justificativa é obrigatória');
+  checa('justificativa curta e recusada', validarExclusao({ justificativa: 'curto' }).erros.join(' | '), 'mínimo de 10');
+  checa('justificativa so com espacos e recusada', validarExclusao({ justificativa: '            ' }).erros.join(' | '), 'mínimo de 10');
+  checa('justificativa valida passa', validarExclusao({ justificativa: 'Registrada em duplicidade' }).dados.justificativa, 'Registrada em duplicidade');
+  checa('excluir recusa campo extra', validarExclusao({ justificativa: 'Registrada em duplicidade', status: 'x' }).erros.join(' | '), 'campos não aceitos');
+  checa('excluir recusa justificativa enorme', validarExclusao({ justificativa: 'x'.repeat(501) }).erros.join(' | '), 'no máximo 500');
+  checa('encerrada nao e excluida por API', String(ESTADOS_QUE_NAO_EXCLUEM.includes('encerrada')), 'true');
+  checa('aguardando reabertura tambem nao', String(ESTADOS_QUE_NAO_EXCLUEM.includes('aguardando_confirmacao_reabertura')), 'true');
+  checa('em andamento pode ser excluida', String(ESTADOS_QUE_NAO_EXCLUEM.includes('em_andamento')), 'false');
+
+  const q2 = (x) => new URLSearchParams(x);
+  checa('apuracao: filtro por tipo valido', filtrosDeApuracao(q2('tipo=chat')).filtros.tipo, 'chat');
+  checa('apuracao: tipo invalido', filtrosDeApuracao(q2('tipo=zap')).erros.join(' | '), 'tipo inválido');
+  checa('apuracao: colaborador_id com aspas e recusado', filtrosDeApuracao(q2("colaborador_id=a'b")).erros.join(' | '), 'colaborador_id inválido');
+  checa('apuracao: datas', JSON.stringify(filtrosDeApuracao(q2('desde=2026-09-01&ate=2026-09-30')).filtros), '{"desde":"2026-09-01","ate":"2026-09-30"}');
+  checa('apuracao: data invalida', filtrosDeApuracao(q2('desde=1/9')).erros.join(' | '), 'AAAA-MM-DD');
+  checa('apuracao nao expoe o historico detalhado', String(CAMPOS_APURACAO.includes('historico_detalhado')), 'false');
+  checa('apuracao expoe os dias', String(CAMPOS_APURACAO.includes('dados_por_data')), 'true');
+
+  const etapas = [{ id: 'e1', nome: 'Onboarding' }, { id: 'e2', nome: 'Suporte' }];
+  const trs = [
+    { etapa_jornada_id: 'e1', status: 'encerrada', encerrado_no_sla: true, tempo_total_minutos: 100, valor_devolvido_cliente: 50.5 },
+    { etapa_jornada_id: 'e1', status: 'encerrada', encerrado_no_sla: false, tempo_total_minutos: 300, valor_devolvido_cliente: 0, houve_reabertura: true },
+    { etapa_jornada_id: 'e1', status: 'em_andamento' },
+    { etapa_jornada_id: 'e2', status: 'aguardando_confirmacao_reabertura', encerrado_no_sla: true, tempo_total_minutos: 60 },
+    { etapa_jornada_id: null, status: 'registrada', custo_operacional_reais: 999 },
+  ];
+  const res = resumoPorEtapa(trs, etapas);
+  const e1 = res.find((l) => l.etapa === 'Onboarding');
+  checa('jornada: ordena pelo volume', res[0].etapa, 'Onboarding');
+  checa('jornada: total e em aberto', `${e1.total}/${e1.encerradas}/${e1.em_aberto}`, '3/2/1');
+  checa('jornada: percentual no prazo', String(e1.percentual_no_prazo), '50');
+  checa('jornada: tempo medio das encerradas', String(e1.tempo_medio_minutos), '200');
+  checa('jornada: valor devolvido', String(e1.valor_devolvido), '50.5');
+  checa('jornada: reabertas', String(e1.reabertas), '1');
+  checa('jornada: aguardando reabertura conta como encerrada', String(res.find((l) => l.etapa === 'Suporte').encerradas), '1');
+  checa('jornada: sem etapa vai para o grupo proprio', String(res.some((l) => l.etapa === 'Sem etapa definida' && l.etapa_id === null)), 'true');
+  checa('jornada: sem encerradas, percentual nulo', String(res.find((l) => l.etapa === 'Sem etapa definida').percentual_no_prazo), 'null');
+  checa('jornada: nunca sai custo operacional', String(/custo/.test(JSON.stringify(res))), 'false');
+  checa('jornada: lista vazia', JSON.stringify(resumoPorEtapa([], etapas)), '[]');
   checa('recurso acompanhamento so tem ler', JSON.stringify(Object.keys(RECURSOS.acompanhamento.acoes)), '["ler"]');
-  checa('tratativas tem ler, gravar e atualizar', JSON.stringify(Object.keys(RECURSOS.tratativas.acoes)), '["ler","gravar","atualizar"]');
+  checa('tratativas tem ler, gravar, atualizar e excluir', JSON.stringify(Object.keys(RECURSOS.tratativas.acoes)), '["ler","gravar","atualizar","excluir"]');
   checa('campos de saida incluem os tickets', String(['ticket_zendesk', 'ticket_clickdesk', 'resumo_whatsapp'].every((c) => CAMPOS_TRATATIVA.includes(c))), 'true');
   checa('atualizar exige permissao propria (ler nao basta)', cod(decidir({ geral: true, chave: chaveOk, integracao: integ({ recursos: { tratativas: { ler: true, gravar: true } } }), recurso: 'tratativas', acao: 'atualizar', agora, usoNoUltimoMinuto: 0 })), '403 sem_permissao');
   checa('acompanhamento liberado sem liberar tratativas', cod(decidir({ geral: true, chave: chaveOk, integracao: integ({ recursos: { acompanhamento: { ler: true } } }), recurso: 'acompanhamento', acao: 'ler', agora, usoNoUltimoMinuto: 0 })), 'ok');

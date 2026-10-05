@@ -21,7 +21,7 @@ const SENTIDOS = {
   ambos: 'Os dois',
 };
 
-const ROTULO_ACAO = { ler: 'Consultar', gravar: 'Gravar', atualizar: 'Atualizar' };
+const ROTULO_ACAO = { ler: 'Consultar', gravar: 'Gravar', atualizar: 'Atualizar', excluir: 'Excluir' };
 const seletor = 'mt-1 h-10 w-full rounded-md border border-input bg-background px-3 text-sm';
 const dataHora = (v) => (v ? new Date(v).toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo', dateStyle: 'short', timeStyle: 'short' }) : '—');
 
@@ -169,6 +169,8 @@ export default function PainelIntegracoes() {
             <li><code className="text-foreground">GET /ping</code>: confere se a chave funciona</li>
             <li><code className="text-foreground">GET /tratativas</code>, <code className="text-foreground">GET /tratativas/TRT-0123</code> (ou pelo número do ticket), <code className="text-foreground">POST /tratativas</code> e <code className="text-foreground">PATCH /tratativas/TRT-0123</code></li>
             <li><code className="text-foreground">GET /acompanhamento/TRT-0123?cnpj=...</code> (ou pelo ticket): só a situação e o resumo que o cliente pode ver, mediante o CNPJ do cliente, para o WhatsApp</li>
+            <li><code className="text-foreground">DELETE /tratativas/TRT-0123</code> (exclusão lógica de tratativa em aberto, com justificativa)</li>
+            <li><code className="text-foreground">GET /apuracao</code>, <code className="text-foreground">GET /jornada/etapas</code>, <code className="text-foreground">GET /jornada/motivos</code> e <code className="text-foreground">GET /jornada/resumo</code></li>
             <li><code className="text-foreground">GET /colaboradores</code> e <code className="text-foreground">GET /ciclos</code></li>
           </ul>
         </div>
@@ -217,6 +219,7 @@ export default function PainelIntegracoes() {
                       <th className="px-3 py-2 text-center font-medium">Consultar</th>
                       <th className="px-3 py-2 text-center font-medium">Gravar</th>
                       <th className="px-3 py-2 text-center font-medium">Atualizar</th>
+                      <th className="px-3 py-2 text-center font-medium">Excluir</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -226,7 +229,7 @@ export default function PainelIntegracoes() {
                           {r.rotulo}
                           <span className="block text-xs text-muted-foreground">{Object.values(r.acoes).join(' · ')}</span>
                         </td>
-                        {['ler', 'gravar', 'atualizar'].map((acao) => (
+                        {['ler', 'gravar', 'atualizar', 'excluir'].map((acao) => (
                           <td key={acao} className="px-3 py-2 text-center">
                             {r.acoes[acao] ? (
                               <input

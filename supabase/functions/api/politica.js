@@ -30,11 +30,20 @@ export const RECURSOS = {
       ler: 'Consultar tratativas (sem o custo operacional)',
       gravar: 'Registrar tratativas novas',
       atualizar: 'Atualizar tickets, resumo do WhatsApp e dados do ClickDesk de tratativas existentes',
+      excluir: 'Excluir tratativas em aberto (exclusão lógica, com justificativa; a tratativa some dos números, mas fica registrada)',
     },
   },
   acompanhamento: {
     rotulo: 'Acompanhamento para o cliente (WhatsApp)',
     acoes: { ler: 'Consultar só a situação e o resumo que o cliente pode ver, pelo número TRT ou pelo ticket, mediante o CNPJ do cliente' },
+  },
+  apuracao: {
+    rotulo: 'Apuração (CSAT, performance e CX)',
+    acoes: { ler: 'Consultar os números diários de telefone, chat e CX por colaborador (sem o detalhe de cada ligação)' },
+  },
+  jornada: {
+    rotulo: 'Jornada do cliente',
+    acoes: { ler: 'Consultar as etapas, os motivos e o resumo por etapa (volume, prazo, devolução; sem custo operacional)' },
   },
   colaboradores: {
     rotulo: 'Colaboradores',
@@ -124,6 +133,16 @@ export const CAMPOS_TRATATIVA = [
 ];
 
 export const CAMPOS_COLABORADOR = ['id', 'nome_completo', 'cargo_atual', 'equipe_nome', 'ativo'];
+/** Apuração sem o historico_detalhado (cada ligação e cada ticket individual). */
+export const CAMPOS_APURACAO = [
+  'id', 'colaborador_id', 'colaborador_nome', 'tipo_apuracao', 'fonte',
+  'periodo_inicio', 'periodo_fim', 'intervalo', 'modo',
+  'dados_por_data', 'canal_telefone', 'canal_chat', 'avaliacao_cx',
+  'satisfacao_media', 'percentual_avaliados', 'data_apuracao',
+];
+export const CAMPOS_ETAPA = ['id', 'nome', 'descricao', 'ordem', 'ativa'];
+export const CAMPOS_MOTIVO = ['id', 'motivo', 'descricao', 'submotivos', 'ordem', 'ativo'];
+
 export const CAMPOS_CICLO = ['id', 'nome', 'data_inicio', 'data_fim', 'ativo'];
 
 export const TIPOS = ['reclamacao_interna', 'reclame_aqui', 'google_meu_negocio', 'contestacao', 'administrativas', 'procon'];
@@ -449,4 +468,85 @@ export function interpretarCodigo(bruto) {
   // o número é gravado com 4 dígitos (TRT-0012): "TRT-12" e "trt-0012" são a mesma tratativa
   if (trt) return { tipo: 'trt', valor: `TRT-${trt[1].padStart(4, '0')}` };
   return { tipo: 'ticket', valor: texto };
+}
+
+/* ------------------------------------------------------------------ *
+ * EXCLUIR (DELETE)
+ * ------------------------------------------------------------------ */
+
+/** Estados em que a API NÃO exclui: tratativa encerrada já conta nos pontos e nos ciclos. */
+export const ESTADOS_QUE_NAO_EXCLUEM = ['encerrada', 'aguardando_confirmacao_reabertura', 'excluida'];
+
+/** Corpo de DELETE /v1/tratativas/{codigo}: a justificativa é obrigatória (mínimo 10 caracteres, como na tela). */
+export function validarExclusao(corpo) {
+  const erros = [];
+  const justificativa = typeof corpo?.justificativa === 'string' ? corpo.justificativa.trim() : '';
+  if (!corpo || typeof corpo !== 'object' || Array.isArray(corpo)) return { erros: ['o corpo deve ser um objeto JSON com a justificativa'], dados: null };
+  const desconhecidos = Object.keys(corpo).filter((k) => k !== 'justificativa');
+  if (desconhecidos.length) erros.push(`campos não aceitos: ${desconhecidos.join(', ')}`);
+  if (justificativa.length < 10) erros.push('justificativa é obrigatória (mínimo de 10 caracteres)');
+  if (justificativa.length > 500) erros.push('justificativa deve ter no máximo 500 caracteres');
+  return { erros, dados: erros.length ? null : { justificativa } };
+}
+
+/* ------------------------------------------------------------------ *
+ * APURAÇÃO (leitura)
+ * ------------------------------------------------------------------ */
+
+export const TIPOS_APURACAO = ['telefone', 'chat', 'cx'];
+
+/** Filtros de GET /v1/apuracao: tipo, colaborador_id, desde e ate (o período da apuração cruza o intervalo). */
+export function filtrosDeApuracao(params) {
+  const erros = [];
+  const filtros = {};
+  const tipo = params.get('tipo');
+  const colaborador = params.get('colaborador_id');
+  const desde = params.get('desde');
+  const ate = params.get('ate');
+  if (tipo) { if (TIPOS_APURACAO.includes(tipo)) filtros.tipo = tipo; else erros.push(`tipo inválido (use: ${TIPOS_APURACAO.join(', ')})`); }
+  if (colaborador) { if (CODIGO_VALIDO.test(colaborador)) filtros.colaborador_id = colaborador; else erros.push('colaborador_id inválido'); }
+  if (desde) { if (ehData(desde)) filtros.desde = desde; else erros.push('desde deve ser uma data AAAA-MM-DD'); }
+  if (ate) { if (ehData(ate)) filtros.ate = ate; else erros.push('ate deve ser uma data AAAA-MM-DD'); }
+  return { erros, filtros };
+}
+
+/* ------------------------------------------------------------------ *
+ * JORNADA DO CLIENTE (leitura)
+ * ------------------------------------------------------------------ */
+
+const ENCERRADAS = ['encerrada', 'aguardando_confirmacao_reabertura'];
+
+/**
+ * O resumo por etapa da jornada: quantas tratativas, quantas encerradas, quantas
+ * no prazo, quantas reabertas, tempo médio das encerradas e o valor devolvido ao
+ * cliente. Só o que não é sensível: NADA de custo operacional (que depende de
+ * salário). Tratativa sem etapa vai para "sem_etapa".
+ */
+export function resumoPorEtapa(tratativas = [], etapas = []) {
+  const nomes = new Map(etapas.map((e) => [e.id, e.nome]));
+  const grupos = new Map();
+  for (const t of tratativas) {
+    const chave = t.etapa_jornada_id || 'sem_etapa';
+    if (!grupos.has(chave)) grupos.set(chave, []);
+    grupos.get(chave).push(t);
+  }
+  const linhas = [...grupos.entries()].map(([id, lista]) => {
+    const encerradas = lista.filter((t) => ENCERRADAS.includes(t.status));
+    const comTempo = encerradas.filter((t) => Number(t.tempo_total_minutos) > 0);
+    const noPrazo = encerradas.filter((t) => t.encerrado_no_sla === true).length;
+    const devolvido = lista.reduce((soma, t) => soma + (Number(t.valor_devolvido_cliente) || 0), 0);
+    return {
+      etapa_id: id === 'sem_etapa' ? null : id,
+      etapa: id === 'sem_etapa' ? 'Sem etapa definida' : (nomes.get(id) ?? lista[0].etapa_jornada_nome ?? 'Etapa removida'),
+      total: lista.length,
+      encerradas: encerradas.length,
+      em_aberto: lista.length - encerradas.length,
+      no_prazo: noPrazo,
+      percentual_no_prazo: encerradas.length ? Math.round((noPrazo / encerradas.length) * 1000) / 10 : null,
+      reabertas: lista.filter((t) => t.houve_reabertura === true || t.status_reabertura === 'cliente_reabriu').length,
+      tempo_medio_minutos: comTempo.length ? Math.round(comTempo.reduce((s, t) => s + Number(t.tempo_total_minutos), 0) / comTempo.length) : null,
+      valor_devolvido: Math.round(devolvido * 100) / 100,
+    };
+  });
+  return linhas.sort((a, b) => b.total - a.total);
 }

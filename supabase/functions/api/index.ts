@@ -34,6 +34,12 @@
  *   GET  /v1/acompanhamento/{codigo}?cnpj=...  o que o CLIENTE vê no WhatsApp:
  *                                  situação e resumo (só isso), pelo número TRT
  *                                  ou pelo ticket, MEDIANTE O CNPJ do cliente
+ *   DELETE /v1/tratativas/{codigo} exclui (lógica) tratativa EM ABERTO, com justificativa
+ *   GET  /v1/apuracao              números diários de telefone, chat e CX (filtros: tipo,
+ *                                  colaborador_id, desde, ate, pagina, limite)
+ *   GET  /v1/jornada/etapas        as etapas da jornada do cliente
+ *   GET  /v1/jornada/motivos       os motivos de tratativa
+ *   GET  /v1/jornada/resumo        resumo por etapa (filtros: tipo, desde, ate)
  *   GET  /v1/colaboradores         nome, cargo e equipe (sem salário nem e-mail)
  *   GET  /v1/ciclos                os ciclos trimestrais
  *
@@ -49,10 +55,11 @@
 
 import {
   VERSAO, extrairChave, sha256hex, decidir,
-  CAMPOS_TRATATIVA, CAMPOS_COLABORADOR, CAMPOS_CICLO,
+  CAMPOS_TRATATIVA, CAMPOS_COLABORADOR, CAMPOS_CICLO, CAMPOS_APURACAO, CAMPOS_ETAPA, CAMPOS_MOTIVO,
   paginacao, filtrosDeTratativas, validarNovaTratativa, validarAtualizacaoTratativa, slaDoTipo,
   interpretarCodigo, montarAcompanhamento, cnpjValido, apenasDigitos, escolherDoCliente,
   MAXIMO_ERROS_POR_CODIGO, JANELA_ERROS_MINUTOS,
+  validarExclusao, ESTADOS_QUE_NAO_EXCLUEM, filtrosDeApuracao, resumoPorEtapa,
 } from './politica.js';
 
 const URL_SUPABASE = Deno.env.get('SUPABASE_URL')!;
@@ -66,7 +73,7 @@ const CABECALHOS = {
   'Cache-Control': 'no-store',
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-api-key, content-type',
-  'Access-Control-Allow-Methods': 'GET, POST, PATCH, OPTIONS',
+  'Access-Control-Allow-Methods': 'GET, POST, PATCH, DELETE, OPTIONS',
 };
 
 const responder = (corpo: unknown, status = 200, extra: Record<string, string> = {}) =>
@@ -260,6 +267,89 @@ async function criarTratativa({ sb, integracao, req }: Contexto) {
   return responder({ dados: data }, 201);
 }
 
+async function excluirTratativa({ sb, integracao, req, partes }: Contexto) {
+  let corpo: unknown;
+  try { corpo = await req.json(); } catch { return erro(400, 'json_invalido', 'Envie um JSON com a justificativa da exclusão.'); }
+  const { erros, dados } = validarExclusao(corpo);
+  if (erros.length || !dados) return erro(422, 'dados_invalidos', 'Há campos inválidos.', erros);
+
+  const { tratativa, erro: falha } = await buscarPorCodigo(sb, decodeURIComponent(partes[2] ?? ''), 'id, id_interno, status, historico_estados');
+  if (falha) return falha;
+  // tratativa encerrada já conta nos pontos e nos ciclos: não some por API
+  if (ESTADOS_QUE_NAO_EXCLUEM.includes(tratativa.status)) {
+    return erro(409, 'tratativa_encerrada', 'Tratativa encerrada não pode ser excluída pela API: ela já conta na pontuação. A exclusão é feita pela tela, por quem tem a permissão.');
+  }
+
+  const agora = new Date().toISOString();
+  const quem = `API: ${integracao.nome}`;
+  const historico = [...(tratativa.historico_estados ?? []), {
+    estado_anterior: tratativa.status,
+    estado_novo: 'excluida',
+    data_mudanca: agora,
+    usuario: quem,
+    observacao: `Excluída - Motivo: ${dados.justificativa}`,
+  }];
+  const { error } = await sb.from('tratativa_base').update({
+    status: 'excluida',
+    excluida: true,
+    justificativa_exclusao: dados.justificativa,
+    data_exclusao: agora,
+    excluida_por_nome: quem,
+    historico_estados: historico,
+    updated_date: agora,
+    atualizado_em: agora,
+  }).eq('id', tratativa.id);
+  if (error) return erro(422, 'recusada_pelo_banco', 'O banco recusou a exclusão.', error.message);
+  return responder({ dados: { id: tratativa.id, id_interno: tratativa.id_interno, excluida: true } });
+}
+
+async function listarApuracao({ sb, params }: Contexto) {
+  const { erros, filtros } = filtrosDeApuracao(params);
+  if (erros.length) return erro(400, 'parametro_invalido', 'Parâmetro inválido.', erros);
+  const pg = paginacao(params);
+  let q = sb.from('apuracao').select(CAMPOS_APURACAO.join(','), { count: 'exact' });
+  if (filtros.tipo) q = q.eq('tipo_apuracao', filtros.tipo);
+  if (filtros.colaborador_id) q = q.eq('colaborador_id', filtros.colaborador_id);
+  // a apuração cobre um período: entra se o período dela cruza o intervalo pedido
+  if (filtros.desde) q = q.gte('periodo_fim', filtros.desde);
+  if (filtros.ate) q = q.lte('periodo_inicio', filtros.ate);
+  const { data, count, error } = await q.order('periodo_fim', { ascending: false }).range(pg.de, pg.ate);
+  if (error) return erro(500, 'erro_interno', 'Não consegui consultar a apuração.');
+  return responder({ dados: data, paginacao: { pagina: pg.pagina, limite: pg.limite, total: count ?? data.length } });
+}
+
+async function listarEtapas({ sb }: Contexto) {
+  const { data, error } = await sb.from('etapa_jornada').select(CAMPOS_ETAPA.join(',')).order('ordem');
+  if (error) return erro(500, 'erro_interno', 'Não consegui consultar as etapas.');
+  return responder({ dados: data });
+}
+
+async function listarMotivos({ sb }: Contexto) {
+  const { data, error } = await sb.from('motivo_tratativa').select(CAMPOS_MOTIVO.join(',')).order('ordem');
+  if (error) return erro(500, 'erro_interno', 'Não consegui consultar os motivos.');
+  return responder({ dados: data });
+}
+
+async function resumoDaJornada({ sb, params }: Contexto) {
+  const { erros, filtros } = filtrosDeTratativas(params);
+  if (erros.length) return erro(400, 'parametro_invalido', 'Parâmetro inválido.', erros);
+  const colunas = 'etapa_jornada_id, etapa_jornada_nome, status, encerrado_no_sla, houve_reabertura, status_reabertura, tempo_total_minutos, valor_devolvido_cliente';
+  const tratativas: any[] = [];
+  // em páginas de 1000 (teto do banco), para nunca resumir só uma parte
+  for (let de = 0; ; de += 1000) {
+    let q = sb.from('tratativa_base').select(colunas).or('excluida.is.null,excluida.eq.false');
+    if (filtros.tipo) q = q.eq('tipo_tratativa', filtros.tipo);
+    if (filtros.desde) q = q.gte('data_registro', `${filtros.desde}T00:00:00-03:00`);
+    if (filtros.ate) q = q.lte('data_registro', `${filtros.ate}T23:59:59.999-03:00`);
+    const { data, error } = await q.order('data_registro').range(de, de + 999);
+    if (error) return erro(500, 'erro_interno', 'Não consegui montar o resumo da jornada.');
+    tratativas.push(...data);
+    if (data.length < 1000) break;
+  }
+  const { data: etapas } = await sb.from('etapa_jornada').select('id, nome');
+  return responder({ dados: resumoPorEtapa(tratativas, etapas ?? []), total_tratativas: tratativas.length });
+}
+
 async function listarColaboradores({ sb, params }: Contexto) {
   const pg = paginacao(params);
   let q = sb.from('colaborador_base').select(CAMPOS_COLABORADOR.join(','), { count: 'exact' });
@@ -282,6 +372,11 @@ const ROTAS = [
   { metodo: 'POST', caminho: /^\/v1\/tratativas$/, recurso: 'tratativas', acao: 'gravar', f: criarTratativa },
   { metodo: 'PATCH', caminho: /^\/v1\/tratativas\/[^/]+$/, recurso: 'tratativas', acao: 'atualizar', f: atualizarTratativa },
   { metodo: 'GET', caminho: /^\/v1\/acompanhamento\/[^/]+$/, recurso: 'acompanhamento', acao: 'ler', f: acompanhamento },
+  { metodo: 'DELETE', caminho: /^\/v1\/tratativas\/[^/]+$/, recurso: 'tratativas', acao: 'excluir', f: excluirTratativa },
+  { metodo: 'GET', caminho: /^\/v1\/apuracao$/, recurso: 'apuracao', acao: 'ler', f: listarApuracao },
+  { metodo: 'GET', caminho: /^\/v1\/jornada\/etapas$/, recurso: 'jornada', acao: 'ler', f: listarEtapas },
+  { metodo: 'GET', caminho: /^\/v1\/jornada\/motivos$/, recurso: 'jornada', acao: 'ler', f: listarMotivos },
+  { metodo: 'GET', caminho: /^\/v1\/jornada\/resumo$/, recurso: 'jornada', acao: 'ler', f: resumoDaJornada },
   { metodo: 'GET', caminho: /^\/v1\/colaboradores$/, recurso: 'colaboradores', acao: 'ler', f: listarColaboradores },
   { metodo: 'GET', caminho: /^\/v1\/ciclos$/, recurso: 'ciclos', acao: 'ler', f: listarCiclos },
 ];
