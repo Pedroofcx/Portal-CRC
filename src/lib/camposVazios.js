@@ -15,7 +15,7 @@ export const VAZIO_VIRA_NULO = {
     'status_resolucao_contestacao', 'status_final_contestacao', 'plano_cliente',
     'modalidade_plano', 'tipo_acionamento_lider', 'tipo_acionamento_n2',
     'data_primeira_contratacao', 'data_contratacao_plano_atual', 'valor_contratacao_plano_atual',
-    'ticket_zendesk', 'ticket_clickdesk', 'resumo_whatsapp',
+    'ticket_zendesk', 'ticket_clickdesk', 'resumo_whatsapp', 'cnpj_cliente',
   ],
 };
 
