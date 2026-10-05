@@ -29,7 +29,12 @@ export const RECURSOS = {
     acoes: {
       ler: 'Consultar tratativas (sem o custo operacional)',
       gravar: 'Registrar tratativas novas',
+      atualizar: 'Atualizar tickets, resumo do WhatsApp e dados do ClickDesk de tratativas existentes',
     },
+  },
+  acompanhamento: {
+    rotulo: 'Acompanhamento para o cliente (WhatsApp)',
+    acoes: { ler: 'Consultar só a situação e o resumo que o cliente pode ver, pelo número TRT ou pelo ticket' },
   },
   colaboradores: {
     rotulo: 'Colaboradores',
@@ -113,6 +118,8 @@ export const CAMPOS_TRATATIVA = [
   'houve_devolucao_financeira', 'valor_devolvido_cliente',
   'nota_reclame_aqui', 'numero_case_contestacao',
   'status_resolucao_contestacao', 'status_final_contestacao',
+  'ticket_zendesk', 'ticket_clickdesk', 'dados_clickdesk',
+  'resumo_whatsapp', 'resumo_whatsapp_atualizado_em',
   'created_date', 'updated_date',
 ];
 
@@ -173,7 +180,25 @@ const CAMPOS_ACEITOS = [
   'valor_contratacao_plano_atual', 'data_primeira_contratacao', 'data_contratacao_plano_atual',
   'segmento_cliente', 'numero_case_contestacao', 'motivo_contestacao',
   'valor_contestado_inicial', 'prazo_sla_dias', 'observacao',
+  'ticket_zendesk', 'ticket_clickdesk', 'dados_clickdesk', 'resumo_whatsapp',
 ];
+
+/** Resumo para o cliente: o mesmo teto da coluna no banco. */
+export const LIMITE_RESUMO = 600;
+
+/** Tamanho máximo do JSON que a integração guarda em dados_clickdesk. */
+const LIMITE_JSON_BYTES = 20_000;
+
+/** Número de ticket ou de tratativa: letras, números, ponto, hífen e sublinhado. */
+const CODIGO_VALIDO = /^[A-Za-z0-9._-]{1,100}$/;
+
+function jsonLimitado(valor, campo, erros) {
+  if (valor === undefined) return undefined;
+  if (valor === null) return null;
+  if (typeof valor !== 'object' || Array.isArray(valor)) { erros.push(`${campo} deve ser um objeto JSON`); return undefined; }
+  if (JSON.stringify(valor).length > LIMITE_JSON_BYTES) { erros.push(`${campo} passa de ${LIMITE_JSON_BYTES} caracteres`); return undefined; }
+  return valor;
+}
 
 /**
  * Confere o corpo de POST /v1/tratativas. Devolve { erros, dados }.
@@ -249,7 +274,15 @@ export function validarNovaTratativa(corpo) {
     data_primeira_contratacao: data('data_primeira_contratacao'),
     data_contratacao_plano_atual: data('data_contratacao_plano_atual'),
     segmento_cliente: texto('segmento_cliente', 100),
+    ticket_zendesk: texto('ticket_zendesk', 100),
+    ticket_clickdesk: texto('ticket_clickdesk', 100),
+    resumo_whatsapp: texto('resumo_whatsapp', LIMITE_RESUMO),
   };
+  for (const campo of ['ticket_zendesk', 'ticket_clickdesk']) {
+    if (dados[campo] && !CODIGO_VALIDO.test(dados[campo])) erros.push(`${campo} só pode ter letras, números, ponto, hífen e sublinhado`);
+  }
+  const clickdesk = jsonLimitado(corpo.dados_clickdesk, 'dados_clickdesk', erros);
+  if (clickdesk !== undefined) dados.dados_clickdesk = clickdesk;
 
   if (tipo === 'contestacao') {
     dados.numero_case_contestacao = texto('numero_case_contestacao', 100);
@@ -269,4 +302,102 @@ export function validarNovaTratativa(corpo) {
   // sem chave sem valor: o banco usa o padrão dele
   for (const k of Object.keys(dados)) if (dados[k] === undefined) delete dados[k];
   return { erros, dados: erros.length ? null : dados, observacao: texto('observacao', 1000) };
+}
+
+/* ------------------------------------------------------------------ *
+ * ATUALIZAR (PATCH)
+ * ------------------------------------------------------------------ */
+
+const CAMPOS_ATUALIZAVEIS = ['ticket_zendesk', 'ticket_clickdesk', 'dados_clickdesk', 'resumo_whatsapp'];
+
+/**
+ * Confere o corpo de PATCH /v1/tratativas/{codigo}. Só os quatro campos de
+ * atendimento ao cliente podem ser alterados por aqui (estado, prazo, pontos e
+ * demais continuam só pela tela). Valor null limpa o campo.
+ */
+export function validarAtualizacaoTratativa(corpo) {
+  const erros = [];
+  if (!corpo || typeof corpo !== 'object' || Array.isArray(corpo)) {
+    return { erros: ['o corpo deve ser um objeto JSON'], dados: null };
+  }
+  const desconhecidos = Object.keys(corpo).filter((k) => !CAMPOS_ATUALIZAVEIS.includes(k));
+  if (desconhecidos.length) erros.push(`campos não aceitos: ${desconhecidos.join(', ')} (aceitos: ${CAMPOS_ATUALIZAVEIS.join(', ')})`);
+  if (!Object.keys(corpo).some((k) => CAMPOS_ATUALIZAVEIS.includes(k))) erros.push('envie ao menos um campo para atualizar');
+
+  const dados = {};
+  for (const campo of ['ticket_zendesk', 'ticket_clickdesk']) {
+    if (!(campo in corpo)) continue;
+    const v = corpo[campo];
+    if (v === null || v === '') dados[campo] = null;
+    else if (typeof v !== 'string' || !CODIGO_VALIDO.test(v.trim())) erros.push(`${campo} só pode ter letras, números, ponto, hífen e sublinhado`);
+    else dados[campo] = v.trim();
+  }
+  if ('resumo_whatsapp' in corpo) {
+    const v = corpo.resumo_whatsapp;
+    if (v === null || v === '') dados.resumo_whatsapp = null;
+    else if (typeof v !== 'string') erros.push('resumo_whatsapp deve ser texto');
+    else if (v.trim().length > LIMITE_RESUMO) erros.push(`resumo_whatsapp deve ter no máximo ${LIMITE_RESUMO} caracteres`);
+    else dados.resumo_whatsapp = v.trim();
+  }
+  if ('dados_clickdesk' in corpo) {
+    const j = jsonLimitado(corpo.dados_clickdesk, 'dados_clickdesk', erros);
+    if (j !== undefined) dados.dados_clickdesk = j;
+  }
+  return { erros, dados: erros.length ? null : dados };
+}
+
+/* ------------------------------------------------------------------ *
+ * ACOMPANHAMENTO PARA O CLIENTE (WhatsApp)
+ * ------------------------------------------------------------------ */
+
+/**
+ * O que o cliente pode ver, em linguagem de cliente, conforme o estado. Quando o
+ * agente não escreveu um resumo próprio, a API devolve esta mensagem padrão.
+ * Nada interno (prazo, custo, nome de agente, motivo) entra aqui.
+ */
+export function situacaoParaCliente(status) {
+  switch (status) {
+    case 'registrada':
+      return { situacao: 'Recebida', mensagem: 'Recebemos a sua solicitação e ela está na fila para atendimento.' };
+    case 'tratativa_iniciada':
+    case 'em_andamento':
+      return { situacao: 'Em atendimento', mensagem: 'A sua solicitação está em atendimento pela nossa equipe.' };
+    case 'dependencia_externa':
+      return { situacao: 'Aguardando retorno', mensagem: 'Estamos aguardando o retorno de outra área para seguir com a sua solicitação.' };
+    case 'aguardando_financeiro':
+      return { situacao: 'Em análise financeira', mensagem: 'A sua solicitação está em análise pelo setor financeiro.' };
+    case 'encerrada':
+    case 'aguardando_confirmacao_reabertura':
+      return { situacao: 'Concluída', mensagem: 'A sua solicitação foi concluída. Se precisar de algo mais, fale com o nosso atendimento.' };
+    default:
+      return { situacao: 'Em andamento', mensagem: 'A sua solicitação está em andamento.' };
+  }
+}
+
+/** Só estes campos saem no acompanhamento. */
+export function montarAcompanhamento(t) {
+  const padrao = situacaoParaCliente(t.status);
+  const proprio = typeof t.resumo_whatsapp === 'string' ? t.resumo_whatsapp.trim() : '';
+  return {
+    codigo: t.id_interno,
+    ticket_zendesk: t.ticket_zendesk ?? null,
+    ticket_clickdesk: t.ticket_clickdesk ?? null,
+    situacao: padrao.situacao,
+    resumo: proprio || padrao.mensagem,
+    resumo_do_atendente: proprio.length > 0,
+    atualizado_em: t.resumo_whatsapp_atualizado_em ?? t.updated_date ?? null,
+  };
+}
+
+/**
+ * O que a pessoa digitou: número TRT (TRT-0123) ou número de ticket. Devolve
+ * { tipo: 'trt' | 'ticket', valor } ou null se o formato não serve.
+ */
+export function interpretarCodigo(bruto) {
+  const texto = String(bruto ?? '').trim().replace(/^#/, '');
+  if (!CODIGO_VALIDO.test(texto)) return null;
+  const trt = /^TRT-(\d+)$/i.exec(texto);
+  // o número é gravado com 4 dígitos (TRT-0012): "TRT-12" e "trt-0012" são a mesma tratativa
+  if (trt) return { tipo: 'trt', valor: `TRT-${trt[1].padStart(4, '0')}` };
+  return { tipo: 'ticket', valor: texto };
 }

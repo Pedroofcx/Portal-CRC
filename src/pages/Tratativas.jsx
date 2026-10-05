@@ -54,6 +54,8 @@ const formularioVazio = () => ({
   id_base_cliente: '',
   nome_cliente: '',
   cnpj_cliente: '',
+  ticket_zendesk: '',
+  ticket_clickdesk: '',
   tipo_tratativa: '',
   prioridade: '',
   motivo_id: '',
@@ -896,6 +898,32 @@ export default function Tratativas() {
                 </div>
               )}
             </CampoFormulario>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <CampoFormulario
+                id="ticket_zendesk"
+                rotulo="Ticket no Zendesk"
+                ajuda="Opcional. Só o número do ticket."
+              >
+                <Input
+                  id="ticket_zendesk"
+                  value={formData.ticket_zendesk}
+                  onChange={(e) => setFormData({ ...formData, ticket_zendesk: e.target.value.replace(/[^A-Za-z0-9._-]/g, '') })}
+                  placeholder="Ex: 1089224"
+                />
+              </CampoFormulario>
+              <CampoFormulario
+                id="ticket_clickdesk"
+                rotulo="Ticket no ClickDesk"
+                ajuda="Opcional. Só o número do ticket."
+              >
+                <Input
+                  id="ticket_clickdesk"
+                  value={formData.ticket_clickdesk}
+                  onChange={(e) => setFormData({ ...formData, ticket_clickdesk: e.target.value.replace(/[^A-Za-z0-9._-]/g, '') })}
+                  placeholder="Ex: CD-5521"
+                />
+              </CampoFormulario>
+            </div>
 
             {/* Dados Comerciais do Cliente */}
             <DadosComerciaisForm formData={formData} setFormData={setFormData} validacao={validacao} />

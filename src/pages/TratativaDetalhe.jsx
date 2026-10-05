@@ -14,6 +14,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import LinhaDoTempo from '@/components/tratativas/LinhaDoTempo';
+import AtendimentoAoCliente from '@/components/tratativas/AtendimentoAoCliente';
 import RegistrarNota from '@/components/tratativas/RegistrarNota';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -688,6 +689,9 @@ export default function TratativaDetalhe({ idExterno = null, embutido = false })
             <TabsContent value="informacoes" className="mt-0 space-y-6">
       {/* Perfil Comercial do Cliente — contexto comercial da ocorrência */}
       <PerfilComercialCliente tratativa={tratativa} />
+
+      {/* Tickets e o resumo que o cliente vê no WhatsApp */}
+      <AtendimentoAoCliente tratativa={tratativa} colaborador={colaborador} />
 
           {/* Info Card */}
           <Card className="border-0 shadow-sm">

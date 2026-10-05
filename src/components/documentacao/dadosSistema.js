@@ -76,7 +76,9 @@ export const modulosSistema = [
     objetivo: 'Deixar outros sistemas consultarem e gravarem no Portal por uma API própria, com tudo controlado pela tela Configurações > Integrações: a chave geral, cada integração, cada recurso (consultar e gravar separados) e cada chave.',
     fluxo: 'O gestor cria a integração (nasce desligada e sem acesso a nada), escolhe os recursos e as ações, cria uma chave (o texto aparece uma única vez) e liga. O outro sistema chama a Edge Function api com a chave em "Authorization: Bearer" ou "x-api-key". A função confere, nesta ordem: chave geral ligada, chave existente, ativa e não vencida, integração ligada, recurso e ação liberados e limite de chamadas por minuto. Cada chamada reconhecida entra no registro de uso, aceita ou recusada.',
     campos_chave: [
-      { campo: 'Rotas v1', descricao: 'GET /v1/ping, GET e POST /v1/tratativas, GET /v1/tratativas/{numero}, GET /v1/colaboradores, GET /v1/ciclos. Endereço: https://<projeto>.supabase.co/functions/v1/api/v1/...' },
+      { campo: 'Rotas v1', descricao: 'GET /v1/ping, GET, POST e PATCH em /v1/tratativas, GET /v1/tratativas/{codigo}, GET /v1/acompanhamento/{codigo}, GET /v1/colaboradores, GET /v1/ciclos. O {codigo} é o número TRT, o ticket do Zendesk ou do ClickDesk. Endereço: https://<projeto>.supabase.co/functions/v1/api/v1/...' },
+      { campo: 'Acompanhamento (WhatsApp)', descricao: 'GET /v1/acompanhamento/{codigo} devolve só a situação (em linguagem de cliente) e o resumo da tratativa: o texto do agente ou, se não houver, uma frase padrão do estado. É um recurso à parte, para dar ao WhatsApp acesso só a isso e não às tratativas. Código que casa com mais de uma tratativa dá 409, em vez de adivinhar.' },
+      { campo: 'Ações por recurso', descricao: 'Consultar, gravar (criar) e atualizar são liberadas separadamente. PATCH altera só ticket_zendesk, ticket_clickdesk, dados_clickdesk e resumo_whatsapp: estado, prazo e pontos continuam só pela tela.' },
       { campo: 'integracao.recursos', descricao: 'JSON { recurso: { ler: true/false, gravar: true/false } }. A lista de recursos e ações possíveis é RECURSOS em politica.js, a mesma que a tela mostra.' },
       { campo: 'Códigos de recusa', descricao: '503 integracoes_desligadas, 401 chave_invalida / chave_desativada / chave_expirada, 403 integracao_desligada / sem_permissao, 429 limite_excedido, e 400/422 para dados inválidos.' },
       { campo: 'Campos que saem', descricao: 'Lista fechada (CAMPOS_TRATATIVA, CAMPOS_COLABORADOR, CAMPOS_CICLO): nunca custo operacional, salário, e-mail de colaborador nem notas do Oráculo.' },
@@ -86,6 +88,7 @@ export const modulosSistema = [
       'A chave geral nasce DESLIGADA. Nenhum sistema de fora entra até o gestor ligar.',
       'A chave nunca é guardada: só o hash SHA-256 (integracao_chave_segredo, fechada ao app). Perdeu, cria outra.',
       'Consultar e gravar são liberados separadamente em cada recurso.',
+      'Atenção no acompanhamento: o número TRT e o ticket são sequenciais, então quem souber o formato pode testar números e ler o resumo de tratativas de outros clientes. Por isso o resumo é escrito pelo agente PARA o cliente (nada interno) e o recurso tem o limite de chamadas por minuto da integração. Se quiser reforçar, dá para exigir também o CNPJ ou o número do WhatsApp.',
       'A função usa a chave de serviço do banco, então as travas por linha (RLS) NÃO valem para ela: quem decide o que sai e o que entra é politica.js. Mudou um recurso, mude lá e teste.',
       'Publicação da função: ver o cabeçalho de supabase/functions/api/index.ts (dois arquivos e "Verify JWT" desligado).',
     ],

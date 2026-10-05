@@ -23,7 +23,7 @@ import { ligacoesAuditoria, resumoAuditoria } from '../src/lib/apuracao/auditori
 import { revisarLigacao } from '../src/lib/apuracao/revisaoTelefone.js';
 import { indisponiveisEm, filaDoCanal, gradeDoMes, montarJustificativa, motivoDaJustificativa, resumoDeOverrides, filtrarHistorico, ultimosMeses } from '../src/lib/equidade.js';
 import { vazioViraNulo } from '../src/lib/camposVazios.js';
-import { decidir, permitido, extrairChave, sha256hex, validarNovaTratativa, slaDoTipo, paginacao, filtrosDeTratativas, CAMPOS_TRATATIVA, CAMPOS_COLABORADOR, RECURSOS } from '../supabase/functions/api/politica.js';
+import { decidir, permitido, extrairChave, sha256hex, validarNovaTratativa, slaDoTipo, paginacao, filtrosDeTratativas, CAMPOS_TRATATIVA, CAMPOS_COLABORADOR, RECURSOS, validarAtualizacaoTratativa, situacaoParaCliente, montarAcompanhamento, interpretarCodigo } from '../supabase/functions/api/politica.js';
 import path from 'node:path';
 import { carregarModuloJsx } from './lib/carregar-jsx.mjs';
 
@@ -1629,6 +1629,62 @@ console.log('\n== api de integracoes: quem passa ==');
   checa('filtro valido', filtrosDeTratativas(q('tipo=procon&desde=2026-09-01')).filtros.tipo, 'procon');
   checa('data de filtro invalida', filtrosDeTratativas(q('ate=ontem')).erros.join(' | '), 'AAAA-MM-DD');
   checa('todo recurso tem ao menos a acao ler', String(Object.values(RECURSOS).every((r) => r.acoes.ler)), 'true');
+  console.log('\n== api: acompanhamento no WhatsApp, tickets e atualizacao ==');
+  checa('TRT com zeros', JSON.stringify(interpretarCodigo('TRT-0012')), '{"tipo":"trt","valor":"TRT-0012"}');
+  checa('TRT sem zeros e minusculo vira o mesmo', JSON.stringify(interpretarCodigo(' trt-12 ')), '{"tipo":"trt","valor":"TRT-0012"}');
+  checa('ticket numerico', JSON.stringify(interpretarCodigo('1089224')), '{"tipo":"ticket","valor":"1089224"}');
+  checa('ticket com cerquilha', JSON.stringify(interpretarCodigo('#1089224')), '{"tipo":"ticket","valor":"1089224"}');
+  checa('codigo com espaco e invalido', String(interpretarCodigo('12 34')), 'null');
+  checa('codigo com aspas e invalido (nada de injecao no filtro)', String(interpretarCodigo(`1',ticket_zendesk.neq.'`)), 'null');
+  checa('codigo com virgula e invalido', String(interpretarCodigo('1,2')), 'null');
+  checa('codigo vazio e invalido', String(interpretarCodigo('')), 'null');
+
+  checa('estado registrada: frase de cliente', situacaoParaCliente('registrada').situacao, 'Recebida');
+  checa('em andamento', situacaoParaCliente('em_andamento').situacao, 'Em atendimento');
+  checa('iniciada = em andamento', situacaoParaCliente('tratativa_iniciada').situacao, 'Em atendimento');
+  checa('dependencia externa', situacaoParaCliente('dependencia_externa').situacao, 'Aguardando retorno');
+  checa('financeiro', situacaoParaCliente('aguardando_financeiro').situacao, 'Em análise financeira');
+  checa('encerrada', situacaoParaCliente('encerrada').situacao, 'Concluída');
+  checa('aguardando reabertura conta como concluida', situacaoParaCliente('aguardando_confirmacao_reabertura').situacao, 'Concluída');
+  checa('estado desconhecido nao quebra', situacaoParaCliente('xpto').situacao, 'Em andamento');
+
+  const bruta = {
+    id_interno: 'TRT-0123', status: 'em_andamento', ticket_zendesk: '555', ticket_clickdesk: null,
+    resumo_whatsapp: '  Estamos ajustando a cobranca e damos retorno amanha.  ', resumo_whatsapp_atualizado_em: '2026-10-05T10:00:00Z',
+    nome_cliente: 'SEGREDO LTDA', custo_operacional_reais: 99, agente_responsavel_nome: 'Fulana', valor_devolvido_cliente: 500, historico_estados: [{ observacao: 'interno' }],
+  };
+  const acomp = montarAcompanhamento(bruta);
+  checa('acompanhamento usa o resumo do agente (sem espacos)', acomp.resumo, 'Estamos ajustando a cobranca e damos retorno amanha.');
+  checa('acompanhamento marca que e do atendente', String(acomp.resumo_do_atendente), 'true');
+  checa('acompanhamento so tem os campos de cliente', JSON.stringify(Object.keys(acomp)), '["codigo","ticket_zendesk","ticket_clickdesk","situacao","resumo","resumo_do_atendente","atualizado_em"]');
+  checa('acompanhamento nao vaza nome, custo, agente nem historico', String(/SEGREDO|99|Fulana|500|interno/.test(JSON.stringify(acomp))), 'false');
+  const semResumo = montarAcompanhamento({ ...bruta, resumo_whatsapp: null });
+  checa('sem resumo: frase padrao do estado', semResumo.resumo, 'A sua solicitação está em atendimento pela nossa equipe.');
+  checa('sem resumo: nao e do atendente', String(semResumo.resumo_do_atendente), 'false');
+  checa('resumo so com espacos vira padrao', montarAcompanhamento({ ...bruta, resumo_whatsapp: '   ' }).resumo_do_atendente === false ? 'padrao' : 'proprio', 'padrao');
+  checa('atualizado_em cai para updated_date', montarAcompanhamento({ ...bruta, resumo_whatsapp_atualizado_em: null, updated_date: '2026-10-01T00:00:00Z' }).atualizado_em, '2026-10-01');
+
+  const at = (c) => validarAtualizacaoTratativa(c);
+  checa('atualizar: ticket valido', JSON.stringify(at({ ticket_clickdesk: 'CD-77' }).dados), '{"ticket_clickdesk":"CD-77"}');
+  checa('atualizar: corpo vazio e recusado', at({}).erros.join(' | '), 'ao menos um campo');
+  checa('atualizar: status nao pode ser mudado por aqui', at({ status: 'encerrada' }).erros.join(' | '), 'campos não aceitos: status');
+  checa('atualizar: nome do cliente tambem nao', at({ nome_cliente: 'x' }).erros.join(' | '), 'campos não aceitos');
+  checa('atualizar: null limpa o ticket', String(at({ ticket_zendesk: null }).dados.ticket_zendesk), 'null');
+  checa('atualizar: resumo acima de 600', at({ resumo_whatsapp: 'x'.repeat(601) }).erros.join(' | '), 'no máximo 600');
+  checa('atualizar: resumo de 600 passa', String(at({ resumo_whatsapp: 'x'.repeat(600) }).erros.length), '0');
+  checa('atualizar: ticket com espaco', at({ ticket_zendesk: '12 34' }).erros.join(' | '), 'letras, números');
+  checa('atualizar: dados_clickdesk objeto passa', JSON.stringify(at({ dados_clickdesk: { cliente: 'X', fila: 'suporte' } }).dados.dados_clickdesk), '{"cliente":"X","fila":"suporte"}');
+  checa('atualizar: dados_clickdesk lista e recusada', at({ dados_clickdesk: [1] }).erros.join(' | '), 'objeto JSON');
+  checa('atualizar: dados_clickdesk enorme e recusado', at({ dados_clickdesk: { x: 'a'.repeat(21000) } }).erros.join(' | '), 'passa de 20000');
+  checa('criar aceita ticket e resumo', String(val({ ...ok, ticket_zendesk: '555', ticket_clickdesk: 'CD-1', resumo_whatsapp: 'Recebido.' }).erros.length), '0');
+  checa('criar: ticket invalido', val({ ...ok, ticket_zendesk: 'a b' }).erros.join(' | '), 'letras, números');
+  checa('recurso acompanhamento so tem ler', JSON.stringify(Object.keys(RECURSOS.acompanhamento.acoes)), '["ler"]');
+  checa('tratativas tem ler, gravar e atualizar', JSON.stringify(Object.keys(RECURSOS.tratativas.acoes)), '["ler","gravar","atualizar"]');
+  checa('campos de saida incluem os tickets', String(['ticket_zendesk', 'ticket_clickdesk', 'resumo_whatsapp'].every((c) => CAMPOS_TRATATIVA.includes(c))), 'true');
+  checa('atualizar exige permissao propria (ler nao basta)', cod(decidir({ geral: true, chave: chaveOk, integracao: integ({ recursos: { tratativas: { ler: true, gravar: true } } }), recurso: 'tratativas', acao: 'atualizar', agora, usoNoUltimoMinuto: 0 })), '403 sem_permissao');
+  checa('acompanhamento liberado sem liberar tratativas', cod(decidir({ geral: true, chave: chaveOk, integracao: integ({ recursos: { acompanhamento: { ler: true } } }), recurso: 'acompanhamento', acao: 'ler', agora, usoNoUltimoMinuto: 0 })), 'ok');
+  checa('acompanhamento liberado nao abre tratativas', cod(decidir({ geral: true, chave: chaveOk, integracao: integ({ recursos: { acompanhamento: { ler: true } } }), recurso: 'tratativas', acao: 'ler', agora, usoNoUltimoMinuto: 0 })), '403 sem_permissao');
+
 }
 
 console.log('\n== conferencia de cores (o verificador pega o que deve) ==');

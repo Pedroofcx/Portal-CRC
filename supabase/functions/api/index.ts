@@ -26,8 +26,13 @@
  *   GET  /v1/ping                  prova que a chave funciona (não exige recurso)
  *   GET  /v1/tratativas            lista (filtros: tipo, status, prioridade,
  *                                  desde, ate, pagina, limite)
- *   GET  /v1/tratativas/{numero}   uma tratativa pelo número (TRT-0123) ou id
+ *   GET  /v1/tratativas/{codigo}   uma tratativa pelo número TRT, pelo ticket
+ *                                  (Zendesk ou ClickDesk) ou pelo id
  *   POST /v1/tratativas            registra uma tratativa nova
+ *   PATCH /v1/tratativas/{codigo}  atualiza ticket_zendesk, ticket_clickdesk,
+ *                                  dados_clickdesk e resumo_whatsapp
+ *   GET  /v1/acompanhamento/{codigo}  o que o CLIENTE vê no WhatsApp: situação e
+ *                                  resumo (só isso), pelo número TRT ou pelo ticket
  *   GET  /v1/colaboradores         nome, cargo e equipe (sem salário nem e-mail)
  *   GET  /v1/ciclos                os ciclos trimestrais
  *
@@ -44,7 +49,8 @@
 import {
   VERSAO, extrairChave, sha256hex, decidir,
   CAMPOS_TRATATIVA, CAMPOS_COLABORADOR, CAMPOS_CICLO,
-  paginacao, filtrosDeTratativas, validarNovaTratativa, slaDoTipo,
+  paginacao, filtrosDeTratativas, validarNovaTratativa, validarAtualizacaoTratativa, slaDoTipo,
+  interpretarCodigo, montarAcompanhamento,
 } from './politica.js';
 
 const URL_SUPABASE = Deno.env.get('SUPABASE_URL')!;
@@ -58,7 +64,7 @@ const CABECALHOS = {
   'Cache-Control': 'no-store',
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-api-key, content-type',
-  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+  'Access-Control-Allow-Methods': 'GET, POST, PATCH, OPTIONS',
 };
 
 const responder = (corpo: unknown, status = 200, extra: Record<string, string> = {}) =>
@@ -103,15 +109,63 @@ async function listarTratativas({ sb, params }: Contexto) {
   return responder({ dados: data, paginacao: { pagina: pg.pagina, limite: pg.limite, total: count ?? data.length } });
 }
 
+/**
+ * Acha UMA tratativa pelo que a pessoa informou: número TRT, ticket do Zendesk
+ * ou do ClickDesk (ou o id interno). Se o número casar com mais de uma
+ * tratativa (há números repetidos no histórico), NÃO adivinha: devolve conflito.
+ */
+async function buscarPorCodigo(sb: any, bruto: string, campos: string) {
+  const ehUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(bruto);
+  let q = sb.from('tratativa_base').select(campos).or('excluida.is.null,excluida.eq.false');
+  if (ehUuid) {
+    q = q.eq('id', bruto);
+  } else {
+    const codigo = interpretarCodigo(bruto);
+    if (!codigo) return { erro: erro(400, 'codigo_invalido', 'Código inválido. Use o número TRT (TRT-0123) ou o número do ticket.') };
+    q = codigo.tipo === 'trt'
+      ? q.eq('id_interno', codigo.valor)
+      : q.or(`ticket_zendesk.eq.${codigo.valor},ticket_clickdesk.eq.${codigo.valor}`);
+  }
+  const { data, error } = await q.limit(2);
+  if (error) return { erro: erro(500, 'erro_interno', 'Não consegui consultar a tratativa.') };
+  if (!data?.length) return { erro: erro(404, 'nao_encontrada', 'Tratativa não encontrada.') };
+  if (data.length > 1) return { erro: erro(409, 'codigo_ambiguo', 'Este código corresponde a mais de uma tratativa. Procure o atendimento.') };
+  return { tratativa: data[0] };
+}
+
 async function umaTratativa({ sb, partes }: Contexto) {
-  const chave = decodeURIComponent(partes[2] ?? '');
-  const ehUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(chave);
-  let q = sb.from('tratativa_base').select(CAMPOS_TRATATIVA.join(',')).or('excluida.is.null,excluida.eq.false');
-  q = ehUuid ? q.eq('id', chave) : q.eq('id_interno', chave.toUpperCase());
-  const { data, error } = await q.order('data_registro', { ascending: true }).limit(1);
-  if (error) return erro(500, 'erro_interno', 'Não consegui consultar a tratativa.');
-  if (!data?.length) return erro(404, 'nao_encontrada', 'Tratativa não encontrada.');
-  return responder({ dados: data[0] });
+  const { tratativa, erro: falha } = await buscarPorCodigo(sb, decodeURIComponent(partes[2] ?? ''), CAMPOS_TRATATIVA.join(','));
+  return falha ?? responder({ dados: tratativa });
+}
+
+/** O que o cliente vê no WhatsApp: só a situação e o resumo, nunca a tratativa. */
+async function acompanhamento({ sb, partes }: Contexto) {
+  const { tratativa, erro: falha } = await buscarPorCodigo(
+    sb, decodeURIComponent(partes[2] ?? ''),
+    'id_interno, status, ticket_zendesk, ticket_clickdesk, resumo_whatsapp, resumo_whatsapp_atualizado_em, updated_date',
+  );
+  return falha ?? responder({ dados: montarAcompanhamento(tratativa) });
+}
+
+async function atualizarTratativa({ sb, integracao, req, partes }: Contexto) {
+  const tamanho = Number(req.headers.get('content-length') ?? '0');
+  if (tamanho > LIMITE_CORPO_BYTES) return erro(413, 'corpo_grande', 'Corpo da requisição grande demais.');
+  let corpo: unknown;
+  try { corpo = await req.json(); } catch { return erro(400, 'json_invalido', 'O corpo deve ser um JSON válido.'); }
+
+  const { erros, dados } = validarAtualizacaoTratativa(corpo);
+  if (erros.length || !dados) return erro(422, 'dados_invalidos', 'Há campos inválidos.', erros);
+
+  const { tratativa, erro: falha } = await buscarPorCodigo(sb, decodeURIComponent(partes[2] ?? ''), 'id, id_interno');
+  if (falha) return falha;
+
+  const agora = new Date().toISOString();
+  const mudanca: Record<string, unknown> = { ...dados, updated_date: agora, atualizado_em: agora };
+  if ('resumo_whatsapp' in dados) mudanca.resumo_whatsapp_por_nome = dados.resumo_whatsapp ? `API: ${integracao.nome}` : null;
+
+  const { error } = await sb.from('tratativa_base').update(mudanca).eq('id', tratativa.id);
+  if (error) return erro(422, 'recusada_pelo_banco', 'O banco recusou a atualização.', error.message);
+  return responder({ dados: { id: tratativa.id, id_interno: tratativa.id_interno, atualizados: Object.keys(dados) } });
 }
 
 async function proximoNumero(sb: any): Promise<string> {
@@ -153,6 +207,10 @@ async function criarTratativa({ sb, integracao, req }: Contexto) {
     }],
   };
   if (ehContestacao) registro.data_inicio_tratativa = agora;
+  if (dados.resumo_whatsapp) {
+    registro.resumo_whatsapp_atualizado_em = agora;
+    registro.resumo_whatsapp_por_nome = quem;
+  }
 
   const { data, error } = await sb.from('tratativa_base').insert(registro).select('id, id_interno').single();
   if (error) return erro(422, 'recusada_pelo_banco', 'O banco recusou o registro.', error.message);
@@ -179,6 +237,8 @@ const ROTAS = [
   { metodo: 'GET', caminho: /^\/v1\/tratativas$/, recurso: 'tratativas', acao: 'ler', f: listarTratativas },
   { metodo: 'GET', caminho: /^\/v1\/tratativas\/[^/]+$/, recurso: 'tratativas', acao: 'ler', f: umaTratativa },
   { metodo: 'POST', caminho: /^\/v1\/tratativas$/, recurso: 'tratativas', acao: 'gravar', f: criarTratativa },
+  { metodo: 'PATCH', caminho: /^\/v1\/tratativas\/[^/]+$/, recurso: 'tratativas', acao: 'atualizar', f: atualizarTratativa },
+  { metodo: 'GET', caminho: /^\/v1\/acompanhamento\/[^/]+$/, recurso: 'acompanhamento', acao: 'ler', f: acompanhamento },
   { metodo: 'GET', caminho: /^\/v1\/colaboradores$/, recurso: 'colaboradores', acao: 'ler', f: listarColaboradores },
   { metodo: 'GET', caminho: /^\/v1\/ciclos$/, recurso: 'ciclos', acao: 'ler', f: listarCiclos },
 ];

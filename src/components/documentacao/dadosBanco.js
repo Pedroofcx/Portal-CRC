@@ -143,6 +143,7 @@ export const funcoesDoBanco = [
   { nome: 'papel_atual', migration: 13, descricao: 'Devolve o papel (agente, gestor, fi) da pessoa logada, ou nulo.' },
   { nome: 'meu_colaborador_id', migration: 14, descricao: 'O id (TEXTO, não uuid) do colaborador logado. Base de tudo que é "só do dono". Atenção ao tipo: comparar com uuid dá erro.' },
   { nome: 'tem_permissao', migration: 35, descricao: 'tem_permissao(chave): vale a exceção cadastrada em colaborador_permissao; sem exceção, o padrão do papel (gestor sim, agente não).' },
+  { nome: 'carimba_resumo_whatsapp', migration: 44, descricao: 'Função do gatilho ad_carimba_resumo_whatsapp: grava o horário (do servidor) em que o resumo para o cliente mudou.' },
   { nome: 'criar_chave_integracao', migration: 43, descricao: 'Gera uma chave de API para uma integração (exige gerenciar_integracoes), devolve o texto UMA vez e guarda só o hash.' },
   { nome: 'minhas_permissoes', migration: 35, descricao: 'Lista as chaves de permissão que a pessoa logada tem agora. O front chama uma vez por sessão (usePermissoes).' },
   { nome: 'transicao_de_status_permitida', migration: 8, descricao: 'A matriz da máquina de estados da tratativa: de qual estado para quais é permitido ir.' },
@@ -173,6 +174,7 @@ export const gatilhosDoBanco = [
   { nome: 'ab_protege_auditoria_replicavel', tabela: 'tratativa_base', quando: 'antes de inserir ou alterar', migration: 20, descricao: 'Só quem tem aprovar_solucao_replicavel grava a decisão sobre a solução replicável.' },
   { nome: 'calcula_custo_ao_encerrar', tabela: 'tratativa_base', quando: 'antes de alterar', migration: 10, descricao: 'Grava o custo operacional na entrada em encerrada ou aguardando_confirmacao_reabertura.' },
   { nome: 'calcula_sla_ao_encerrar', tabela: 'tratativa_base', quando: 'antes de alterar', migration: 9, descricao: 'Grava tempo_total_minutos e encerrado_no_sla (regra de 02/10/2026: do início, com pausa em dependência externa).' },
+  { nome: 'ad_carimba_resumo_whatsapp', tabela: 'tratativa_base', quando: 'antes de alterar', migration: 44, descricao: 'Quando resumo_whatsapp muda, grava resumo_whatsapp_atualizado_em com o horário do servidor.' },
   { nome: 'ac_protege_papel_colaborador', tabela: 'colaborador_base', quando: 'antes de inserir ou alterar', migration: 41, descricao: 'Só gestor de verdade muda papel, e-mail, vínculo de conta e Facilitador Interno.' },
 ];
 
@@ -228,6 +230,7 @@ export const migracoes = [
   { n: 41, titulo: 'Permissão por área', descricao: 'eh_gestor() vira tem_permissao(<área>) em ~40 tabelas, mais a trava contra escalada.' },
   { n: 42, titulo: 'Arquivar o legado', descricao: 'Move 7 tabelas sem uso para o esquema arquivo_legado (sem apagar dados) e apaga 4 funções antigas.' },
   { n: 43, titulo: 'Integrações (base da API)', descricao: 'Chave geral, integrações, chaves, registro de uso e a permissão gerenciar_integracoes.' },
+  { n: 44, titulo: 'Tickets, ClickDesk e resumo do WhatsApp', descricao: 'Seis colunas novas em tratativa (ticket_zendesk, ticket_clickdesk, dados_clickdesk, resumo_whatsapp e os dois carimbos do resumo) e o gatilho do carimbo.' },
   { n: 99, titulo: 'Restrições pós-importação', descricao: 'Só se aplica depois da carga de dados do Base44.' },
 ];
 
