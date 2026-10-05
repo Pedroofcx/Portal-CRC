@@ -170,6 +170,7 @@ export default function PainelIntegracoes() {
             <li><code className="text-foreground">GET /tratativas</code>, <code className="text-foreground">GET /tratativas/TRT-0123</code> (ou pelo número do ticket), <code className="text-foreground">POST /tratativas</code> e <code className="text-foreground">PATCH /tratativas/TRT-0123</code></li>
             <li><code className="text-foreground">GET /acompanhamento/TRT-0123?cnpj=...</code> (ou pelo ticket): só a situação e o resumo que o cliente pode ver, mediante o CNPJ do cliente, para o WhatsApp</li>
             <li><code className="text-foreground">DELETE /tratativas/TRT-0123</code> (exclusão lógica de tratativa em aberto, com justificativa)</li>
+            <li><code className="text-foreground">POST /apuracao</code> (linhas brutas: o Portal classifica e calcula) e <code className="text-foreground">DELETE /apuracao/{'{lote}'}</code> (desfaz um lote enviado pela própria integração)</li>
             <li><code className="text-foreground">GET /apuracao</code>, <code className="text-foreground">GET /jornada/etapas</code>, <code className="text-foreground">GET /jornada/motivos</code> e <code className="text-foreground">GET /jornada/resumo</code></li>
             <li><code className="text-foreground">GET /colaboradores</code> e <code className="text-foreground">GET /ciclos</code></li>
           </ul>

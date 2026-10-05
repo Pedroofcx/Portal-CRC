@@ -42,6 +42,8 @@ async function chamar(metodo, caminho, { chave = chaveTexto, corpo, cabecalhos =
 const codigo = (r) => r.json?.erro?.codigo ?? '';
 
 let integracaoId = null, chaveId = null;
+let colabTesteId = null;
+const EMAIL_COLAB = 'zz.teste.api@clickdigital.com.br';
 const idsTratativas = [];
 const geralAntes = (await admin.from('integracao_geral').select('habilitada').eq('id', 1).single()).data.habilitada;
 
@@ -230,6 +232,70 @@ try {
   r = await chamar('DELETE', `/tratativas/${numero}`, { corpo: { justificativa: 'Registrada em duplicidade de teste' } });
   ver('excluir de novo: ja nao existe (404)', r.status === 404, `${r.status}`);
 
+  console.log('\n== 6c. apuracao: linhas brutas ==');
+  const { data: colabTeste, error: ec } = await admin.from('colaborador_base').insert({ nome_completo: 'ZZ Teste API Colaborador', email: EMAIL_COLAB, papel: 'agente', ativo: false }).select('id').single();
+  if (ec) throw ec; colabTesteId = colabTeste.id;
+  const linhasTel = [
+    { agente: 'ZZ Nome Que So Existe No Teste', data: '2000-01-03', origem: '', status: 'Atendida', fcr: '1', csat: '5' },
+    { agente: 'ZZ Nome Que So Existe No Teste', data: '2000-01-03', origem: '', status: 'Atendida', fcr: '1', csat: '4' },
+    { agente: 'ZZ Nome Que So Existe No Teste', data: '2000-01-03', origem: '', status: 'Atendida', fcr: '2', csat: '' },
+    { agente: 'ZZ Nome Que So Existe No Teste', data: '2000-01-03', origem: '', status: 'Abandonada', fcr: '', csat: '' },
+  ];
+  await setInteg({ recursos: { apuracao: { ler: true } } });
+  r = await chamar('POST', '/apuracao', { corpo: { fonte: '55pbx', registros: linhasTel } });
+  ver('enviar apuracao sem permissao de gravar (403)', r.status === 403 && codigo(r) === 'sem_permissao', `${r.status} ${codigo(r)}`);
+  await setInteg({ recursos: { apuracao: { ler: true, gravar: true, excluir: true } } });
+  r = await chamar('POST', '/apuracao', { corpo: { fonte: 'zap', registros: linhasTel } });
+  ver('fonte invalida (422)', r.status === 422, `${r.status}`);
+  r = await chamar('POST', '/apuracao', { corpo: { fonte: '55pbx', registros: [{ agente: 'x' }] } });
+  ver('registro sem data (422)', r.status === 422 && JSON.stringify(r.json?.erro?.detalhes).includes('falta data'), `${r.status}`);
+  r = await chamar('POST', '/apuracao', { corpo: { fonte: '55pbx', registros: linhasTel } });
+  ver('nome que nao liga a ninguem: recusa tudo (422) e diz quem', r.status === 422 && codigo(r) === 'agentes_sem_vinculo' && r.json.erro.detalhes[0].includes('ZZ Nome'), `${r.status} ${codigo(r)}`);
+  r = await chamar('POST', '/apuracao', { corpo: { fonte: '55pbx', registros: linhasTel, vinculos: { 'ZZ Nome Que So Existe No Teste': '00000000-0000-0000-0000-000000000000' } } });
+  ver('vinculo para colaborador inexistente (422)', r.status === 422 && codigo(r) === 'vinculo_invalido', `${r.status} ${codigo(r)}`);
+  const { count: antes } = await admin.from('apuracao').select('id', { count: 'exact', head: true }).like('arquivo_nome', 'api:ZZ%');
+  ver('nada foi gravado pelas recusas', antes === 0, `${antes}`);
+  r = await chamar('POST', '/apuracao', { corpo: { fonte: '55pbx', registros: linhasTel, vinculos: { 'ZZ Nome Que So Existe No Teste': colabTesteId } } });
+  ver('envio valido (201)', r.status === 201 && r.json?.dados?.registros_criados === 1 && /^imp-api-/.test(r.json?.dados?.importacao_id), `${r.status} ${JSON.stringify(r.json?.dados)?.slice(0, 160)}`);
+  const lote = r.json?.dados?.importacao_id;
+  ver('devolve linhas lidas/validas e o periodo', r.json?.dados?.linhas_lidas === 4 && r.json?.dados?.linhas_validas === 4 && r.json?.dados?.periodo?.inicio === '2000-01-03', JSON.stringify(r.json?.dados?.periodo));
+  const { data: ap } = await admin.from('apuracao').select('*').eq('importacao_id', lote);
+  const dia = ap?.[0]?.dados_por_data?.[0]?.telefone;
+  ver('gravou 1 registro ligado ao colaborador, origem API', ap?.length === 1 && ap[0].colaborador_id === colabTesteId && ap[0].arquivo_nome === `api:${NOME}` && ap[0].apurado_por_nome === `API: ${NOME}` && ap[0].fonte === '55pbx', JSON.stringify([ap?.length, ap?.[0]?.arquivo_nome]));
+  ver('o PORTAL classificou: 2 positivas, 1 negativa, 4 ligacoes, 3 atendidas', dia?.total_positivas === 2 && dia?.total_negativas === 1 && dia?.total_ligacoes === 4 && dia?.total_atendidas === 3, JSON.stringify(dia));
+  ver('csat do dia = 2 / (2 + 1) = 66,7%', Math.abs(dia?.csat - 66.7) < 0.1, String(dia?.csat));
+  ver('o historico detalhado fica no banco (para a auditoria)', Array.isArray(ap?.[0]?.historico_detalhado) && ap[0].historico_detalhado.length === 4);
+
+  r = await chamar('GET', '/apuracao?colaborador_id=' + colabTesteId + '&desde=2000-01-01&ate=2000-01-31');
+  ver('a leitura enxerga o que foi enviado', r.status === 200 && r.json?.dados?.length === 1 && r.json.dados[0].dados_por_data?.[0]?.telefone?.total_positivas === 2, `${r.status} n=${r.json?.dados?.length}`);
+  ver('a leitura nao traz o historico detalhado', !('historico_detalhado' in (r.json?.dados?.[0] ?? {})));
+
+  // chat e cx: o mesmo caminho, outras regras
+  r = await chamar('POST', '/apuracao', { corpo: { fonte: 'zendesk', vinculos: { 'ZZ Nome Que So Existe No Teste': colabTesteId }, registros: [
+    { agente: 'ZZ Nome Que So Existe No Teste', ticket: 'T1', data: '2000-01-04', bom: '1', ruim: '0' },
+    { agente: 'ZZ Nome Que So Existe No Teste', ticket: 'T2', data: '2000-01-04', bom: '0', ruim: '1' },
+  ] } });
+  const loteChat = r.json?.dados?.importacao_id;
+  ver('envio de chat (201)', r.status === 201, `${r.status} ${codigo(r)}`);
+  const { data: apChat } = await admin.from('apuracao').select('dados_por_data').eq('importacao_id', loteChat).single();
+  ver('chat classificado: 2 chats, 1 positivo, 1 negativo', apChat?.dados_por_data?.[0]?.chat?.total_chats === 2 && apChat.dados_por_data[0].chat.total_positivos === 1 && apChat.dados_por_data[0].chat.total_negativos === 1, JSON.stringify(apChat?.dados_por_data?.[0]?.chat));
+
+  // desfazer: so o que a propria integracao enviou
+  await admin.from('apuracao').insert({ colaborador_id: colabTesteId, colaborador_nome: 'ZZ', tipo_apuracao: 'telefone', importacao_id: 'imp-api-de-outra-integracao', arquivo_nome: 'api:ZZ OUTRA INTEGRACAO', periodo_inicio: '2000-01-05', periodo_fim: '2000-01-05', data_apuracao: new Date().toISOString() });
+  r = await chamar('DELETE', '/apuracao/imp-api-de-outra-integracao');
+  ver('lote de OUTRA integracao nao pode ser desfeito (404)', r.status === 404, `${r.status}`);
+  const { count: outraAinda } = await admin.from('apuracao').select('id', { count: 'exact', head: true }).eq('importacao_id', 'imp-api-de-outra-integracao');
+  ver('e continua la', outraAinda === 1);
+  r = await chamar('DELETE', '/apuracao/imp-1727000000000-abcde');
+  ver('lote de CSV (imp-...) nao se desfaz por API (400)', r.status === 400, `${r.status}`);
+  r = await chamar('DELETE', `/apuracao/${lote}`);
+  ver('desfazer o proprio lote (200)', r.status === 200 && r.json?.dados?.registros_removidos === 1, `${r.status} ${JSON.stringify(r.json?.dados)}`);
+  r = await chamar('DELETE', `/apuracao/${lote}`);
+  ver('desfazer de novo (404)', r.status === 404, `${r.status}`);
+  await setInteg({ recursos: { apuracao: { ler: true, gravar: true } } });
+  r = await chamar('DELETE', `/apuracao/${loteChat}`);
+  ver('desfazer sem permissao de excluir (403)', r.status === 403 && codigo(r) === 'sem_permissao', `${r.status} ${codigo(r)}`);
+
   console.log('\n== 7. limite por minuto e rotas ==');
   await setInteg({ limite_por_minuto: 4, recursos: { tratativas: { ler: true } } });
   let statusFinal = 0; const vistos = [];
@@ -255,6 +321,10 @@ try {
   falhou++; console.log('  ERRO NO TESTE:', e?.message ?? e);
 } finally {
   // --- limpeza: tudo o que foi criado, pelo id, com conferência ---
+  await admin.from('apuracao').delete().like('arquivo_nome', 'api:ZZ%');
+  await admin.from('apuracao').delete().eq('importacao_id', 'imp-api-de-outra-integracao');
+  if (colabTesteId) await admin.from('colaborador_base').delete().eq('id', colabTesteId);
+  await admin.from('colaborador_base').delete().eq('email', EMAIL_COLAB);
   for (const id of idsTratativas) await admin.from('tratativa_base').delete().eq('id', id);
   await admin.from('integracao_log').delete().eq('integracao_nome', NOME);
   if (integracaoId) await admin.from('integracao').delete().eq('id', integracaoId);
@@ -265,10 +335,13 @@ try {
   const { data: restoC } = await admin.from('integracao_chave').select('id').eq('id', chaveId ?? '00000000-0000-0000-0000-000000000000');
   const { data: restoS } = await admin.from('integracao_chave_segredo').select('chave_id').eq('chave_id', chaveId ?? '00000000-0000-0000-0000-000000000000');
   const { data: restoL } = await admin.from('integracao_log').select('id').eq('integracao_nome', NOME);
+  const { count: restoAp } = await admin.from('apuracao').select('id', { count: 'exact', head: true }).or('arquivo_nome.like.api:ZZ%,importacao_id.eq.imp-api-de-outra-integracao');
+  const { data: restoCol } = await admin.from('colaborador_base').select('id').eq('email', EMAIL_COLAB);
   const { data: g } = await admin.from('integracao_geral').select('habilitada').eq('id', 1).single();
   const { data: todas } = await admin.from('tratativa_base').select('id_interno').not('id_interno', 'is', null);
   const maior = Math.max(...todas.map((x) => parseInt(String(x.id_interno).match(/TRT-(\d+)/)?.[1] ?? '0', 10)));
   console.log('\n== limpeza ==');
+  console.log(`apuracoes de teste restantes: ${restoAp} | colaborador de teste restante: ${restoCol.length}`);
   console.log(`tratativas de teste restantes: ${restoT.length} | integracoes: ${restoI.length} | chaves: ${restoC.length} | segredos: ${restoS.length} | logs: ${restoL.length}`);
   console.log(`chave geral voltou para: ${g.habilitada} (era ${geralAntes}) | maior numero de tratativa: ${maior} -> proximo TRT-${String(maior + 1).padStart(4, '0')}`);
   console.log(`\nRESULTADO: ${passou} ok, ${falhou} falhas`);

@@ -16,6 +16,10 @@
  *   6. limite de chamadas por minuto    429  limite_excedido
  */
 
+import { FONTES, CAMPOS, vincularAgentes, periodoDoArquivo } from './apuracao/importacao.js';
+import { calcularTelefone, calcularChat, calcularCX, normalizarData } from './apuracao/calculos.js';
+import { registrosDaImportacao } from './apuracao/registros.js';
+
 export const VERSAO = 'v1';
 
 /**
@@ -39,7 +43,11 @@ export const RECURSOS = {
   },
   apuracao: {
     rotulo: 'Apuração (CSAT, performance e CX)',
-    acoes: { ler: 'Consultar os números diários de telefone, chat e CX por colaborador (sem o detalhe de cada ligação)' },
+    acoes: {
+      ler: 'Consultar os números diários de telefone, chat e CX por colaborador (sem o detalhe de cada ligação)',
+      gravar: 'Enviar linhas brutas (ligações, tickets ou avaliações): o Portal classifica e calcula como na importação do CSV',
+      excluir: 'Desfazer um lote que a própria integração enviou',
+    },
   },
   jornada: {
     rotulo: 'Jornada do cliente',
@@ -550,3 +558,117 @@ export function resumoPorEtapa(tratativas = [], etapas = []) {
   });
   return linhas.sort((a, b) => b.total - a.total);
 }
+
+/* ------------------------------------------------------------------ *
+ * APURAÇÃO: ENVIO DE LINHAS BRUTAS (POST /v1/apuracao)
+ * ------------------------------------------------------------------ */
+
+/** Linhas por envio. Acima disso, envie em mais de um lote. */
+export const MAXIMO_LINHAS_APURACAO = 20_000;
+
+const TIPO_DA_FONTE = Object.fromEntries(FONTES.map((f) => [f.valor, f.tipo]));
+
+/**
+ * Confere o corpo de POST /v1/apuracao:
+ *   { fonte: '55pbx' | 'zendesk' | 'planilha_cx',
+ *     registros: [ { ...campos da fonte } ],
+ *     vinculos?: { 'Nome do agente no sistema de origem': '<colaborador_id>' } }
+ *
+ * Os campos de cada registro têm os MESMOS nomes que o Portal usa ao importar o
+ * CSV (telefone: agente, data, origem, status, fcr, csat; chat: agente, ticket,
+ * data, bom, ruim; cx: agente, data, empatia, cordialidade, comunicacao, escrita,
+ * profissionalismo, resolucao e observacao). Os valores vão como o relatório traz
+ * (texto ou número): o Portal faz a classificação, não quem envia.
+ */
+export function validarLoteApuracao(corpo) {
+  const erros = [];
+  if (!corpo || typeof corpo !== 'object' || Array.isArray(corpo)) return { erros: ['o corpo deve ser um objeto JSON'], lote: null };
+  const extras = Object.keys(corpo).filter((k) => !['fonte', 'registros', 'vinculos'].includes(k));
+  if (extras.length) erros.push(`campos não aceitos: ${extras.join(', ')}`);
+
+  const tipo = TIPO_DA_FONTE[corpo.fonte];
+  if (!tipo) erros.push(`fonte inválida (use: ${FONTES.map((f) => f.valor).join(', ')})`);
+
+  if (!Array.isArray(corpo.registros) || corpo.registros.length === 0) erros.push('registros deve ser uma lista com ao menos um item');
+  else if (corpo.registros.length > MAXIMO_LINHAS_APURACAO) erros.push(`registros passa de ${MAXIMO_LINHAS_APURACAO} linhas: envie em mais de um lote`);
+
+  let vinculos = {};
+  if (corpo.vinculos !== undefined) {
+    if (!corpo.vinculos || typeof corpo.vinculos !== 'object' || Array.isArray(corpo.vinculos)) erros.push('vinculos deve ser um objeto { "nome no sistema de origem": "id do colaborador" }');
+    else {
+      for (const [nome, id] of Object.entries(corpo.vinculos)) {
+        if (typeof id !== 'string' || !CODIGO_VALIDO.test(id)) erros.push(`vinculos["${nome}"] deve ser o id do colaborador`);
+      }
+      vinculos = corpo.vinculos;
+    }
+  }
+
+  if (!tipo || !Array.isArray(corpo.registros)) return { erros, lote: null };
+
+  const campos = CAMPOS[tipo];
+  const chaves = campos.map((c) => c.chave);
+  const linhas = [];
+  let avisos = 0;
+  corpo.registros.forEach((r, i) => {
+    if (!r || typeof r !== 'object' || Array.isArray(r)) { if (avisos++ < 5) erros.push(`registros[${i}] deve ser um objeto`); return; }
+    const desconhecidos = Object.keys(r).filter((k) => !chaves.includes(k));
+    if (desconhecidos.length && avisos++ < 5) erros.push(`registros[${i}]: campos não aceitos para ${corpo.fonte}: ${desconhecidos.join(', ')} (aceitos: ${chaves.join(', ')})`);
+    const faltando = campos.filter((c) => c.obrigatorio && (r[c.chave] === undefined || r[c.chave] === null || String(r[c.chave]).trim() === '')).map((c) => c.chave);
+    // fcr/csat/bom/ruim podem vir vazios no relatório (ligação sem pesquisa): só agente e data são indispensáveis
+    const indispensaveis = faltando.filter((k) => ['agente', 'data'].includes(k));
+    if (indispensaveis.length && avisos++ < 5) erros.push(`registros[${i}]: falta ${indispensaveis.join(', ')}`);
+    // o cálculo espera texto, como vem de um CSV
+    const linha = {};
+    for (const k of chaves) linha[k] = r[k] === undefined || r[k] === null ? '' : String(r[k]);
+    linhas.push(linha);
+  });
+  if (avisos > 5) erros.push(`... e mais ${avisos - 5} problema(s) em outros registros`);
+  return { erros, lote: erros.length ? null : { fonte: corpo.fonte, tipo, linhas, vinculos } };
+}
+
+const CALCULO = { telefone: calcularTelefone, chat: calcularChat, cx: calcularCX };
+
+/**
+ * O caminho inteiro da importação, sem tocar em banco: calcula pelas mesmas regras
+ * do CSV, liga cada nome a uma pessoa e monta os registros de Apuracao. Quem
+ * grava é a Edge Function. Pessoa sem vínculo NÃO é gravada pela metade: o envio
+ * inteiro é recusado e a lista de nomes volta na resposta.
+ */
+export function prepararImportacaoApi({ lote, colaboradores = [], lembrados = {}, integracaoNome, importacaoId }) {
+  const { fonte, tipo, linhas, vinculos } = lote;
+  const mapeamento = Object.fromEntries(CAMPOS[tipo].map((c) => [c.chave, c.chave]));
+  const resultados = CALCULO[tipo](linhas, mapeamento);
+
+  const nomes = Object.keys(resultados);
+  const automaticos = vincularAgentes(nomes, colaboradores, { ...lembrados, ...vinculos });
+  const vinculosFinais = {};
+  const semVinculo = [];
+  for (const v of automaticos) {
+    const escolhido = vinculos[v.nome] ?? v.colaborador_id;
+    if (escolhido) vinculosFinais[v.nome] = escolhido;
+    else semVinculo.push(v.nome);
+  }
+
+  const validas = linhas.filter((l) => String(l.agente).trim() && normalizarData(l.data)).length;
+  const periodo = periodoDoArquivo(linhas, 'data');
+  const registros = registrosDaImportacao({
+    resultados, tipo, fonte, vinculos: vinculosFinais, colaboradores,
+    arquivo: { name: `api:${integracaoNome}` },
+    conferencia: { linhasLidas: linhas.length, linhasValidas: validas, periodo: periodo ? { inicio: periodo.inicio, fim: periodo.fim } : null },
+    quem: { id: null, nome_completo: `API: ${integracaoNome}` },
+    importacaoId,
+  }).filter((r) => r.colaborador_id);
+
+  return {
+    registros,
+    semVinculo,
+    linhasLidas: linhas.length,
+    linhasValidas: validas,
+    periodo: periodo ? { inicio: periodo.inicio, fim: periodo.fim } : null,
+    pessoas: nomes.map((n) => ({ nome_no_arquivo: n, colaborador_id: vinculosFinais[n] ?? null })),
+  };
+}
+
+/** O identificador de um lote enviado por API ("imp-api-..."): só o que a própria API gera. */
+export const ehIdDeLoteApi = (v) => /^imp-api-[A-Za-z0-9-]{8,60}$/.test(String(v ?? ''));
+export const novoIdDeLoteApi = () => `imp-api-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;

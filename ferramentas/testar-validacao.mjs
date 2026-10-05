@@ -23,13 +23,13 @@ import { ligacoesAuditoria, resumoAuditoria } from '../src/lib/apuracao/auditori
 import { revisarLigacao } from '../src/lib/apuracao/revisaoTelefone.js';
 import { indisponiveisEm, filaDoCanal, gradeDoMes, montarJustificativa, motivoDaJustificativa, resumoDeOverrides, filtrarHistorico, ultimosMeses } from '../src/lib/equidade.js';
 import { vazioViraNulo } from '../src/lib/camposVazios.js';
-import { decidir, permitido, extrairChave, sha256hex, validarNovaTratativa, slaDoTipo, paginacao, filtrosDeTratativas, CAMPOS_TRATATIVA, CAMPOS_COLABORADOR, RECURSOS, validarAtualizacaoTratativa, validarExclusao, ESTADOS_QUE_NAO_EXCLUEM, filtrosDeApuracao, resumoPorEtapa, CAMPOS_APURACAO, situacaoParaCliente, montarAcompanhamento, interpretarCodigo, cnpjValido, apenasDigitos, escolherDoCliente } from '../supabase/functions/api/politica.js';
+import { decidir, permitido, extrairChave, sha256hex, validarNovaTratativa, slaDoTipo, paginacao, filtrosDeTratativas, CAMPOS_TRATATIVA, CAMPOS_COLABORADOR, RECURSOS, validarAtualizacaoTratativa, validarExclusao, ESTADOS_QUE_NAO_EXCLUEM, filtrosDeApuracao, resumoPorEtapa, CAMPOS_APURACAO, validarLoteApuracao, prepararImportacaoApi, ehIdDeLoteApi, novoIdDeLoteApi, MAXIMO_LINHAS_APURACAO, situacaoParaCliente, montarAcompanhamento, interpretarCodigo, cnpjValido, apenasDigitos, escolherDoCliente } from '../supabase/functions/api/politica.js';
 import path from 'node:path';
 import { carregarModuloJsx } from './lib/carregar-jsx.mjs';
 
 // calculosApuracao.jsx é JS puro com extensão .jsx (sem elementos JSX de
 // verdade) — carregado via esbuild porque o Node não importa .jsx direto.
-const { calcularChat, calcularTelefone, validarConsistenciaTelefone, calcularCX } = await carregarModuloJsx(path.resolve('src/components/apuracao/calculosApuracao.jsx'));
+const { calcularChat, calcularTelefone, validarConsistenciaTelefone, calcularCX } = await import('../supabase/functions/api/apuracao/calculos.js');
 import { produtividadePorTurno } from '../src/lib/relatorios/turnos.js';
 import { diasCorridos, saldoDoCiclo, situacaoDoCiclo, cicloParaAData, deFeriasEm, lotacaoNoPeriodo, conferirPedido, fragmentoDoPedido, proximasFerias } from '../src/lib/ferias.js';
 import { situacaoDaPesquisa, quemRespondeu, resultadoDasPerguntas, resumoDaPesquisa, montarParticipacao } from '../src/lib/pesquisas.js';
@@ -1731,6 +1731,74 @@ console.log('\n== api de integracoes: quem passa ==');
   checa('jornada: sem encerradas, percentual nulo', String(res.find((l) => l.etapa === 'Sem etapa definida').percentual_no_prazo), 'null');
   checa('jornada: nunca sai custo operacional', String(/custo/.test(JSON.stringify(res))), 'false');
   checa('jornada: lista vazia', JSON.stringify(resumoPorEtapa([], etapas)), '[]');
+
+  console.log('\n== api: envio de linhas brutas da apuracao ==');
+  const tel = (o) => ({ agente: 'Ana Souza', data: '2026-09-21', origem: '', status: 'Atendida', fcr: '1', csat: '5', ...o });
+  const lote = (registros, extra = {}) => ({ fonte: '55pbx', registros, ...extra });
+  const colabs = [{ id: 'c-ana', nome_completo: 'Ana Maria Souza', ativo: true }, { id: 'c-bia', nome_completo: 'Bia Lima', ativo: true }, { id: 'c-inativa', nome_completo: 'Carla Dias', ativo: false }];
+
+  checa('lote valido', String(validarLoteApuracao(lote([tel()])).erros.length), '0');
+  checa('fonte invalida', validarLoteApuracao({ fonte: 'zap', registros: [tel()] }).erros.join(' | '), 'fonte inválida');
+  checa('sem registros', validarLoteApuracao({ fonte: '55pbx', registros: [] }).erros.join(' | '), 'ao menos um item');
+  checa('registro com campo desconhecido', validarLoteApuracao(lote([tel({ ramal: '1' })])).erros.join(' | '), 'campos não aceitos para 55pbx: ramal');
+  checa('registro sem agente', validarLoteApuracao(lote([tel({ agente: '' })])).erros.join(' | '), 'falta agente');
+  checa('registro sem data', validarLoteApuracao(lote([tel({ data: undefined })])).erros.join(' | '), 'falta data');
+  checa('ligacao sem pesquisa (fcr e csat vazios) e valida', String(validarLoteApuracao(lote([tel({ fcr: '', csat: '' })])).erros.length), '0');
+  checa('campo extra de outra fonte e recusado', validarLoteApuracao({ fonte: 'zendesk', registros: [tel()] }).erros.join(' | '), 'campos não aceitos para zendesk');
+  checa('corpo que nao e objeto', validarLoteApuracao([]).erros.join(' | '), 'objeto JSON');
+  checa('chave extra no corpo', validarLoteApuracao({ ...lote([tel()]), x: 1 }).erros.join(' | '), 'campos não aceitos: x');
+  checa('numeros viram texto, como num CSV', validarLoteApuracao(lote([tel({ fcr: 1, csat: 5 })])).lote.linhas[0].csat, '5');
+  checa('vinculos precisam ser objeto', validarLoteApuracao(lote([tel()], { vinculos: ['a'] })).erros.join(' | '), 'vinculos deve ser um objeto');
+  checa('vinculo com id malformado', validarLoteApuracao(lote([tel()], { vinculos: { Ana: "a'b" } })).erros.join(' | '), 'deve ser o id do colaborador');
+  checa('limite de linhas por envio', validarLoteApuracao(lote(new Array(MAXIMO_LINHAS_APURACAO + 1).fill(tel()))).erros.join(' | '), 'passa de 20000');
+  checa('muitos erros nao enchem a resposta', String(validarLoteApuracao(lote(new Array(50).fill({ nada: 1 }))).erros.length <= 8), 'true');
+
+  const prep = (registros, extra = {}, vinc = {}) => prepararImportacaoApi({ lote: validarLoteApuracao(lote(registros, { vinculos: vinc })).lote, colaboradores: colabs, integracaoNome: 'Teste', importacaoId: 'imp-api-teste-0001', ...extra });
+  const rA = prep([
+    tel({ fcr: '1', csat: '5' }), tel({ fcr: '1', csat: '4' }), tel({ fcr: '1', csat: '3' }),
+    tel({ fcr: '2', csat: '' }), tel({ fcr: '1', csat: '' }), tel({ origem: 'x - transferência fila' }),
+    tel({ status: 'Abandonada', fcr: '', csat: '' }),
+  ]);
+  const dia = rA.registros[0].dados_por_data[0].telefone;
+  checa('liga o nome ao colaborador (nome do meio)', rA.registros[0].colaborador_id, 'c-ana');
+  checa('classificacao: 2 positivas (fcr1+nota4/5)', String(dia.total_positivas), '2');
+  checa('classificacao: nota 3 e neutra', String(dia.total_neutras), '1');
+  checa('classificacao: fcr 2 e negativa', String(dia.total_negativas), '1');
+  checa('classificacao: fcr 1 sem nota e incompleta', String(dia.total_incompletas), '1');
+  checa('transferencia conta ligacao e nao avalia', String(dia.transferencias), '1');
+  checa('total de ligacoes do dia', String(dia.total_ligacoes), '7');
+  checa('csat do dia exclui neutras (positivas / positivas+negativas)', String(Math.round(dia.csat * 10) / 10), String(Math.round((2 / 3) * 1000) / 10));
+  checa('canal_telefone calculado', String(rA.registros[0].canal_telefone.total_atendimentos), '7');
+  checa('origem do registro e a API', rA.registros[0].arquivo_nome, 'api:Teste');
+  checa('quem apurou', rA.registros[0].apurado_por_nome, 'API: Teste');
+  checa('lote tem o id de lote da API', rA.registros[0].importacao_id, 'imp-api-teste-0001');
+  checa('fonte gravada', rA.registros[0].fonte, '55pbx');
+  checa('linhas lidas e validas', `${rA.linhasLidas}/${rA.linhasValidas}`, '7/7');
+  checa('periodo do lote', JSON.stringify(rA.periodo), '{"inicio":"2026-09-21","fim":"2026-09-21"}');
+  checa('modo incremental como no CSV', rA.registros[0].modo, 'incremental');
+
+  const rB = prep([tel({ agente: 'Zé Desconhecido' }), tel({ agente: 'Bia Lima' })]);
+  checa('nome sem vinculo e listado (e nada e gravado pela metade)', rB.semVinculo.join(','), 'Zé Desconhecido');
+  checa('quem tem vinculo continua sendo preparado', rB.registros.map((r) => r.colaborador_id).join(','), 'c-bia');
+  const rC = prep([tel({ agente: 'Zé Desconhecido' })], {}, { 'Zé Desconhecido': 'c-bia' });
+  checa('vinculos informados resolvem o nome', String(rC.semVinculo.length) + rC.registros[0].colaborador_id, '0c-bia');
+  const rD = prep([tel({ agente: 'Carla Dias' })]);
+  checa('colaborador inativo nao e ligado sozinho', rD.semVinculo.join(','), 'Carla Dias');
+  checa('linha sem data valida e descartada na conta', String(prep([tel(), tel({ data: 'ontem' })]).linhasValidas), '1');
+
+  const chat = (o) => ({ agente: 'Bia Lima', ticket: '1', data: '2026-09-21', bom: '1', ruim: '0', ...o });
+  const rE = prepararImportacaoApi({ lote: validarLoteApuracao({ fonte: 'zendesk', registros: [chat(), chat({ ticket: '2', bom: '0', ruim: '1' }), chat({ ticket: '3', bom: '0', ruim: '0' })] }).lote, colaboradores: colabs, integracaoNome: 'Teste', importacaoId: 'imp-api-teste-0002' });
+  const diaChat = rE.registros[0].dados_por_data[0].chat;
+  checa('chat: total, avaliados, positivos e negativos', `${diaChat.total_chats}/${diaChat.total_avaliados}/${diaChat.total_positivos}/${diaChat.total_negativos}`, '3/2/1/1');
+  checa('chat: csat do dia', String(diaChat.csat), '50');
+
+  const cx = (o) => ({ agente: 'Ana Souza', data: '2026-09-21', empatia: '5', cordialidade: '5', comunicacao: '4', escrita: '4', profissionalismo: '5', resolucao: '5', ...o });
+  const rF = prepararImportacaoApi({ lote: validarLoteApuracao({ fonte: 'planilha_cx', registros: [cx(), cx({ empatia: '3' })] }).lote, colaboradores: colabs, integracaoNome: 'Teste', importacaoId: 'imp-api-teste-0003' });
+  checa('cx: calcula a media das avaliacoes', rF.registros[0].tipo_apuracao + ':' + String(rF.registros[0].avaliacao_cx.total_avaliacoes), 'cx:2');
+
+  checa('id de lote da API valido', String(ehIdDeLoteApi(novoIdDeLoteApi())), 'true');
+  checa('id de lote do CSV nao e da API (nao se desfaz por aqui)', String(ehIdDeLoteApi('imp-1727000000000-abcde')), 'false');
+  checa('id de lote com lixo e recusado', String(ehIdDeLoteApi("imp-api-1' or '1'='1")), 'false');
   checa('recurso acompanhamento so tem ler', JSON.stringify(Object.keys(RECURSOS.acompanhamento.acoes)), '["ler"]');
   checa('tratativas tem ler, gravar, atualizar e excluir', JSON.stringify(Object.keys(RECURSOS.tratativas.acoes)), '["ler","gravar","atualizar","excluir"]');
   checa('campos de saida incluem os tickets', String(['ticket_zendesk', 'ticket_clickdesk', 'resumo_whatsapp'].every((c) => CAMPOS_TRATATIVA.includes(c))), 'true');

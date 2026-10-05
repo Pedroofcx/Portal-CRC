@@ -37,6 +37,9 @@
  *   DELETE /v1/tratativas/{codigo} exclui (lógica) tratativa EM ABERTO, com justificativa
  *   GET  /v1/apuracao              números diários de telefone, chat e CX (filtros: tipo,
  *                                  colaborador_id, desde, ate, pagina, limite)
+ *   POST /v1/apuracao              envia linhas BRUTAS (ligações, tickets ou avaliações);
+ *                                  o Portal classifica e calcula como no CSV
+ *   DELETE /v1/apuracao/{lote}     desfaz um lote que a própria integração enviou
  *   GET  /v1/jornada/etapas        as etapas da jornada do cliente
  *   GET  /v1/jornada/motivos       os motivos de tratativa
  *   GET  /v1/jornada/resumo        resumo por etapa (filtros: tipo, desde, ate)
@@ -60,6 +63,7 @@ import {
   interpretarCodigo, montarAcompanhamento, cnpjValido, apenasDigitos, escolherDoCliente,
   MAXIMO_ERROS_POR_CODIGO, JANELA_ERROS_MINUTOS,
   validarExclusao, ESTADOS_QUE_NAO_EXCLUEM, filtrosDeApuracao, resumoPorEtapa,
+  validarLoteApuracao, prepararImportacaoApi, ehIdDeLoteApi, novoIdDeLoteApi,
 } from './politica.js';
 
 const URL_SUPABASE = Deno.env.get('SUPABASE_URL')!;
@@ -67,6 +71,9 @@ const CHAVE_SERVICO = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 
 /** Corpo de POST acima disto é recusado. */
 const LIMITE_CORPO_BYTES = 100_000;
+
+/** Envio de apuração (linhas brutas): bem maior que os demais corpos. */
+const LIMITE_CORPO_APURACAO = 8_000_000;
 
 const CABECALHOS = {
   'Content-Type': 'application/json; charset=utf-8',
@@ -318,6 +325,61 @@ async function listarApuracao({ sb, params }: Contexto) {
   return responder({ dados: data, paginacao: { pagina: pg.pagina, limite: pg.limite, total: count ?? data.length } });
 }
 
+/** Envio de linhas brutas: o Portal classifica e calcula, como na importação do CSV. */
+async function criarApuracao({ sb, integracao, req }: Contexto) {
+  const texto = await req.text();
+  if (texto.length > LIMITE_CORPO_APURACAO) return erro(413, 'corpo_grande', 'Corpo da requisição grande demais: envie em mais de um lote.');
+  let corpo: unknown;
+  try { corpo = JSON.parse(texto); } catch { return erro(400, 'json_invalido', 'O corpo deve ser um JSON válido.'); }
+
+  const { erros, lote } = validarLoteApuracao(corpo);
+  if (erros.length || !lote) return erro(422, 'dados_invalidos', 'Há campos inválidos.', erros);
+
+  const { data: colaboradores } = await sb.from('colaborador_base').select('id, nome_completo, ativo');
+  const existentes = new Set((colaboradores ?? []).map((c: any) => c.id));
+  const invalidos = Object.entries(lote.vinculos).filter(([, id]) => !existentes.has(id)).map(([nome]) => nome);
+  if (invalidos.length) return erro(422, 'vinculo_invalido', 'Há vínculos para colaboradores que não existem.', invalidos);
+
+  const { data: mapa } = await sb.from('apuracao_mapeamento').select('agentes').eq('fonte', lote.fonte).maybeSingle();
+  const importacaoId = novoIdDeLoteApi();
+  const preparo = prepararImportacaoApi({ lote, colaboradores: colaboradores ?? [], lembrados: mapa?.agentes ?? {}, integracaoNome: integracao.nome, importacaoId });
+
+  if (preparo.semVinculo.length) {
+    return erro(422, 'agentes_sem_vinculo', 'Alguns nomes não foram ligados a um colaborador. Nada foi gravado. Envie "vinculos" para esses nomes.', preparo.semVinculo);
+  }
+  if (!preparo.registros.length) return erro(422, 'nada_a_gravar', 'Nenhuma linha válida: confira agente e data.');
+
+  for (let i = 0; i < preparo.registros.length; i += 100) {
+    const { error } = await sb.from('apuracao').insert(preparo.registros.slice(i, i + 100));
+    if (error) {
+      // não deixa lote pela metade
+      await sb.from('apuracao').delete().eq('importacao_id', importacaoId);
+      return erro(422, 'recusada_pelo_banco', 'O banco recusou o envio. Nada foi gravado.', error.message);
+    }
+  }
+  return responder({
+    dados: {
+      importacao_id: importacaoId,
+      registros_criados: preparo.registros.length,
+      linhas_lidas: preparo.linhasLidas,
+      linhas_validas: preparo.linhasValidas,
+      linhas_descartadas: preparo.linhasLidas - preparo.linhasValidas,
+      periodo: preparo.periodo,
+      pessoas: preparo.pessoas,
+    },
+  }, 201);
+}
+
+/** Desfaz um lote, só se foi esta integração que o enviou. */
+async function desfazerApuracao({ sb, integracao, partes }: Contexto) {
+  const id = decodeURIComponent(partes[2] ?? '');
+  if (!ehIdDeLoteApi(id)) return erro(400, 'codigo_invalido', 'Informe o importacao_id devolvido no envio (imp-api-...).');
+  const { data, error } = await sb.from('apuracao').delete().eq('importacao_id', id).eq('arquivo_nome', `api:${integracao.nome}`).select('id');
+  if (error) return erro(500, 'erro_interno', 'Não consegui desfazer o lote.');
+  if (!data?.length) return erro(404, 'nao_encontrada', 'Lote não encontrado, ou não foi enviado por esta integração.');
+  return responder({ dados: { importacao_id: id, registros_removidos: data.length } });
+}
+
 async function listarEtapas({ sb }: Contexto) {
   const { data, error } = await sb.from('etapa_jornada').select(CAMPOS_ETAPA.join(',')).order('ordem');
   if (error) return erro(500, 'erro_interno', 'Não consegui consultar as etapas.');
@@ -373,6 +435,8 @@ const ROTAS = [
   { metodo: 'PATCH', caminho: /^\/v1\/tratativas\/[^/]+$/, recurso: 'tratativas', acao: 'atualizar', f: atualizarTratativa },
   { metodo: 'GET', caminho: /^\/v1\/acompanhamento\/[^/]+$/, recurso: 'acompanhamento', acao: 'ler', f: acompanhamento },
   { metodo: 'DELETE', caminho: /^\/v1\/tratativas\/[^/]+$/, recurso: 'tratativas', acao: 'excluir', f: excluirTratativa },
+  { metodo: 'POST', caminho: /^\/v1\/apuracao$/, recurso: 'apuracao', acao: 'gravar', f: criarApuracao },
+  { metodo: 'DELETE', caminho: /^\/v1\/apuracao\/[^/]+$/, recurso: 'apuracao', acao: 'excluir', f: desfazerApuracao },
   { metodo: 'GET', caminho: /^\/v1\/apuracao$/, recurso: 'apuracao', acao: 'ler', f: listarApuracao },
   { metodo: 'GET', caminho: /^\/v1\/jornada\/etapas$/, recurso: 'jornada', acao: 'ler', f: listarEtapas },
   { metodo: 'GET', caminho: /^\/v1\/jornada\/motivos$/, recurso: 'jornada', acao: 'ler', f: listarMotivos },
