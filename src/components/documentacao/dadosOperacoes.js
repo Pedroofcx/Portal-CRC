@@ -34,7 +34,7 @@ export const modulosOperacoes = [
       { campo: 'custo_operacional_reais', descricao: 'Calculado pelo servidor; sai nulo para quem não tem ver_custo_operacional.' },
       { campo: 'ticket_zendesk / ticket_clickdesk', descricao: 'O número do ticket em cada ferramenta (opcionais; só letras, números, ponto, hífen e sublinhado). A API acha a tratativa por eles, além do número TRT.' },
       { campo: 'dados_clickdesk', descricao: 'JSON (até 20 mil caracteres) que a integração com o ClickDesk preenche pela API. Fica pronto para receber os dados do ticket interno; nenhuma tela o edita.' },
-      { campo: 'resumo_whatsapp (+ _atualizado_em, _por_nome)', descricao: 'O texto que o CLIENTE lê quando pergunta pela tratativa no WhatsApp (até 600 caracteres), escrito pelo agente na guia Informações > Atendimento ao cliente. Escrito para o cliente: nada interno. Sem texto, a API responde com uma frase padrão do estado.' },
+      { campo: 'resumo_whatsapp (+ _atualizado_em, _por_nome)', descricao: 'O texto que o CLIENTE lê quando pergunta pela tratativa no WhatsApp (até 600 caracteres), escrito pelo agente na guia Informações > Atendimento ao cliente. Escrito para o cliente: nada interno. Sem texto, a API responde com uma frase padrão do estado. A consulta do cliente só funciona com o CNPJ cadastrado na tratativa (cnpj_cliente).' },
       { campo: 'cnpj_cliente', descricao: 'Opcional, validado pelo dígito verificador (migration 33).' },
       { campo: 'excluida / justificativa_exclusao / data_exclusao', descricao: 'Exclusão lógica. Tratativa excluída some de todo indicador.' },
     ],

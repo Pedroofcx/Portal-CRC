@@ -34,7 +34,7 @@ export const RECURSOS = {
   },
   acompanhamento: {
     rotulo: 'Acompanhamento para o cliente (WhatsApp)',
-    acoes: { ler: 'Consultar só a situação e o resumo que o cliente pode ver, pelo número TRT ou pelo ticket' },
+    acoes: { ler: 'Consultar só a situação e o resumo que o cliente pode ver, pelo número TRT ou pelo ticket, mediante o CNPJ do cliente' },
   },
   colaboradores: {
     rotulo: 'Colaboradores',
@@ -388,6 +388,43 @@ export function montarAcompanhamento(t) {
     atualizado_em: t.resumo_whatsapp_atualizado_em ?? t.updated_date ?? null,
   };
 }
+
+/** Só os dígitos de um texto (o CNPJ pode vir como 12.345.678/0001-90, com espaço ou tab). */
+export const apenasDigitos = (v) => String(v ?? '').replace(/\D/g, '');
+
+/**
+ * O CNPJ tem 14 dígitos e os dois últimos conferem (mesma conta de
+ * src/lib/validacao.js; há teste que compara as duas). Barrar CNPJ inválido ANTES
+ * de consultar o banco tira da frente quem só está chutando números.
+ */
+export function cnpjValido(bruto) {
+  const d = apenasDigitos(bruto);
+  if (d.length !== 14 || /^(\d)\1{13}$/.test(d)) return false;
+  const digito = (ate) => {
+    let peso = ate - 7;
+    let soma = 0;
+    for (let i = 0; i < ate; i++) {
+      soma += Number(d[i]) * peso--;
+      if (peso < 2) peso = 9;
+    }
+    const r = soma % 11;
+    return r < 2 ? 0 : 11 - r;
+  };
+  return digito(12) === Number(d[12]) && digito(13) === Number(d[13]);
+}
+
+/** Dos candidatos achados pelo código, fica o que tem o CNPJ informado (o mais recente, se houver mais de um do mesmo cliente). */
+export function escolherDoCliente(linhas, cnpjInformado) {
+  const alvo = apenasDigitos(cnpjInformado);
+  if (alvo.length !== 14) return null;
+  const doCliente = (linhas ?? []).filter((l) => apenasDigitos(l.cnpj_cliente) === alvo);
+  if (!doCliente.length) return null;
+  return [...doCliente].sort((a, b) => String(b.data_registro ?? '').localeCompare(String(a.data_registro ?? '')))[0];
+}
+
+/** Tentativas erradas seguidas do mesmo código antes de travar a consulta por um tempo. */
+export const MAXIMO_ERROS_POR_CODIGO = 5;
+export const JANELA_ERROS_MINUTOS = 15;
 
 /**
  * O que a pessoa digitou: número TRT (TRT-0123) ou número de ticket. Devolve

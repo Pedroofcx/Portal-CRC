@@ -168,7 +168,7 @@ export default function PainelIntegracoes() {
           <ul className="list-disc space-y-0.5 pl-5 text-muted-foreground">
             <li><code className="text-foreground">GET /ping</code>: confere se a chave funciona</li>
             <li><code className="text-foreground">GET /tratativas</code>, <code className="text-foreground">GET /tratativas/TRT-0123</code> (ou pelo número do ticket), <code className="text-foreground">POST /tratativas</code> e <code className="text-foreground">PATCH /tratativas/TRT-0123</code></li>
-            <li><code className="text-foreground">GET /acompanhamento/TRT-0123</code> (ou pelo ticket): só a situação e o resumo que o cliente pode ver, para o WhatsApp</li>
+            <li><code className="text-foreground">GET /acompanhamento/TRT-0123?cnpj=...</code> (ou pelo ticket): só a situação e o resumo que o cliente pode ver, mediante o CNPJ do cliente, para o WhatsApp</li>
             <li><code className="text-foreground">GET /colaboradores</code> e <code className="text-foreground">GET /ciclos</code></li>
           </ul>
         </div>

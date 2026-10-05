@@ -23,7 +23,7 @@ import { ligacoesAuditoria, resumoAuditoria } from '../src/lib/apuracao/auditori
 import { revisarLigacao } from '../src/lib/apuracao/revisaoTelefone.js';
 import { indisponiveisEm, filaDoCanal, gradeDoMes, montarJustificativa, motivoDaJustificativa, resumoDeOverrides, filtrarHistorico, ultimosMeses } from '../src/lib/equidade.js';
 import { vazioViraNulo } from '../src/lib/camposVazios.js';
-import { decidir, permitido, extrairChave, sha256hex, validarNovaTratativa, slaDoTipo, paginacao, filtrosDeTratativas, CAMPOS_TRATATIVA, CAMPOS_COLABORADOR, RECURSOS, validarAtualizacaoTratativa, situacaoParaCliente, montarAcompanhamento, interpretarCodigo } from '../supabase/functions/api/politica.js';
+import { decidir, permitido, extrairChave, sha256hex, validarNovaTratativa, slaDoTipo, paginacao, filtrosDeTratativas, CAMPOS_TRATATIVA, CAMPOS_COLABORADOR, RECURSOS, validarAtualizacaoTratativa, situacaoParaCliente, montarAcompanhamento, interpretarCodigo, cnpjValido, apenasDigitos, escolherDoCliente } from '../supabase/functions/api/politica.js';
 import path from 'node:path';
 import { carregarModuloJsx } from './lib/carregar-jsx.mjs';
 
@@ -1684,6 +1684,33 @@ console.log('\n== api de integracoes: quem passa ==');
   checa('atualizar exige permissao propria (ler nao basta)', cod(decidir({ geral: true, chave: chaveOk, integracao: integ({ recursos: { tratativas: { ler: true, gravar: true } } }), recurso: 'tratativas', acao: 'atualizar', agora, usoNoUltimoMinuto: 0 })), '403 sem_permissao');
   checa('acompanhamento liberado sem liberar tratativas', cod(decidir({ geral: true, chave: chaveOk, integracao: integ({ recursos: { acompanhamento: { ler: true } } }), recurso: 'acompanhamento', acao: 'ler', agora, usoNoUltimoMinuto: 0 })), 'ok');
   checa('acompanhamento liberado nao abre tratativas', cod(decidir({ geral: true, chave: chaveOk, integracao: integ({ recursos: { acompanhamento: { ler: true } } }), recurso: 'tratativas', acao: 'ler', agora, usoNoUltimoMinuto: 0 })), '403 sem_permissao');
+
+  console.log('\n== api: o CNPJ como senha do acompanhamento ==');
+  checa('cnpj valido (so digitos)', String(cnpjValido('11222333000181')), 'true');
+  checa('cnpj valido (formatado)', String(cnpjValido('11.222.333/0001-81')), 'true');
+  checa('cnpj valido (com tab e espaco, como no banco)', String(cnpjValido(' 11.222.333/0001-81 ' + String.fromCharCode(9))), 'true');
+  checa('cnpj com digito verificador errado', String(cnpjValido('11222333000182')), 'false');
+  checa('cnpj curto', String(cnpjValido('123')), 'false');
+  checa('cnpj todo igual', String(cnpjValido('11111111111111')), 'false');
+  checa('cnpj vazio', String(cnpjValido('')), 'false');
+  checa('cnpj nulo', String(cnpjValido(null)), 'false');
+  for (const c of ['11222333000181', '62781329000194', '19164968000181', '32952352000133', '11111111111111', '12345678000100', '00000000000191']) {
+    checa(`mesma conta da tela (${c})`, String(cnpjValido(c)), String(cnpj(c) === null));
+  }
+  checa('apenasDigitos', apenasDigitos(' 62.781.329/0001-94 '), '62781329000194');
+
+  const linhas = [
+    { id_interno: 'TRT-0010', cnpj_cliente: '62.781.329/0001-94 ', data_registro: '2026-01-01' },
+    { id_interno: 'TRT-0010', cnpj_cliente: '19.164.968/0001-81', data_registro: '2026-02-01' },
+    { id_interno: 'TRT-0010', cnpj_cliente: null, data_registro: '2026-03-01' },
+    { id_interno: 'TRT-0010', cnpj_cliente: '19164968000181', data_registro: '2026-04-01' },
+  ];
+  checa('escolhe pelo CNPJ (codigo repetido: o CNPJ desempata)', escolherDoCliente(linhas, '62781329000194').data_registro, '2026-01-01');
+  checa('mesmo cliente duas vezes: fica a mais recente', escolherDoCliente(linhas, '19.164.968/0001-81').data_registro, '2026-04-01');
+  checa('CNPJ que nao e de nenhuma', String(escolherDoCliente(linhas, '11222333000181')), 'null');
+  checa('tratativa sem CNPJ cadastrado nunca e entregue', String(escolherDoCliente([{ cnpj_cliente: null }, { cnpj_cliente: '' }], '11222333000181')), 'null');
+  checa('CNPJ informado incompleto nao casa', String(escolherDoCliente(linhas, '62781329')), 'null');
+  checa('CNPJ informado vazio nao casa com cadastro vazio', String(escolherDoCliente([{ cnpj_cliente: '' }], '')), 'null');
 
 }
 

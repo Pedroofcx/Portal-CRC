@@ -31,8 +31,9 @@
  *   POST /v1/tratativas            registra uma tratativa nova
  *   PATCH /v1/tratativas/{codigo}  atualiza ticket_zendesk, ticket_clickdesk,
  *                                  dados_clickdesk e resumo_whatsapp
- *   GET  /v1/acompanhamento/{codigo}  o que o CLIENTE vê no WhatsApp: situação e
- *                                  resumo (só isso), pelo número TRT ou pelo ticket
+ *   GET  /v1/acompanhamento/{codigo}?cnpj=...  o que o CLIENTE vê no WhatsApp:
+ *                                  situação e resumo (só isso), pelo número TRT
+ *                                  ou pelo ticket, MEDIANTE O CNPJ do cliente
  *   GET  /v1/colaboradores         nome, cargo e equipe (sem salário nem e-mail)
  *   GET  /v1/ciclos                os ciclos trimestrais
  *
@@ -50,7 +51,8 @@ import {
   VERSAO, extrairChave, sha256hex, decidir,
   CAMPOS_TRATATIVA, CAMPOS_COLABORADOR, CAMPOS_CICLO,
   paginacao, filtrosDeTratativas, validarNovaTratativa, validarAtualizacaoTratativa, slaDoTipo,
-  interpretarCodigo, montarAcompanhamento,
+  interpretarCodigo, montarAcompanhamento, cnpjValido, apenasDigitos, escolherDoCliente,
+  MAXIMO_ERROS_POR_CODIGO, JANELA_ERROS_MINUTOS,
 } from './politica.js';
 
 const URL_SUPABASE = Deno.env.get('SUPABASE_URL')!;
@@ -114,7 +116,7 @@ async function listarTratativas({ sb, params }: Contexto) {
  * ou do ClickDesk (ou o id interno). Se o número casar com mais de uma
  * tratativa (há números repetidos no histórico), NÃO adivinha: devolve conflito.
  */
-async function buscarPorCodigo(sb: any, bruto: string, campos: string) {
+async function buscarVarios(sb: any, bruto: string, campos: string, limite: number) {
   const ehUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(bruto);
   let q = sb.from('tratativa_base').select(campos).or('excluida.is.null,excluida.eq.false');
   if (ehUuid) {
@@ -126,11 +128,17 @@ async function buscarPorCodigo(sb: any, bruto: string, campos: string) {
       ? q.eq('id_interno', codigo.valor)
       : q.or(`ticket_zendesk.eq.${codigo.valor},ticket_clickdesk.eq.${codigo.valor}`);
   }
-  const { data, error } = await q.limit(2);
+  const { data, error } = await q.limit(limite);
   if (error) return { erro: erro(500, 'erro_interno', 'Não consegui consultar a tratativa.') };
-  if (!data?.length) return { erro: erro(404, 'nao_encontrada', 'Tratativa não encontrada.') };
-  if (data.length > 1) return { erro: erro(409, 'codigo_ambiguo', 'Este código corresponde a mais de uma tratativa. Procure o atendimento.') };
-  return { tratativa: data[0] };
+  return { linhas: data ?? [] };
+}
+
+async function buscarPorCodigo(sb: any, bruto: string, campos: string) {
+  const { linhas, erro: falha } = await buscarVarios(sb, bruto, campos, 2);
+  if (falha) return { erro: falha };
+  if (!linhas.length) return { erro: erro(404, 'nao_encontrada', 'Tratativa não encontrada.') };
+  if (linhas.length > 1) return { erro: erro(409, 'codigo_ambiguo', 'Este código corresponde a mais de uma tratativa. Procure o atendimento.') };
+  return { tratativa: linhas[0] };
 }
 
 async function umaTratativa({ sb, partes }: Contexto) {
@@ -138,13 +146,48 @@ async function umaTratativa({ sb, partes }: Contexto) {
   return falha ?? responder({ dados: tratativa });
 }
 
-/** O que o cliente vê no WhatsApp: só a situação e o resumo, nunca a tratativa. */
-async function acompanhamento({ sb, partes }: Contexto) {
-  const { tratativa, erro: falha } = await buscarPorCodigo(
-    sb, decodeURIComponent(partes[2] ?? ''),
-    'id_interno, status, ticket_zendesk, ticket_clickdesk, resumo_whatsapp, resumo_whatsapp_atualizado_em, updated_date',
+/**
+ * O que o cliente vê no WhatsApp: só a situação e o resumo, nunca a tratativa.
+ *
+ * EXIGE O CNPJ DO CLIENTE (?cnpj=...). O número TRT e o ticket são sequenciais,
+ * então só o código não prova que quem pergunta é o dono da tratativa. Quatro
+ * travas, nesta ordem:
+ *   1. o CNPJ é obrigatório e precisa ser um CNPJ válido (14 dígitos, dígitos
+ *      verificadores certos): chute aleatório nem chega ao banco;
+ *   2. o CNPJ precisa ser o cadastrado na tratativa. Código certo com CNPJ
+ *      errado, código inexistente e tratativa sem CNPJ cadastrado dão a MESMA
+ *      resposta (404), para não revelar o que existe;
+ *   3. depois de várias tentativas erradas no mesmo código, a consulta trava
+ *      por alguns minutos (429);
+ *   4. o limite de chamadas por minuto da integração continua valendo.
+ * Quando o mesmo número de ticket ou TRT casa com mais de uma tratativa, o CNPJ
+ * é quem desempata.
+ */
+async function acompanhamento({ sb, integracao, params, partes }: Contexto) {
+  const bruto = decodeURIComponent(partes[2] ?? '');
+  const cnpjInformado = params.get('cnpj');
+  if (!cnpjInformado) return erro(400, 'cnpj_obrigatorio', 'Informe o CNPJ do cliente (parâmetro cnpj).');
+  if (!cnpjValido(cnpjInformado)) return erro(400, 'cnpj_invalido', 'CNPJ inválido. Confira os 14 dígitos.');
+
+  // trava por tentativas erradas no mesmo código
+  const desde = new Date(Date.now() - JANELA_ERROS_MINUTOS * 60_000).toISOString();
+  const { count: erros } = await sb.from('integracao_log').select('id', { count: 'exact', head: true })
+    .eq('integracao_id', integracao.id).eq('caminho', `/v1/acompanhamento/${partes[2] ?? ''}`)
+    .eq('status_http', 404).gte('created_date', desde);
+  if ((erros ?? 0) >= MAXIMO_ERROS_POR_CODIGO) {
+    return erro(429, 'tentativas_excedidas', `Muitas tentativas com este código. Tente de novo em ${JANELA_ERROS_MINUTOS} minutos ou procure o atendimento.`,
+      undefined, { 'Retry-After': String(JANELA_ERROS_MINUTOS * 60) });
+  }
+
+  const { linhas, erro: falha } = await buscarVarios(
+    sb, bruto,
+    'id_interno, status, cnpj_cliente, data_registro, ticket_zendesk, ticket_clickdesk, resumo_whatsapp, resumo_whatsapp_atualizado_em, updated_date',
+    10,
   );
-  return falha ?? responder({ dados: montarAcompanhamento(tratativa) });
+  if (falha) return falha;
+  const achada = escolherDoCliente(linhas, apenasDigitos(cnpjInformado));
+  if (!achada) return erro(404, 'nao_encontrada', 'Não encontramos uma tratativa com esses dados.');
+  return responder({ dados: montarAcompanhamento(achada) });
 }
 
 async function atualizarTratativa({ sb, integracao, req, partes }: Contexto) {
