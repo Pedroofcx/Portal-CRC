@@ -57,6 +57,7 @@ export const secoesDeOperacao = [
         ['npm run testar', 'Testes das regras de negócio (funções puras de src/lib). Não usam o banco.'],
         ['npm run testar-fsm <email> <senha>', 'Entra como agente comum e tenta pular estados da tratativa. Cria dados de teste.'],
         ['npm run testar-pontuacao <email> <senha>', 'Entra como agente comum e tenta inflar a própria pontuação.'],
+        ['node ferramentas/testar-api.mjs', 'Teste de ponta a ponta da API de integrações (a Edge Function publicada), com integração e chave descartáveis. Roda no banco real e limpa tudo no final; não rode enquanto alguém registra tratativa.'],
         ['npm run testar-ia', 'Confere a Edge Function de IA (login exigido, chave não exposta, limites).'],
         ['node ferramentas/testar-seguranca.mjs', 'Teste de invasão: o que um agente comum não deveria conseguir.'],
         ['npm run conferir-contas / criar-contas / exigir-troca-de-senha', 'Gestão de contas de login (ver Contas e acessos).'],
