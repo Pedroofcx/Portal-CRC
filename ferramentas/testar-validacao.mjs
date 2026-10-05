@@ -2012,6 +2012,11 @@ console.log('\n== conector Gestao Click: ferias ==');
   checa('rodar de novo: nenhum ciclo criado nem alterado', `${seg.plano.ciclosCriar.length}/${seg.plano.ciclosAtualizar.length}`, '0/0');
   checa('rodar de novo: nenhuma ferias nova, alterada ou cancelada', `${seg.plano.solicitacoesCriar.length}/${seg.plano.solicitacoesAtualizar.length}/${seg.plano.solicitacoesCancelar.length}`, '0/0/0');
   checa('rodar de novo: o resumo diz sem mudanca', String(seg.resumo.ciclos_sem_mudanca), '3');
+  // o jsonb do banco devolve as chaves dos fragmentos em outra ordem: nao pode contar como mudanca
+  const reordenado = estado1.c.map((c) => ({ ...c, fragmentos: (c.fragmentos ?? []).map((f) => Object.fromEntries(Object.entries(f).reverse())) }));
+  const reord = rodar({ portalCiclos: reordenado, portalSolicitacoes: estado1.t });
+  checa('chaves em outra ordem (jsonb) nao contam como mudanca', `${reord.plano.ciclosAtualizar.length}/${reord.resumo.ciclos_sem_mudanca}`, '0/3');
+
 
   // a data da parcela mudou la
   const f3b = { ...f3, parcelas: [f3.parcelas[0], { ordem: 2, dias: 15, inicio: '2026-10-20', fim: '2026-11-03', status: 'planejada' }] };

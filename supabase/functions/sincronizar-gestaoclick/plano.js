@@ -62,7 +62,17 @@ export function fragmentosDasParcelas(periodoId, parcelas = []) {
     }));
 }
 
-const iguais = (a, b) => JSON.stringify(a ?? null) === JSON.stringify(b ?? null);
+/**
+ * JSON com as chaves em ordem fixa. O banco (jsonb) devolve as chaves de um
+ * objeto em outra ordem da que foi gravada: comparar o texto direto dava
+ * "mudou" a cada execução, só por causa da ordem.
+ */
+const canonico = (v) => {
+  if (Array.isArray(v)) return `[${v.map(canonico).join(',')}]`;
+  if (v && typeof v === 'object') return `{${Object.keys(v).sort().map((k) => `${JSON.stringify(k)}:${canonico(v[k])}`).join(',')}}`;
+  return JSON.stringify(v ?? null);
+};
+const iguais = (a, b) => canonico(a ?? null) === canonico(b ?? null);
 
 const CAMPOS_COMPARADOS = [
   'colaborador_id', 'colaborador_nome', 'colaborador_setor', 'aquisitivo_inicio', 'aquisitivo_fim', 'concessivo_fim',
