@@ -95,10 +95,10 @@ export default function AvdDaPessoa({ colaborador }) {
               })}
             </div>
             <Grafico altura={240} temDados={dados.length > 1 && escolhidos.length > 0} vazio={escolhidos.length === 0 ? 'Escolha ao menos um indicador.' : 'Só há uma AVD: ainda não dá para traçar a linha.'}>
-              <LineChart data={dados} margin={{ left: -18, right: 8 }}>
+              <LineChart data={dados} margin={{ top: 8, left: -18, right: 8 }}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} />
                 <XAxis dataKey="rotulo" tick={{ fontSize: 11 }} />
-                <YAxis domain={[0, 10]} tick={{ fontSize: 11 }} />
+                <YAxis domain={[0, 10]} ticks={[0, 2, 4, 6, 8, 10]} tick={{ fontSize: 11 }} />
                 <Tooltip formatter={(v) => (v === null ? '—' : Number(v).toFixed(1))} />
                 <Legend />
                 {escolhidos.flatMap((chave, i) => {
