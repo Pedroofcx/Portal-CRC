@@ -58,6 +58,20 @@ export function useValidacao(valores, regras) {
     return ok;
   }, [valores, regras]);
 
+  /** Valida só alguns campos (um passo do formulário). Devolve true se estiverem certos. */
+  const validarCampos = useCallback((nomes) => {
+    const novos = {};
+    let ok = true;
+    for (const nome of nomes) {
+      const mensagem = validarCampo(valores[nome], regras[nome] || []);
+      novos[nome] = mensagem;
+      if (mensagem) ok = false;
+    }
+    setErros((atual) => ({ ...atual, ...novos }));
+    setTocados((atual) => ({ ...atual, ...Object.fromEntries(nomes.map((n) => [n, true])) }));
+    return ok;
+  }, [valores, regras]);
+
   /** Mensagem a exibir — só depois que o campo foi tocado. */
   const erro = useCallback((nome) => (tocados[nome] ? erros[nome] : null) || null, [erros, tocados]);
 
@@ -76,5 +90,5 @@ export function useValidacao(valores, regras) {
   /** Quantos campos estão com erro — para o aviso no topo do formulário. */
   const totalDeErros = Object.keys(regras).filter((n) => tocados[n] && erros[n]).length;
 
-  return { erro, campo, aoSair, aoMudar, validarTudo, limpar, totalDeErros };
+  return { erro, campo, aoSair, aoMudar, validarTudo, validarCampos, limpar, totalDeErros };
 }

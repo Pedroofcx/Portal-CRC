@@ -1010,3 +1010,12 @@ opcionais (o que for preenchido continua sendo conferido). Uma caixa "Localizei
 os dados do cliente nos nossos sistemas" grava `dados_localizados` (migration 47)
 e a tela de Tratativas ganhou um filtro por localizados / não localizados. A API
 segue a mesma regra. Os outros tipos não mudam.
+
+## 06/10/2026 — Nova tratativa em 4 passos, numa janela no centro
+
+**Decisão:** o registro de tratativa deixou de ser um painel na lateral direita e
+virou uma janela centralizada com 4 passos: Tipo, Cliente (Zendesk, Intranet,
+base, nome, CNPJ), Comercial e Classificação (prioridade, motivo, submotivos e,
+na contestação, os dados dela). O tipo vem primeiro porque decide o que é
+obrigatório. "Próximo" só deixa seguir se os campos do passo estiverem certos;
+ao registrar, se algo faltar, a janela volta ao primeiro passo com erro.

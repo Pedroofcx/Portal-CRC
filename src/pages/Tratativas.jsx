@@ -33,13 +33,27 @@ import {
   Archive,
   Columns2,
   Rows3,
+  Check,
   X
 } from 'lucide-react';
 import ImportExportCSV from '@/components/tratativas/ImportExportCSV';
 import AdminBulkActions from '@/components/tratativas/AdminBulkActions';
 import DadosComerciaisForm from '@/components/tratativas/DadosComerciaisForm';
-import PainelLateral from '@/components/ui/PainelLateral';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { validarCampo } from '@/lib/validacao';
 import { traduzirErro } from '@/lib/erros';
+
+/**
+ * Os 4 passos de "Nova tratativa" e os campos que cada um confere antes de
+ * deixar seguir. O tipo vem primeiro porque é ele que decide o que é
+ * obrigatório (Google Meu Negócio só exige o nome do reclamante).
+ */
+const PASSOS = [
+  { n: 1, nome: 'Tipo', campos: ['tipo_tratativa'] },
+  { n: 2, nome: 'Cliente', campos: ['link_zendesk', 'link_intranet', 'id_base_cliente', 'nome_cliente', 'cnpj_cliente'] },
+  { n: 3, nome: 'Comercial', campos: ['plano_cliente', 'modalidade_plano', 'valor_contratacao_plano_atual', 'data_primeira_contratacao', 'data_contratacao_plano_atual'] },
+  { n: 4, nome: 'Classificação', campos: ['prioridade', 'motivo_id', 'submotivos'] },
+];
 
 /**
  * O formulário em branco — a MESMA função abre a tela e limpa depois de salvar.
@@ -108,6 +122,7 @@ export default function Tratativas() {
     window.history.replaceState({}, '', url);
   };
   const [formData, setFormData] = useState(formularioVazio);
+  const [passo, setPasso] = useState(1);
   /*
    * Regras do formulário de nova tratativa.
    *
@@ -149,6 +164,8 @@ export default function Tratativas() {
     data_contratacao_plano_atual:  [obrigatorio('A data de contratação do plano atual'),
                                     dataNaoFutura('A data de contratação do plano atual')],
   }), [formData.cliente_sem_cnpj, google]);
+
+  useEffect(() => { if (dialogOpen) setPasso(1); }, [dialogOpen]);
 
   const [clienteRecorrente, setClienteRecorrente] = useState(false);
   const [numeroOcorrencias, setNumeroOcorrencias] = useState(0);
@@ -413,8 +430,18 @@ export default function Tratativas() {
     outros: 'Outros'
   };
 
+  const proximoPasso = () => {
+    const passoAtual = PASSOS.find((p) => p.n === passo);
+    if (!validacao.validarCampos(passoAtual.campos)) {
+      toast.error('Confira os campos destacados para seguir.');
+      return;
+    }
+    setPasso(passo + 1);
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (passo < PASSOS.length) { proximoPasso(); return; }
 
     /*
      * Valida o formulário INTEIRO antes de enviar.
@@ -425,6 +452,8 @@ export default function Tratativas() {
      * todos os erros aparecem de uma vez, cada um junto do seu campo.
      */
     if (!validacao.validarTudo()) {
+      const comErro = PASSOS.find((p) => p.campos.some((c) => validarCampo(formData[c], regrasTratativa[c] || [])));
+      if (comErro) setPasso(comErro.n);
       toast.error('Confira os campos destacados antes de salvar.');
       return;
     }
@@ -800,7 +829,7 @@ export default function Tratativas() {
       )}
 
       {/* Dialog de Nova Tratativa */}
-      <PainelLateral
+      <Dialog
         open={dialogOpen}
         onOpenChange={(open) => {
           if (!open && Object.values(formData).some(v => v && (Array.isArray(v) ? v.length > 0 : v !== ''))) {
@@ -810,33 +839,62 @@ export default function Tratativas() {
           }
           setDialogOpen(open);
         }}
-        largura="xl"
-        titulo="Nova Tratativa"
-        descricao="Preencha os campos abaixo para registrar uma nova tratativa"
-        rodape={(
-          <>
-            <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
-              Cancelar
-            </Button>
-            <Button
-              onClick={handleSubmit}
-              className="bg-primary hover:bg-primary/90"
-              disabled={createMutation.isPending}
-            >
-              {createMutation.isPending ? (
-                <>
-                  <div className="w-4 h-4 mr-2 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  Registrando...
-                </>
-              ) : (
-                'Registrar'
-              )}
-            </Button>
-          </>
-        )}
       >
-          <form onSubmit={handleSubmit}>
-            <div className="space-y-4 pb-4">
+        <DialogContent className="flex max-h-[90vh] w-[calc(100%-2rem)] max-w-2xl flex-col gap-0 p-0">
+          <DialogHeader className="border-b border-border px-6 py-4 pr-12">
+            <DialogTitle>Nova tratativa</DialogTitle>
+            <DialogDescription>Passo {passo} de {PASSOS.length}</DialogDescription>
+            <ol className="mt-3 flex gap-2">
+              {PASSOS.map((p) => (
+                <li
+                  key={p.n}
+                  className={`flex flex-1 items-center justify-center gap-1 rounded-md border px-2 py-1.5 text-xs ${
+                    p.n === passo ? 'border-primary/40 bg-info-soft font-medium text-primary'
+                      : p.n < passo ? 'border-border bg-card text-success' : 'border-border bg-card text-muted-foreground'
+                  }`}
+                >
+                  {p.n < passo ? <Check className="h-3.5 w-3.5" /> : <span>{p.n}</span>}
+                  <span className="hidden sm:inline">{p.nome}</span>
+                </li>
+              ))}
+            </ol>
+          </DialogHeader>
+          <form onSubmit={handleSubmit} className="flex min-h-0 flex-1 flex-col">
+            <div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-6 py-5">
+            {passo === 1 && (
+              <div className="space-y-3">
+                <p className="text-sm font-medium text-foreground">Que tipo de tratativa é essa?</p>
+                <div className="grid gap-2 sm:grid-cols-2" role="radiogroup" aria-label="Tipo de tratativa">
+                  {tiposTratativa.map(tipo => {
+                    const marcado = formData.tipo_tratativa === tipo.chave;
+                    return (
+                      <button
+                        key={tipo.id}
+                        type="button"
+                        role="radio"
+                        aria-checked={marcado}
+                        onClick={() => {
+                          setFormData(prev => ({ ...prev, tipo_tratativa: tipo.chave }));
+                          validacao.aoMudar('tipo_tratativa', tipo.chave);
+                        }}
+                        className={`rounded-lg border px-4 py-3 text-left text-sm transition-colors ${
+                          marcado ? 'border-primary bg-info-soft font-medium text-primary ring-2 ring-primary' : 'border-border bg-card text-foreground hover:bg-muted'
+                        }`}
+                      >
+                        {tipo.nome}
+                      </button>
+                    );
+                  })}
+                </div>
+                {validacao.erro('tipo_tratativa') && <p className="text-sm text-destructive">{validacao.erro('tipo_tratativa')}</p>}
+                {google && (
+                  <p className="rounded-lg bg-info-soft p-3 text-sm text-primary">
+                    No Google Meu Negócio só o nome do reclamante é obrigatório. O resto você preenche se encontrar.
+                  </p>
+                )}
+              </div>
+            )}
+            {passo === 2 && (<>
             <CampoFormulario
               id="link_zendesk"
               rotulo="Link do Zendesk"
@@ -993,27 +1051,12 @@ export default function Tratativas() {
               </CampoFormulario>
             </div>
 
-            {/* Dados Comerciais do Cliente */}
-            <DadosComerciaisForm formData={formData} setFormData={setFormData} validacao={validacao} opcional={google} />
+            </>)}
+            {passo === 3 && (
+              <DadosComerciaisForm formData={formData} setFormData={setFormData} validacao={validacao} opcional={google} />
+            )}
+            {passo === 4 && (<>
             <div className="grid grid-cols-2 gap-4">
-              <CampoFormulario id="tipo_tratativa" rotulo="Tipo de Tratativa" obrigatorio erro={validacao.erro('tipo_tratativa')}>
-                <Select
-                  value={formData.tipo_tratativa || ''}
-                  onValueChange={(value) => {
-                    setFormData(prev => ({ ...prev, tipo_tratativa: value }));
-                    validacao.aoMudar('tipo_tratativa', value);
-                  }}
-                >
-                  <SelectTrigger id="tipo_tratativa" {...validacao.campo('tipo_tratativa')}>
-                    <SelectValue placeholder="Selecione o tipo" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {tiposTratativa.map(tipo => (
-                      <SelectItem key={tipo.id} value={tipo.chave}>{tipo.nome}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </CampoFormulario>
               <CampoFormulario id="prioridade" rotulo="Prioridade" obrigatorio={!google} erro={validacao.erro('prioridade')}>
                 <Select
                   value={formData.prioridade || ''}
@@ -1219,9 +1262,39 @@ export default function Tratativas() {
                   </div>
                   );
                   })()}
+            </>)}
+            </div>
+            <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border bg-card px-6 py-3">
+              <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
+                Cancelar
+              </Button>
+              <div className="flex items-center gap-2">
+                {passo > 1 && (
+                  <Button type="button" variant="outline" onClick={() => setPasso(passo - 1)}>
+                    Voltar
+                  </Button>
+                )}
+                {passo < PASSOS.length ? (
+                  <Button key="proximo" type="button" onClick={proximoPasso} className="bg-primary hover:bg-primary/90">
+                    Próximo
+                  </Button>
+                ) : (
+                  <Button key="registrar" type="submit" className="bg-primary hover:bg-primary/90" disabled={createMutation.isPending}>
+                    {createMutation.isPending ? (
+                      <>
+                        <div className="w-4 h-4 mr-2 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        Registrando...
+                      </>
+                    ) : (
+                      'Registrar'
+                    )}
+                  </Button>
+                )}
+              </div>
             </div>
           </form>
-        </PainelLateral>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
