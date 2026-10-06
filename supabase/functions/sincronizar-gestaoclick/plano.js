@@ -18,6 +18,11 @@
  *   5. Salário nunca é lido nem guardado.
  *   6. Pedido aprovado no Portal que o Gestão Click não conhece vira AVISO
  *      ("lance lá"), porque o Portal não escreve no Gestão Click.
+ *   7. Toda parcela de férias (passada, em curso ou futura) é lançada também na
+ *      ESCALA DE TRABALHO como "Férias" (um registro por parcela, chave
+ *      gc-ferias:<período>:<ordem>). Parcela que sumiu de lá tem o registro
+ *      desativado, não apagado. Um registro manual de depois prevalece (a escala
+ *      vale a marcação mais recente do dia).
  */
 
 const so = (v) => String(v ?? '').slice(0, 10);
@@ -27,6 +32,9 @@ const emDias = (data) => {
 };
 const diasCorridos = (inicio, fim) => (!inicio || !fim ? 0 : Math.max(0, Math.round(emDias(fim) - emDias(inicio)) + 1));
 const dataBr = (d) => so(d).split('-').reverse().slice(0, 2).join('/');
+
+/** Prefixo do escala_id dos registros de férias que a sincronização cria na Escala de Trabalho. */
+export const PREFIXO_ESCALA = 'gc-ferias:';
 
 export const normalizarEmail = (e) => String(e ?? '').trim().toLowerCase();
 
@@ -97,13 +105,14 @@ const normalizaCampo = (campo, valor) => {
  */
 export function planejarSincronizacao({
   empresaColaboradores = [], empresaFerias = [], portalColaboradores = [],
-  portalCiclos = [], portalSolicitacoes = [], hoje, agoraIso,
+  portalCiclos = [], portalSolicitacoes = [], portalEscala = [], hoje, agoraIso,
 }) {
   const avisos = [];
   const aviso = (tipo, mensagem) => avisos.push({ tipo, mensagem });
   const plano = {
     ciclosCriar: [], ciclosAtualizar: [],
     solicitacoesCriar: [], solicitacoesAtualizar: [], solicitacoesCancelar: [],
+    escalaCriar: [], escalaAtualizar: [], escalaDesativar: [],
     avisos,
   };
   const resumo = {
@@ -114,6 +123,7 @@ export function planejarSincronizacao({
     periodos_ignorados: 0,
     ciclos_criados: 0, ciclos_atualizados: 0, ciclos_sem_mudanca: 0,
     ferias_criadas: 0, ferias_atualizadas: 0, ferias_canceladas: 0,
+    escala_criadas: 0, escala_atualizadas: 0, escala_desativadas: 0,
   };
 
   // --- 1. quem é quem: pelo e-mail ----------------------------------------
@@ -145,6 +155,7 @@ export function planejarSincronizacao({
   const chavesDeParcelasVivas = new Set();   // parcelas que ainda valem (terminam hoje ou depois)
   const ciclosPorGc = new Map(portalCiclos.filter((c) => c.gestaoclick_id).map((c) => [c.gestaoclick_id, c]));
   const adotados = new Set();
+  const escalaDesejada = new Map(); // escala_id -> registro da Escala de Trabalho
 
   for (const f of empresaFerias) {
     const ligacao = pessoaDaEmpresa.get(f.colaborador?.id);
@@ -198,6 +209,13 @@ export function planejarSincronizacao({
 
     // --- 3. parcelas que ainda não terminaram -> férias aprovadas ---------------
     for (const p of parcelas) {
+      if (so(p.inicio) && so(p.fim)) {
+        escalaDesejada.set(`${PREFIXO_ESCALA}${f.id}:${p.ordem}`, {
+          escala_id: `${PREFIXO_ESCALA}${f.id}:${p.ordem}`, escala_nome: 'Férias (Gestão Click)',
+          colaborador_id: pessoa.id, colaborador_nome: pessoa.nome_completo,
+          data_inicio: so(p.inicio), data_fim: so(p.fim), tipo_evento: 'ferias', ativa: true,
+        });
+      }
       if (so(p.fim) < hoje) continue;
       const chave = `${f.id}:${p.ordem}`;
       chavesDeParcelasVivas.add(chave);
@@ -230,6 +248,21 @@ export function planejarSincronizacao({
         resumo.ferias_criadas += 1;
       }
     }
+  }
+
+  // --- 3b. Escala de Trabalho: um registro de "Férias" por parcela --------------
+  const escalaExistente = new Map(portalEscala.filter((e) => String(e.escala_id ?? '').startsWith(PREFIXO_ESCALA)).map((e) => [e.escala_id, e]));
+  for (const [id, desejado] of escalaDesejada) {
+    const atual = escalaExistente.get(id);
+    if (!atual) { plano.escalaCriar.push(desejado); resumo.escala_criadas += 1; continue; }
+    const mudou = so(atual.data_inicio) !== desejado.data_inicio || so(atual.data_fim) !== desejado.data_fim
+      || atual.ativa !== true || atual.colaborador_id !== desejado.colaborador_id || atual.tipo_evento !== 'ferias';
+    if (mudou) { plano.escalaAtualizar.push({ id: atual.id, dados: desejado }); resumo.escala_atualizadas += 1; }
+  }
+  for (const [id, atual] of escalaExistente) {
+    if (escalaDesejada.has(id) || atual.ativa === false) continue;
+    plano.escalaDesativar.push({ id: atual.id, dados: { ativa: false } });
+    resumo.escala_desativadas += 1;
   }
 
   // --- 4. férias importadas que sumiram de lá: deixam de travar -----------------

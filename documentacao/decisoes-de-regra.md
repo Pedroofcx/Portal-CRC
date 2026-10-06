@@ -987,3 +987,12 @@ controle de saldo, lançado à mão.
   (direito, gozados e abono): foram adotados, não duplicados.
 - O token foi colado numa conversa na criação do conector: deve ser trocado por
   quem administra o Gestão Click e guardado só como segredo da Edge Function.
+
+## 06/10/2026 — Férias do Gestão Click também entram na Escala de Trabalho
+
+**Decisão:** a sincronização lança cada parcela de férias (passada, em curso
+ou futura) na Escala de Trabalho como "Férias", sem lançamento manual. Um
+registro por parcela, marcado pelo prefixo `gc-ferias:<período>:<ordem>` no
+`escala_id` (sem coluna nova). Parcela remarcada atualiza o mesmo registro;
+parcela que sumiu do Gestão Click é desativada, não apagada. Marcação manual
+feita depois na mesma data prevalece, porque a escala vale a mais recente.

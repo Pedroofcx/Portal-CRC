@@ -2011,6 +2011,37 @@ console.log('\n== conector Gestao Click: ferias ==');
   const seg = rodar({ portalCiclos: estado1.c, portalSolicitacoes: estado1.t });
   checa('rodar de novo: nenhum ciclo criado nem alterado', `${seg.plano.ciclosCriar.length}/${seg.plano.ciclosAtualizar.length}`, '0/0');
   checa('rodar de novo: nenhuma ferias nova, alterada ou cancelada', `${seg.plano.solicitacoesCriar.length}/${seg.plano.solicitacoesAtualizar.length}/${seg.plano.solicitacoesCancelar.length}`, '0/0/0');
+
+  // --- Escala de Trabalho ---------------------------------------------------------
+  const esc = plano.escalaCriar;
+  checa('escala: um registro de Ferias por parcela (3 de G1 + 2 de G3)', String(esc.length), '5');
+  checa('escala: tipo ferias, ativa e com a chave da parcela', `${esc[0].tipo_evento}/${esc[0].ativa}/${esc[0].escala_id}`, 'ferias/true/gc-ferias:G1:1');
+  checa('escala: parcela PASSADA tambem entra (historico da escala)', String(esc.some((e) => e.data_inicio === '2025-12-29' && e.data_fim === '2026-01-07')), 'true');
+  checa('escala: a parcela planejada entra com o periodo certo', String(esc.some((e) => e.colaborador_id === 'pb' && e.data_inicio === '2026-10-13' && e.data_fim === '2026-10-27')), 'true');
+  checa('escala: nome e origem legiveis', esc[0].escala_nome, 'Férias (Gestão Click)');
+  checa('escala: periodo sem parcelas nao gera registro', String(esc.some((e) => e.escala_id.startsWith('gc-ferias:G2'))), 'false');
+  const apl = (pl, escala) => {
+    const e = escala.map((x) => ({ ...x }));
+    pl.escalaAtualizar.forEach((u) => Object.assign(e.find((x) => x.id === u.id), u.dados));
+    pl.escalaDesativar.forEach((u) => Object.assign(e.find((x) => x.id === u.id), u.dados));
+    pl.escalaCriar.forEach((n, i) => e.push({ id: `esc-${e.length + i}`, ...n }));
+    return e;
+  };
+  const escala1 = apl(plano, []);
+  const seg2 = rodar({ portalCiclos: estado1.c, portalSolicitacoes: estado1.t, portalEscala: escala1 });
+  checa('escala: rodar de novo nao cria, atualiza nem desativa nada', `${seg2.plano.escalaCriar.length}/${seg2.plano.escalaAtualizar.length}/${seg2.plano.escalaDesativar.length}`, '0/0/0');
+  const g3b = { ...f3, parcelas: [f3.parcelas[0], { ordem: 2, dias: 15, inicio: '2026-10-20', fim: '2026-11-03', status: 'planejada' }] };
+  const g3c = { ...f3, dias_gozados: 15, parcelas: [f3.parcelas[0]] };
+  const remarcada = rodar({ empresaFerias: [f1, f2, g3b, f4, f5], portalCiclos: estado1.c, portalSolicitacoes: estado1.t, portalEscala: escala1 });
+  checa('escala: parcela remarcada atualiza o MESMO registro (nao duplica)', `${remarcada.plano.escalaAtualizar.length}/${remarcada.plano.escalaCriar.length}/${remarcada.plano.escalaAtualizar[0].dados.data_inicio}`, '1/0/2026-10-20');
+  const semParcela = rodar({ empresaFerias: [f1, f2, g3c, f4, f5], portalCiclos: estado1.c, portalSolicitacoes: estado1.t, portalEscala: escala1 });
+  checa('escala: parcela que sumiu e DESATIVADA, nao apagada', `${semParcela.plano.escalaDesativar.length}/${semParcela.plano.escalaDesativar[0].dados.ativa}`, '1/false');
+  const jaDesativada = rodar({ empresaFerias: [f1, f2, g3c, f4, f5], portalCiclos: estado1.c, portalSolicitacoes: estado1.t, portalEscala: apl(semParcela.plano, escala1) });
+  checa('escala: o que ja foi desativado nao e desativado de novo', String(jaDesativada.plano.escalaDesativar.length), '0');
+  const reativada = rodar({ portalCiclos: estado1.c, portalSolicitacoes: estado1.t, portalEscala: apl(semParcela.plano, escala1) });
+  checa('escala: se a parcela volta, o registro e reativado', `${reativada.plano.escalaAtualizar.length}/${reativada.plano.escalaAtualizar[0]?.dados.ativa}`, '1/true');
+  checa('escala: registro manual de outra origem nunca e tocado', String(rodar({ portalEscala: [{ id: 'm1', escala_id: 'direct', colaborador_id: 'pa', data_inicio: '2026-10-06', data_fim: '2026-10-06', tipo_evento: 'presencial', ativa: true }] }).plano.escalaDesativar.length), '0');
+  checa('escala: o resumo conta os lancamentos', String(resumo.escala_criadas), '5');
   checa('rodar de novo: o resumo diz sem mudanca', String(seg.resumo.ciclos_sem_mudanca), '3');
   // o jsonb do banco devolve as chaves dos fragmentos em outra ordem: nao pode contar como mudanca
   const reordenado = estado1.c.map((c) => ({ ...c, fragmentos: (c.fragmentos ?? []).map((f) => Object.fromEntries(Object.entries(f).reverse())) }));

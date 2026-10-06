@@ -8,7 +8,7 @@ import { usePermissoes } from '@/hooks/usePermissoes';
 const CHAVE_SESSAO = 'portal_crc_sync_ferias_tentada';
 
 /** As consultas que mostram férias: recarregam depois de uma sincronização. */
-export const CHAVES_DE_FERIAS = ['ciclos-ferias', 'solicitacoes-ferias', 'ferias-aprovadas', 'ciclos-ferias-colaborador', 'conector', 'conector-execucoes'];
+export const CHAVES_DE_FERIAS = ['ciclos-ferias', 'solicitacoes-ferias', 'ferias-aprovadas', 'ciclos-ferias-colaborador', 'escalaAtribuicoes', 'conector', 'conector-execucoes'];
 
 export const invalidarFerias = (queryClient) => CHAVES_DE_FERIAS.forEach((k) => queryClient.invalidateQueries({ queryKey: [k] }));
 

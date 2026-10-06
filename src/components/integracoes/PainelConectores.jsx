@@ -20,6 +20,7 @@ const LINHAS_DO_RESUMO = [
   ['ciclos_criados', 'Períodos criados no Portal'],
   ['ciclos_atualizados', 'Períodos atualizados'],
   ['ferias_criadas', 'Férias futuras que passaram a travar a Escala e o rodízio'],
+  ['escala_criadas', 'Parcelas de férias lançadas na Escala de Trabalho'],
   ['ferias_canceladas', 'Férias canceladas (sumiram do Gestão Click)'],
 ];
 

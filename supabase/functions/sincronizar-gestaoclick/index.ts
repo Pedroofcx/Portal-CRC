@@ -29,7 +29,8 @@
  * O QUE ELA NUNCA FAZ
  *
  * Não escreve no Gestão Click (o token é de leitura), não lê nem guarda salário
- * e não apaga ciclo de férias que só existe no Portal.
+ * e não apaga ciclo de férias que só existe no Portal. Além dos ciclos e das
+ * férias aprovadas, lança cada parcela como "Férias" na Escala de Trabalho.
  */
 
 import { planejarSincronizacao } from './plano.js';
@@ -123,15 +124,17 @@ Deno.serve(async (req) => {
       buscarTudo('/ferias?updated_since=2000-01-01T00:00:00Z'),
     ]);
 
-    const [{ data: portalColaboradores }, { data: portalCiclos }, { data: portalSolicitacoes }] = await Promise.all([
+    const [{ data: portalColaboradores }, { data: portalCiclos }, { data: portalSolicitacoes }, { data: portalEscala }] = await Promise.all([
       sb.from('colaborador_base').select('id, nome_completo, email, data_admissao, cargo_atual'),
       sb.from('ciclo_ferias').select('*'),
       sb.from('solicitacao_ferias').select('*'),
+      sb.from('escala_atribuicao').select('*').like('escala_id', 'gc-ferias:%'),
     ]);
 
     const { plano, resumo } = planejarSincronizacao({
       empresaColaboradores, empresaFerias,
       portalColaboradores: portalColaboradores ?? [], portalCiclos: portalCiclos ?? [], portalSolicitacoes: portalSolicitacoes ?? [],
+      portalEscala: portalEscala ?? [],
       hoje: hojeEmBrasilia(), agoraIso,
     });
 
@@ -147,6 +150,11 @@ Deno.serve(async (req) => {
     if (plano.solicitacoesCriar.length) checar('criar férias', (await sb.from('solicitacao_ferias').insert(plano.solicitacoesCriar)).error);
     for (const s of plano.solicitacoesAtualizar) checar(`atualizar férias ${s.id}`, (await sb.from('solicitacao_ferias').update({ ...s.dados, ...carimbo }).eq('id', s.id)).error);
     for (const s of plano.solicitacoesCancelar) checar(`cancelar férias ${s.id}`, (await sb.from('solicitacao_ferias').update({ ...s.dados, ...carimbo }).eq('id', s.id)).error);
+
+    // Escala de Trabalho: as férias aparecem como "Férias" no grid, sem lançamento manual
+    if (plano.escalaCriar.length) checar('lançar férias na escala', (await sb.from('escala_atribuicao').insert(plano.escalaCriar)).error);
+    for (const e of plano.escalaAtualizar) checar(`atualizar escala ${e.id}`, (await sb.from('escala_atribuicao').update({ ...e.dados, ...carimbo }).eq('id', e.id)).error);
+    for (const e of plano.escalaDesativar) checar(`desativar escala ${e.id}`, (await sb.from('escala_atribuicao').update({ ...e.dados, ...carimbo }).eq('id', e.id)).error);
 
     if (falhas.length) {
       await terminar('erro', resumo, plano.avisos, falhas.slice(0, 5).join(' | '));
