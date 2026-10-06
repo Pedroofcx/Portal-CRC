@@ -996,3 +996,17 @@ registro por parcela, marcado pelo prefixo `gc-ferias:<período>:<ordem>` no
 `escala_id` (sem coluna nova). Parcela remarcada atualiza o mesmo registro;
 parcela que sumiu do Gestão Click é desativada, não apagada. Marcação manual
 feita depois na mesma data prevalece, porque a escala vale a mais recente.
+
+## 06/10/2026 — Google Meu Negócio: só o nome do reclamante é obrigatório
+
+**Contexto:** na reclamação do Google Meu Negócio o cliente só deixa o nome. A
+equipe procura o cadastro nos sistemas e nem sempre acha, e os campos
+obrigatórios travavam o registro.
+
+**Decisão:** ao escolher o tipo Google Meu Negócio, o único campo obrigatório é o
+nome do reclamante (quem registrou a reclamação na plataforma). Links,
+ID da base, CNPJ, prioridade, motivo, submotivos e dados comerciais ficam
+opcionais (o que for preenchido continua sendo conferido). Uma caixa "Localizei
+os dados do cliente nos nossos sistemas" grava `dados_localizados` (migration 47)
+e a tela de Tratativas ganhou um filtro por localizados / não localizados. A API
+segue a mesma regra. Os outros tipos não mudam.

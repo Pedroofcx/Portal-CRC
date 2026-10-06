@@ -235,6 +235,7 @@ export const migracoes = [
   { n: 44, titulo: 'Tickets, ClickDesk e resumo do WhatsApp', descricao: 'Seis colunas novas em tratativa (ticket_zendesk, ticket_clickdesk, dados_clickdesk, resumo_whatsapp e os dois carimbos do resumo) e o gatilho do carimbo.' },
   { n: 45, titulo: 'Cliente sem CNPJ', descricao: 'Coluna cliente_sem_cnpj em tratativa (padrão false), com regra que impede CNPJ e "sem CNPJ" ao mesmo tempo.' },
   { n: 46, titulo: 'Conector do Gestão Click (férias)', descricao: 'gestaoclick_id e origem em ciclo_ferias e solicitacao_ferias, e as tabelas conector e conector_execucao.' },
+  { n: 47, titulo: 'Google Meu Negócio: dados localizados', descricao: 'Coluna dados_localizados (verdadeiro, falso ou vazio) em tratativa, usada só no Google Meu Negócio para filtrar as que tiveram o cadastro do cliente achado.' },
   { n: 99, titulo: 'Restrições pós-importação', descricao: 'Só se aplica depois da carga de dados do Base44.' },
 ];
 

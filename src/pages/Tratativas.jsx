@@ -55,6 +55,8 @@ const formularioVazio = () => ({
   nome_cliente: '',
   cnpj_cliente: '',
   cliente_sem_cnpj: false,
+  // Só Google Meu Negócio: os dados do cliente foram localizados nos sistemas?
+  dados_localizados: false,
   ticket_zendesk: '',
   ticket_clickdesk: '',
   tipo_tratativa: '',
@@ -86,6 +88,8 @@ export default function Tratativas() {
   const [filterPrioridade, setFilterPrioridade] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [filterCnpj, setFilterCnpj] = useState('');
+  // Google Meu Negócio: 'all' | 'localizados' | 'nao_localizados'
+  const [filterLocalizados, setFilterLocalizados] = useState('all');
   // Filtros que chegam pelo link, vindos da tela do gestor: "Ver as vencidas"
   // (?situacao=vencidas) e "Ver as abertas de Fulana" (?agente=id&situacao=abertas).
   const [filtroLink, setFiltroLink] = useState(() => {
@@ -111,7 +115,19 @@ export default function Tratativas() {
    * dependem só de constantes — o useValidacao guarda o resultado, então
    * recriar o objeto não custa revalidação.
    */
-  const regrasTratativa = React.useMemo(() => ({
+  const google = formData.tipo_tratativa === 'google_meu_negocio';
+  const regrasTratativa = React.useMemo(() => (google ? {
+    // Google Meu Negócio: o cliente só deixa o nome na reclamação, então só o
+    // nome de quem reclamou é obrigatório. O que for preenchido continua sendo conferido.
+    nome_cliente:    [obrigatorio('O nome do reclamante')],
+    tipo_tratativa:  [obrigatorio('O tipo de tratativa')],
+    link_zendesk:    [url('O link do Zendesk')],
+    link_intranet:   [url('O link da Intranet')],
+    cnpj_cliente:    formData.cliente_sem_cnpj ? [] : [validarCnpj],
+    valor_contratacao_plano_atual: [numeroPositivo('O valor da contratação')],
+    data_primeira_contratacao:     [dataNaoFutura('A data da primeira contratação')],
+    data_contratacao_plano_atual:  [dataNaoFutura('A data de contratação do plano atual')],
+  } : {
     link_zendesk:    [obrigatorio('O link do Zendesk'), url('O link do Zendesk')],
     link_intranet:   [obrigatorio('O link da Intranet'), url('O link da Intranet')],
     id_base_cliente: [obrigatorio('O ID da base do cliente')],
@@ -132,7 +148,7 @@ export default function Tratativas() {
                                     dataNaoFutura('A data da primeira contratação')],
     data_contratacao_plano_atual:  [obrigatorio('A data de contratação do plano atual'),
                                     dataNaoFutura('A data de contratação do plano atual')],
-  }), [formData.cliente_sem_cnpj]);
+  }), [formData.cliente_sem_cnpj, google]);
 
   const [clienteRecorrente, setClienteRecorrente] = useState(false);
   const [numeroOcorrencias, setNumeroOcorrencias] = useState(0);
@@ -304,6 +320,10 @@ export default function Tratativas() {
       t.id?.toLowerCase().includes(term)
     );
   }
+  if (filterLocalizados !== 'all') {
+    filteredTratativas = filteredTratativas.filter(t => t.tipo_tratativa === 'google_meu_negocio'
+      && (filterLocalizados === 'localizados' ? t.dados_localizados === true : t.dados_localizados !== true));
+  }
   if (filterCnpj) {
     const cnpjTerm = filterCnpj.replace(/\D/g, '');
     filteredTratativas = filteredTratativas.filter(t => {
@@ -439,7 +459,9 @@ export default function Tratativas() {
       ...formData,
       motivo_nome: motivoSelecionado?.motivo || '',
       cliente_recorrente: clienteRecorrente,
-      numero_ocorrencias: numeroOcorrencias
+      numero_ocorrencias: numeroOcorrencias,
+      // Só Google Meu Negócio tem essa pergunta; nos outros tipos fica vazio.
+      dados_localizados: formData.tipo_tratativa === 'google_meu_negocio' ? formData.dados_localizados === true : null,
     });
   };
 
@@ -679,6 +701,16 @@ export default function Tratativas() {
               ))}
             </SelectContent>
           </Select>
+          <Select value={filterLocalizados} onValueChange={setFilterLocalizados}>
+            <SelectTrigger className="w-56">
+              <SelectValue placeholder="Dados do cliente (Google)" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Dados do cliente: todos</SelectItem>
+              <SelectItem value="localizados">Google: dados localizados</SelectItem>
+              <SelectItem value="nao_localizados">Google: dados não localizados</SelectItem>
+            </SelectContent>
+          </Select>
           {filtroLink && (
             <span className="inline-flex items-center gap-2 rounded-full bg-info-soft px-3 py-1 text-sm text-foreground">
               {[
@@ -690,11 +722,11 @@ export default function Tratativas() {
               </button>
             </span>
           )}
-          {(filterStatus !== 'all' || filterTipo !== 'all' || filterPrioridade !== 'all' || searchTerm || filterCnpj) && (
+          {(filterStatus !== 'all' || filterTipo !== 'all' || filterPrioridade !== 'all' || filterLocalizados !== 'all' || searchTerm || filterCnpj) && (
           <Button 
             variant="ghost" 
             size="sm"
-            onClick={() => { setFilterStatus('all'); setFilterTipo('all'); setFilterPrioridade('all'); setSearchTerm(''); setFilterCnpj(''); }}
+            onClick={() => { setFilterStatus('all'); setFilterTipo('all'); setFilterPrioridade('all'); setFilterLocalizados('all'); setSearchTerm(''); setFilterCnpj(''); }}
           >
             Limpar filtros
           </Button>
@@ -808,7 +840,7 @@ export default function Tratativas() {
             <CampoFormulario
               id="link_zendesk"
               rotulo="Link do Zendesk"
-              obrigatorio
+              obrigatorio={!google}
               erro={validacao.erro('link_zendesk')}
             >
               <Input
@@ -825,7 +857,7 @@ export default function Tratativas() {
             <CampoFormulario
               id="link_intranet"
               rotulo="Link da Intranet"
-              obrigatorio
+              obrigatorio={!google}
               erro={validacao.erro('link_intranet')}
             >
               <Input
@@ -842,7 +874,7 @@ export default function Tratativas() {
             <CampoFormulario
               id="id_base_cliente"
               rotulo="ID da Base do Cliente"
-              obrigatorio
+              obrigatorio={!google}
               erro={validacao.erro('id_base_cliente')}
             >
               <Input
@@ -858,9 +890,10 @@ export default function Tratativas() {
             </CampoFormulario>
             <CampoFormulario
               id="nome_cliente"
-              rotulo="Nome do Cliente"
+              rotulo={google ? 'Nome do reclamante' : 'Nome do Cliente'}
               obrigatorio
               erro={validacao.erro('nome_cliente')}
+              ajuda={google ? 'Quem registrou a reclamação na plataforma (Google Meu Negócio).' : undefined}
             >
               <Input
                 id="nome_cliente"
@@ -872,13 +905,31 @@ export default function Tratativas() {
                   validacao.aoMudar('nome_cliente', valor);
                 }}
                 {...validacao.campo('nome_cliente')}
-                placeholder="Nome completo do cliente"
+                placeholder={google ? 'Nome que aparece na avaliação do Google' : 'Nome completo do cliente'}
               />
             </CampoFormulario>
+            {google && (
+              <div className="rounded-lg border border-border p-3">
+                <label className="flex items-center gap-2 text-sm font-medium text-foreground">
+                  <input
+                    type="checkbox"
+                    className="h-4 w-4"
+                    checked={formData.dados_localizados === true}
+                    onChange={(e) => setFormData({ ...formData, dados_localizados: e.target.checked })}
+                  />
+                  Localizei os dados do cliente nos nossos sistemas
+                </label>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {formData.dados_localizados === true
+                    ? 'Preencha abaixo o que encontrou: tudo é opcional.'
+                    : 'Deixe desmarcado se não achou o cadastro. Só o nome do reclamante é obrigatório e a tratativa fica marcada como "não localizado" para filtrar depois.'}
+                </p>
+              </div>
+            )}
             <CampoFormulario
               id="cnpj_cliente"
               rotulo="CNPJ do Cliente"
-              obrigatorio={!formData.cliente_sem_cnpj}
+              obrigatorio={!formData.cliente_sem_cnpj && !google}
               erro={formData.cliente_sem_cnpj ? undefined : validacao.erro('cnpj_cliente')}
               ajuda={formData.cliente_sem_cnpj
                 ? 'Sem CNPJ, o cliente não consegue consultar a tratativa pelo WhatsApp.'
@@ -943,7 +994,7 @@ export default function Tratativas() {
             </div>
 
             {/* Dados Comerciais do Cliente */}
-            <DadosComerciaisForm formData={formData} setFormData={setFormData} validacao={validacao} />
+            <DadosComerciaisForm formData={formData} setFormData={setFormData} validacao={validacao} opcional={google} />
             <div className="grid grid-cols-2 gap-4">
               <CampoFormulario id="tipo_tratativa" rotulo="Tipo de Tratativa" obrigatorio erro={validacao.erro('tipo_tratativa')}>
                 <Select
@@ -963,7 +1014,7 @@ export default function Tratativas() {
                   </SelectContent>
                 </Select>
               </CampoFormulario>
-              <CampoFormulario id="prioridade" rotulo="Prioridade" obrigatorio erro={validacao.erro('prioridade')}>
+              <CampoFormulario id="prioridade" rotulo="Prioridade" obrigatorio={!google} erro={validacao.erro('prioridade')}>
                 <Select
                   value={formData.prioridade || ''}
                   onValueChange={(value) => {
@@ -985,7 +1036,7 @@ export default function Tratativas() {
 
             {/* Motivo e Submotivos */}
             <div className="p-4 bg-warning-soft border border-warning/25 rounded-lg space-y-4">
-              <CampoFormulario id="motivo_id" rotulo="Motivo Principal (apenas 1)" obrigatorio erro={validacao.erro('motivo_id')}>
+              <CampoFormulario id="motivo_id" rotulo="Motivo Principal (apenas 1)" obrigatorio={!google} erro={validacao.erro('motivo_id')}>
                 <Select
                   value={formData.motivo_id || ''}
                   onValueChange={(value) => {
@@ -1011,7 +1062,7 @@ export default function Tratativas() {
               </CampoFormulario>
 
               {formData.motivo_id && (
-                <CampoFormulario id="submotivos" rotulo="Submotivos (até 3)" obrigatorio erro={validacao.erro('submotivos')}>
+                <CampoFormulario id="submotivos" rotulo="Submotivos (até 3)" obrigatorio={!google} erro={validacao.erro('submotivos')}>
                   <p className="text-xs text-warning mb-2">
                     Selecione até 3 submotivos relacionados ao motivo principal
                   </p>

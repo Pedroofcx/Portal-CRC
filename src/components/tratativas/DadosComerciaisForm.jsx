@@ -17,11 +17,12 @@ const MODALIDADES = ['Mensal', 'Trimestral', 'Semestral', 'Anual'];
 // Componente de seção "Dados Comerciais do Cliente" para o formulário de Nova Tratativa.
 // Recebe formData e setFormData do pai, e `validacao` (useValidacao) para destacar
 // os campos que faltam.
+// `opcional` (Google Meu Negócio): nenhum campo é obrigatório.
 // Campos obrigatórios: plano, modalidade_plano, valor_contratacao_plano_atual,
 // data_primeira_contratacao, data_contratacao_plano_atual.
 // A fonte de verdade é sempre o contrato firmado — valores mensal/anual equivalentes
 // são calculados dinamicamente pela aplicação, nunca persistidos.
-export default function DadosComerciaisForm({ formData, setFormData, validacao }) {
+export default function DadosComerciaisForm({ formData, setFormData, validacao, opcional = false }) {
   const atualizar = (nome, valor) => {
     setFormData({ ...formData, [nome]: valor });
     validacao?.aoMudar(nome, valor);
@@ -37,7 +38,7 @@ export default function DadosComerciaisForm({ formData, setFormData, validacao }
       </h4>
 
       <div className="grid grid-cols-2 gap-4">
-        <CampoFormulario id="plano_cliente" rotulo="Plano do Cliente" obrigatorio erro={erro('plano_cliente')}>
+        <CampoFormulario id="plano_cliente" rotulo="Plano do Cliente" obrigatorio={!opcional} erro={erro('plano_cliente')}>
           <Select
             value={formData.plano_cliente || ''}
             onValueChange={(value) => atualizar('plano_cliente', value)}
@@ -70,7 +71,7 @@ export default function DadosComerciaisForm({ formData, setFormData, validacao }
       </div>
 
       <div className="grid grid-cols-2 gap-4">
-        <CampoFormulario id="modalidade_plano" rotulo="Modalidade do Plano" obrigatorio erro={erro('modalidade_plano')}>
+        <CampoFormulario id="modalidade_plano" rotulo="Modalidade do Plano" obrigatorio={!opcional} erro={erro('modalidade_plano')}>
           <Select
             value={formData.modalidade_plano || ''}
             onValueChange={(value) => atualizar('modalidade_plano', value)}
@@ -85,7 +86,7 @@ export default function DadosComerciaisForm({ formData, setFormData, validacao }
             </SelectContent>
           </Select>
         </CampoFormulario>
-        <CampoFormulario id="valor_contratacao_plano_atual" rotulo="Valor da Contratação do Plano Atual (R$)" obrigatorio erro={erro('valor_contratacao_plano_atual')}>
+        <CampoFormulario id="valor_contratacao_plano_atual" rotulo="Valor da Contratação do Plano Atual (R$)" obrigatorio={!opcional} erro={erro('valor_contratacao_plano_atual')}>
           <CurrencyInput
             id="valor_contratacao_plano_atual"
             value={formData.valor_contratacao_plano_atual || 0}
@@ -99,7 +100,7 @@ export default function DadosComerciaisForm({ formData, setFormData, validacao }
         <CampoFormulario
           id="data_primeira_contratacao"
           rotulo="Data da Primeira Contratação"
-          obrigatorio
+          obrigatorio={!opcional}
           erro={erro('data_primeira_contratacao')}
           ajuda="Início do relacionamento comercial do cliente com a empresa."
         >
@@ -114,7 +115,7 @@ export default function DadosComerciaisForm({ formData, setFormData, validacao }
         <CampoFormulario
           id="data_contratacao_plano_atual"
           rotulo="Data da Contratação do Plano Atual"
-          obrigatorio
+          obrigatorio={!opcional}
           erro={erro('data_contratacao_plano_atual')}
           ajuda="Aderiu ao plano atual (permite identificar upgrades/downgrades)."
         >

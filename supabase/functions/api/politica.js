@@ -126,7 +126,7 @@ export function decidir({ geral, chave, integracao, recurso, acao, agora, usoNoU
 /** Só estes campos de tratativa saem. O custo operacional nunca. */
 export const CAMPOS_TRATATIVA = [
   'id', 'id_interno', 'tipo_tratativa', 'prioridade', 'status',
-  'nome_cliente', 'id_base_cliente', 'cnpj_cliente', 'cliente_sem_cnpj', 'link_zendesk', 'link_intranet',
+  'nome_cliente', 'id_base_cliente', 'cnpj_cliente', 'cliente_sem_cnpj', 'dados_localizados', 'link_zendesk', 'link_intranet',
   'motivo_nome', 'plano_cliente', 'modalidade_plano', 'segmento_cliente',
   'agente_responsavel_id', 'agente_responsavel_nome',
   'data_registro', 'data_inicio_tratativa', 'data_encerramento',
@@ -207,7 +207,7 @@ const CAMPOS_ACEITOS = [
   'valor_contratacao_plano_atual', 'data_primeira_contratacao', 'data_contratacao_plano_atual',
   'segmento_cliente', 'numero_case_contestacao', 'motivo_contestacao',
   'valor_contestado_inicial', 'prazo_sla_dias', 'observacao',
-  'ticket_zendesk', 'ticket_clickdesk', 'dados_clickdesk', 'resumo_whatsapp', 'cliente_sem_cnpj',
+  'ticket_zendesk', 'ticket_clickdesk', 'dados_clickdesk', 'resumo_whatsapp', 'cliente_sem_cnpj', 'dados_localizados',
 ];
 
 /** Resumo para o cliente: o mesmo teto da coluna no banco. */
@@ -275,7 +275,9 @@ export function validarNovaTratativa(corpo) {
   const nome = texto('nome_cliente', 200);
   if (!nome) erros.push('nome_cliente é obrigatório');
   const tipo = lista('tipo_tratativa', TIPOS, true);
-  const prioridade = lista('prioridade', PRIORIDADES, true);
+  // Google Meu Negócio: o cliente só deixa o nome, então só o nome é obrigatório.
+  const google = tipo === 'google_meu_negocio';
+  const prioridade = lista('prioridade', PRIORIDADES, !google);
 
   // O CNPJ é obrigatório em tratativa nova: é a senha da consulta do cliente no WhatsApp.
   // Cliente sem CNPJ marca cliente_sem_cnpj: true (e então não envia o CNPJ). Esse
@@ -286,11 +288,17 @@ export function validarNovaTratativa(corpo) {
   const cnpjNumeros = cnpj ? cnpj.replace(/\D/g, '') : undefined;
   if (semCnpj === true) {
     if (cnpj) erros.push('envie o CNPJ ou marque cliente_sem_cnpj, não os dois');
+  } else if (!cnpj && google) {
+    // Google Meu Negócio: sem CNPJ é normal (a pessoa nem sempre localiza o cadastro).
   } else if (!cnpj) {
     erros.push('cnpj_cliente é obrigatório (ou envie cliente_sem_cnpj: true quando o cliente não tem CNPJ)');
-  } else if (!cnpjValido(cnpj)) {
+  } else if (cnpj && !cnpjValido(cnpj)) {
     erros.push('cnpj_cliente inválido: use 14 dígitos com os dígitos verificadores corretos');
   }
+
+  // Só vale para Google Meu Negócio: os dados do cliente foram localizados nos sistemas?
+  const localizados = corpo.dados_localizados;
+  if (localizados !== undefined && localizados !== null && typeof localizados !== 'boolean') erros.push('dados_localizados deve ser true ou false');
 
   const link = (campo) => {
     const v = texto(campo, 500);
@@ -307,6 +315,7 @@ export function validarNovaTratativa(corpo) {
     id_base_cliente: texto('id_base_cliente', 100),
     cnpj_cliente: semCnpj === true ? undefined : cnpjNumeros,
     cliente_sem_cnpj: semCnpj === true ? true : undefined,
+    dados_localizados: google && typeof localizados === 'boolean' ? localizados : undefined,
     plano_cliente: lista('plano_cliente', PLANOS),
     modalidade_plano: lista('modalidade_plano', MODALIDADES),
     valor_contratacao_plano_atual: numero('valor_contratacao_plano_atual'),

@@ -16,6 +16,8 @@ export const VAZIO_VIRA_NULO = {
     'modalidade_plano', 'tipo_acionamento_lider', 'tipo_acionamento_n2',
     'data_primeira_contratacao', 'data_contratacao_plano_atual', 'valor_contratacao_plano_atual',
     'ticket_zendesk', 'ticket_clickdesk', 'resumo_whatsapp', 'cnpj_cliente',
+    // Google Meu Negócio não exige esses campos: vazio é ausência, não texto.
+    'link_zendesk', 'link_intranet', 'id_base_cliente', 'motivo_id',
   ],
 };
 

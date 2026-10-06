@@ -1552,11 +1552,12 @@ console.log('\n== equidade: rodizio que pula quem esta ausente ==');
 
 console.log('\n== campos vazios viram nulo antes de gravar ==');
 {
-  const r = vazioViraNulo('Tratativa', { categoria_contestacao: '', prioridade: 'alta', link_intranet: '', data_primeira_contratacao: '' });
+  const r = vazioViraNulo('Tratativa', { categoria_contestacao: '', prioridade: 'alta', link_intranet: '', descricao_solucao: '', data_primeira_contratacao: '' });
   checa('lista fechada vazia vira nulo', String(r.categoria_contestacao), 'null');
   checa('data vazia vira nulo', String(r.data_primeira_contratacao), 'null');
   checa('valor preenchido fica', r.prioridade, 'alta');
-  checa('texto livre vazio continua vazio', JSON.stringify(r.link_intranet), '""');
+  checa('texto livre vazio continua vazio', JSON.stringify(r.descricao_solucao), '""');
+  checa('link vazio vira nulo (Google nao exige)', String(r.link_intranet), 'null');
   checa('entidade sem regra nao muda', vazioViraNulo('Aviso', { titulo: '' }).titulo, '');
   checa('nao altera o objeto de entrada', (() => { const o = { categoria_contestacao: '' }; vazioViraNulo('Tratativa', o); return JSON.stringify(o); })(), '""');
 }
@@ -1689,6 +1690,15 @@ console.log('\n== api de integracoes: quem passa ==');
   checa('criar: CNPJ e sem-CNPJ juntos sao recusados', val({ ...ok, cliente_sem_cnpj: true }).erros.join(' | '), 'não os dois');
   checa('criar: cliente_sem_cnpj precisa ser booleano', val({ ...semCnpjOk, cliente_sem_cnpj: 'sim' }).erros.join(' | '), 'true ou false');
   checa('criar: cliente_sem_cnpj false exige CNPJ', val({ ...semCnpjOk, cliente_sem_cnpj: false }).erros.join(' | '), 'cnpj_cliente é obrigatório');
+  const gmn = { nome_cliente: 'Maria (Google)', tipo_tratativa: 'google_meu_negocio' };
+  checa('google: so o nome basta (sem CNPJ, prioridade, links)', String(val(gmn).erros.length), '0');
+  checa('google: o nome continua obrigatorio', val({ tipo_tratativa: 'google_meu_negocio' }).erros.join(' | '), 'nome_cliente é obrigatório');
+  checa('google: grava dados_localizados true', String(val({ ...gmn, dados_localizados: true }).dados.dados_localizados), 'true');
+  checa('google: sem a marca nao grava nada', String('dados_localizados' in val(gmn).dados && val(gmn).dados.dados_localizados !== undefined), 'false');
+  checa('google: dados_localizados precisa ser booleano', val({ ...gmn, dados_localizados: 'sim' }).erros.join(' | '), 'true ou false');
+  checa('google: CNPJ preenchido ainda e conferido', val({ ...gmn, cnpj_cliente: '123' }).erros.join(' | '), 'cnpj_cliente inválido');
+  checa('outro tipo: dados_localizados e ignorado', String(val({ ...ok, dados_localizados: true }).dados.dados_localizados), 'undefined');
+  checa('outro tipo: continua exigindo CNPJ e prioridade', val({ nome_cliente: 'X', tipo_tratativa: 'reclame_aqui' }).erros.length > 1 ? 'sim' : 'nao', 'sim');
   checa('criar: CNPJ invalido e recusado', val({ ...ok, cnpj_cliente: '11222333000182' }).erros.join(' | '), 'cnpj_cliente inválido');
   checa('criar: CNPJ valido vira so digitos', val({ ...ok, cnpj_cliente: '11.222.333/0001-81' }).dados.cnpj_cliente, '11222333000181');
   checa('acompanhamento: cliente sem CNPJ nunca e entregue', String(escolherDoCliente([{ cnpj_cliente: null, cliente_sem_cnpj: true }], '11222333000181')), 'null');
