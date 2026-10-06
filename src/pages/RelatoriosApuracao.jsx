@@ -33,6 +33,7 @@ const pct = (v) => (v === null || v === undefined ? '—' : `${Number(v).toLocal
 const nota = (v) => (v === null || v === undefined ? '—' : Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 2 }));
 const dataCurta = (iso) => (iso ? `${iso.slice(8, 10)}/${iso.slice(5, 7)}` : '—');
 const MESES = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
+const rotuloDoMes = (mes) => `${MESES[Number(mes.slice(5, 7)) - 1]}/${mes.slice(2, 4)}`;
 const diaSemanaCurto = (iso) => ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sáb'][new Date(`${iso}T00:00:00`).getDay()];
 
 export default function RelatoriosApuracao() {
@@ -90,11 +91,104 @@ export default function RelatoriosApuracao() {
       {filtroColaborador === 'todos' ? (
         <VisaoEquipe q={q} periodo={periodo} />
       ) : (
-        <VisaoPessoa pessoa={pessoa} drill={drill} periodo={periodo} linhaComPontos={linhaComPontos} />
+        <VisaoPessoa pessoa={pessoa} drill={drill} periodo={periodo} linhaComPontos={linhaComPontos} equipeMeses={q.meses} />
       )}
 
       <PreditivoApuracao apuracoes={apuracoes} colaboradores={colaboradores} />
     </div>
+  );
+}
+
+/** Linhas do mês a mês de UMA pessoa, com o CSAT da equipe ao lado para comparar. */
+function GraficoMesAMesPessoa({ pessoa, equipeMeses }) {
+  const equipePorMes = new Map(equipeMeses.map((m) => [m.mes, m.csat]));
+  const dados = pessoa.meses.map((m) => ({ rotulo: rotuloDoMes(m.mes), csat: m.csat, performance: m.performance, equipe: equipePorMes.get(m.mes) ?? null }));
+  return (
+    <Cartao titulo={`Mês a mês · ${pessoa.nome}`}>
+      <Grafico altura={220} temDados={dados.length > 1} vazio="Só há um mês com apuração neste período: não dá para traçar a linha.">
+        <LineChart data={dados} margin={{ left: -18, right: 8 }}>
+          <CartesianGrid strokeDasharray="3 3" vertical={false} />
+          <XAxis dataKey="rotulo" tick={{ fontSize: 11 }} />
+          <YAxis domain={[0, 100]} tick={{ fontSize: 11 }} unit="%" />
+          <Tooltip formatter={(v) => (v === null ? '—' : `${Number(v).toFixed(1)}%`)} />
+          <Legend />
+          <Line type="monotone" dataKey="csat" name="CSAT" stroke={SERIE_GRAFICO[0]} strokeWidth={2} connectNulls />
+          <Line type="monotone" dataKey="performance" name="Performance" stroke={SERIE_GRAFICO[1]} strokeWidth={2} connectNulls />
+          <Line type="monotone" dataKey="equipe" name="CSAT da equipe" stroke={SERIE_GRAFICO[2]} strokeWidth={1.5} strokeDasharray="5 4" dot={false} connectNulls />
+        </LineChart>
+      </Grafico>
+    </Cartao>
+  );
+}
+
+const MAX_AGENTES_NO_GRAFICO = SERIE_GRAFICO.length;
+
+/** Compara agentes mês a mês: uma linha por agente (até 5, as cores da paleta). */
+function ComparacaoDeAgentes({ q }) {
+  const [metrica, setMetrica] = useState('csat');
+  const [escolhidos, setEscolhidos] = useState(() => q.pessoas.slice(0, 3).map((p) => p.id));
+  const marcados = q.pessoas.filter((p) => escolhidos.includes(p.id));
+
+  const alternar = (id) => setEscolhidos((atual) => {
+    if (atual.includes(id)) return atual.filter((x) => x !== id);
+    return atual.length >= MAX_AGENTES_NO_GRAFICO ? atual : [...atual, id];
+  });
+
+  const dados = q.meses.map((m) => {
+    const linha = { rotulo: rotuloDoMes(m.mes) };
+    for (const p of marcados) linha[p.id] = p.meses.find((x) => x.mes === m.mes)?.[metrica] ?? null;
+    return linha;
+  });
+
+  return (
+    <Cartao titulo="Agentes mês a mês">
+      <div className="mb-3 flex flex-wrap items-center gap-2">
+        <div className="flex gap-2" role="group" aria-label="Indicador">
+          {[['csat', 'CSAT'], ['performance', 'Performance']].map(([chave, rotulo]) => (
+            <button
+              key={chave}
+              type="button"
+              onClick={() => setMetrica(chave)}
+              aria-pressed={metrica === chave}
+              className={`rounded-md border px-3 py-1 text-sm ${metrica === chave ? 'border-primary bg-info-soft font-medium text-primary' : 'border-border text-foreground hover:bg-muted'}`}
+            >
+              {rotulo}
+            </button>
+          ))}
+        </div>
+        <span className="text-xs text-muted-foreground">Escolha até {MAX_AGENTES_NO_GRAFICO} agentes</span>
+      </div>
+      <div className="mb-3 flex flex-wrap gap-2">
+        {q.pessoas.map((p) => {
+          const marcado = escolhidos.includes(p.id);
+          const cheio = !marcado && escolhidos.length >= MAX_AGENTES_NO_GRAFICO;
+          return (
+            <button
+              key={p.id}
+              type="button"
+              onClick={() => alternar(p.id)}
+              aria-pressed={marcado}
+              disabled={cheio}
+              className={`rounded-full border px-3 py-1 text-xs ${marcado ? 'border-primary bg-info-soft font-medium text-primary' : 'border-border text-foreground hover:bg-muted'} ${cheio ? 'opacity-50' : ''}`}
+            >
+              {p.nome}
+            </button>
+          );
+        })}
+      </div>
+      <Grafico altura={260} temDados={dados.length > 1 && marcados.length > 0} vazio={marcados.length === 0 ? 'Escolha ao menos um agente.' : 'Só há um mês com apuração neste período: não dá para traçar a linha.'}>
+        <LineChart data={dados} margin={{ left: -18, right: 8 }}>
+          <CartesianGrid strokeDasharray="3 3" vertical={false} />
+          <XAxis dataKey="rotulo" tick={{ fontSize: 11 }} />
+          <YAxis domain={[0, 100]} tick={{ fontSize: 11 }} unit="%" />
+          <Tooltip formatter={(v) => (v === null ? '—' : `${Number(v).toFixed(1)}%`)} />
+          <Legend />
+          {marcados.map((p, i) => (
+            <Line key={p.id} type="monotone" dataKey={p.id} name={p.nome} stroke={SERIE_GRAFICO[i % SERIE_GRAFICO.length]} strokeWidth={2} connectNulls />
+          ))}
+        </LineChart>
+      </Grafico>
+    </Cartao>
   );
 }
 
@@ -128,7 +222,7 @@ function VisaoEquipe({ q, periodo }) {
 
         <Cartao titulo="Mês a mês" className="xl:col-span-3">
           <Grafico altura={220} temDados={q.meses.length > 1}>
-            <LineChart data={q.meses.map((m) => ({ ...m, rotulo: `${MESES[Number(m.mes.slice(5, 7)) - 1]}/${m.mes.slice(2, 4)}` }))} margin={{ left: -18, right: 8 }}>
+            <LineChart data={q.meses.map((m) => ({ ...m, rotulo: rotuloDoMes(m.mes) }))} margin={{ left: -18, right: 8 }}>
               <CartesianGrid strokeDasharray="3 3" vertical={false} />
               <XAxis dataKey="rotulo" tick={{ fontSize: 11 }} />
               <YAxis domain={[0, 100]} tick={{ fontSize: 11 }} unit="%" />
@@ -140,6 +234,8 @@ function VisaoEquipe({ q, periodo }) {
           </Grafico>
         </Cartao>
       </div>
+
+      <ComparacaoDeAgentes q={q} />
 
       <Cartao titulo="Cada pessoa no período">
         <TabelaResumida
@@ -161,7 +257,7 @@ function VisaoEquipe({ q, periodo }) {
   );
 }
 
-function VisaoPessoa({ pessoa, drill, periodo, linhaComPontos }) {
+function VisaoPessoa({ pessoa, drill, periodo, linhaComPontos, equipeMeses }) {
   if (!pessoa) {
     return (
       <Cartao>
@@ -187,6 +283,8 @@ function VisaoPessoa({ pessoa, drill, periodo, linhaComPontos }) {
           </p>
         )}
       </Cartao>
+
+      <GraficoMesAMesPessoa pessoa={pessoa} equipeMeses={equipeMeses} />
 
       <Cartao titulo="Semana a semana (seg → sex)">
         {semanas.length === 0 ? (

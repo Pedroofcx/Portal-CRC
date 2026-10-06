@@ -48,7 +48,29 @@ function somar(apuracoesPorPessoa, periodo) {
 }
 
 /**
- * @returns { equipe, pessoas: [...], meses: [...] }
+ * Mês a mês de um grupo de listas de apuração: um item por mês com apuração,
+ * com a mesma conta de `somar` limitada ao pedaço do mês que cai no período.
+ * Serve à equipe inteira e a cada pessoa (o gráfico de linhas é o mesmo).
+ */
+function serieMensal(listas, p) {
+  const meses = new Set();
+  for (const lista of listas) {
+    for (const tipo of ['telefone', 'chat']) for (const { dia } of diasApurados(lista, tipo, p)) meses.add(dia.slice(0, 7));
+  }
+  return [...meses].sort().map((mes) => {
+    const [ano, m] = mes.split('-').map(Number);
+    const ultimo = String(new Date(ano, m, 0).getDate()).padStart(2, '0');
+    const dentro = {
+      data_inicio: `${mes}-01` < p.data_inicio ? p.data_inicio : `${mes}-01`,
+      data_fim: `${mes}-${ultimo}` > p.data_fim ? p.data_fim : `${mes}-${ultimo}`,
+    };
+    return { mes, ...somar(listas, dentro) };
+  });
+}
+
+/**
+ * @returns { equipe, pessoas: [...], meses: [...] } — cada pessoa também traz
+ * `meses`, a mesma série mensal só dela.
  */
 export function resumoQualidade({ apuracoes = [], colaboradores = [], periodo = {} }) {
   const p = semLimite(periodo);
@@ -67,6 +89,7 @@ export function resumoQualidade({ apuracoes = [], colaboradores = [], periodo = 
       cx: ind.cx?.valor ?? null,
       cxAvaliacoes: ind.cx?.avaliacoes ?? 0,
       pontos: { csat: pontosDaFaixa('csat', s.csat), performance: pontosDaFaixa('performance', s.performance), cx: pontosDaFaixa('cx', ind.cx?.valor) },
+      meses: serieMensal([lista], p),
       temDados: s.volumes.ligacoes + s.volumes.chats > 0 || (ind.cx?.avaliacoes ?? 0) > 0,
     };
   }).filter((x) => x.temDados); // quem não teve apuração no período não entra
@@ -75,16 +98,7 @@ export function resumoQualidade({ apuracoes = [], colaboradores = [], periodo = 
   const equipe = somar([...porPessoa.values()], p);
 
   // Mês a mês, para ver a tendência.
-  const meses = new Set();
-  for (const lista of porPessoa.values()) {
-    for (const tipo of ['telefone', 'chat']) for (const { dia } of diasApurados(lista, tipo, p)) meses.add(dia.slice(0, 7));
-  }
-  const serie = [...meses].sort().map((mes) => {
-    const [ano, m] = mes.split('-').map(Number);
-    const ultimo = new Date(ano, m, 0).getDate();
-    const dentro = { data_inicio: `${mes}-01` < p.data_inicio ? p.data_inicio : `${mes}-01`, data_fim: `${mes}-${String(ultimo).padStart(2, '0')}` > p.data_fim ? p.data_fim : `${mes}-${String(ultimo).padStart(2, '0')}` };
-    return { mes, ...somar([...porPessoa.values()], dentro) };
-  });
+  const serie = serieMensal([...porPessoa.values()], p);
 
   return { equipe, pessoas, meses: serie };
 }

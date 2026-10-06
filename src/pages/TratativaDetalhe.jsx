@@ -16,6 +16,7 @@ import { Textarea } from '@/components/ui/textarea';
 import LinhaDoTempo from '@/components/tratativas/LinhaDoTempo';
 import AtendimentoAoCliente from '@/components/tratativas/AtendimentoAoCliente';
 import RegistrarNota from '@/components/tratativas/RegistrarNota';
+import ReenviarSolucaoReplicavel from '@/components/tratativas/ReenviarSolucaoReplicavel';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -1364,8 +1365,11 @@ export default function TratativaDetalhe({ idExterno = null, embutido = false })
                 )}
                 {tratativa.solucao_replicavel_parecer && (
                   <p className="mt-2 text-sm text-muted-foreground">
-                    <span className="font-medium text-foreground">Parecer do gestor:</span> {tratativa.solucao_replicavel_parecer}
+                    <span className="font-medium text-foreground">{situacaoReplicavel(tratativa) === 'pendente' ? 'Parecer anterior do gestor:' : 'Parecer do gestor:'}</span> {tratativa.solucao_replicavel_parecer}
                   </p>
+                )}
+                {situacaoReplicavel(tratativa) === 'contestada' && colaborador?.id && colaborador.id === tratativa.agente_responsavel_id && (
+                  <ReenviarSolucaoReplicavel tratativa={tratativa} />
                 )}
               </CardContent>
             </Card>

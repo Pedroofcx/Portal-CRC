@@ -17,8 +17,13 @@
  *   - PENDENTE: some sozinho quando a pessoa faz o que foi pedido (confirmar o
  *     aviso, responder a pesquisa). Nunca é "marcado como lido": se ainda falta
  *     fazer, continua no sino.
- *   - INFORMATIVO: só avisa (ex.: "suas férias foram aprovadas"). Dá para
- *     marcar como visto; a marca fica no navegador de quem a fez.
+ *   - INFORMATIVO: só avisa (ex.: "suas férias foram aprovadas").
+ *
+ * Qualquer item, pendente ou informativo, pode ser "lido" pela pessoa: ele some
+ * do sino (a marca fica no navegador de quem a fez). Isso só esconde o aviso: o
+ * que está pendente continua pendente na tela de origem. O id do item leva a
+ * quantidade quando ela muda (ex.: "3 vencidas"), então um número novo volta a
+ * aparecer mesmo depois de lido.
  */
 import { filaDePendencias } from './pendencias.js';
 import { popsParaCiencia } from './pops.js';
@@ -63,6 +68,7 @@ export function montarNotificacoes({
   tratativasAbertas = [],
   solicitacoesFerias = [],
   replicaveisPendentes = 0,
+  replicaveisContestadas = [],
   vistas = new Set(),
   agora = new Date(),
 } = {}) {
@@ -86,7 +92,7 @@ export function montarNotificacoes({
   const retrato = vencidasDaEquipe(suas, agora);
   if (retrato.vencidas > 0) {
     add({
-      id: 'tratativas-vencidas', categoria: 'tratativa',
+      id: `tratativas-vencidas@${retrato.vencidas}`, categoria: 'tratativa',
       para: ehAgente ? `/Tratativas?situacao=vencidas&agente=${colaborador.id}` : '/Tratativas?situacao=vencidas',
       titulo: ehAgente
         ? `${plural(retrato.vencidas, 'tratativa sua com o prazo vencido', 'tratativas suas com o prazo vencido')}`
@@ -96,7 +102,7 @@ export function montarNotificacoes({
   }
   if (retrato.venceHoje > 0) {
     add({
-      id: 'tratativas-vencem-hoje', categoria: 'tratativa',
+      id: `tratativas-vencem-hoje@${retrato.venceHoje}`, categoria: 'tratativa',
       para: ehAgente ? `/Tratativas?situacao=abertas&agente=${colaborador.id}` : '/Tratativas?situacao=abertas',
       titulo: ehAgente
         ? `${plural(retrato.venceHoje, 'tratativa sua vence hoje', 'tratativas suas vencem hoje')}`
@@ -149,7 +155,6 @@ export function montarNotificacoes({
       .filter((s) => new Date(s.updated_date ?? s.created_date ?? 0).getTime() >= limite)
       .forEach((s) => {
         const id = `ferias-${s.id}-${s.status}`;
-        if (vistas.has(id)) return;
         const periodo = `${dataCurta(s.data_inicio)} a ${dataCurta(s.data_fim)}`;
         add({
           id, categoria: 'ferias', para: '/GestaoFerias', informativa: true,
@@ -164,7 +169,7 @@ export function montarNotificacoes({
     const emAnalise = solicitacoesFerias.filter((s) => s.status === 'em_analise' && s.colaborador_id !== colaborador.id).length;
     if (emAnalise > 0) {
       add({
-        id: 'ferias-para-aprovar', categoria: 'ferias', para: '/GestaoFerias',
+        id: `ferias-para-aprovar@${emAnalise}`, categoria: 'ferias', para: '/GestaoFerias',
         titulo: plural(emAnalise, 'pedido de férias para aprovar', 'pedidos de férias para aprovar'),
         detalhe: 'Abrir os pedidos',
       });
@@ -174,11 +179,26 @@ export function montarNotificacoes({
   // --- soluções replicáveis esperando a gestão --------------------------------
   if (tem('aprovar_solucao_replicavel') && replicaveisPendentes > 0) {
     add({
-      id: 'replicaveis-pendentes', categoria: 'replicavel', para: '/SolucoesReplicaveis',
+      id: `replicaveis-pendentes@${replicaveisPendentes}`, categoria: 'replicavel', para: '/SolucoesReplicaveis',
       titulo: plural(replicaveisPendentes, 'solução replicável para aprovar', 'soluções replicáveis para aprovar'),
       detalhe: 'Abrir a fila',
     });
   }
+
+  // --- solução replicável contestada: o agente edita e reenvia ------------------
+  replicaveisContestadas
+    .filter((t) => t.agente_responsavel_id === colaborador.id)
+    .forEach((t) => add({
+      id: `replicavel-contestada-${t.id}@${t.solucao_replicavel_auditada_em ?? ''}`, categoria: 'replicavel',
+      para: `/TratativaDetalhe?id=${t.id}`,
+      titulo: `Solução replicável contestada${t.id_interno ? ` (${t.id_interno})` : ''}`,
+      detalhe: 'Veja o parecer, edite a solução e reenvie para valer o ponto',
+    }));
+
+  // O que a pessoa já leu some do sino.
+  const naoLidas = itens.filter((it) => !vistas.has(it.id));
+  itens.length = 0;
+  itens.push(...naoLidas);
 
   // Categoria na ordem do sino; dentro dela, urgente primeiro e o resto como veio.
   const posicao = (c) => CATEGORIAS.findIndex((x) => x.chave === c);

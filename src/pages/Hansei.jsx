@@ -41,12 +41,16 @@ export default function Hansei() {
   const colaborador = colaboradores.find(c => c.email === user?.email);
   const isGestor = colaborador?.papel === 'gestor';
 
+  const [ultimoEnvio, setUltimoEnvio] = useState(null);
+
   const enviarMutation = useMutation({
     mutationFn: (data) => db.entities.HanseiEnvio.create(data),
-    onSuccess: () => {
+    onSuccess: (_, enviado) => {
       queryClient.invalidateQueries(['hansei-envios']);
       toast.success('Resultados enviados com sucesso!');
-      setEnvioDialogOpen(false);
+      // A janela fica aberta com a confirmação: dali dá para enviar a outra
+      // pessoa ou voltar à tela inicial (a lista de pessoas).
+      setUltimoEnvio({ nome: enviado?.colaborador_nome ?? 'a pessoa escolhida' });
     },
     onError: () => toast.error('Erro ao enviar resultados'),
   });
@@ -198,7 +202,10 @@ export default function Hansei() {
       {/* Dialog de Envio */}
       <HanseiEnvioDialog
         open={envioDialogOpen}
-        onClose={() => setEnvioDialogOpen(false)}
+        onClose={() => { setEnvioDialogOpen(false); setUltimoEnvio(null); }}
+        ultimoEnvio={ultimoEnvio}
+        onEnviarOutro={() => { setUltimoEnvio(null); setPessoaAberta(null); }}
+        onVoltarAoInicio={() => { setEnvioDialogOpen(false); setUltimoEnvio(null); setPessoaAberta(null); }}
         colaboradores={colaboradores}
         tratativas={tratativas}
         apuracoes={apuracoes}

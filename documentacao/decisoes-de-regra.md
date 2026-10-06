@@ -1019,3 +1019,18 @@ base, nome, CNPJ), Comercial e Classificação (prioridade, motivo, submotivos e
 na contestação, os dados dela). O tipo vem primeiro porque decide o que é
 obrigatório. "Próximo" só deixa seguir se os campos do passo estiverem certos;
 ao registrar, se algo faltar, a janela volta ao primeiro passo com erro.
+
+## 06/10/2026 — Mês a mês por agente, notificações lidas, Hansei em sequência e reenvio da solução replicável
+
+- **Análise da apuração:** o gráfico de linhas "Mês a mês" agora existe também
+  por agente (CSAT, Performance e o CSAT da equipe tracejado para comparar) e
+  há um gráfico que compara até 5 agentes mês a mês (CSAT ou Performance).
+- **Sino:** qualquer notificação pode ser marcada como lida (um "x" em cada
+  uma e "Marcar todas como lidas") e some do sino. Só esconde o aviso, o que
+  está pendente continua pendente na tela de origem. A marca fica no navegador
+  de quem a fez. Um número novo (ex.: mais tratativas vencidas) volta a aparecer.
+- **Hansei:** depois de enviar, a janela mostra a confirmação com "Enviar para
+  outra pessoa" e "Voltar à tela inicial" (a lista de pessoas).
+- **Solução replicável contestada:** o agente que atendeu recebe uma notificação,
+  vê o parecer, edita a solução e reenvia (migration 48). Ela volta a pendente;
+  se o gestor aprovar, o +0,5 entra na pontuação como já era a regra.

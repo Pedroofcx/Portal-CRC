@@ -732,6 +732,13 @@ console.log('\n== relatorio de qualidade ==');
   checa('equipe ponderada: 9 de 10 = 90% (media de medias daria 50%)', String(q.equipe.csatTelefone), '90');
   checa('agosto fora do periodo', String(q.meses.length), '1');
   checa('por pessoa', q.pessoas.map((p) => `${p.nome}:${p.csatTelefone}`).join(','), 'Ana:0,Bia:100');
+  // Mes a mes de cada agente (o mesmo grafico da equipe, so da pessoa)
+  const qTodos = resumoQualidade({ apuracoes, colaboradores, periodo: { inicio: '2026-07-01', fim: '2026-08-31' } });
+  const bia = qTodos.pessoas.find((p) => p.id === 'b');
+  checa('agente tem a serie mensal (jul e ago)', bia.meses.map((m) => m.mes).join(','), '2026-07,2026-08');
+  checa('serie mensal do agente: CSAT de cada mes', bia.meses.map((m) => m.csatTelefone).join(','), '100,100');
+  checa('agente sem apuracao em agosto so tem julho', qTodos.pessoas.find((p) => p.id === 'a').meses.map((m) => m.mes).join(','), '2026-07');
+  checa('serie da equipe continua igual', qTodos.meses.map((m) => m.mes).join(','), '2026-07,2026-08');
 }
 
 console.log('\n== qualidade dia a dia: achar o dia ruim que puxou a semana ==');
@@ -1909,6 +1916,17 @@ console.log('\n== sino de notificacoes ==');
   checa('ferias de outra pessoa nao aparecem', String(base({ solicitacoesFerias: [fer('f1', 'aprovada', { colaborador_id: 'outra' })] }).length), '0');
   checa('decisao antiga (mais de 30 dias) nao e novidade', String(base({ solicitacoesFerias: [fer('f1', 'aprovada', { updated_date: '2026-08-01T00:00:00Z' })] }).length), '0');
   checa('novidade marcada como vista some', String(base({ solicitacoesFerias: [fer('f1', 'aprovada')], vistas: new Set(['ferias-f1-aprovada']) }).length), '0');
+  // Ler uma notificacao (qualquer uma) a faz sumir; um numero novo volta a aparecer
+  const venc = base({ tratativasAbertas: [vencida] });
+  checa('qualquer item pode ser lido e some', String(base({ tratativasAbertas: [vencida], vistas: new Set([venc[0].id]) }).length), '0');
+  checa('o id do prazo vencido leva a quantidade', venc[0].id, 'tratativas-vencidas@1');
+  checa('lida com 1 vencida, aparece de novo com 2', String(base({ tratativasAbertas: [vencida, mk('t9', 24)], vistas: new Set(['tratativas-vencidas@1']) }).length), '1');
+  const contestada = { id: 'tc1', id_interno: 'TRT-0100', agente_responsavel_id: 'a1', solucao_replicavel_auditada_em: '2026-10-05T10:00:00Z' };
+  const sCont = base({ replicaveisContestadas: [contestada] });
+  checa('agente e avisado da solucao replicavel contestada', sCont.map((n) => n.titulo).join(' | '), 'Solução replicável contestada (TRT-0100)');
+  checa('o aviso leva para a tratativa', sCont[0].para, '/TratativaDetalhe?id=tc1');
+  checa('so o agente da tratativa recebe', String(base({ replicaveisContestadas: [{ ...contestada, agente_responsavel_id: 'outro' }] }).length), '0');
+  checa('contestacao nova (outra data) volta a avisar apos leitura', String(base({ replicaveisContestadas: [{ ...contestada, solucao_replicavel_auditada_em: '2026-10-09T10:00:00Z' }], vistas: new Set([sCont[0].id]) }).length), '1');
   checa('ferias e informativa (pode ser marcada como vista)', String(base({ solicitacoesFerias: [fer('f1', 'aprovada')] })[0].informativa), 'true');
   checa('ticket atribuido NAO e informativo (so some quando confirma)', String(base({ atribuicoes: atr })[0].informativa), 'false');
 

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Bell } from 'lucide-react';
+import { Bell, X } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import useNotificacoes from '@/hooks/useNotificacoes';
 import { agruparPorCategoria, rotuloDoSelo } from '@/lib/notificacoes';
@@ -18,7 +18,7 @@ export default function SinoDeNotificacoes({ colaborador, className = '' }) {
   const { notificacoes, total, marcarComoVistas } = useNotificacoes(colaborador);
   const [aberto, setAberto] = useState(false);
   const grupos = agruparPorCategoria(notificacoes);
-  const informativas = notificacoes.filter((n) => n.informativa).map((n) => n.id);
+  const todas = notificacoes.map((n) => n.id);
   const selo = rotuloDoSelo(total);
 
   return (
@@ -55,15 +55,24 @@ export default function SinoDeNotificacoes({ colaborador, className = '' }) {
                 </h3>
                 <ul>
                   {g.itens.slice(0, POR_CATEGORIA).map((n) => (
-                    <li key={n.id}>
+                    <li key={n.id} className="group -mx-2 flex items-start gap-1 rounded-md px-2 transition-colors hover:bg-accent">
                       <Link
                         to={n.para}
                         onClick={() => setAberto(false)}
-                        className="-mx-2 block rounded-md px-2 py-1.5 transition-colors hover:bg-accent"
+                        className="block min-w-0 flex-1 py-1.5"
                       >
                         <span className={`block text-sm ${n.urgente ? 'font-semibold text-critical' : 'font-medium text-foreground'}`}>{n.titulo}</span>
                         {n.detalhe && <span className="block text-xs text-muted-foreground">{n.detalhe}</span>}
                       </Link>
+                      <button
+                        type="button"
+                        onClick={() => marcarComoVistas([n.id])}
+                        className="mt-1.5 shrink-0 rounded p-1 text-muted-foreground hover:bg-background hover:text-foreground"
+                        aria-label={`Marcar como lida: ${n.titulo}`}
+                        title="Marcar como lida"
+                      >
+                        <X className="h-3.5 w-3.5" aria-hidden="true" />
+                      </button>
                     </li>
                   ))}
                 </ul>
@@ -77,10 +86,10 @@ export default function SinoDeNotificacoes({ colaborador, className = '' }) {
           </div>
         )}
 
-        {informativas.length > 0 && (
+        {todas.length > 0 && (
           <div className="border-t border-border px-4 py-2 text-right">
-            <button type="button" className="text-xs text-primary underline" onClick={() => marcarComoVistas(informativas)}>
-              Marcar as novidades como vistas
+            <button type="button" className="text-xs text-primary underline" onClick={() => marcarComoVistas(todas)}>
+              Marcar todas como lidas
             </button>
           </div>
         )}

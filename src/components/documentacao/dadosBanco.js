@@ -164,6 +164,7 @@ export const funcoesDoBanco = [
   { nome: 'congelar_campos_de_pontuacao', migration: 19, descricao: 'Função do gatilho ab_congela_pontuacao: depois de encerrada, os campos que geram ponto só mudam por quem tem corrigir_tratativa_encerrada.' },
   { nome: 'proteger_auditoria_replicavel', migration: 20, descricao: 'Função do gatilho ab_protege_auditoria_replicavel: só quem tem aprovar_solucao_replicavel grava a aprovação ou contestação de uma solução replicável.' },
   { nome: 'proteger_papel_do_colaborador', migration: 41, descricao: 'Função do gatilho ac_protege_papel_colaborador: impede quem gerencia colaboradores de se promover ou trocar e-mail (identidade).' },
+  { nome: 'reenviar_solucao_replicavel', migration: 48, descricao: 'O agente que atendeu a tratativa edita a solução replicável CONTESTADA e reenvia: a análise volta a pendente (o parecer anterior fica) e o histórico registra. Só vale para o responsável e só para solução contestada.' },
   { nome: 'confirmar_atribuicao', migration: 32, descricao: 'O agente confirma ("OK") que viu a atribuição nova. Altera só a própria linha.' },
   { nome: 'atualizar_minha_foto', migration: 37, descricao: 'Troca a foto de perfil de quem está logado, e só ela. Aceita só endereço do nosso bucket. Existe porque o agente não pode editar a própria linha de colaborador.' },
   { nome: 'auditoria_rls', migration: 29, descricao: 'Lista cada política de RLS e o que ela usa (eh_gestor, eh_colaborador, dono). Só service_role. Serve para conferir se o banco real bate com as migrations.' },
@@ -236,6 +237,7 @@ export const migracoes = [
   { n: 45, titulo: 'Cliente sem CNPJ', descricao: 'Coluna cliente_sem_cnpj em tratativa (padrão false), com regra que impede CNPJ e "sem CNPJ" ao mesmo tempo.' },
   { n: 46, titulo: 'Conector do Gestão Click (férias)', descricao: 'gestaoclick_id e origem em ciclo_ferias e solicitacao_ferias, e as tabelas conector e conector_execucao.' },
   { n: 47, titulo: 'Google Meu Negócio: dados localizados', descricao: 'Coluna dados_localizados (verdadeiro, falso ou vazio) em tratativa, usada só no Google Meu Negócio para filtrar as que tiveram o cadastro do cliente achado.' },
+  { n: 48, titulo: 'Reenviar solução replicável', descricao: 'Função reenviar_solucao_replicavel: o agente edita a solução contestada e ela volta a pendente para o gestor decidir de novo.' },
   { n: 99, titulo: 'Restrições pós-importação', descricao: 'Só se aplica depois da carga de dados do Base44.' },
 ];
 

@@ -5,7 +5,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Send, Eye, Zap, AlertTriangle, CheckCircle, Info } from 'lucide-react';
+import { Send, Eye, Zap, AlertTriangle, CheckCircle, CheckCircle2, Users, Info } from 'lucide-react';
 import { getQuickPeriod, calcularDadosConsolidados, gerarInsights } from './hanseiUtils';
 import { formatDateSP } from '@/components/utils/helpers';
 import PainelLateral from '@/components/ui/PainelLateral';
@@ -95,7 +95,7 @@ function PreviewDados({ dados, colaboradorNome, periodoInicio, periodoFim }) {
   );
 }
 
-export default function HanseiEnvioDialog({ open, onClose, colaboradores, tratativas, apuracoes, bonus, ciclos, colaborador, colaboradorInicial, user, onEnviar, isEnviando }) {
+export default function HanseiEnvioDialog({ open, onClose, colaboradores, tratativas, apuracoes, bonus, ciclos, colaborador, colaboradorInicial, user, onEnviar, isEnviando, ultimoEnvio, onEnviarOutro, onVoltarAoInicio }) {
   const [formData, setFormData] = useState({
     colaborador_id: '',
     periodicidade: 'semanal',
@@ -153,6 +153,23 @@ export default function HanseiEnvioDialog({ open, onClose, colaboradores, tratat
       largura="2xl"
       titulo={<><Send className="w-5 h-5 text-primary" /> Enviar Resultados Hansei</>}
     >
+      {ultimoEnvio ? (
+        <div className="mx-auto flex max-w-md flex-col items-center gap-4 py-10 text-center">
+          <CheckCircle2 className="h-12 w-12 text-success" aria-hidden="true" />
+          <div>
+            <p className="text-lg font-semibold text-foreground">Hansei enviado</p>
+            <p className="mt-1 text-sm text-muted-foreground">O resultado de <span className="font-medium text-foreground">{ultimoEnvio.nome}</span> já está com a pessoa.</p>
+          </div>
+          <div className="flex w-full flex-col gap-2 sm:flex-row">
+            <Button className="flex-1 bg-primary hover:bg-primary/90" onClick={onEnviarOutro}>
+              <Send className="mr-1 h-4 w-4" /> Enviar para outra pessoa
+            </Button>
+            <Button variant="outline" className="flex-1" onClick={onVoltarAoInicio}>
+              <Users className="mr-1 h-4 w-4" /> Voltar à tela inicial
+            </Button>
+          </div>
+        </div>
+      ) : (
         <div className="grid md:grid-cols-2 gap-6 mt-4">
           {/* Formulário */}
           <div className="space-y-4">
@@ -248,6 +265,7 @@ export default function HanseiEnvioDialog({ open, onClose, colaboradores, tratat
             )}
           </div>
         </div>
+      )}
       </PainelLateral>
   );
 }

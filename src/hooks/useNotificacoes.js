@@ -52,6 +52,13 @@ export default function useNotificacoes(colaborador) {
     { enabled: ligado && podeAprovarReplicavel, refetchInterval: 300000 },
   ));
 
+  // Soluções replicáveis do próprio agente que o gestor contestou: ele edita e reenvia.
+  const { data: replicaveisContestadas = [] } = useQuery(q(
+    ['replicaveis-contestadas-sino', id],
+    () => db.entities.Tratativa.filter({ agente_responsavel_id: id, solucao_replicavel: true, solucao_replicavel_auditada: true, solucao_replicavel_valida: false }),
+    { enabled: ligado, refetchInterval: 300000 },
+  ));
+
   const notificacoes = useMemo(() => montarNotificacoes({
     colaborador,
     permissoes,
@@ -59,9 +66,10 @@ export default function useNotificacoes(colaborador) {
     atribuicoes,
     tratativasAbertas,
     solicitacoesFerias,
+    replicaveisContestadas: replicaveisContestadas.filter((t) => situacaoReplicavel(t) === 'contestada'),
     replicaveisPendentes: podeAprovarReplicavel ? replicaveis.filter((t) => situacaoReplicavel(t) === 'pendente').length : 0,
     vistas,
-  }), [colaborador, permissoes, avisos, leituras, pesquisas, participacoes, hanseis, pops, leiturasPop, atribuicoes, tratativasAbertas, solicitacoesFerias, replicaveis, podeAprovarReplicavel, vistas]);
+  }), [colaborador, permissoes, avisos, leituras, pesquisas, participacoes, hanseis, pops, leiturasPop, atribuicoes, tratativasAbertas, solicitacoesFerias, replicaveis, replicaveisContestadas, podeAprovarReplicavel, vistas]);
 
   const marcarComoVistas = useCallback((ids) => {
     if (!id) return;
