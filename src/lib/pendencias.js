@@ -172,8 +172,9 @@ export function montarResposta(pesquisa, respostas, colaborador, agora = new Dat
     pesquisa_id: pesquisa.id,
     pesquisa_titulo: pesquisa.titulo,
     pesquisa_tipo: pesquisa.tipo,
-    colaborador_id: pesquisa.anonima ? null : colaborador.id,
-    colaborador_nome: pesquisa.anonima ? null : colaborador.nome_completo,
+    // A AVD nunca é anônima: a resposta tem que estar ligada à pessoa.
+    colaborador_id: pesquisa.anonima && pesquisa.tipo !== 'avd' ? null : colaborador.id,
+    colaborador_nome: pesquisa.anonima && pesquisa.tipo !== 'avd' ? null : colaborador.nome_completo,
     respostas: (pesquisa.perguntas ?? []).map((p) => ({ pergunta_id: p.id, pergunta_texto: p.texto, resposta: respostas[p.id] ?? '' })),
     confirmou_leitura: true,
     data_leitura: iso,

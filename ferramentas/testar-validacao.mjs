@@ -2180,6 +2180,8 @@ console.log('\n== AVD: nota, mes de referencia, carimbo e serie mensal ==');
   checa('quem ja respondeu sai da fila', String(filaDePendencias({ colaborador: agenteAvd, pesquisas: [avdAberta], participacoes: [{ pesquisa_id: 'avd1', colaborador_id: 'a1' }], agora: agoraAvd }).length), '0');
   const respAvd = Object.fromEntries(PERGUNTAS_AVD.map((p) => [p.id, p.tipo_resposta === 'escala_0_10' ? '8' : 'texto']));
   checa('a nota geral da AVD vai para a resposta', String(montarResposta(avdAberta, respAvd, agenteAvd, agoraAvd).nota_calculada), '8');
+  checa('AVD sempre grava o nome, mesmo se marcada como anonima por engano', montarResposta({ ...avdAberta, anonima: true }, respAvd, agenteAvd, agoraAvd).colaborador_id, 'a1');
+  checa('pesquisa anonima comum continua sem nome', String(montarResposta({ ...avdAberta, tipo: 'personalizada', anonima: true }, respAvd, agenteAvd, agoraAvd).colaborador_id), 'null');
   checa('textos por bloco so os preenchidos', String(textosDaResposta(respostas).every((b) => b.itens.length > 0)), 'true');
   checa('bloco de nota pura nao tem texto', String(textosDaResposta(respostas).some((b) => b.bloco === 'clima')), 'false');
 

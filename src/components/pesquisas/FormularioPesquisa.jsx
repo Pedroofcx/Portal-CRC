@@ -73,6 +73,8 @@ export default function FormularioPesquisa({ open, onOpenChange, pesquisa, onSal
     if (semOpcao) { toast.error(`"${semOpcao.texto}" precisa de ao menos duas opções.`); return; }
     onSalvar({
       ...form,
+      // A AVD é identificada: o dado precisa estar ligado à pessoa.
+      anonima: form.tipo === 'avd' ? false : form.anonima,
       perguntas: perguntas.map((p) => ({ ...p, opcoes: (p.opcoes || []).filter(Boolean) })),
       data_inicio: form.data_inicio || null,
       data_fim: form.data_fim || null,

@@ -1064,3 +1064,12 @@ evolução mês a mês por bloco, média da equipe tracejada e o que ela escreve
 - **Segurança (migration 50):** o teste mostrou que um colaborador conseguia
   gravar resposta de pesquisa em nome de outro. Agora a resposta só vale em nome
   de quem está logado, sem nome (pesquisa anônima) ou por gestor.
+
+## 06/10/2026 — A AVD nunca é anônima (migration 51)
+
+A migration 50 deixou passar a resposta sem nome em qualquer pesquisa. Na AVD o
+nome da pessoa é obrigatório: sem ele o dado não se liga ao colaborador e o
+Oráculo não o encontra. Agora resposta sem nome só entra em pesquisa marcada
+como anônima, e há travas no próprio dado: pesquisa do tipo AVD não pode ser
+anônima e resposta de AVD não pode ficar sem colaborador. A tela também força
+a AVD a gravar o nome, mesmo que alguém a marque como anônima.
