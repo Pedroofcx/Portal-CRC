@@ -17,7 +17,8 @@ import PainelResultados from '@/components/pesquisas/PainelResultados';
 import FormularioPesquisa from '@/components/pesquisas/FormularioPesquisa';
 
 import { formatDateSP } from '@/components/utils/helpers';
-import { obrigatoriasSemResposta, montarResposta, pesquisasVisiveis } from '@/lib/pendencias';
+import { obrigatoriasSemResposta, montarResposta, pesquisasVisiveis, pesquisaEhPara } from '@/lib/pendencias';
+import { PERGUNTAS_AVD, competenciaDoEnvio, tituloDaAvd } from '@/lib/avd';
 import { montarParticipacao, quemRespondeu, situacaoDaPesquisa, SITUACOES } from '@/lib/pesquisas';
 import { usePermissoes } from '@/hooks/usePermissoes';
 
@@ -84,7 +85,8 @@ export default function Pesquisas() {
 
   const participacaoDe = useMemo(() => {
     const mapa = new Map();
-    pesquisas.forEach((p) => mapa.set(p.id, quemRespondeu({ pesquisa: p, participacoes, pessoas })));
+    // A AVD é só dos agentes: a conta de quem falta não inclui a gestão.
+    pesquisas.forEach((p) => mapa.set(p.id, quemRespondeu({ pesquisa: p, participacoes, pessoas: pessoas.filter((c) => pesquisaEhPara(p, c)) })));
     return mapa;
   }, [pesquisas, participacoes, pessoas]);
 
@@ -103,6 +105,26 @@ export default function Pesquisas() {
       setEditando(null);
     },
     onError: () => toast.error('Não consegui salvar a pesquisa.'),
+  });
+
+  // A AVD do mês: um clique cria a pesquisa com as perguntas de sempre. O mês
+  // de referência é o do trabalho avaliado (até o dia 15, o mês que passou).
+  const competenciaDaRodada = competenciaDoEnvio(new Date().toLocaleDateString('en-CA', { timeZone: 'America/Sao_Paulo' }));
+  const avdJaAberta = pesquisas.some((p) => p.tipo === 'avd' && p.competencia === competenciaDaRodada);
+  const abrirAvd = useMutation({
+    mutationFn: () => db.entities.Pesquisa.create({
+      titulo: tituloDaAvd(competenciaDaRodada),
+      descricao: 'Autoavaliação mensal do setor. Leva uns minutos; só a gestão lê as respostas.',
+      tipo: 'avd', categoria: 'interna', competencia: competenciaDaRodada,
+      perguntas: PERGUNTAS_AVD, anonima: false, requer_confirmacao_leitura: false,
+      ativa: true, publicada: true, data_publicacao: new Date().toISOString(),
+      criado_por_id: eu?.id, criado_por_nome: eu?.nome_completo,
+    }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['pesquisas'] });
+      toast.success('AVD aberta. Os agentes recebem o aviso no sino e no início.');
+    },
+    onError: () => toast.error('Não consegui abrir a AVD.'),
   });
 
   const duplicar = useMutation({
@@ -288,7 +310,7 @@ export default function Pesquisas() {
 
   // O gestor também responde (o Kaizen da semana é de todo mundo).
   const minhasPendentes = pesquisas
-    .filter((p) => situacaoDaPesquisa(p) === 'no_ar' && !jaRespondi(p.id));
+    .filter((p) => situacaoDaPesquisa(p) === 'no_ar' && !jaRespondi(p.id) && pesquisaEhPara(p, eu));
 
   return (
     <div className="space-y-6">
@@ -296,7 +318,16 @@ export default function Pesquisas() {
         title="Pesquisas"
         subtitle="O que a equipe respondeu — e quem ainda falta responder"
         icon={ClipboardCheck}
-        actions={<Button onClick={() => { setEditando(null); setFormAberto(true); }}>Nova pesquisa</Button>}
+        actions={(
+          <div className="flex flex-wrap items-center gap-2">
+            {isGestor && (
+              <Button variant="outline" onClick={() => abrirAvd.mutate()} disabled={avdJaAberta || abrirAvd.isPending}>
+                {avdJaAberta ? `${tituloDaAvd(competenciaDaRodada)} já aberta` : `Abrir ${tituloDaAvd(competenciaDaRodada)}`}
+              </Button>
+            )}
+            <Button onClick={() => { setEditando(null); setFormAberto(true); }}>Nova pesquisa</Button>
+          </div>
+        )}
       />
 
       <div className="flex flex-wrap items-center gap-2">

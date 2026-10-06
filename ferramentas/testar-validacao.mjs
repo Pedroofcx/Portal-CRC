@@ -39,7 +39,7 @@ import { situacaoDaPesquisa, quemRespondeu, resultadoDasPerguntas, resumoDaPesqu
 import { segundaDaSemana, semanaDeReferencia, diasDaSemana, trabalhoDaSemana, trabalhoDe, montarSemanaDeTrabalho, avisosDoTrabalho, montarTurnosDaSemana, meuDiaNoTurno, equilibrioDoAtendimento, estadoNoTurno, definirEstado, proximoEstado, inverterDia, copiarDia, trabalhandoNaMetade } from '../src/lib/escalas.js';
 import { mediaDasCompetencias, leiturasDoColaborador, palavrasRecorrentes, pontosDoRadar, evolucaoDasLeituras } from '../src/lib/competencias.js';
 import { proximaVersao, popsParaCiencia, agruparPorCategoria, popsDoTipo, fotografia } from '../src/lib/pops.js';
-import { filaDePendencias, avisosVisiveis, pesquisasVisiveis, obrigatoriasSemResposta, montarResposta } from '../src/lib/pendencias.js';
+import { filaDePendencias, avisosVisiveis, pesquisasVisiveis, obrigatoriasSemResposta, montarResposta, pesquisaEhPara } from '../src/lib/pendencias.js';
 import { traduzirErro } from '../src/lib/erros.js';
 import { formatDateSP, dataDoCalendario } from '../src/components/utils/helpers.js';
 import { getMesReferencia } from '../src/components/ferramentas/apoio/constants.js';
@@ -2165,6 +2165,21 @@ console.log('\n== AVD: nota, mes de referencia, carimbo e serie mensal ==');
   checa('media geral considera o 10', notasDaResposta(respostas).geral.toFixed(3), ((12 * 9 + 10) / 13).toFixed(3));
   checa('media do bloco maturidade (9, 10, 9)', notasDaResposta(respostas).porBloco.maturidade.toFixed(2), '9.33');
   checa('resposta vazia nao quebra', String(notasDaResposta([]).geral), 'null');
+  // A AVD vai so para agente, nao cobra quem esta de ferias e a nota geral vai para a resposta
+  const avdAberta = { id: 'avd1', tipo: 'avd', ativa: true, publicada: true, data_publicacao: '2026-10-01T10:00:00Z', perguntas: PERGUNTAS_AVD };
+  const agenteAvd = { id: 'a1', papel: 'agente', created_date: '2026-01-01T00:00:00Z' };
+  const gestorAvd = { id: 'g1', papel: 'gestor', created_date: '2026-01-01T00:00:00Z' };
+  const agoraAvd = new Date('2026-10-06T12:00:00Z');
+  checa('AVD e para agente', String(pesquisaEhPara(avdAberta, agenteAvd)), 'true');
+  checa('AVD nao e para gestor', String(pesquisaEhPara(avdAberta, gestorAvd)), 'false');
+  checa('outras pesquisas continuam para todos', String(pesquisaEhPara({ tipo: 'clima_organizacional' }, gestorAvd)), 'true');
+  checa('agente recebe a AVD aberta', String(filaDePendencias({ colaborador: agenteAvd, pesquisas: [avdAberta], agora: agoraAvd }).length), '1');
+  checa('gestor nao recebe a AVD', String(filaDePendencias({ colaborador: gestorAvd, pesquisas: [avdAberta], agora: agoraAvd }).length), '0');
+  checa('quem esta de ferias nao e cobrado', String(filaDePendencias({ colaborador: agenteAvd, pesquisas: [avdAberta], agora: agoraAvd, ausente: true }).length), '0');
+  checa('de ferias, outra pesquisa continua', String(filaDePendencias({ colaborador: agenteAvd, pesquisas: [{ ...avdAberta, id: 'x', tipo: 'personalizada' }], agora: agoraAvd, ausente: true }).length), '1');
+  checa('quem ja respondeu sai da fila', String(filaDePendencias({ colaborador: agenteAvd, pesquisas: [avdAberta], participacoes: [{ pesquisa_id: 'avd1', colaborador_id: 'a1' }], agora: agoraAvd }).length), '0');
+  const respAvd = Object.fromEntries(PERGUNTAS_AVD.map((p) => [p.id, p.tipo_resposta === 'escala_0_10' ? '8' : 'texto']));
+  checa('a nota geral da AVD vai para a resposta', String(montarResposta(avdAberta, respAvd, agenteAvd, agoraAvd).nota_calculada), '8');
   checa('textos por bloco so os preenchidos', String(textosDaResposta(respostas).every((b) => b.itens.length > 0)), 'true');
   checa('bloco de nota pura nao tem texto', String(textosDaResposta(respostas).some((b) => b.bloco === 'clima')), 'false');
 

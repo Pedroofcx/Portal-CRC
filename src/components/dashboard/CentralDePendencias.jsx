@@ -100,14 +100,24 @@ export default function CentralDePendencias({ colaborador }) {
   const [faltando, setFaltando] = useState([]);
   const [falhou, setFalhou] = useState(false);
 
+  // Férias aprovadas: a AVD não cobra quem está fora (mesma chave do sino, uma busca só).
+  const { data: ferias = [] } = useQuery({
+    queryKey: ['solicitacoes-ferias'],
+    queryFn: () => db.entities.SolicitacaoFerias.list('-data_inicio', 500),
+    enabled: Boolean(colaborador?.id),
+    staleTime: 60000,
+  });
+
   const carregado = okAvisos && okLeituras && okPesquisas && okRespostas;
   const fila = useMemo(() => {
     if (!carregado) return [];
-    const base = filaDePendencias({ colaborador, avisos, leituras, pesquisas, participacoes, tratados });
+    const hoje = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Sao_Paulo' });
+    const ausente = ferias.some((f) => f.colaborador_id === colaborador?.id && f.status === 'aprovada' && String(f.data_inicio).slice(0, 10) <= hoje && hoje <= String(f.data_fim).slice(0, 10));
+    const base = filaDePendencias({ colaborador, avisos, leituras, pesquisas, participacoes, tratados, ausente });
     for (const pop of popsParaCiencia({ pops, leituras: leiturasPop, colaborador, tratados })) base.push({ tipo: 'pop', item: pop });
     if (ehAgente && hanseis.length && !hanseiAdiado) base.push({ tipo: 'hansei', item: hanseis });
     return base;
-  }, [carregado, colaborador, avisos, leituras, pesquisas, participacoes, tratados, ehAgente, hanseis, hanseiAdiado, pops, leiturasPop]);
+  }, [carregado, colaborador, avisos, leituras, pesquisas, participacoes, tratados, ehAgente, hanseis, hanseiAdiado, pops, leiturasPop, ferias]);
 
   const atual = fila[0];
   const total = concluidos + fila.length;

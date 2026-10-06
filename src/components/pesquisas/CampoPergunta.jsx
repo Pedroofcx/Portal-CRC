@@ -36,7 +36,7 @@ export default function CampoPergunta({ pergunta, numero, valor = '', aoMudar, f
       aria-describedby={faltando ? `${id}-erro` : undefined}
     >
       <legend className="sr-only">{pergunta.texto}</legend>
-      <p className="mb-3 text-sm font-medium text-foreground">
+      <p className="mb-3 whitespace-pre-line text-sm font-medium text-foreground">
         <span className="mr-1.5 text-muted-foreground tabular-nums">{numero}.</span>
         {pergunta.texto}
         {pergunta.obrigatoria && <span className="ml-0.5 text-destructive" aria-label="obrigatória">*</span>}

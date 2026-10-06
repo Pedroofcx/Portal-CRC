@@ -1051,3 +1051,16 @@ para comparar mês a mês. O histórico de fev a ago/2026 entra pelo script
 `ferramentas/importar-avd.mjs` (prévia por padrão, `--gravar` para gravar, pode
 rodar de novo sem duplicar). A aba "AVD" de cada pessoa fica no Oráculo CRC:
 evolução mês a mês por bloco, média da equipe tracejada e o que ela escreveu.
+
+## 06/10/2026 — AVD respondida dentro do sistema e resposta só em nome próprio
+
+- **Abrir a rodada:** em Pesquisas, o botão "Abrir AVD de <mês>" cria a AVD do
+  mês com as 22 perguntas de sempre (só uma por mês). O mês é o do trabalho
+  avaliado: até o dia 15, conta o mês que passou.
+- **Quem responde:** só agentes ativos. A gestão não é cobrada e fica fora da
+  conta de "quem falta".
+- **Férias:** quem está de férias aprovadas hoje não é cobrado (nem no sino
+  nem na tela inicial); a AVD continua aberta e aparece na volta.
+- **Segurança (migration 50):** o teste mostrou que um colaborador conseguia
+  gravar resposta de pesquisa em nome de outro. Agora a resposta só vale em nome
+  de quem está logado, sem nome (pesquisa anônima) ou por gestor.

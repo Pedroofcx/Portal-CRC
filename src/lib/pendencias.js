@@ -17,6 +17,7 @@
  *      releitura do banco — antes, nesse intervalo, a mesma pesquisa podia
  *      voltar a aparecer.
  */
+import { notasDaResposta } from './avd.js';
 
 const SO_DATA = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -59,6 +60,15 @@ export function avisoVigente(aviso, agora = new Date()) {
   return !(expira && expira < agora);
 }
 
+/**
+ * A quem a pesquisa se dirige. A AVD é só dos agentes (a gestão não responde).
+ * As demais valem para todo mundo.
+ */
+export function pesquisaEhPara(pesquisa, colaborador) {
+  if (pesquisa?.tipo === 'avd') return colaborador?.papel === 'agente';
+  return true;
+}
+
 /** Regra 2 (pesquisas). */
 export function pesquisaVigente(pesquisa, agora = new Date()) {
   if (!pesquisa || pesquisa.ativa === false) return false;
@@ -79,7 +89,7 @@ export function avisosVisiveis(avisos = [], colaborador, agora = new Date()) {
 /** Pesquisas que a pessoa pode ver numa lista (gestor: todas). */
 export function pesquisasVisiveis(pesquisas = [], colaborador) {
   if (colaborador?.papel === 'gestor') return pesquisas;
-  return pesquisas.filter((p) => publicadoDepoisDoCadastro(p, colaborador));
+  return pesquisas.filter((p) => publicadoDepoisDoCadastro(p, colaborador) && pesquisaEhPara(p, colaborador));
 }
 
 const PESO_TIPO = { urgente: 0, alerta: 1, comunicado: 2, informativo: 3 };
@@ -91,7 +101,7 @@ const PESO_TIPO = { urgente: 0, alerta: 1, comunicado: 2, informativo: 3 };
  */
 export function filaDePendencias({
   colaborador, avisos = [], leituras = [], pesquisas = [], participacoes = [],
-  tratados = new Set(), agora = new Date(),
+  tratados = new Set(), agora = new Date(), ausente = false,
 }) {
   if (!colaborador?.id) return [];
   const confirmados = new Set(leituras
@@ -113,6 +123,8 @@ export function filaDePendencias({
   const pesquisasPendentes = pesquisas
     .filter((p) => !respondidas.has(p.id) && !tratados.has(p.id))
     .filter((p) => pesquisaVigente(p, agora) && publicadoDepoisDoCadastro(p, colaborador))
+    // A AVD não cobra quem está de férias: aparece na volta (ela continua aberta).
+    .filter((p) => pesquisaEhPara(p, colaborador) && !(p.tipo === 'avd' && ausente))
     .sort((a, b) => (dataDePublicacao(a)?.getTime() ?? 0) - (dataDePublicacao(b)?.getTime() ?? 0));
 
   return [
@@ -143,6 +155,10 @@ export function obrigatoriasSemResposta(pesquisa, respostas = {}) {
 export function montarResposta(pesquisa, respostas, colaborador, agora = new Date()) {
   let nota = null;
   let sentimento = 'neutro';
+  if (pesquisa.tipo === 'avd') {
+    const geral = notasDaResposta((pesquisa.perguntas ?? []).map((p) => ({ pergunta_id: p.id, resposta: respostas[p.id] ?? '' }))).geral;
+    nota = geral === null ? null : Math.round(geral * 100) / 100;
+  }
   if (pesquisa.tipo === 'csat' || pesquisa.tipo === 'nps') {
     const primeira = respostas[pesquisa.perguntas?.[0]?.id];
     if (primeira !== undefined && primeira !== '' && !Number.isNaN(parseFloat(primeira))) {

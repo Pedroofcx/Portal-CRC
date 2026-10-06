@@ -121,7 +121,9 @@ export function montarNotificacoes({
   }
 
   // --- avisos e pesquisas (mesma regra da central de pendências) ---------------
-  filaDePendencias({ colaborador, avisos, leituras, pesquisas, participacoes, agora }).forEach(({ tipo, item }) => {
+  const hoje = agora.toISOString().slice(0, 10);
+  const ausente = solicitacoesFerias.some((f) => f.colaborador_id === colaborador.id && f.status === 'aprovada' && String(f.data_inicio).slice(0, 10) <= hoje && hoje <= String(f.data_fim).slice(0, 10));
+  filaDePendencias({ colaborador, avisos, leituras, pesquisas, participacoes, agora, ausente }).forEach(({ tipo, item }) => {
     if (tipo === 'aviso') {
       add({
         id: `aviso-${item.id}`, categoria: 'aviso', para: '/Avisos',
