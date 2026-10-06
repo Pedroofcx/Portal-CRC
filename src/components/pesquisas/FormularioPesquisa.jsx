@@ -20,6 +20,8 @@ const TIPOS = [
   { valor: 'nps', rotulo: 'NPS (0 a 10)' },
   { valor: 'ces', rotulo: 'CES (esforço)' },
   { valor: 'clima_organizacional', rotulo: 'Clima organizacional' },
+  { valor: 'avd', rotulo: 'AVD (avaliação de desempenho setorial)' },
+  { valor: 'kaizen', rotulo: 'Kaizen' },
 ];
 
 const TIPOS_RESPOSTA = [

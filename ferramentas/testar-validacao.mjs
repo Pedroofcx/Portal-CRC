@@ -55,6 +55,9 @@ import { filaDeHoje, entradaESaida, tempoPorCanal, diagnosticoDeCarga } from '..
 import { resumoDoCanal, distribuicaoDeChegada } from '../src/lib/relatorios/canais.js';
 import { resumoQualidade, diaADiaQualidade, diaADiaEquipeQualidade } from '../src/lib/relatorios/qualidade.js';
 import { resumoJornada } from '../src/lib/relatorios/jornada.js';
+import {
+  PERGUNTAS_AVD, NOTAS as NOTAS_AVD, limitarNota, competenciaDoEnvio, lerCarimbo, respostasDaLinha, notasDaResposta, serieMensalAvd, textosDaResposta,
+} from '../src/lib/avd.js';
 
 let passou = 0;
 let falhou = 0;
@@ -2133,6 +2136,46 @@ checa('fundo claro -soft passa', cor('<Card className="bg-warning-soft text-warn
 checa('ramos diferentes da condicao passam', cor("<b className={`p-2 ${x ? 'bg-primary text-white' : 'bg-muted text-muted-foreground'}`}>"), null);
 checa('superficie escura passa', cor('<div className="bg-muted superficie-escura text-white">'), null);
 checa('mesmo ramo com erro e pego', cor("<b className={`p-2 ${x ? 'bg-muted text-white' : 'bg-card'}`}>"), 'texto branco sobre fundo claro');
+
+console.log('\n== AVD: nota, mes de referencia, carimbo e serie mensal ==');
+{
+  checa('nota 11 vale 10', String(limitarNota('11')), '10');
+  checa('nota negativa vale 0', String(limitarNota('-2')), '0');
+  checa('virgula decimal', String(limitarNota('8,5')), '8.5');
+  checa('vazio nao vira zero', String(limitarNota('')), 'null');
+  checa('texto nao e nota', String(limitarNota('bom')), 'null');
+  checa('envio no fim do mes e do proprio mes', competenciaDoEnvio('2026-02-27'), '2026-02');
+  checa('envio na virada conta o mes anterior', competenciaDoEnvio('2026-07-03'), '2026-06');
+  checa('dia 15 ainda e do mes anterior', competenciaDoEnvio('2026-08-15'), '2026-07');
+  checa('dia 16 e do proprio mes', competenciaDoEnvio('2026-08-16'), '2026-08');
+  checa('janeiro volta para dezembro', competenciaDoEnvio('2026-01-05'), '2025-12');
+  checa('carimbo M/D', JSON.stringify(lerCarimbo('7/31/2026 15:24:51', '2026-07-31')), '{"dia":"2026-07-31","hora":"15:24:51"}');
+  checa('carimbo D/M (planilha de agosto)', lerCarimbo('04/09/2026 15:47:49', '2026-08-31').dia, '2026-09-04');
+  checa('carimbo ambiguo vale o mais perto do mes do arquivo', lerCarimbo('7/3/2026 16:14:47', '2026-05-31').dia, '2026-07-03');
+  checa('carimbo invalido', String(lerCarimbo('ontem', '2026-05-31')), 'null');
+  checa('o modelo tem 22 perguntas', String(PERGUNTAS_AVD.length), '22');
+  checa('ids das perguntas sao unicos', String(new Set(PERGUNTAS_AVD.map((p) => p.id)).size), '22');
+  checa('toda nota tem pergunta no modelo', String(NOTAS_AVD.every((n) => PERGUNTAS_AVD.some((p) => p.id === n.chave && p.tipo_resposta === 'escala_0_10'))), 'true');
+
+  const colunas = PERGUNTAS_AVD.map((p) => (p.tipo_resposta === 'escala_0_10' ? '9' : `texto de ${p.id}`));
+  colunas[PERGUNTAS_AVD.findIndex((p) => p.id === 'inovacao_nota')] = '11';
+  const { respostas, ajustes } = respostasDaLinha(colunas);
+  checa('linha vira uma resposta por pergunta', String(respostas.length), '22');
+  checa('nota 11 vira 10 e e registrada', JSON.stringify(ajustes), '[{"pergunta":"inovacao_nota","de":"11","para":10}]');
+  checa('media geral considera o 10', notasDaResposta(respostas).geral.toFixed(3), ((12 * 9 + 10) / 13).toFixed(3));
+  checa('media do bloco maturidade (9, 10, 9)', notasDaResposta(respostas).porBloco.maturidade.toFixed(2), '9.33');
+  checa('resposta vazia nao quebra', String(notasDaResposta([]).geral), 'null');
+  checa('textos por bloco so os preenchidos', String(textosDaResposta(respostas).every((b) => b.itens.length > 0)), 'true');
+  checa('bloco de nota pura nao tem texto', String(textosDaResposta(respostas).some((b) => b.bloco === 'clima')), 'false');
+
+  const mk = (nota) => respostasDaLinha(PERGUNTAS_AVD.map((p) => (p.tipo_resposta === 'escala_0_10' ? String(nota) : ''))).respostas;
+  const serie = serieMensalAvd([
+    { competencia: '2026-04', respostas: mk(8) }, { competencia: '2026-03', respostas: mk(10) }, { competencia: '2026-03', respostas: mk(6) },
+  ]);
+  checa('serie em ordem de mes', serie.map((m) => m.competencia).join(','), '2026-03,2026-04');
+  checa('duas respostas no mes viram a media', String(serie[0].geral), '8');
+  checa('rotulo do mes', serie[1].rotulo, 'abr/26');
+}
 
 console.log('\n' + passou + ' passaram, ' + falhou + ' falharam');
 process.exit(falhou ? 1 : 0);

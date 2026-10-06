@@ -7,7 +7,7 @@ import { SITUACOES, situacaoDaPesquisa } from '@/lib/pesquisas';
  * Uma pesquisa na lista do gestor: o que interessa de longe é quantos já
  * responderam e quantos faltam.
  */
-const TIPOS = { csat: 'CSAT', nps: 'NPS', ces: 'CES', clima_organizacional: 'Clima', personalizada: 'Personalizada' };
+const TIPOS = { csat: 'CSAT', nps: 'NPS', ces: 'CES', clima_organizacional: 'Clima', personalizada: 'Personalizada', avd: 'AVD', kaizen: 'Kaizen' };
 
 export default function CartaoPesquisa({ pesquisa, participacao, onClick }) {
   const situacao = situacaoDaPesquisa(pesquisa);

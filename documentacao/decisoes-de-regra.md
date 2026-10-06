@@ -1034,3 +1034,20 @@ ao registrar, se algo faltar, a janela volta ao primeiro passo com erro.
 - **Solução replicável contestada:** o agente que atendeu recebe uma notificação,
   vê o parecer, edita a solução e reenvia (migration 48). Ela volta a pendente;
   se o gestor aprovar, o +0,5 entra na pontuação como já era a regra.
+
+## 06/10/2026 — AVD (avaliação de desempenho setorial) dentro de Pesquisas
+
+**Decisões do Pedro:** só o gestor vê as respostas e precisa saber quem é quem;
+a AVD não entra na pontuação nem na premiação; nota acima de 10 vale 10; as
+perguntas continuam exatamente as mesmas; o mês de referência é o do trabalho
+avaliado (a AVD sai no fim do mês, ou na volta de férias, então até o dia 15 do
+mês seguinte conta o mês anterior); só agentes ativos respondem; sem resumo por
+IA. A rodada de setembro/2026 será a primeira feita direto no sistema.
+
+**Como ficou:** a AVD é uma pesquisa do tipo `avd` (e o Kaizen ganhou o tipo
+`kaizen`), com a coluna `competencia` (migration 49). As 22 perguntas do
+formulário viraram o modelo `PERGUNTAS_AVD` (src/lib/avd.js), com id estável
+para comparar mês a mês. O histórico de fev a ago/2026 entra pelo script
+`ferramentas/importar-avd.mjs` (prévia por padrão, `--gravar` para gravar, pode
+rodar de novo sem duplicar). A aba "AVD" de cada pessoa fica no Oráculo CRC:
+evolução mês a mês por bloco, média da equipe tracejada e o que ela escreveu.

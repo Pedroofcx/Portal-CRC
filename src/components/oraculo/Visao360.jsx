@@ -16,6 +16,7 @@ import Grafico from '@/components/relatorios/hub/Grafico';
 import { SERIE_GRAFICO } from '@/lib/cores-grafico';
 import { formatDateSP } from '@/components/utils/helpers';
 import FotoDaPessoa from './FotoDaPessoa';
+import AvdDaPessoa from './AvdDaPessoa';
 import {
   GRUPOS_COMPETENCIA, pontosDoRadar, evolucaoDasLeituras, palavrasRecorrentes, mediaDasCompetencias,
 } from '@/lib/competencias';
@@ -225,6 +226,8 @@ export default function Visao360({ colaborador, leituras, mediasEquipe, processo
           </div>
         )}
       </Cartao>
+
+      <AvdDaPessoa colaborador={colaborador} />
 
       <Cartao titulo="Leituras registradas">
         {leituras.length === 0 ? (
