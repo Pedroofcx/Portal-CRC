@@ -11,16 +11,28 @@
  * abertura, o ponto é ganho — sem ninguém precisar confirmar. O cliente é
  * reconhecido pelo id da base (id_base_cliente).
  *
+ * VOLUME MÍNIMO POR CANAL (decisão de 08/10/2026, do Ciclo 3 em diante): os
+ * pontos de um canal só contam se a pessoa tem pelo menos N registros (padrão
+ * 4) naquele canal, no ciclo — por data de registro, é o "registros no
+ * trimestre" da Estrutura de Trabalho. Abaixo disso os pontos do canal ficam
+ * RETIDOS: aparecem à parte, não somam, e voltam a contar quando o canal
+ * chega ao mínimo. Os ciclos 1 e 2 já foram apurados e não mudam.
+ *
  * ABERTURA: cada tratativa aberta no Portal vale 0,5 ponto para o agente
  * responsável, no ciclo em que foi REGISTRADA. Vale do Ciclo 2 em diante
  * (ciclos que começam em 16/06/2026 ou depois); o Ciclo 1 não muda.
  */
 import { calculateTratativaPoints } from '../components/utils/helpers.js';
+import { volumePorCanal, canalDe, VOLUME_MINIMO_PADRAO } from './elegibilidade.js';
 
 const DIA = 24 * 60 * 60 * 1000;
 export const PRAZO_REABERTURA_DIAS = 7;
 export const PONTOS_POR_ABERTURA = 0.5;
 export const ABERTURA_PONTUA_DESDE = '2026-06-16'; // início do Ciclo 2
+export const VOLUME_MINIMO_VALE_DESDE = '2026-09-16'; // início do Ciclo 3
+
+/** O ciclo aplica o mínimo de registros por canal? Do Ciclo 3 em diante. */
+export const cicloExigeVolumeMinimo = (ciclo) => !!ciclo?.data_inicio && ciclo.data_inicio >= VOLUME_MINIMO_VALE_DESDE;
 
 /**
  * A tratativa está no ciclo? Pelo encerramento (ou pelo registro, se ainda
@@ -122,10 +134,14 @@ export function aberturaDaTratativa(tratativa, ciclos = []) {
 /**
  * Pontos de tratativas de cada agente no ciclo.
  * @param todas TODAS as tratativas (abertas também: são elas que revelam a reabertura)
- * @returns Map agenteId -> { itens, aberturas, pontosEncerramento, pontosAbertura }
+ * @param opcoes.volumeMinimo registros mínimos por canal (do Ciclo 3 em diante); padrão 4
+ * @returns Map agenteId -> { itens, aberturas, pontosEncerramento, pontosAbertura,
+ *   volume, volumeMinimo, retidos, pontosRetidos }
  *   itens: [{ tratativa_id, pontos, detalhes, tipo_tratativa, data_encerramento, encerrado_no_sla, nome_cliente }]
+ *   itens e aberturas são só o que CONTA; o que ficou retido por canal abaixo do
+ *   mínimo está em retidos: { [canal]: { registros, minimo, pontos, itens, aberturas } }.
  */
-export function pontosDeTratativasNoCiclo(todas = [], ciclo, { encerrada, noCiclo }, agora = new Date()) {
+export function pontosDeTratativasNoCiclo(todas = [], ciclo, { encerrada, noCiclo, volumeMinimo = VOLUME_MINIMO_PADRAO }, agora = new Date()) {
   const porAgente = new Map();
   const doAgente = (id) => {
     if (!porAgente.has(id)) porAgente.set(id, { itens: [], aberturas: [], pontosEncerramento: 0, pontosAbertura: 0 });
@@ -153,6 +169,55 @@ export function pontosDeTratativasNoCiclo(todas = [], ciclo, { encerrada, noCicl
     const reg = doAgente(t.agente_responsavel_id);
     reg.aberturas.push({ tratativa_id: t.id, data_registro: t.data_registro, tipo_tratativa: t.tipo_tratativa, nome_cliente: t.nome_cliente, id_interno: t.id_interno });
     reg.pontosAbertura += PONTOS_POR_ABERTURA;
+  }
+
+  // Registros de cada pessoa por canal no ciclo (por data de registro).
+  const registrosDe = new Map();
+  if (ciclo) {
+    for (const t of todas) {
+      if (t.excluida || !t.agente_responsavel_id || !dentro(t.data_registro, ciclo)) continue;
+      if (!registrosDe.has(t.agente_responsavel_id)) registrosDe.set(t.agente_responsavel_id, []);
+      registrosDe.get(t.agente_responsavel_id).push(t);
+    }
+  }
+  for (const id of registrosDe.keys()) doAgente(id);
+
+  const aplica = cicloExigeVolumeMinimo(ciclo);
+  for (const [id, reg] of porAgente) {
+    const volume = volumePorCanal(registrosDe.get(id) ?? []);
+    reg.volume = volume;
+    reg.volumeMinimo = volumeMinimo;
+    reg.retidos = {};
+    reg.pontosRetidos = 0;
+    if (!aplica) continue;
+
+    const abaixo = (tipo) => {
+      const canal = canalDe(tipo);
+      return canal in volume && volume[canal] < volumeMinimo ? canal : null;
+    };
+    const retido = (canal) => (reg.retidos[canal] ||= { canal, registros: volume[canal], minimo: volumeMinimo, pontos: 0, itens: [], aberturas: [] });
+
+    const itens = [];
+    for (const i of reg.itens) {
+      const canal = abaixo(i.tipo_tratativa);
+      if (!canal) { itens.push(i); continue; }
+      const r = retido(canal);
+      r.itens.push(i);
+      r.pontos += i.pontos;
+    }
+    const aberturas = [];
+    for (const a of reg.aberturas) {
+      const canal = abaixo(a.tipo_tratativa);
+      if (!canal) { aberturas.push(a); continue; }
+      const r = retido(canal);
+      r.aberturas.push(a);
+      r.pontos += PONTOS_POR_ABERTURA;
+    }
+    reg.itens = itens;
+    reg.aberturas = aberturas;
+    reg.pontosEncerramento = itens.reduce((s, i) => s + i.pontos, 0);
+    reg.pontosAbertura = aberturas.length * PONTOS_POR_ABERTURA;
+    reg.pontosRetidos = Object.values(reg.retidos).reduce((s, r) => s + r.pontos, 0);
   }
   return porAgente;
 }

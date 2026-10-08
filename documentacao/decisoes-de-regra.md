@@ -1114,3 +1114,25 @@ como encerradas). A função roda de hora em hora no banco (pg_cron, se estiver
 ligado) e sempre que alguém abre o Portal. Na tela inicial, a gestão vê quantos
 tickets foram encerrados assim (de toda a equipe) e cada agente vê os dele, por
 7 dias; a própria tratativa mostra a faixa "Encerrada automaticamente".
+
+## 08/10/2026 — Volume mínimo de registros por canal vale para os pontos (Ciclo 3 em diante)
+
+**Decisão do Pedro:** para os pontos de um canal contarem, a pessoa precisa ter
+tratado pelo menos 4 registros nele no trimestre (Reclame Aqui, Google Meu
+Negócio, Contestação de compra e Reclamação interna). Com 3 contestações no
+trimestre, por exemplo, nada de contestação soma nem aparece no ranking.
+
+**Como ficou:** a regra já estava na Estrutura de Trabalho, mas só valia para o
+✓ da elegibilidade. Agora vale para a pontuação, do Ciclo 3 em diante (os
+ciclos 1 e 2 já foram apurados e não mudam). Conta o REGISTRO no ciclo
+(data de registro, não excluído), mesmo que a tratativa ainda esteja aberta. O
+que fica abaixo do mínimo (pontos de encerramento e as aberturas de 0,5 do
+canal) é RETIDO: sai do total e do ranking, aparece à parte ("x pts retidos") e
+volta a contar quando o canal chega ao mínimo. O mínimo é o cadastrado em
+Configurações > Elegibilidade (padrão 4). Indicadores (CSAT, performance, CX) e
+bônus não são afetados.
+
+Na tela inicial da gestão, "Ranking e elegibilidade do ciclo" ganhou a regra
+escrita e uma coluna "Registros por canal" (R.A., GMN, Contest., R.I., cada um
+com n/4) ao lado dos pontos. O agente vê o mesmo no "Meu ciclo", e a Auditoria
+de pontuação e a página da pessoa seguem a mesma conta.

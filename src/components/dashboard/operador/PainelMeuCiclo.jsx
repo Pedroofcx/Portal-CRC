@@ -5,6 +5,7 @@ import { tipoTratativaLabels } from '@/components/utils/helpers';
 import { useRankingCiclo, posicaoNoRanking } from '@/hooks/useRankingCiclo';
 import { pontosDaFaixa, proximaFaixa } from '@/lib/faixasIndicadores';
 import { avaliarExigencia } from '@/lib/elegibilidade';
+import { cicloExigeVolumeMinimo } from '@/lib/pontuacaoCiclo';
 import { indicadoresDoCiclo, detalheCsat } from '@/lib/indicadoresCiclo';
 import { pontosPorSemana, fimDoRitmo } from '@/lib/ritmoSemanal';
 import IconeExigencia from '@/components/ciclo/IconeExigencia';
@@ -62,6 +63,7 @@ export default function PainelMeuCiclo({
   totalPontos,
   detalhamentoPontos = [],
   bonusManual = 0,
+  retidos = {},
   minhasTratativas = [],
   exigencias = [],
   rankingVisivel = true,
@@ -195,7 +197,14 @@ export default function PainelMeuCiclo({
       {/* 2. De onde vieram */}
       <div className="space-y-4">
         <Grupo titulo="De onde vieram — tratativas">
-          {CANAIS.map((c) => <Linha key={c} rotulo={tipoTratativaLabels[c]} valor={fmt(porCanal[c])} />)}
+          {CANAIS.map((c) => (
+            <Linha
+              key={c}
+              rotulo={tipoTratativaLabels[c]}
+              detalhe={retidos[c]?.pontos > 0 ? `${fmt(retidos[c].pontos)} pts retidos: só ${retidos[c].registros} de ${volumeMinimo} registros` : null}
+              valor={fmt(porCanal[c])}
+            />
+          ))}
           {aberturas > 0 && <Linha rotulo="Tratativas abertas" detalhe={`${aberturas} × 0,5`} valor={fmt(aberturas * 0.5)} />}
           {bonusManual > 0 && <Linha rotulo="Bônus lançado pelo gestor" valor={fmt(bonusManual)} />}
         </Grupo>
@@ -231,6 +240,11 @@ export default function PainelMeuCiclo({
         <p className="mt-4 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
           Registros por canal · mínimo {volumeMinimo}
         </p>
+        {cicloExigeVolumeMinimo(cicloAtivo) && (
+          <p className="mt-1 text-xs text-muted-foreground">
+            Cada canal só soma pontos com {volumeMinimo} registros ou mais no ciclo. Abaixo disso os pontos do canal ficam retidos e voltam a contar quando ele chega lá.
+          </p>
+        )}
         <div className="mt-1.5 grid grid-cols-2 gap-1.5">
           {CANAIS.map((c) => {
             const n = volume[c];
@@ -239,7 +253,7 @@ export default function PainelMeuCiclo({
               <span
                 key={c}
                 className={`flex items-center justify-between rounded-md px-2 py-1 text-xs ${conta ? 'bg-success-soft text-success' : 'bg-muted text-muted-foreground'}`}
-                title={conta ? 'Este canal conta para a premiação' : `Faltam ${volumeMinimo - n} para o canal contar`}
+                title={conta ? 'Este canal conta para a premiação' : `Faltam ${volumeMinimo - n} para os pontos do canal contarem`}
               >
                 <span className="truncate">{tipoTratativaLabels[c]}</span>
                 <span className="font-semibold tabular-nums">{n}/{volumeMinimo}</span>

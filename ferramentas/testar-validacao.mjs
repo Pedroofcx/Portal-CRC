@@ -46,7 +46,7 @@ import { getMesReferencia } from '../src/components/ferramentas/apoio/constants.
 import { montarBonus, somaDoBonus, ciclosEmOrdem } from '../src/lib/bonusManual.js';
 import { vencidasDaEquipe, situacaoDoPrazo, ordenarPorPrazo, registrosNoCiclo, percentualNoSla, acompanhamentoDa } from '../src/lib/cicloEquipe.js';
 import { calculateCSATPoints, calculateCXPoints, calculateTratativaPoints, situacaoReplicavel } from '../src/components/utils/helpers.js';
-import { reaberturaDe, comReaberturaApurada, aberturasNoCiclo, aberturaDaTratativa, cicloPagaAbertura, pontosDeTratativasNoCiclo, tratativaNosCiclo } from '../src/lib/pontuacaoCiclo.js';
+import { reaberturaDe, comReaberturaApurada, aberturasNoCiclo, aberturaDaTratativa, cicloPagaAbertura, cicloExigeVolumeMinimo, pontosDeTratativasNoCiclo, tratativaNosCiclo } from '../src/lib/pontuacaoCiclo.js';
 import { extratoDoAgente } from '../src/lib/extratoPontos.js';
 import { calcularDadosConsolidados, cicloDaData } from '../src/lib/hanseiDados.js';
 import { desfechoDaContestacao, resumoFinanceiro } from '../src/lib/relatorios/financeiro.js';
@@ -587,6 +587,56 @@ console.log('\n== reabertura apurada pelos dados e 0,5 por abertura ==');
   const mapa = pontosDeTratativasNoCiclo([reg('2026-07-01'), { ...reg('2026-07-02'), status: 'encerrada', data_encerramento: '2026-07-03T12:00:00.000Z', encerrado_no_sla: true, status_reabertura: 'nao_houve' }], ciclo2,
     { encerrada: (t) => t.status === 'encerrada', noCiclo: (t, c) => t.data_encerramento >= c.data_inicio && t.data_encerramento <= `${c.data_fim}T23:59:59` }, depois);
   checa('abertura + encerramento somam para o agente', `${mapa.get('ana').pontosAbertura}+${mapa.get('ana').pontosEncerramento}`, '1+2');
+}
+
+console.log('\n== volume minimo por canal: so pontua com 4 registros (Ciclo 3 em diante) ==');
+{
+  const c3 = { data_inicio: '2026-09-16', data_fim: '2026-12-16' };
+  const c2 = { data_inicio: '2026-06-16', data_fim: '2026-09-16' };
+  const reg = (id, tipo, dia, extra = {}) => ({ id, agente_responsavel_id: 'ana', tipo_tratativa: tipo, data_registro: `${dia}T15:00:00.000Z`, status: 'em_andamento', ...extra });
+  const enc = (id, tipo, dia, extra = {}) => reg(id, tipo, dia, { status: 'encerrada', data_encerramento: `${dia}T18:00:00.000Z`, ...extra });
+  const opcoes = (volumeMinimo) => ({ encerrada: (t) => t.status === 'encerrada', noCiclo: (t, c) => t.data_encerramento >= c.data_inicio && t.data_encerramento <= `${c.data_fim}T23:59:59`, volumeMinimo });
+  const agora = new Date('2026-11-01T12:00:00Z');
+  const contest = (n) => Array.from({ length: n }, (_, i) => enc(`c${i}`, 'contestacao', '2026-10-05', { status_resolucao_contestacao: 'pagou' }));
+  const ri = (n) => Array.from({ length: n }, (_, i) => reg(`r${i}`, 'reclamacao_interna', '2026-10-06'));
+
+  checa('o Ciclo 3 exige o minimo', String(cicloExigeVolumeMinimo(c3)), 'true');
+  checa('o Ciclo 2 nao muda (ja apurado)', String(cicloExigeVolumeMinimo(c2)), 'false');
+
+  // 3 contestacoes (2,5 + 0,5 de abertura cada) com minimo 4: nada conta
+  const tres = pontosDeTratativasNoCiclo([...contest(3), ...ri(4)], c3, opcoes(4), agora).get('ana');
+  checa('3 contestacoes (minimo 4): nao somam', String(tres.pontosEncerramento), '0');
+  checa('as aberturas das 3 tambem ficam fora, as 4 de R.I. contam', String(tres.pontosAbertura), '2');
+  checa('os pontos retidos aparecem a parte (3 x 3,0)', String(tres.pontosRetidos), '9');
+  checa('diz quantos registros e qual o minimo', `${tres.retidos.contestacao.registros}/${tres.retidos.contestacao.minimo}`, '3/4');
+  checa('a contagem por canal acompanha', `${tres.volume.contestacao}/${tres.volume.reclamacao_interna}`, '3/4');
+  checa('itens ficam so com o que conta', String(tres.itens.length), '0');
+
+  // com 4 contestacoes o canal passa a contar
+  const quatro = pontosDeTratativasNoCiclo([...contest(4)], c3, opcoes(4), agora).get('ana');
+  checa('4 contestacoes: o canal conta (4 x 2,5)', String(quatro.pontosEncerramento), '10');
+  checa('e as 4 aberturas tambem (4 x 0,5)', String(quatro.pontosAbertura), '2');
+  checa('nada retido', `${quatro.pontosRetidos}/${Object.keys(quatro.retidos).length}`, '0/0');
+
+  // o minimo e por canal
+  const misto = pontosDeTratativasNoCiclo([...contest(3), reg('g1', 'google_meu_negocio', '2026-10-07', { status: 'encerrada', data_encerramento: '2026-10-07T18:00:00.000Z', reavaliacao_positiva_google: true })], c3, opcoes(4), agora).get('ana');
+  checa('cada canal abaixo do minimo tem a sua conta retida', Object.keys(misto.retidos).sort().join(','), 'contestacao,google_meu_negocio');
+
+  // minimo configurado pelo gestor
+  const dois = pontosDeTratativasNoCiclo([...contest(2)], c3, opcoes(2), agora).get('ana');
+  checa('minimo configurado em 2: 2 contestacoes contam', String(dois.pontosEncerramento), '5');
+
+  // ciclos antigos nao mudam
+  const antigo = pontosDeTratativasNoCiclo([enc('a', 'contestacao', '2026-07-05', { status_resolucao_contestacao: 'pagou' })], c2, opcoes(4), agora).get('ana');
+  checa('Ciclo 2: 1 contestacao continua somando (regra antiga)', String(antigo.pontosEncerramento), '2.5');
+  checa('Ciclo 2: nada retido', String(antigo.pontosRetidos), '0');
+
+  // excluida nao conta como registro
+  const excluida = pontosDeTratativasNoCiclo([...contest(3), enc('e', 'contestacao', '2026-10-05', { excluida: true, status_resolucao_contestacao: 'pagou' })], c3, opcoes(4), agora).get('ana');
+  checa('tratativa excluida nao completa o minimo', String(excluida.retidos.contestacao?.registros), '3');
+  // o registro conta pela data de REGISTRO no ciclo, mesmo ainda aberto
+  const abertas = pontosDeTratativasNoCiclo([...contest(3), reg('aberta', 'contestacao', '2026-10-20')], c3, opcoes(4), agora).get('ana');
+  checa('uma tratativa so aberta ja conta como o 4o registro', String(abertas.pontosEncerramento), '7.5');
 }
 
 console.log('\n== solucao replicavel: do Ciclo 2 em diante, so com aprovacao ==');

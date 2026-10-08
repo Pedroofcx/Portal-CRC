@@ -10,10 +10,19 @@
  * seria mentira — e dizer que cumpriu também.
  */
 
-const CANAIS = ['reclamacao_interna', 'reclame_aqui', 'google_meu_negocio', 'contestacao'];
+export const CANAIS = ['reclamacao_interna', 'reclame_aqui', 'google_meu_negocio', 'contestacao'];
 
 /** Contestação aparece com dois nomes nos dados antigos. */
-const canalDe = (tipo) => (tipo === 'contestacao_compra' ? 'contestacao' : tipo);
+export const canalDe = (tipo) => (tipo === 'contestacao_compra' ? 'contestacao' : tipo);
+
+/** Mínimo de registros por canal quando o gestor não cadastrou outro. */
+export const VOLUME_MINIMO_PADRAO = 4;
+
+/** O mínimo de registros por canal, como o gestor cadastrou (padrão 4). */
+export function volumeMinimoDasExigencias(exigencias = []) {
+  const e = exigencias.find((x) => x?.tipo_validacao === 'volume_minimo_canal');
+  return Number(e?.volume_minimo_canal ?? e?.valor_minimo ?? VOLUME_MINIMO_PADRAO) || VOLUME_MINIMO_PADRAO;
+}
 
 /** Registros da pessoa por canal, no ciclo. */
 export function volumePorCanal(tratativas = []) {

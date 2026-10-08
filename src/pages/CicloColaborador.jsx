@@ -200,7 +200,10 @@ export default function CicloColaborador() {
               <Linha
                 key={c}
                 rotulo={tipoTratativaLabels[c]}
-                detalhe={`${porCanal[c].n} encerrada${porCanal[c].n === 1 ? '' : 's'} no ciclo`}
+                detalhe={[
+                  `${porCanal[c].n} encerrada${porCanal[c].n === 1 ? '' : 's'} no ciclo`,
+                  pessoa.retidos?.[c]?.pontos > 0 ? `${fmt(pessoa.retidos[c].pontos)} pts retidos: só ${pessoa.retidos[c].registros} de ${volumeMinimo} registros` : null,
+                ].filter(Boolean).join(' · ')}
                 valor={fmt(porCanal[c].pontos)}
               />
             ))}
