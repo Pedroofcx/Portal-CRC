@@ -167,6 +167,7 @@ export const funcoesDoBanco = [
   { nome: 'proteger_papel_do_colaborador', migration: 41, descricao: 'Função do gatilho ac_protege_papel_colaborador: impede quem gerencia colaboradores de se promover ou trocar e-mail (identidade).' },
   { nome: 'reenviar_solucao_replicavel', migration: 48, descricao: 'O agente que atendeu a tratativa edita a solução replicável CONTESTADA e reenvia: a análise volta a pendente (o parecer anterior fica) e o histórico registra. Só vale para o responsável e só para solução contestada.' },
   { nome: 'validar_avd_agendamento', migration: 53, descricao: 'Gatilho que confere o agendamento da AVD antes de gravar: AVD aberta, pessoa que ainda não respondeu, horário entre 1 minuto e 48 horas à frente.' },
+  { nome: 'encerrar_prazo_reabertura', migration: 55, descricao: 'Encerra as reclamações internas em aguardando confirmação cujo prazo de 7 dias passou: marca cliente reabriu ou sem reabertura, registra no histórico como Sistema (automatica) e devolve quantas foram. Roda de hora em hora (pg_cron, se ligado) e quando alguém abre o Portal.' },
   { nome: 'confirmar_atribuicao', migration: 32, descricao: 'O agente confirma ("OK") que viu a atribuição nova. Altera só a própria linha.' },
   { nome: 'atualizar_minha_foto', migration: 37, descricao: 'Troca a foto de perfil de quem está logado, e só ela. Aceita só endereço do nosso bucket. Existe porque o agente não pode editar a própria linha de colaborador.' },
   { nome: 'auditoria_rls', migration: 29, descricao: 'Lista cada política de RLS e o que ela usa (eh_gestor, eh_colaborador, dono). Só service_role. Serve para conferir se o banco real bate com as migrations.' },
@@ -246,6 +247,7 @@ export const migracoes = [
   { n: 52, titulo: 'Atestado médico na Escala', descricao: 'escala_atribuicao.tipo_evento aceita atestado. Quem está com atestado é pulado no rodízio e na montagem da semana, como em férias e day off.' },
   { n: 53, titulo: 'Agendar a AVD', descricao: 'Tabela avd_agendamento: o agente escolhe um horário (até 48 horas) para responder a AVD, uma vez só; na hora ela volta obrigatória.' },
   { n: 54, titulo: 'AVD: prazo de 48 horas', descricao: 'A conferência do agendamento da AVD passa de 7 dias para 48 horas.' },
+  { n: 55, titulo: 'Encerrar sozinho depois dos 7 dias', descricao: 'Função encerrar_prazo_reabertura() e o agendador de hora em hora: a reclamação interna deixa de depender de clique para sair de aguardando confirmação.' },
   { n: 99, titulo: 'Restrições pós-importação', descricao: 'Só se aplica depois da carga de dados do Base44.' },
 ];
 

@@ -11,6 +11,7 @@ import CardBoasVindas from '@/components/dashboard/CardBoasVindas';
 import MinhasAnotacoes from '@/components/dashboard/MinhasAnotacoes';
 import DistribuicaoTratativas from '@/components/dashboard/DistribuicaoTratativas';
 import FaixaVencidas from '@/components/dashboard/gestor/FaixaVencidas';
+import AvisoEncerramentoAutomatico from '@/components/dashboard/AvisoEncerramentoAutomatico';
 import PainelCicloGestor from '@/components/dashboard/gestor/PainelCicloGestor';
 import { useCicloEquipe } from '@/hooks/useCicloEquipe';
 import MinhaSemanaCard from '@/components/escalas/MinhaSemanaCard';
@@ -230,6 +231,7 @@ export default function Dashboard() {
       {isGestor && (
       <>
       <FaixaVencidas retrato={cicloEquipe.retrato} isLoading={cicloEquipe.isLoading} />
+      <AvisoEncerramentoAutomatico tratativas={minhasTratativas} mostrarAgente />
       <PainelCicloGestor
         ciclo={cicloEquipe.ciclo}
         cicloAtivo={cicloEquipe.cicloAtivo}
@@ -266,6 +268,7 @@ export default function Dashboard() {
         */}
       {!isGestor && (
         <div className="space-y-6">
+          <AvisoEncerramentoAutomatico tratativas={minhasTratativas} />
           <PainelMeuCiclo
             colaborador={colaborador}
             cicloAtivo={cicloAtivo}

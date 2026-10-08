@@ -32,6 +32,7 @@ import {
 import { ClipboardList, Play, Pause, CheckCircle, Clock, ExternalLink, AlertTriangle, MapPin, Trash2, Snowflake } from 'lucide-react';
 import TimerReobertura from '@/components/tratativas/TimerReobertura';
 import { reaberturaDe, comReaberturaApurada, aberturaDaTratativa } from '@/lib/pontuacaoCiclo';
+import { encerramentoAutomaticoDe } from '@/lib/encerramentoAutomatico';
 import CongelamentoSLA from '@/components/tratativas/CongelamentoSLA';
 import DesfechoContestacao from '@/components/tratativas/DesfechoContestacao';
 import MonetizacaoAtritoForm from '@/components/tratativas/MonetizacaoAtritoForm';
@@ -584,6 +585,7 @@ export default function TratativaDetalhe({ idExterno = null, embutido = false })
   // Os 0,5 da abertura entram no ciclo em que a tratativa foi registrada,
   // mesmo antes de encerrar; o resto só depois do encerramento.
   const abertura = aberturaDaTratativa(tratativa, ciclosTrimestrais);
+  const encerramentoAutomatico = encerramentoAutomaticoDe(tratativa);
   const doEncerramento = isEncerrada ? calculateTratativaPoints(comReaberturaApurada(tratativa, todasTratativas)) : { pontos: 0, detalhes: [] };
   const pontosPreview = isEncerrada || abertura
     ? {
@@ -703,6 +705,15 @@ export default function TratativaDetalhe({ idExterno = null, embutido = false })
             </TabsList>
 
             <TabsContent value="informacoes" className="mt-0 space-y-6">
+      {encerramentoAutomatico && (
+        <div className="rounded-lg border border-success/25 bg-success-soft px-4 py-3 text-sm text-foreground">
+          <span className="font-medium">Encerrada automaticamente em {formatDateSP(encerramentoAutomatico.data_mudanca, 'DD/MM/YYYY')}.</span>{' '}
+          {tratativa.status_reabertura === 'cliente_reabriu'
+            ? 'O prazo de 7 dias passou e o cliente reabriu a reclamação.'
+            : 'O prazo de 7 dias passou sem reabertura, então o sistema confirmou o encerramento sozinho.'}
+        </div>
+      )}
+
       {/* Perfil Comercial do Cliente — contexto comercial da ocorrência */}
       <PerfilComercialCliente tratativa={tratativa} />
 

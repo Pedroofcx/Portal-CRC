@@ -85,7 +85,7 @@ export default function TimerReobertura({ tratativa, reabertura, onConfirmar, is
               <CheckCircle className="w-10 h-10 text-success mx-auto mb-2" />
               <p className="font-semibold text-success">Período de 7 dias concluído</p>
               <p className="text-xs text-muted-foreground mt-1">
-                Prazo encerrado em {formatDateSP(timer.dataLimite, 'DD/MM/YYYY')}.
+                Prazo encerrado em {formatDateSP(timer.dataLimite, 'DD/MM/YYYY')}. O sistema encerra a tratativa sozinho em até 1 hora.
               </p>
             </>
           ) : (
@@ -97,7 +97,7 @@ export default function TimerReobertura({ tratativa, reabertura, onConfirmar, is
                 {timer.dias === 0 ? 'menos de 24h restantes' : timer.dias === 1 ? 'dia restante' : 'dias restantes'}
               </p>
               <p className="text-xs text-muted-foreground mt-1">
-                Prazo até {formatDateSP(timer.dataLimite, 'DD/MM/YYYY HH:mm')}
+                Prazo até {formatDateSP(timer.dataLimite, 'DD/MM/YYYY HH:mm')} · depois dele o sistema encerra sozinho
               </p>
               {urgente && (
                 <Badge className="mt-2 bg-destructive/10 text-destructive">Urgente</Badge>

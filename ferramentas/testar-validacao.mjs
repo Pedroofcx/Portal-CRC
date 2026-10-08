@@ -55,6 +55,7 @@ import { filaDeHoje, entradaESaida, tempoPorCanal, diagnosticoDeCarga } from '..
 import { resumoDoCanal, distribuicaoDeChegada } from '../src/lib/relatorios/canais.js';
 import { resumoQualidade, diaADiaQualidade, diaADiaEquipeQualidade } from '../src/lib/relatorios/qualidade.js';
 import { resumoJornada } from '../src/lib/relatorios/jornada.js';
+import { encerramentoAutomaticoDe, encerradasAutomaticamente, textoDoAviso } from '../src/lib/encerramentoAutomatico.js';
 import {
   problemaDoAgendamento, agendamentoDa, agendamentoFuturo, quandoPorExtenso, PERGUNTAS_AVD, NOTAS as NOTAS_AVD, limitarNota, competenciaDoEnvio, lerCarimbo, respostasDaLinha, notasDaResposta, serieMensalAvd, textosDaResposta,
 } from '../src/lib/avd.js';
@@ -2233,6 +2234,27 @@ console.log('\n== AVD: nota, mes de referencia, carimbo e serie mensal ==');
   checa('serie em ordem de mes', serie.map((m) => m.competencia).join(','), '2026-03,2026-04');
   checa('duas respostas no mes viram a media', String(serie[0].geral), '8');
   checa('rotulo do mes', serie[1].rotulo, 'abr/26');
+}
+
+console.log('\n== encerramento automatico depois dos 7 dias ==');
+{
+  const auto = (id, quando, extra = {}) => ({ id, id_interno: id, status: 'encerrada', status_reabertura: 'nao_houve', historico_estados: [
+    { estado_novo: 'aguardando_confirmacao_reabertura', data_mudanca: '2026-09-28T10:00:00Z', usuario: 'Ana' },
+    { estado_anterior: 'aguardando_confirmacao_reabertura', estado_novo: 'encerrada', data_mudanca: quando, usuario: 'Sistema', automatica: true },
+  ], ...extra });
+  const manual = { id: 'm1', status: 'encerrada', historico_estados: [{ estado_novo: 'encerrada', data_mudanca: '2026-10-07T10:00:00Z', usuario: 'Ana' }] };
+  const agora = new Date('2026-10-08T12:00:00Z');
+  checa('acha a entrada automatica do historico', encerramentoAutomaticoDe(auto('a', '2026-10-07T09:00:00Z')).usuario, 'Sistema');
+  checa('encerramento manual nao e automatico', String(encerramentoAutomaticoDe(manual)), 'null');
+  checa('sem historico nao quebra', String(encerramentoAutomaticoDe({})), 'null');
+  const lista = encerradasAutomaticamente([auto('a', '2026-10-07T09:00:00Z'), auto('b', '2026-10-08T08:00:00Z'), manual, auto('velha', '2026-09-20T09:00:00Z')], { agora });
+  checa('so as automaticas dos ultimos 7 dias', lista.map((t) => t.id).join(','), 'b,a');
+  checa('da mais recente para a mais antiga', lista[0].encerrada_automaticamente_em, '2026-10-08T08:00:00Z');
+  checa('excluida nao entra', String(encerradasAutomaticamente([auto('x', '2026-10-07T09:00:00Z', { excluida: true })], { agora }).length), '0');
+  checa('ainda aguardando nao entra', String(encerradasAutomaticamente([auto('y', '2026-10-07T09:00:00Z', { status: 'aguardando_confirmacao_reabertura' })], { agora }).length), '0');
+  checa('marca quando o cliente reabriu', String(encerradasAutomaticamente([auto('r', '2026-10-07T09:00:00Z', { status_reabertura: 'cliente_reabriu' })], { agora })[0].cliente_reabriu), 'true');
+  checa('texto no singular', textoDoAviso(1), '1 ticket que aguardava confirmação foi encerrado automaticamente (prazo de 7 dias).');
+  checa('texto no plural', textoDoAviso(3), '3 tickets que aguardavam confirmação foram encerrados automaticamente (prazo de 7 dias).');
 }
 
 console.log('\n' + passou + ' passaram, ' + falhou + ' falharam');

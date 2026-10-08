@@ -1102,3 +1102,15 @@ confere tudo (AVD aberta, pessoa que ainda não respondeu, janela de horário) e
 só a gestão apaga um agendamento, se precisar liberar outro.
 
 Atualização (08/10/2026): o prazo para agendar a AVD é de até 48 horas (era 7 dias), migration 54.
+
+## 08/10/2026 — Reclamação interna encerra sozinha depois dos 7 dias (migration 55)
+
+Depois do encerramento, a reclamação interna fica 7 dias em "aguardando
+confirmação de reabertura". Passado o prazo, o sistema a move para "encerrada"
+sozinho (antes dependia de alguém clicar): marca "cliente reabriu" se o mesmo
+cliente abriu outra tratativa no prazo, ou "sem reabertura", e registra no
+histórico como "Sistema". A pontuação não muda (as duas situações já contavam
+como encerradas). A função roda de hora em hora no banco (pg_cron, se estiver
+ligado) e sempre que alguém abre o Portal. Na tela inicial, a gestão vê quantos
+tickets foram encerrados assim (de toda a equipe) e cada agente vê os dele, por
+7 dias; a própria tratativa mostra a faixa "Encerrada automaticamente".
