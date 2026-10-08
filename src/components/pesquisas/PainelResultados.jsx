@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react';
+import { quandoPorExtenso } from '@/lib/avd';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Cartao, Linha } from '@/components/ui/Cartao';
@@ -15,7 +16,7 @@ import { SITUACOES, situacaoDaPesquisa, resultadoDasPerguntas, resumoDaPesquisa 
 const num = (v, casas = 1) => (v === null || v === undefined ? '—' : Number(v).toLocaleString('pt-BR', { maximumFractionDigits: casas }));
 const pct = (v) => (v === null || v === undefined ? '—' : `${Number(v).toLocaleString('pt-BR', { maximumFractionDigits: 0 })}%`);
 
-export default function PainelResultados({ pesquisa, respostas, participacao, podeEditar, onVoltar, onEditar, onDuplicar, onReenviar, onArquivar, ocupado }) {
+export default function PainelResultados({ pesquisa, respostas, participacao, agendamentos = [], podeEditar, onVoltar, onEditar, onDuplicar, onReenviar, onArquivar, ocupado }) {
   const perguntas = useMemo(() => resultadoDasPerguntas(pesquisa, respostas), [pesquisa, respostas]);
   const resumo = useMemo(() => resumoDaPesquisa(pesquisa, respostas), [pesquisa, respostas]);
   const situacao = situacaoDaPesquisa(pesquisa);
@@ -91,7 +92,10 @@ export default function PainelResultados({ pesquisa, respostas, participacao, po
                   <p className="text-sm text-muted-foreground">Todo mundo respondeu.</p>
                 ) : (
                   <div className="divide-y divide-border border-t border-border">
-                    {participacao.faltam.map((p) => <Linha key={p.id} rotulo={p.nome_completo} valor="—" />)}
+                    {participacao.faltam.map((p) => {
+                      const ag = agendamentos.find((a) => a.colaborador_id === p.id);
+                      return <Linha key={p.id} rotulo={p.nome_completo} valor={ag ? `agendou para ${quandoPorExtenso(ag.agendada_para)}` : '—'} />;
+                    })}
                   </div>
                 )}
               </div>

@@ -111,6 +111,13 @@ export default function Pesquisas() {
   // de referência é o do trabalho avaliado (até o dia 15, o mês que passou).
   const competenciaDaRodada = competenciaDoEnvio(new Date().toLocaleDateString('en-CA', { timeZone: 'America/Sao_Paulo' }));
   const avdJaAberta = pesquisas.some((p) => p.tipo === 'avd' && p.competencia === competenciaDaRodada);
+  // Quem agendou a AVD e para quando (a gestão vê todos; cada agente, o próprio).
+  const { data: agendamentosAvd = [] } = useQuery({
+    queryKey: ['avd-agendamentos', 'todos'],
+    queryFn: () => db.entities.AvdAgendamento.list('-created_date', 500),
+    staleTime: 30000,
+  });
+
   const abrirAvd = useMutation({
     mutationFn: () => db.entities.Pesquisa.create({
       titulo: tituloDaAvd(competenciaDaRodada),
@@ -275,6 +282,7 @@ export default function Pesquisas() {
             pesquisa={atual}
             respostas={respostas}
             participacao={participacaoDe.get(atual.id) ?? { responderam: [], faltam: [], deDesligados: [], total: 0, taxa: null }}
+            agendamentos={agendamentosAvd.filter((a) => a.pesquisa_id === atual.id)}
             podeEditar={isGestor}
             ocupado={duplicar.isPending || reenviar.isPending || arquivarPesquisa.isPending}
             onVoltar={() => setSelecionada(null)}

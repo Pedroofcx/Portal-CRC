@@ -181,3 +181,36 @@ export function textosDaResposta(respostas) {
       .filter((t) => t.resposta),
   })).filter((b) => b.itens.length > 0);
 }
+
+/** Até quantos dias à frente o agente pode agendar a AVD. */
+export const DIAS_MAX_AGENDAMENTO = 7;
+
+/**
+ * O horário escolhido vale? Daqui a pelo menos 1 minuto e até 7 dias.
+ * @returns mensagem do problema, ou null quando está certo.
+ */
+export function problemaDoAgendamento(quando, agora = new Date()) {
+  const t = quando instanceof Date ? quando.getTime() : new Date(quando).getTime();
+  if (Number.isNaN(t)) return 'Escolha o dia e a hora.';
+  if (t < agora.getTime() + 60 * 1000) return 'Escolha um horário daqui a pelo menos 1 minuto.';
+  if (t > agora.getTime() + DIAS_MAX_AGENDAMENTO * 86400000) return `O horário pode ser de até ${DIAS_MAX_AGENDAMENTO} dias à frente.`;
+  return null;
+}
+
+/** O agendamento desta pessoa para esta AVD, se houver (qualquer horário). */
+export const agendamentoDa = (agendamentos = [], pesquisaId, colaboradorId) => (
+  agendamentos.find((a) => a.pesquisa_id === pesquisaId && a.colaborador_id === colaboradorId) ?? null
+);
+
+/** Ainda falta chegar a hora do agendamento? (a AVD fica escondida até lá) */
+export const agendamentoFuturo = (agendamento, agora = new Date()) => (
+  Boolean(agendamento) && new Date(agendamento.agendada_para).getTime() > agora.getTime()
+);
+
+/** "dd/mm às HH:MM", no horário de Brasília. */
+export function quandoPorExtenso(iso) {
+  const d = new Date(iso);
+  const dia = d.toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo', day: '2-digit', month: '2-digit' });
+  const hora = d.toLocaleTimeString('pt-BR', { timeZone: 'America/Sao_Paulo', hour: '2-digit', minute: '2-digit' });
+  return `${dia} às ${hora}`;
+}

@@ -9,6 +9,7 @@ export const TABELAS = {
   Apuracao: 'apuracao',
   ApuracaoMapeamento: 'apuracao_mapeamento',
   Aviso: 'aviso',
+  AvdAgendamento: 'avd_agendamento',
   AvisoLeitura: 'aviso_leitura',
   CategoriaTratativa: 'categoria_tratativa',
   CicloFerias: 'ciclo_ferias',

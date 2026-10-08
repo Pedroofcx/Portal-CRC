@@ -1091,3 +1091,12 @@ pontos de ENCERRAMENTO, então uma contestação encerrada sem ponto de
 encerramento aparecia com 0,0. Agora o cartão traz a linha "Abertura de
 tratativa +0,5" (no ciclo em que foi registrada, do Ciclo 2 em diante) e
 aparece desde a abertura, antes mesmo de encerrar.
+
+## 08/10/2026 — O agente agenda a AVD para um horário (migration 53)
+
+Quando a AVD aparece, o agente pode escolher um dia e uma hora (de 1 minuto até
+7 dias à frente). Até lá ela some da tela inicial e do sino; na hora marcada
+volta sozinha e é obrigatória, sem poder agendar de novo (só uma vez por AVD).
+A gestão vê, em Pesquisas, quem falta responder e para quando agendou. O banco
+confere tudo (AVD aberta, pessoa que ainda não respondeu, janela de horário) e
+só a gestão apaga um agendamento, se precisar liberar outro.

@@ -56,7 +56,7 @@ import { resumoDoCanal, distribuicaoDeChegada } from '../src/lib/relatorios/cana
 import { resumoQualidade, diaADiaQualidade, diaADiaEquipeQualidade } from '../src/lib/relatorios/qualidade.js';
 import { resumoJornada } from '../src/lib/relatorios/jornada.js';
 import {
-  PERGUNTAS_AVD, NOTAS as NOTAS_AVD, limitarNota, competenciaDoEnvio, lerCarimbo, respostasDaLinha, notasDaResposta, serieMensalAvd, textosDaResposta,
+  problemaDoAgendamento, agendamentoDa, agendamentoFuturo, quandoPorExtenso, PERGUNTAS_AVD, NOTAS as NOTAS_AVD, limitarNota, competenciaDoEnvio, lerCarimbo, respostasDaLinha, notasDaResposta, serieMensalAvd, textosDaResposta,
 } from '../src/lib/avd.js';
 
 let passou = 0;
@@ -2201,6 +2201,25 @@ console.log('\n== AVD: nota, mes de referencia, carimbo e serie mensal ==');
   checa('quem ja respondeu sai da fila', String(filaDePendencias({ colaborador: agenteAvd, pesquisas: [avdAberta], participacoes: [{ pesquisa_id: 'avd1', colaborador_id: 'a1' }], agora: agoraAvd }).length), '0');
   const respAvd = Object.fromEntries(PERGUNTAS_AVD.map((p) => [p.id, p.tipo_resposta === 'escala_0_10' ? '8' : 'texto']));
   checa('a nota geral da AVD vai para a resposta', String(montarResposta(avdAberta, respAvd, agenteAvd, agoraAvd).nota_calculada), '8');
+  // Agendar a AVD: some ate a hora marcada e volta obrigatoria
+  const agendada = { pesquisa_id: 'avd1', colaborador_id: 'a1', agendada_para: '2026-10-06T18:00:00Z' };
+  checa('antes da hora marcada a AVD fica escondida', String(filaDePendencias({ colaborador: agenteAvd, pesquisas: [avdAberta], agora: agoraAvd, agendamentos: [agendada] }).length), '0');
+  checa('na hora marcada ela volta', String(filaDePendencias({ colaborador: agenteAvd, pesquisas: [avdAberta], agora: new Date('2026-10-06T18:00:01Z'), agendamentos: [agendada] }).length), '1');
+  checa('depois da hora continua na fila ate responder', String(filaDePendencias({ colaborador: agenteAvd, pesquisas: [avdAberta], agora: new Date('2026-10-07T09:00:00Z'), agendamentos: [agendada] }).length), '1');
+  checa('o agendamento de outra pessoa nao esconde a minha', String(filaDePendencias({ colaborador: agenteAvd, pesquisas: [avdAberta], agora: agoraAvd, agendamentos: [{ ...agendada, colaborador_id: 'outra' }] }).length), '1');
+  checa('o agendamento de outra AVD nao esconde esta', String(filaDePendencias({ colaborador: agenteAvd, pesquisas: [avdAberta], agora: agoraAvd, agendamentos: [{ ...agendada, pesquisa_id: 'avd0' }] }).length), '1');
+  checa('so a AVD e escondida: outra pesquisa continua', String(filaDePendencias({ colaborador: agenteAvd, pesquisas: [{ ...avdAberta, id: 'avd1', tipo: 'personalizada' }], agora: agoraAvd, agendamentos: [agendada] }).length), '1');
+  checa('acha o agendamento da pessoa', agendamentoDa([agendada], 'avd1', 'a1').agendada_para, '2026-10-06T18:00:00Z');
+  checa('sem agendamento devolve null', String(agendamentoDa([agendada], 'avd1', 'zzz')), 'null');
+  checa('agendamento no futuro e futuro', String(agendamentoFuturo(agendada, agoraAvd)), 'true');
+  checa('agendamento passado nao e futuro', String(agendamentoFuturo(agendada, new Date('2026-10-06T19:00:00Z'))), 'false');
+  checa('horario daqui a 2 horas vale', String(problemaDoAgendamento(new Date('2026-10-06T14:00:00Z'), agoraAvd)), 'null');
+  checa('horario no passado e recusado', problemaDoAgendamento(new Date('2026-10-06T11:00:00Z'), agoraAvd), 'Escolha um horário daqui a pelo menos 1 minuto.');
+  checa('menos de 1 minuto e recusado', problemaDoAgendamento(new Date('2026-10-06T12:00:30Z'), agoraAvd), 'Escolha um horário daqui a pelo menos 1 minuto.');
+  checa('mais de 7 dias e recusado', problemaDoAgendamento(new Date('2026-10-14T12:00:00Z'), agoraAvd), 'O horário pode ser de até 7 dias à frente.');
+  checa('exatamente 7 dias vale', String(problemaDoAgendamento(new Date('2026-10-13T12:00:00Z'), agoraAvd)), 'null');
+  checa('data invalida pede o dia e a hora', problemaDoAgendamento('nada', agoraAvd), 'Escolha o dia e a hora.');
+  checa('quando por extenso (Brasilia)', quandoPorExtenso('2026-10-06T18:00:00Z'), '06/10 às 15:00');
   checa('AVD sempre grava o nome, mesmo se marcada como anonima por engano', montarResposta({ ...avdAberta, anonima: true }, respAvd, agenteAvd, agoraAvd).colaborador_id, 'a1');
   checa('pesquisa anonima comum continua sem nome', String(montarResposta({ ...avdAberta, tipo: 'personalizada', anonima: true }, respAvd, agenteAvd, agoraAvd).colaborador_id), 'null');
   checa('textos por bloco so os preenchidos', String(textosDaResposta(respostas).every((b) => b.itens.length > 0)), 'true');

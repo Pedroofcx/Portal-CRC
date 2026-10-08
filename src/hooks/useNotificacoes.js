@@ -52,6 +52,9 @@ export default function useNotificacoes(colaborador) {
     { enabled: ligado && podeAprovarReplicavel, refetchInterval: 300000 },
   ));
 
+  // Horários que o agente escolheu para responder a AVD (ela some até lá).
+  const { data: avdAgendamentos = [] } = useQuery(q(['avd-agendamentos', id], () => db.entities.AvdAgendamento.filter({ colaborador_id: id }), { enabled: ligado && ehAgente }));
+
   // Soluções replicáveis do próprio agente que o gestor contestou: ele edita e reenvia.
   const { data: replicaveisContestadas = [] } = useQuery(q(
     ['replicaveis-contestadas-sino', id],
@@ -66,10 +69,11 @@ export default function useNotificacoes(colaborador) {
     atribuicoes,
     tratativasAbertas,
     solicitacoesFerias,
+    avdAgendamentos,
     replicaveisContestadas: replicaveisContestadas.filter((t) => situacaoReplicavel(t) === 'contestada'),
     replicaveisPendentes: podeAprovarReplicavel ? replicaveis.filter((t) => situacaoReplicavel(t) === 'pendente').length : 0,
     vistas,
-  }), [colaborador, permissoes, avisos, leituras, pesquisas, participacoes, hanseis, pops, leiturasPop, atribuicoes, tratativasAbertas, solicitacoesFerias, replicaveis, replicaveisContestadas, podeAprovarReplicavel, vistas]);
+  }), [colaborador, permissoes, avisos, leituras, pesquisas, participacoes, hanseis, pops, leiturasPop, atribuicoes, tratativasAbertas, solicitacoesFerias, replicaveis, replicaveisContestadas, avdAgendamentos, podeAprovarReplicavel, vistas]);
 
   const marcarComoVistas = useCallback((ids) => {
     if (!id) return;

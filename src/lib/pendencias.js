@@ -17,7 +17,7 @@
  *      releitura do banco — antes, nesse intervalo, a mesma pesquisa podia
  *      voltar a aparecer.
  */
-import { notasDaResposta } from './avd.js';
+import { notasDaResposta, agendamentoDa, agendamentoFuturo } from './avd.js';
 
 const SO_DATA = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -101,7 +101,7 @@ const PESO_TIPO = { urgente: 0, alerta: 1, comunicado: 2, informativo: 3 };
  */
 export function filaDePendencias({
   colaborador, avisos = [], leituras = [], pesquisas = [], participacoes = [],
-  tratados = new Set(), agora = new Date(), ausente = false,
+  tratados = new Set(), agora = new Date(), ausente = false, agendamentos = [],
 }) {
   if (!colaborador?.id) return [];
   const confirmados = new Set(leituras
@@ -125,6 +125,8 @@ export function filaDePendencias({
     .filter((p) => pesquisaVigente(p, agora) && publicadoDepoisDoCadastro(p, colaborador))
     // A AVD não cobra quem está de férias: aparece na volta (ela continua aberta).
     .filter((p) => pesquisaEhPara(p, colaborador) && !(p.tipo === 'avd' && ausente))
+    // A AVD que a pessoa agendou fica escondida até a hora marcada; na hora, volta obrigatória.
+    .filter((p) => !(p.tipo === 'avd' && agendamentoFuturo(agendamentoDa(agendamentos, p.id, colaborador.id), agora)))
     .sort((a, b) => (dataDePublicacao(a)?.getTime() ?? 0) - (dataDePublicacao(b)?.getTime() ?? 0));
 
   return [

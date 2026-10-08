@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import CampoPergunta from '@/components/pesquisas/CampoPergunta';
 import { formatDateSP } from '@/components/utils/helpers';
 import { filaDePendencias, obrigatoriasSemResposta, montarResposta } from '@/lib/pendencias';
+import { agendamentoDa, problemaDoAgendamento, quandoPorExtenso, DIAS_MAX_AGENDAMENTO } from '@/lib/avd';
 import { montarParticipacao } from '@/lib/pesquisas';
 import { popsParaCiencia } from '@/lib/pops';
 import { traduzirErro } from '@/lib/erros';
@@ -108,16 +109,40 @@ export default function CentralDePendencias({ colaborador }) {
     staleTime: 60000,
   });
 
+  // Horários que a pessoa escolheu para responder a AVD.
+  const { data: agendamentos = [] } = useQuery({
+    queryKey: ['avd-agendamentos', id],
+    queryFn: () => db.entities.AvdAgendamento.filter({ colaborador_id: id }),
+    enabled: Boolean(id) && ehAgente,
+    staleTime: 0,
+  });
+  // "Agora" para a fila: avança sozinho quando chega a hora de um agendamento.
+  const [agora, setAgora] = useState(() => new Date());
+  React.useEffect(() => {
+    const proximo = agendamentos
+      .map((a) => new Date(a.agendada_para).getTime())
+      .filter((t) => t > Date.now())
+      .sort((a, b) => a - b)[0];
+    if (!proximo) return undefined;
+    const espera = Math.min(proximo - Date.now() + 500, 2147483000);
+    const timer = setTimeout(() => setAgora(new Date()), espera);
+    return () => clearTimeout(timer);
+  }, [agendamentos]);
+
+  const [agendando, setAgendando] = useState(false);
+  const [diaAgendado, setDiaAgendado] = useState('');
+  const [horaAgendada, setHoraAgendada] = useState('');
+
   const carregado = okAvisos && okLeituras && okPesquisas && okRespostas;
   const fila = useMemo(() => {
     if (!carregado) return [];
     const hoje = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Sao_Paulo' });
     const ausente = ferias.some((f) => f.colaborador_id === colaborador?.id && f.status === 'aprovada' && String(f.data_inicio).slice(0, 10) <= hoje && hoje <= String(f.data_fim).slice(0, 10));
-    const base = filaDePendencias({ colaborador, avisos, leituras, pesquisas, participacoes, tratados, ausente });
+    const base = filaDePendencias({ colaborador, avisos, leituras, pesquisas, participacoes, tratados, ausente, agendamentos, agora });
     for (const pop of popsParaCiencia({ pops, leituras: leiturasPop, colaborador, tratados })) base.push({ tipo: 'pop', item: pop });
     if (ehAgente && hanseis.length && !hanseiAdiado) base.push({ tipo: 'hansei', item: hanseis });
     return base;
-  }, [carregado, colaborador, avisos, leituras, pesquisas, participacoes, tratados, ehAgente, hanseis, hanseiAdiado, pops, leiturasPop, ferias]);
+  }, [carregado, colaborador, avisos, leituras, pesquisas, participacoes, tratados, ehAgente, hanseis, hanseiAdiado, pops, leiturasPop, ferias, agendamentos, agora]);
 
   const atual = fila[0];
   const total = concluidos + fila.length;
@@ -151,6 +176,19 @@ export default function CentralDePendencias({ colaborador }) {
       queryClient.invalidateQueries({ queryKey: ['pop-leituras'] });
     },
     onError: (e) => { setFalhou(true); toast.error(`Não foi possível confirmar: ${traduzirErro(e)}`); },
+  });
+
+  const agendar = useMutation({
+    mutationFn: ({ pesquisa, quando }) => db.entities.AvdAgendamento.create({
+      pesquisa_id: pesquisa.id, colaborador_id: id, colaborador_nome: colaborador.nome_completo, agendada_para: quando.toISOString(),
+    }),
+    onSuccess: (_, { quando }) => {
+      setAgendando(false);
+      toast.success(`AVD agendada para ${quandoPorExtenso(quando)}. Nessa hora ela volta e precisa ser respondida.`);
+      queryClient.invalidateQueries({ queryKey: ['avd-agendamentos'] });
+      setAgora(new Date());
+    },
+    onError: (e) => toast.error(`Não consegui agendar: ${traduzirErro(e)}`),
   });
 
   const responder = useMutation({
@@ -236,10 +274,50 @@ export default function CentralDePendencias({ colaborador }) {
         ))}
       </div>
     );
-    acoes = (
-      <Button onClick={enviarPesquisa} disabled={responder.isPending}>
-        {responder.isPending ? 'Enviando…' : 'Enviar resposta'}
-      </Button>
+    // A AVD pode ser agendada uma vez; no horário marcado volta e não dá para agendar de novo.
+    const podeAgendar = p.tipo === 'avd' && !agendamentoDa(agendamentos, p.id, id);
+    const horaPadrao = () => {
+      const d = new Date(Date.now() + 60 * 60 * 1000);
+      d.setMinutes(Math.ceil(d.getMinutes() / 5) * 5, 0, 0);
+      return d;
+    };
+    const abrirAgendamento = () => {
+      const d = horaPadrao();
+      setDiaAgendado(d.toLocaleDateString('en-CA'));
+      setHoraAgendada(d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }));
+      setAgendando(true);
+    };
+    const quandoEscolhido = diaAgendado && horaAgendada ? new Date(`${diaAgendado}T${horaAgendada}:00`) : null;
+    const problema = quandoEscolhido ? problemaDoAgendamento(quandoEscolhido) : 'Escolha o dia e a hora.';
+    const hoje = new Date().toLocaleDateString('en-CA');
+    const limite = new Date(Date.now() + DIAS_MAX_AGENDAMENTO * 86400000).toLocaleDateString('en-CA');
+    acoes = agendando ? (
+      <div className="flex w-full flex-wrap items-end gap-2">
+        <div>
+          <label htmlFor="avd-dia" className="mb-1 block text-xs text-muted-foreground">Dia</label>
+          <input id="avd-dia" type="date" min={hoje} max={limite} value={diaAgendado} onChange={(e) => setDiaAgendado(e.target.value)} className="h-9 rounded-md border border-input bg-background px-2 text-sm" />
+        </div>
+        <div>
+          <label htmlFor="avd-hora" className="mb-1 block text-xs text-muted-foreground">Hora</label>
+          <input id="avd-hora" type="time" value={horaAgendada} onChange={(e) => setHoraAgendada(e.target.value)} className="h-9 rounded-md border border-input bg-background px-2 text-sm" />
+        </div>
+        <Button onClick={() => !problema && agendar.mutate({ pesquisa: p, quando: quandoEscolhido })} disabled={agendar.isPending}>
+          {agendar.isPending ? 'Agendando…' : 'Agendar'}
+        </Button>
+        <Button variant="outline" onClick={() => setAgendando(false)}>Voltar</Button>
+        <p className={`basis-full text-xs ${problema ? 'text-destructive' : 'text-muted-foreground'}`}>
+          {problema ?? `Nessa hora a AVD volta e precisa ser respondida. Só dá para agendar uma vez.`}
+        </p>
+      </div>
+    ) : (
+      <>
+        {podeAgendar && (
+          <Button variant="outline" onClick={abrirAgendamento}>Agendar para mais tarde</Button>
+        )}
+        <Button onClick={enviarPesquisa} disabled={responder.isPending}>
+          {responder.isPending ? 'Enviando…' : 'Enviar resposta'}
+        </Button>
+      </>
     );
   } else if (atual.tipo === 'pop') {
     const p = atual.item;
