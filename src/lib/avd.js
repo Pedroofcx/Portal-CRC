@@ -182,18 +182,18 @@ export function textosDaResposta(respostas) {
   })).filter((b) => b.itens.length > 0);
 }
 
-/** Até quantos dias à frente o agente pode agendar a AVD. */
-export const DIAS_MAX_AGENDAMENTO = 7;
+/** Até quantas horas à frente o agente pode agendar a AVD (prazo de 48 horas). */
+export const HORAS_MAX_AGENDAMENTO = 48;
 
 /**
- * O horário escolhido vale? Daqui a pelo menos 1 minuto e até 7 dias.
+ * O horário escolhido vale? Daqui a pelo menos 1 minuto e até 48 horas.
  * @returns mensagem do problema, ou null quando está certo.
  */
 export function problemaDoAgendamento(quando, agora = new Date()) {
   const t = quando instanceof Date ? quando.getTime() : new Date(quando).getTime();
   if (Number.isNaN(t)) return 'Escolha o dia e a hora.';
   if (t < agora.getTime() + 60 * 1000) return 'Escolha um horário daqui a pelo menos 1 minuto.';
-  if (t > agora.getTime() + DIAS_MAX_AGENDAMENTO * 86400000) return `O horário pode ser de até ${DIAS_MAX_AGENDAMENTO} dias à frente.`;
+  if (t > agora.getTime() + HORAS_MAX_AGENDAMENTO * 3600000) return `O horário pode ser de até ${HORAS_MAX_AGENDAMENTO} horas à frente.`;
   return null;
 }
 

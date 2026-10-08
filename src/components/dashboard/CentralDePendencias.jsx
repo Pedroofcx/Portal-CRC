@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import CampoPergunta from '@/components/pesquisas/CampoPergunta';
 import { formatDateSP } from '@/components/utils/helpers';
 import { filaDePendencias, obrigatoriasSemResposta, montarResposta } from '@/lib/pendencias';
-import { agendamentoDa, problemaDoAgendamento, quandoPorExtenso, DIAS_MAX_AGENDAMENTO } from '@/lib/avd';
+import { agendamentoDa, problemaDoAgendamento, quandoPorExtenso, HORAS_MAX_AGENDAMENTO } from '@/lib/avd';
 import { montarParticipacao } from '@/lib/pesquisas';
 import { popsParaCiencia } from '@/lib/pops';
 import { traduzirErro } from '@/lib/erros';
@@ -290,7 +290,7 @@ export default function CentralDePendencias({ colaborador }) {
     const quandoEscolhido = diaAgendado && horaAgendada ? new Date(`${diaAgendado}T${horaAgendada}:00`) : null;
     const problema = quandoEscolhido ? problemaDoAgendamento(quandoEscolhido) : 'Escolha o dia e a hora.';
     const hoje = new Date().toLocaleDateString('en-CA');
-    const limite = new Date(Date.now() + DIAS_MAX_AGENDAMENTO * 86400000).toLocaleDateString('en-CA');
+    const limite = new Date(Date.now() + HORAS_MAX_AGENDAMENTO * 3600000).toLocaleDateString('en-CA');
     acoes = agendando ? (
       <div className="flex w-full flex-wrap items-end gap-2">
         <div>
@@ -306,7 +306,7 @@ export default function CentralDePendencias({ colaborador }) {
         </Button>
         <Button variant="outline" onClick={() => setAgendando(false)}>Voltar</Button>
         <p className={`basis-full text-xs ${problema ? 'text-destructive' : 'text-muted-foreground'}`}>
-          {problema ?? `Nessa hora a AVD volta e precisa ser respondida. Só dá para agendar uma vez.`}
+          {problema ?? `Prazo de até 48 horas. Nessa hora a AVD volta e precisa ser respondida; só dá para agendar uma vez.`}
         </p>
       </div>
     ) : (

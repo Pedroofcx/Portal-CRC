@@ -1095,8 +1095,10 @@ aparece desde a abertura, antes mesmo de encerrar.
 ## 08/10/2026 — O agente agenda a AVD para um horário (migration 53)
 
 Quando a AVD aparece, o agente pode escolher um dia e uma hora (de 1 minuto até
-7 dias à frente). Até lá ela some da tela inicial e do sino; na hora marcada
+48 horas à frente). Até lá ela some da tela inicial e do sino; na hora marcada
 volta sozinha e é obrigatória, sem poder agendar de novo (só uma vez por AVD).
 A gestão vê, em Pesquisas, quem falta responder e para quando agendou. O banco
 confere tudo (AVD aberta, pessoa que ainda não respondeu, janela de horário) e
 só a gestão apaga um agendamento, se precisar liberar outro.
+
+Atualização (08/10/2026): o prazo para agendar a AVD é de até 48 horas (era 7 dias), migration 54.

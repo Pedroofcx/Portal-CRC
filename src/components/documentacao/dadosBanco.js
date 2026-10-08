@@ -89,7 +89,7 @@ export const gruposDeTabelas = [
       { entidade: 'AvisoLeitura', tabela: 'aviso_leitura', descricao: 'A confirmação "li e compreendi" de cada pessoa em cada aviso.', leitura: COLAB, escrita: COLAB },
       { entidade: 'Pesquisa', tabela: 'pesquisa', descricao: 'Pesquisas internas (perguntas, período, anonimato, reenvio).', leitura: COLAB, escrita: 'permissão gerenciar_pesquisas' },
       { entidade: 'RespostaPesquisa', tabela: 'resposta_pesquisa', descricao: 'O que foi respondido. Em pesquisa anônima nasce sem colaborador_id e sem nome.', leitura: 'permissão ver_respostas_pesquisa, ou o dono', escrita: 'qualquer colaborador ativo insere; alterar e apagar exigem ver_respostas_pesquisa' },
-      { entidade: 'AvdAgendamento', tabela: 'avd_agendamento', descricao: 'O horário que o agente escolheu para responder a AVD (migration 53). Uma linha por pessoa e por AVD: a AVD fica escondida até a hora e volta obrigatória, sem poder agendar de novo. O banco confere que a AVD está aberta, que a pessoa ainda não respondeu e que o horário vai de 1 minuto a 7 dias.', leitura: 'a gestão e o próprio agente', escrita: 'cada agente cria o próprio; só a gestão apaga' },
+      { entidade: 'AvdAgendamento', tabela: 'avd_agendamento', descricao: 'O horário que o agente escolheu para responder a AVD (migration 53). Uma linha por pessoa e por AVD: a AVD fica escondida até a hora e volta obrigatória, sem poder agendar de novo. O banco confere que a AVD está aberta, que a pessoa ainda não respondeu e que o horário vai de 1 minuto a 48 horas.', leitura: 'a gestão e o próprio agente', escrita: 'cada agente cria o próprio; só a gestão apaga' },
       { entidade: 'PesquisaParticipacao', tabela: 'pesquisa_participacao', descricao: 'QUEM respondeu (sem as respostas): tira a pesquisa da fila de pendências e alimenta "quem respondeu / quem falta" (migration 23).', leitura: 'permissão ver_respostas_pesquisa, ou o dono', escrita: 'cada pessoa insere a própria; apagar exige ver_respostas_pesquisa' },
       { entidade: 'POP', tabela: 'pop', descricao: 'Procedimentos Operacionais e Orientações Técnicas (tipo pop ou ort, migration 25), com a versão atual e se exige ciência.', leitura: COLAB, escrita: 'permissão gerenciar_pop' },
       { entidade: 'PopVersao', tabela: 'pop_versao', descricao: 'O histórico de versões de cada POP (migration 18).', leitura: COLAB, escrita: 'permissão gerenciar_pop' },
@@ -166,7 +166,7 @@ export const funcoesDoBanco = [
   { nome: 'proteger_auditoria_replicavel', migration: 20, descricao: 'Função do gatilho ab_protege_auditoria_replicavel: só quem tem aprovar_solucao_replicavel grava a aprovação ou contestação de uma solução replicável.' },
   { nome: 'proteger_papel_do_colaborador', migration: 41, descricao: 'Função do gatilho ac_protege_papel_colaborador: impede quem gerencia colaboradores de se promover ou trocar e-mail (identidade).' },
   { nome: 'reenviar_solucao_replicavel', migration: 48, descricao: 'O agente que atendeu a tratativa edita a solução replicável CONTESTADA e reenvia: a análise volta a pendente (o parecer anterior fica) e o histórico registra. Só vale para o responsável e só para solução contestada.' },
-  { nome: 'validar_avd_agendamento', migration: 53, descricao: 'Gatilho que confere o agendamento da AVD antes de gravar: AVD aberta, pessoa que ainda não respondeu, horário entre 1 minuto e 7 dias à frente.' },
+  { nome: 'validar_avd_agendamento', migration: 53, descricao: 'Gatilho que confere o agendamento da AVD antes de gravar: AVD aberta, pessoa que ainda não respondeu, horário entre 1 minuto e 48 horas à frente.' },
   { nome: 'confirmar_atribuicao', migration: 32, descricao: 'O agente confirma ("OK") que viu a atribuição nova. Altera só a própria linha.' },
   { nome: 'atualizar_minha_foto', migration: 37, descricao: 'Troca a foto de perfil de quem está logado, e só ela. Aceita só endereço do nosso bucket. Existe porque o agente não pode editar a própria linha de colaborador.' },
   { nome: 'auditoria_rls', migration: 29, descricao: 'Lista cada política de RLS e o que ela usa (eh_gestor, eh_colaborador, dono). Só service_role. Serve para conferir se o banco real bate com as migrations.' },
@@ -244,7 +244,8 @@ export const migracoes = [
   { n: 50, titulo: 'Resposta de pesquisa só em nome próprio', descricao: 'A regra de inserção de resposta_pesquisa passa a exigir que o colaborador_id seja o da pessoa logada (ou vazio, em pesquisa anônima). Fechava a brecha de responder em nome de outra pessoa.' },
   { n: 51, titulo: 'AVD sempre com o nome da pessoa', descricao: 'Resposta sem colaborador só é aceita em pesquisa anônima; pesquisa do tipo AVD não pode ser anônima e resposta de AVD não pode ficar sem colaborador (travas no dado).' },
   { n: 52, titulo: 'Atestado médico na Escala', descricao: 'escala_atribuicao.tipo_evento aceita atestado. Quem está com atestado é pulado no rodízio e na montagem da semana, como em férias e day off.' },
-  { n: 53, titulo: 'Agendar a AVD', descricao: 'Tabela avd_agendamento: o agente escolhe um horário (até 7 dias) para responder a AVD, uma vez só; na hora ela volta obrigatória.' },
+  { n: 53, titulo: 'Agendar a AVD', descricao: 'Tabela avd_agendamento: o agente escolhe um horário (até 48 horas) para responder a AVD, uma vez só; na hora ela volta obrigatória.' },
+  { n: 54, titulo: 'AVD: prazo de 48 horas', descricao: 'A conferência do agendamento da AVD passa de 7 dias para 48 horas.' },
   { n: 99, titulo: 'Restrições pós-importação', descricao: 'Só se aplica depois da carga de dados do Base44.' },
 ];
 
