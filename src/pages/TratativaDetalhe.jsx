@@ -31,7 +31,7 @@ import {
 } from '@/components/ui/dialog';
 import { ClipboardList, Play, Pause, CheckCircle, Clock, ExternalLink, AlertTriangle, MapPin, Trash2, Snowflake } from 'lucide-react';
 import TimerReobertura from '@/components/tratativas/TimerReobertura';
-import { reaberturaDe, comReaberturaApurada } from '@/lib/pontuacaoCiclo';
+import { reaberturaDe, comReaberturaApurada, aberturaDaTratativa } from '@/lib/pontuacaoCiclo';
 import CongelamentoSLA from '@/components/tratativas/CongelamentoSLA';
 import DesfechoContestacao from '@/components/tratativas/DesfechoContestacao';
 import MonetizacaoAtritoForm from '@/components/tratativas/MonetizacaoAtritoForm';
@@ -151,6 +151,12 @@ export default function TratativaDetalhe({ idExterno = null, embutido = false })
     queryFn: () => db.entities.Tratativa.list('-created_date'),
     enabled: tratativa?.tipo_tratativa === 'reclamacao_interna',
     staleTime: 60000,
+  });
+
+  const { data: ciclosTrimestrais = [] } = useQuery({
+    queryKey: ['ciclos-trimestrais', "list()"],
+    queryFn: () => db.entities.CicloTrimestral.list(),
+    staleTime: 300000,
   });
 
   const colaborador = colaboradores.find(c => c.email === user?.email);
@@ -575,7 +581,16 @@ export default function TratativaDetalhe({ idExterno = null, embutido = false })
 
   // Calcular pontuação (preview)
   const reabertura = reaberturaDe(tratativa, todasTratativas);
-  const pontosPreview = isEncerrada ? calculateTratativaPoints(comReaberturaApurada(tratativa, todasTratativas)) : null;
+  // Os 0,5 da abertura entram no ciclo em que a tratativa foi registrada,
+  // mesmo antes de encerrar; o resto só depois do encerramento.
+  const abertura = aberturaDaTratativa(tratativa, ciclosTrimestrais);
+  const doEncerramento = isEncerrada ? calculateTratativaPoints(comReaberturaApurada(tratativa, todasTratativas)) : { pontos: 0, detalhes: [] };
+  const pontosPreview = isEncerrada || abertura
+    ? {
+      pontos: doEncerramento.pontos + (abertura?.pontos ?? 0),
+      detalhes: [...(abertura ? [{ tipo: 'Abertura de tratativa', pontos: abertura.pontos }] : []), ...doEncerramento.detalhes],
+    }
+    : null;
 
   /*
    * Barra de estado: os botões que mudam o estado da tratativa ficam SEMPRE
@@ -1385,7 +1400,7 @@ export default function TratativaDetalhe({ idExterno = null, embutido = false })
           {podeVerCustoOperacional && <CustoOperacionalCard tratativa={tratativa} />}
 
           {/* Pontuação */}
-          {isEncerrada && pontosPreview && (
+          {pontosPreview && (
             <Card className="border border-warning/25 shadow-none bg-warning-soft">
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-medium text-warning flex items-center gap-2">

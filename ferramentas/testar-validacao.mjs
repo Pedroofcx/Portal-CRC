@@ -46,7 +46,7 @@ import { getMesReferencia } from '../src/components/ferramentas/apoio/constants.
 import { montarBonus, somaDoBonus, ciclosEmOrdem } from '../src/lib/bonusManual.js';
 import { vencidasDaEquipe, situacaoDoPrazo, ordenarPorPrazo, registrosNoCiclo, percentualNoSla, acompanhamentoDa } from '../src/lib/cicloEquipe.js';
 import { calculateCSATPoints, calculateCXPoints, calculateTratativaPoints, situacaoReplicavel } from '../src/components/utils/helpers.js';
-import { reaberturaDe, comReaberturaApurada, aberturasNoCiclo, cicloPagaAbertura, pontosDeTratativasNoCiclo, tratativaNosCiclo } from '../src/lib/pontuacaoCiclo.js';
+import { reaberturaDe, comReaberturaApurada, aberturasNoCiclo, aberturaDaTratativa, cicloPagaAbertura, pontosDeTratativasNoCiclo, tratativaNosCiclo } from '../src/lib/pontuacaoCiclo.js';
 import { extratoDoAgente } from '../src/lib/extratoPontos.js';
 import { calcularDadosConsolidados, cicloDaData } from '../src/lib/hanseiDados.js';
 import { desfechoDaContestacao, resumoFinanceiro } from '../src/lib/relatorios/financeiro.js';
@@ -571,6 +571,17 @@ console.log('\n== reabertura apurada pelos dados e 0,5 por abertura ==');
   const reg = (d, extra = {}) => ({ id: d, agente_responsavel_id: 'ana', data_registro: `${d}T15:00:00.000Z`, status: 'em_andamento', tipo_tratativa: 'reclamacao_interna', ...extra });
   checa('Ciclo 2 paga abertura', String(cicloPagaAbertura(ciclo2)), 'true');
   checa('Ciclo 1 nao muda', String(aberturasNoCiclo([reg('2026-06-16')], ciclo1).length), '0');
+  // A tela da tratativa mostra a abertura (TRT-0395: contestacao encerrada sem pontos de encerramento, mas aberta no portal)
+  const ciclo3 = { data_inicio: '2026-09-16', data_fim: '2026-12-16' };
+  const todosCiclos = [ciclo1, ciclo2, ciclo3];
+  const t395 = reg('2026-10-08', { tipo_tratativa: 'contestacao', status: 'encerrada' });
+  checa('tratativa aberta no Ciclo 3 gera 0,5 de abertura', String(aberturaDaTratativa(t395, todosCiclos)?.pontos), '0.5');
+  checa('a abertura e do ciclo em que foi registrada', aberturaDaTratativa(t395, todosCiclos).ciclo.data_inicio, '2026-09-16');
+  checa('o dia de virada pertence ao ciclo que termina', String(aberturaDaTratativa(reg('2026-09-16', { data_registro: '2026-09-16T20:00:00.000Z' }), todosCiclos).ciclo.data_inicio), '2026-06-16');
+  checa('tratativa do Ciclo 1 nao gera abertura', String(aberturaDaTratativa(reg('2026-05-01'), todosCiclos)), 'null');
+  checa('excluida nao gera abertura', String(aberturaDaTratativa({ ...t395, excluida: true }, todosCiclos)), 'null');
+  checa('sem agente nao gera abertura', String(aberturaDaTratativa({ ...t395, agente_responsavel_id: null }, todosCiclos)), 'null');
+  checa('a conta da tratativa bate com a conta do ciclo', `${aberturaDaTratativa(t395, todosCiclos).pontos}/${aberturasNoCiclo([t395], ciclo3).length * 0.5}`, '0.5/0.5');
   checa('abertas no Ciclo 2 contam, excluida nao', String(aberturasNoCiclo([reg('2026-07-01'), reg('2026-08-01'), reg('2026-08-02', { excluida: true }), reg('2026-10-01')], ciclo2).length), '2');
   const mapa = pontosDeTratativasNoCiclo([reg('2026-07-01'), { ...reg('2026-07-02'), status: 'encerrada', data_encerramento: '2026-07-03T12:00:00.000Z', encerrado_no_sla: true, status_reabertura: 'nao_houve' }], ciclo2,
     { encerrada: (t) => t.status === 'encerrada', noCiclo: (t, c) => t.data_encerramento >= c.data_inicio && t.data_encerramento <= `${c.data_fim}T23:59:59` }, depois);

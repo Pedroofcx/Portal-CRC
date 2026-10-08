@@ -107,6 +107,19 @@ export function aberturasNoCiclo(todas = [], ciclo) {
 }
 
 /**
+ * A abertura de UMA tratativa: 0,5 no ciclo em que foi registrada, do Ciclo 2
+ * em diante. Devolve { pontos, ciclo }, ou null quando não paga (ciclo 1,
+ * excluída, sem agente). É a mesma conta de aberturasNoCiclo, olhada de uma
+ * tratativa só — a tela da tratativa mostra o ponto por aqui.
+ */
+export function aberturaDaTratativa(tratativa, ciclos = []) {
+  if (!tratativa || tratativa.excluida || !tratativa.agente_responsavel_id) return null;
+  const ciclo = ciclos.find((c) => dentro(tratativa.data_registro, c));
+  if (!ciclo || !cicloPagaAbertura(ciclo)) return null;
+  return { pontos: PONTOS_POR_ABERTURA, ciclo };
+}
+
+/**
  * Pontos de tratativas de cada agente no ciclo.
  * @param todas TODAS as tratativas (abertas também: são elas que revelam a reabertura)
  * @returns Map agenteId -> { itens, aberturas, pontosEncerramento, pontosAbertura }

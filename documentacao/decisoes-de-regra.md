@@ -1081,3 +1081,13 @@ com atestado é pulado no rodízio de tratativas e na montagem da semana, como e
 férias, day off e falta, e mantém a vez para quando voltar (a fila é pela última
 atribuição). Dá para marcar na grade da Escala ou por "Marcar como indisponível"
 no rodízio, que agora pergunta o motivo: atestado médico ou ausência/imprevisto.
+
+## 08/10/2026 — A tela da tratativa mostra o 0,5 da abertura (TRT-0395)
+
+Os 0,5 da abertura já eram somados no ranking, em Minha Performance e no Hansei
+(a conta de `aberturasNoCiclo` conta TRT-0395 para a Ana no Ciclo 3). O que
+faltava era a tela da tratativa: o cartão "Pontuação Gerada" só mostrava os
+pontos de ENCERRAMENTO, então uma contestação encerrada sem ponto de
+encerramento aparecia com 0,0. Agora o cartão traz a linha "Abertura de
+tratativa +0,5" (no ciclo em que foi registrada, do Ciclo 2 em diante) e
+aparece desde a abertura, antes mesmo de encerrar.
