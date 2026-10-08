@@ -20,6 +20,7 @@ export function pontuacaoDoCiclo({ tratativas = [], apuracoes = [], bonus = [], 
   const porAgente = pontosDeTratativasNoCiclo(tratativas, ciclo, {
     encerrada: (t) => STATUS_ENCERRADOS.includes(t.status),
     noCiclo: tratativaNosCiclo,
+    equipe: colaboradores.filter((c) => c.papel === 'agente' && c.ativo !== false).map((c) => c.id),
   }, agora);
   const porId = new Map(tratativas.map((t) => [t.id, t]));
 

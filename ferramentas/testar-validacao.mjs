@@ -46,7 +46,7 @@ import { getMesReferencia } from '../src/components/ferramentas/apoio/constants.
 import { montarBonus, somaDoBonus, ciclosEmOrdem } from '../src/lib/bonusManual.js';
 import { vencidasDaEquipe, situacaoDoPrazo, ordenarPorPrazo, registrosNoCiclo, percentualNoSla, acompanhamentoDa } from '../src/lib/cicloEquipe.js';
 import { calculateCSATPoints, calculateCXPoints, calculateTratativaPoints, situacaoReplicavel } from '../src/components/utils/helpers.js';
-import { reaberturaDe, comReaberturaApurada, aberturasNoCiclo, aberturaDaTratativa, cicloPagaAbertura, cicloExigeRegistroEmTodosOsCanais, pontosDeTratativasNoCiclo, tratativaNosCiclo } from '../src/lib/pontuacaoCiclo.js';
+import { reaberturaDe, comReaberturaApurada, aberturasNoCiclo, aberturaDaTratativa, cicloPagaAbertura, cicloExigeRegistroDaEquipe, canaisLiberadosDaEquipe, pontosDeTratativasNoCiclo, tratativaNosCiclo } from '../src/lib/pontuacaoCiclo.js';
 import { extratoDoAgente } from '../src/lib/extratoPontos.js';
 import { calcularDadosConsolidados, cicloDaData } from '../src/lib/hanseiDados.js';
 import { desfechoDaContestacao, resumoFinanceiro } from '../src/lib/relatorios/financeiro.js';
@@ -589,57 +589,75 @@ console.log('\n== reabertura apurada pelos dados e 0,5 por abertura ==');
   checa('abertura + encerramento somam para o agente', `${mapa.get('ana').pontosAbertura}+${mapa.get('ana').pontosEncerramento}`, '1+2');
 }
 
-console.log('\n== uma tratativa em cada canal para os pontos valerem (Ciclo 3 em diante) ==');
+console.log('\n== canal liberado pela equipe: todos com 1 registro (Ciclo 3 em diante) ==');
 {
   const c3 = { data_inicio: '2026-09-16', data_fim: '2026-12-16' };
   const c2 = { data_inicio: '2026-06-16', data_fim: '2026-09-16' };
-  const reg = (id, tipo, dia, extra = {}) => ({ id, agente_responsavel_id: 'ana', tipo_tratativa: tipo, data_registro: `${dia}T15:00:00.000Z`, status: 'em_andamento', ...extra });
-  const enc = (id, tipo, dia, extra = {}) => reg(id, tipo, dia, { status: 'encerrada', data_encerramento: `${dia}T18:00:00.000Z`, ...extra });
-  const opcoes = { encerrada: (t) => t.status === 'encerrada', noCiclo: (t, c) => t.data_encerramento >= c.data_inicio && t.data_encerramento <= `${c.data_fim}T23:59:59` };
+  const reg = (id, ag, tipo, dia, extra = {}) => ({ id, agente_responsavel_id: ag, tipo_tratativa: tipo, data_registro: `${dia}T15:00:00.000Z`, status: 'em_andamento', ...extra });
+  const enc = (id, ag, tipo, dia, extra = {}) => reg(id, ag, tipo, dia, { status: 'encerrada', data_encerramento: `${dia}T18:00:00.000Z`, ...extra });
+  const opcoes = (equipe) => ({ encerrada: (t) => t.status === 'encerrada', noCiclo: (t, c) => t.data_encerramento >= c.data_inicio && t.data_encerramento <= `${c.data_fim}T23:59:59`, equipe });
   const agora = new Date('2026-11-01T12:00:00Z');
-  const contest = (n) => Array.from({ length: n }, (_, i) => enc(`c${i}`, 'contestacao', '2026-10-05', { status_resolucao_contestacao: 'pagou' }));
-  const ri = (n) => Array.from({ length: n }, (_, i) => reg(`r${i}`, 'reclamacao_interna', '2026-10-06'));
-  const um = (tipo) => reg(`u-${tipo}`, tipo, '2026-10-07');
+  const EQUIPE = ['ana', 'bia', 'dani', 'sir'];
+  let n = 0;
+  const um = (ag, tipo) => reg(`u${n++}`, ag, tipo, '2026-10-07');
+  const ra = (ag) => enc(`ra${n++}`, ag, 'reclame_aqui', '2026-10-05', { nota_reclame_aqui: 9 }); // 1,5
+  const ri = (ag) => reg(`ri${n++}`, ag, 'reclamacao_interna', '2026-10-06');
+  const todosCom = (tipos) => EQUIPE.flatMap((ag) => tipos.map((t) => um(ag, t)));
 
-  checa('o Ciclo 3 exige registro nos 4 canais', String(cicloExigeRegistroEmTodosOsCanais(c3)), 'true');
-  checa('o Ciclo 2 nao muda (ja apurado)', String(cicloExigeRegistroEmTodosOsCanais(c2)), 'false');
+  checa('o Ciclo 3 exige o registro da equipe', String(cicloExigeRegistroDaEquipe(c3)), 'true');
+  checa('o Ciclo 2 nao muda (ja apurado)', String(cicloExigeRegistroDaEquipe(c2)), 'false');
 
-  // 3 contestacoes + 4 R.I., sem R.A. nem Google: falta registro, tudo fica retido
-  const faltando = pontosDeTratativasNoCiclo([...contest(3), ...ri(4)], c3, opcoes, agora).get('ana');
-  checa('falta R.A. e Google: os pontos de tratativas nao somam', `${faltando.pontosEncerramento}/${faltando.pontosAbertura}`, '0/0');
-  checa('quais canais faltam', faltando.faltando.sort().join(','), 'google_meu_negocio,reclame_aqui');
-  checa('os pontos ficam retidos a parte (3 x 3,0 + 4 x 0,5)', String(faltando.pontosRetidos), '11');
-  checa('retidos por canal', `${faltando.retidos.contestacao.pontos}/${faltando.retidos.reclamacao_interna.pontos}`, '9/2');
-  checa('a contagem por canal acompanha', `${faltando.volume.contestacao}/${faltando.volume.reclamacao_interna}/${faltando.volume.reclame_aqui}`, '3/4/0');
-  checa('itens e aberturas ficam so com o que conta', `${faltando.itens.length}/${faltando.aberturas.length}`, '0/0');
+  // Ana, Bia e Dani tem R.A.; a Sir nao: R.A. nao e liberado para NINGUEM
+  const dados = [ra('ana'), ra('bia'), ra('dani'), ...todosCom(['reclamacao_interna'])];
+  const r = pontosDeTratativasNoCiclo(dados, c3, opcoes(EQUIPE), agora);
+  checa('3 de 4 com R.A.: o canal fica bloqueado para todos', r.get('ana').canaisBloqueados.join(','), 'reclame_aqui,google_meu_negocio,contestacao');
+  checa('os pontos de R.A. da Ana ficam retidos (1,5 + 0,5)', String(r.get('ana').pontosRetidos > 0 && r.get('ana').retidos.reclame_aqui.pontos), '2');
+  checa('quem falta no R.A. e a Sir', r.get('ana').faltamPorCanal.reclame_aqui.join(','), 'sir');
+  checa('a Sir sabe que nao tem registro em R.A.', r.get('sir').semRegistro.includes('reclame_aqui') ? 'sim' : 'nao', 'sim');
+  checa('a Ana ja tem R.A.: so aguarda os outros', r.get('ana').semRegistro.includes('reclame_aqui') ? 'sim' : 'nao', 'nao');
 
-  // com 1 registro em cada canal, tudo passa a contar (nao precisa de 4)
-  const todos = [...contest(3), ...ri(4), um('reclame_aqui'), um('google_meu_negocio')];
-  const ok = pontosDeTratativasNoCiclo(todos, c3, opcoes, agora).get('ana');
-  checa('1 registro em cada canal: nada faltando', String(ok.faltando.length), '0');
-  checa('os pontos passam a contar (3 x 2,5 + 9 aberturas x 0,5)', `${ok.pontosEncerramento}/${ok.pontosAbertura}`, '7.5/4.5');
-  checa('nada retido', String(ok.pontosRetidos), '0');
+  // a Sir registra o R.A. (mesmo so aberto): o canal e liberado para todos
+  const depois = pontosDeTratativasNoCiclo([...dados, reg('sir-ra', 'sir', 'reclame_aqui', '2026-10-20')], c3, opcoes(EQUIPE), agora);
+  checa('com o registro da Sir, R.A. e liberado para todos', depois.get('ana').canaisBloqueados.includes('reclame_aqui') ? 'bloqueado' : 'liberado', 'liberado');
+  checa('e os pontos de R.A. da Ana passam a contar (1,5)', String(depois.get('ana').itens.filter((i) => i.tipo_tratativa === 'reclame_aqui').reduce((s, i) => s + i.pontos, 0)), '1.5');
+  checa('as aberturas de R.A. tambem contam (0,5)', String(depois.get('ana').aberturas.filter((a) => a.tipo_tratativa === 'reclame_aqui').length), '1');
 
-  // basta o registro: tratativa so aberta, sem encerrar, ja conta como registro do canal
-  const comAberta = pontosDeTratativasNoCiclo([...contest(2), reg('ri1', 'reclamacao_interna', '2026-10-06'), reg('ra1', 'reclame_aqui', '2026-10-08'), reg('g1', 'google_meu_negocio', '2026-10-09')], c3, opcoes, agora).get('ana');
-  checa('tratativa ainda aberta ja conta como registro do canal', String(comAberta.faltando.length), '0');
+  // um canal liberado nao e travado pelo outro: Reclamacao Interna com todos = conta
+  checa('R.I. com todos da equipe esta liberado', depois.get('ana').canaisBloqueados.includes('reclamacao_interna') ? 'bloqueado' : 'liberado', 'liberado');
+  checa('os pontos de R.I. (abertura 0,5) contam mesmo com outros canais bloqueados', String(r.get('ana').aberturas.filter((a) => a.tipo_tratativa === 'reclamacao_interna').length), '1');
+
+  // quem nao atua em reclamacoes (sem registro nenhum) nao trava os canais dos outros
+  const comJulliano = pontosDeTratativasNoCiclo([...todosCom(['reclame_aqui'])], c3, opcoes([...EQUIPE, 'julliano']), agora);
+  checa('colaborador sem nenhum registro no ciclo nao trava o canal', comJulliano.get('ana').canaisBloqueados.includes('reclame_aqui') ? 'bloqueado' : 'liberado', 'liberado');
+
+  // quem nao e da equipe (gestor, inativo) nao conta como participante
+  const comGestor = pontosDeTratativasNoCiclo([...todosCom(['reclame_aqui']), um('gestor', 'contestacao')], c3, opcoes(EQUIPE), agora);
+  checa('registro de quem nao e da equipe nao entra na conta', comGestor.get('ana').canaisBloqueados.includes('reclame_aqui') ? 'bloqueado' : 'liberado', 'liberado');
 
   // excluida nao e registro
-  const excluida = pontosDeTratativasNoCiclo([...contest(1), um('reclamacao_interna'), um('reclame_aqui'), { ...um('google_meu_negocio'), excluida: true }], c3, opcoes, agora).get('ana');
-  checa('tratativa excluida nao conta como registro', excluida.faltando.join(','), 'google_meu_negocio');
+  const excluida = pontosDeTratativasNoCiclo([...todosCom(['reclame_aqui']).filter((t) => t.agente_responsavel_id !== 'sir'), { ...um('sir', 'reclame_aqui'), excluida: true }, um('sir', 'reclamacao_interna')], c3, opcoes(EQUIPE), agora);
+  checa('tratativa excluida nao libera o canal', excluida.get('ana').canaisBloqueados.includes('reclame_aqui') ? 'bloqueado' : 'liberado', 'bloqueado');
 
   // contestacao_compra (nome antigo) conta como contestacao
-  const antigo = pontosDeTratativasNoCiclo([um('reclame_aqui'), um('google_meu_negocio'), um('reclamacao_interna'), um('contestacao_compra')], c3, opcoes, agora).get('ana');
-  checa('contestacao_compra conta como o canal de contestacao', String(antigo.faltando.length), '0');
+  const antigo = pontosDeTratativasNoCiclo(EQUIPE.map((ag) => um(ag, 'contestacao_compra')), c3, opcoes(EQUIPE), agora);
+  checa('contestacao_compra conta como o canal de contestacao', antigo.get('ana').canaisBloqueados.includes('contestacao') ? 'bloqueado' : 'liberado', 'liberado');
 
   // registro de outro ciclo nao vale para este
-  const foraDoCiclo = pontosDeTratativasNoCiclo([um('reclame_aqui'), um('google_meu_negocio'), um('reclamacao_interna'), reg('c-velha', 'contestacao', '2026-08-01')], c3, opcoes, agora).get('ana');
-  checa('registro de outro ciclo nao completa os canais', foraDoCiclo.faltando.join(','), 'contestacao');
+  const foraDoCiclo = pontosDeTratativasNoCiclo([...EQUIPE.slice(0, 3).map((ag) => um(ag, 'reclame_aqui')), reg('velho', 'sir', 'reclame_aqui', '2026-08-01'), um('sir', 'reclamacao_interna')], c3, opcoes(EQUIPE), agora);
+  checa('registro de outro ciclo nao libera o canal', foraDoCiclo.get('ana').canaisBloqueados.includes('reclame_aqui') ? 'bloqueado' : 'liberado', 'bloqueado');
+
+  // sem ninguem atuando nao ha o que travar
+  checa('sem nenhum registro na equipe, nada e travado', String(pontosDeTratativasNoCiclo([], c3, opcoes(EQUIPE), agora).size), '0');
 
   // ciclos antigos nao mudam
-  const velho = pontosDeTratativasNoCiclo([enc('a', 'contestacao', '2026-07-05', { status_resolucao_contestacao: 'pagou' })], c2, opcoes, agora).get('ana');
-  checa('Ciclo 2: soma como sempre, mesmo sem os outros canais', String(velho.pontosEncerramento), '2.5');
-  checa('Ciclo 2: nada retido', String(velho.pontosRetidos), '0');
+  const velho = pontosDeTratativasNoCiclo([enc('a', 'ana', 'contestacao', '2026-07-05', { status_resolucao_contestacao: 'pagou' })], c2, opcoes(EQUIPE), agora).get('ana');
+  checa('Ciclo 2: soma como sempre, sem liberar nada', `${velho.pontosEncerramento}/${velho.pontosRetidos}/${velho.canaisBloqueados.length}`, '2.5/0/0');
+
+  // a funcao pura da liberacao
+  const lib = canaisLiberadosDaEquipe([{ id: 'a', volume: { reclame_aqui: 1, contestacao: 2 } }, { id: 'b', volume: { reclame_aqui: 3, contestacao: 0 } }]);
+  checa('liberados: so o canal em que todos tem registro', lib.liberados.join(','), 'reclame_aqui');
+  checa('quem falta em cada canal', `${lib.faltam.contestacao.join(',')}|${lib.faltam.google_meu_negocio.join(',')}`, 'b|a,b');
+  checa('participantes: quem tem algum registro', String(lib.participantes), '2');
 }
 
 console.log('\n== solucao replicavel: do Ciclo 2 em diante, so com aprovacao ==');

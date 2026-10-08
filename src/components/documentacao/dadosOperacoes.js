@@ -206,7 +206,7 @@ export const modulosOperacoes = [
     fluxo: 'Escolhe ciclo, agente e tipo → aplica calculateTratativaPoints (com a reabertura apurada pelos dados) em cada tratativa → mostra o detalhamento por regra aplicada (Encerramento no SLA, Sem reabertura em 7 dias, Solução replicável, notas...).',
     campos_chave: [
       { campo: 'calculateTratativaPoints(t, { ciclo })', descricao: 'Função pura em src/components/utils/helpers.js. A única fonte da pontuação das tratativas.' },
-      { campo: 'pontosDeTratativasNoCiclo()', descricao: 'Em src/lib/pontuacaoCiclo.js: agrega por agente os pontos de encerramento e de abertura do ciclo. Do Ciclo 3 em diante, se a pessoa não tem registro em algum dos 4 canais (`faltando`), os pontos de tratativas vão para `retidos`, por canal, e `volume` traz os registros de cada canal.' },
+      { campo: 'pontosDeTratativasNoCiclo()', descricao: 'Em src/lib/pontuacaoCiclo.js: agrega por agente os pontos de encerramento e de abertura do ciclo. Do Ciclo 3 em diante, um canal só conta quando todos os agentes da equipe que atuam no ciclo têm registro nele; os pontos dos canais ainda não liberados (`canaisBloqueados`) vão para `retidos`, por canal, e `volume` traz os registros de cada um. `canaisLiberadosDaEquipe()` faz a conta da liberação.' },
     ],
     regras_negocio: ['Os pontos das tratativas nunca são gravados: tudo é recalculado a cada carregamento, para ranking, auditoria e Minha Performance nunca divergirem.', 'A tabela pontuacao guarda só o bônus manual.'],
     integracoes: ['CicloTrimestral define o período (e a regra do dia de virada).'],

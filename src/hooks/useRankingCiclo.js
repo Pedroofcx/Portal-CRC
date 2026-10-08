@@ -72,6 +72,8 @@ export function useRankingCiclo(cicloId = null) {
     const porAgente = pontosDeTratativasNoCiclo(todasTratativas, ciclo, {
       encerrada: (t) => STATUS_ENCERRADOS.includes(t.status),
       noCiclo: tratativaNosCiclo,
+      // Os agentes ativos liberam (ou não) cada canal da pontuação.
+      equipe: colaboradores.filter((c) => c.papel === 'agente' && c.ativo !== false).map((c) => c.id),
     });
     const bonusDoCiclo = bonus.filter((b) => b.ciclo_id === ciclo.id);
     const pontuouNoCiclo = new Set([...porAgente.keys(), ...bonusDoCiclo.map((b) => b.colaborador_id)]);
@@ -83,7 +85,7 @@ export function useRankingCiclo(cicloId = null) {
     return agentes.map((agente) => {
       // Uma linha por tratativa encerrada: a página detalhada do gestor monta
       // dela o ritmo por semana, os pontos por canal e o % no SLA.
-      const { itens = [], aberturas = [], pontosEncerramento = 0, pontosAbertura = 0, retidos = {}, pontosRetidos = 0, faltando = [], volume = {} } = porAgente.get(agente.id) ?? {};
+      const { itens = [], aberturas = [], pontosEncerramento = 0, pontosAbertura = 0, retidos = {}, pontosRetidos = 0, semRegistro = [], canaisBloqueados = [], faltamPorCanal = {}, volume = {} } = porAgente.get(agente.id) ?? {};
       const pontosCalculados = pontosEncerramento + pontosAbertura;
       const indicadores = indicadoresDoCiclo(apuracoes.filter((a) => a.colaborador_id === agente.id), ciclo);
       const lancamentos = bonusDoCiclo.filter((b) => b.colaborador_id === agente.id);
@@ -103,7 +105,9 @@ export function useRankingCiclo(cicloId = null) {
         aberturas,
         retidos,
         pontosRetidos,
-        canaisSemRegistro: faltando,
+        semRegistro,
+        canaisBloqueados,
+        faltamPorCanal,
         registrosPorCanal: volume,
         bonus: somaBonus,
         lancamentosBonus: lancamentos,

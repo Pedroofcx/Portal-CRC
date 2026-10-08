@@ -198,7 +198,7 @@ export default function ConfigElegibilidade() {
             <div className="mb-4 p-3 bg-muted border border-border rounded-lg flex items-start gap-2 text-xs text-muted-foreground">
               <Info className="w-4 h-4 text-muted-foreground flex-shrink-0 mt-0.5" />
               <span>
-                <strong>Regra de volume mínimo:</strong> canais com menos de 4 registros no trimestre são desconsiderados na validação da elegibilidade, evitando distorções por baixo volume. (Os pontos de tratativas têm outra regra: do Ciclo 3 em diante só valem com pelo menos 1 tratativa em cada um dos 4 canais.)
+                <strong>Regra de volume mínimo:</strong> canais com menos de 4 registros no trimestre são desconsiderados na validação da elegibilidade, evitando distorções por baixo volume. (Os pontos têm outra regra: do Ciclo 3 em diante, um canal só pontua quando todos os colaboradores têm pelo menos 1 registro nele.)
               </span>
             </div>
 

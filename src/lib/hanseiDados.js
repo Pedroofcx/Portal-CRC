@@ -24,11 +24,12 @@ const noPeriodo = (valor, inicio, fim) => {
 };
 
 /** Total oficial da pessoa no ciclo: tratativas + aberturas + indicadores + bônus. */
-export function totalNoCiclo({ tratativas = [], apuracoes = [], bonus = [], ciclo, colaboradorId, agora = new Date() }) {
+export function totalNoCiclo({ tratativas = [], apuracoes = [], bonus = [], ciclo, colaboradorId, equipe = null, agora = new Date() }) {
   if (!ciclo) return null;
   const reg = pontosDeTratativasNoCiclo(tratativas, ciclo, {
     encerrada: (t) => STATUS_ENCERRADOS.includes(t.status),
     noCiclo: tratativaNosCiclo,
+    equipe,
   }, agora).get(colaboradorId);
   const ind = indicadoresDoCiclo(apuracoes.filter((a) => a.colaborador_id === colaboradorId), ciclo);
   const lancamentos = bonus.filter((b) => b.colaborador_id === colaboradorId && b.ciclo_id === ciclo.id);

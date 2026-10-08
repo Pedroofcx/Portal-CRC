@@ -5,7 +5,7 @@ import { tipoTratativaLabels } from '@/components/utils/helpers';
 import { useRankingCiclo, posicaoNoRanking } from '@/hooks/useRankingCiclo';
 import { pontosDaFaixa, proximaFaixa } from '@/lib/faixasIndicadores';
 import { avaliarExigencia } from '@/lib/elegibilidade';
-import { cicloExigeRegistroEmTodosOsCanais } from '@/lib/pontuacaoCiclo';
+import { cicloExigeRegistroDaEquipe } from '@/lib/pontuacaoCiclo';
 import { indicadoresDoCiclo, detalheCsat } from '@/lib/indicadoresCiclo';
 import { pontosPorSemana, fimDoRitmo } from '@/lib/ritmoSemanal';
 import IconeExigencia from '@/components/ciclo/IconeExigencia';
@@ -65,7 +65,8 @@ export default function PainelMeuCiclo({
   bonusManual = 0,
   retidos = {},
   pontosRetidos = 0,
-  canaisSemRegistro = [],
+  semRegistro = [],
+  canaisBloqueados = [],
   minhasTratativas = [],
   exigencias = [],
   rankingVisivel = true,
@@ -198,11 +199,14 @@ export default function PainelMeuCiclo({
 
       {/* 2. De onde vieram */}
       <div className="space-y-4">
-        {cicloExigeRegistroEmTodosOsCanais(cicloAtivo) && canaisSemRegistro.length > 0 && (
+        {cicloExigeRegistroDaEquipe(cicloAtivo) && canaisBloqueados.length > 0 && (
           <p className="rounded-lg bg-warning-soft px-3 py-2 text-xs text-foreground">
-            Para os pontos de tratativas valerem, você precisa de pelo menos 1 tratativa em cada canal no ciclo.
-            {' '}Falta: <span className="font-semibold">{canaisSemRegistro.map((c) => tipoTratativaLabels[c]).join(', ')}</span>.
-            {pontosRetidos > 0 && <> Enquanto isso, <span className="font-semibold">{fmt(pontosRetidos)} pts</span> ficam retidos e entram quando o último canal tiver registro.</>}
+            Um canal só pontua depois que <span className="font-semibold">todos da equipe</span> têm pelo menos 1 registro nele no ciclo.
+            {' '}Ainda não liberado{canaisBloqueados.length === 1 ? '' : 's'}: <span className="font-semibold">{canaisBloqueados.map((c) => tipoTratativaLabels[c]).join(', ')}</span>.
+            {semRegistro.length > 0
+              ? <> Você ainda não tem registro em {semRegistro.map((c) => tipoTratativaLabels[c]).join(', ')}.</>
+              : <> Você já tem registro nesses; falta alguém da equipe.</>}
+            {pontosRetidos > 0 && <> Seus <span className="font-semibold">{fmt(pontosRetidos)} pts</span> desses canais ficam retidos e entram quando forem liberados.</>}
           </p>
         )}
         <Grupo titulo="De onde vieram — tratativas">

@@ -218,6 +218,7 @@ export default function Observacoes() {
             tratativas,
             apuracoes,
             bonus,
+            equipe: colaboradores.filter((c) => c.papel === 'agente' && c.ativo !== false).map((c) => c.id),
           })}
           salvando={leituraMutation.isPending}
           onSalvar={(dados, aoTerminar) => leituraMutation.mutate({ dados, aoTerminar })}

@@ -40,13 +40,23 @@ export function usePontuacaoAgente(colaboradorId) {
     refetchOnWindowFocus: false,
   });
 
+  // Os agentes ativos: é a equipe que libera (ou não) cada canal da pontuação.
+  const { data: colaboradores = [] } = useQuery({
+    queryKey: ['colaboradores', "list()"],
+    queryFn: () => db.entities.Colaborador.list(),
+    enabled: !!colaboradorId,
+    staleTime: 120000,
+  });
+  const equipe = useMemo(() => colaboradores.filter((c) => c.papel === 'agente' && c.ativo !== false).map((c) => c.id), [colaboradores]);
+
   const minhas = useMemo(() => {
     if (!cicloAtivo || !colaboradorId) return null;
     return pontosDeTratativasNoCiclo(todas, cicloAtivo, {
       encerrada: (t) => STATUS_ENCERRADOS.includes(t.status),
       noCiclo: tratativaNosCiclo,
-    }).get(colaboradorId) ?? { itens: [], aberturas: [], pontosEncerramento: 0, pontosAbertura: 0, retidos: {}, pontosRetidos: 0, faltando: [] };
-  }, [todas, cicloAtivo, colaboradorId]);
+      equipe,
+    }).get(colaboradorId) ?? { itens: [], aberturas: [], pontosEncerramento: 0, pontosAbertura: 0, retidos: {}, pontosRetidos: 0, semRegistro: [], canaisBloqueados: [] };
+  }, [todas, cicloAtivo, colaboradorId, equipe]);
 
   const tratativasEncerradas = useMemo(() => {
     const ids = new Set((minhas?.itens ?? []).map((i) => i.tratativa_id));
@@ -124,7 +134,8 @@ export function usePontuacaoAgente(colaboradorId) {
     bonusManual,
     retidos: minhas?.retidos ?? {},
     pontosRetidos: minhas?.pontosRetidos ?? 0,
-    canaisSemRegistro: minhas?.faltando ?? [],
+    semRegistro: minhas?.semRegistro ?? [],
+    canaisBloqueados: minhas?.canaisBloqueados ?? [],
     indicadores,
     extrato,
     detalhamentoPontos,

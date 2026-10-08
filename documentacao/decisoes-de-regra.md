@@ -1115,24 +1115,35 @@ ligado) e sempre que alguém abre o Portal. Na tela inicial, a gestão vê quant
 tickets foram encerrados assim (de toda a equipe) e cada agente vê os dele, por
 7 dias; a própria tratativa mostra a faixa "Encerrada automaticamente".
 
-## 08/10/2026 — Uma tratativa em cada canal para os pontos valerem (Ciclo 3 em diante)
+## 08/10/2026 — Canal só pontua quando TODOS da equipe têm registro nele (Ciclo 3 em diante)
 
-**Decisão do Pedro (corrigida no mesmo dia):** são 4 canais — Reclame Aqui,
-Google Meu Negócio, Reclamação Interna e Contestação — e a pessoa precisa ter
-**pelo menos 1 tratativa em cada um** para a pontuação valer. (A primeira
-versão exigiu 4 em cada canal, o que era o mínimo da elegibilidade, e foi
-trocada.)
+**Regra (Estrutura de Trabalho, explicada pelo Pedro):** são 4 canais — Reclame
+Aqui, Google Meu Negócio, Reclamação Interna e Contestação — e um canal só
+começa a ser computado quando **todos os colaboradores** têm pelo menos 1
+registro nele no ciclo. Se três têm e um não, o canal não conta **para
+ninguém**; se o trimestre acabar assim, as tratativas desse canal são
+desconsideradas da pontuação total. Antes disso, os pontos ficam retidos.
+(O texto da Estrutura de Trabalho fala em "4 registros"; o Pedro esclarece que o
+critério é 1 por colaborador.)
 
-**Como ficou:** vale do Ciclo 3 em diante (os ciclos 1 e 2 já foram apurados e
-não mudam). Conta o REGISTRO no ciclo (data de registro, não excluído), mesmo que
-a tratativa ainda esteja aberta. Enquanto faltar registro em algum dos 4
-canais, os pontos de tratativas (encerramento e as aberturas de 0,5) ficam
-RETIDOS: saem do total e do ranking, aparecem à parte ("x retidos") e passam a
-contar quando todos os 4 canais têm registro. Indicadores (CSAT, performance,
-CX) e bônus não são afetados. O mínimo de 4 registros de
-Configurações > Elegibilidade continua valendo só para o ✓ da elegibilidade.
+**Como ficou:** vale do Ciclo 3 em diante (ciclos 1 e 2 já foram apurados e não
+mudam). O registro é contado pela data de registro no ciclo, não excluído, mesmo
+com a tratativa ainda aberta. Os pontos de um canal não liberado (encerramento
+e as aberturas de 0,5) saem do total e do ranking de todos, aparecem como
+"retidos" e voltam a contar quando o último colaborador registra naquele canal.
+Cada canal é independente: um liberado conta mesmo com outro bloqueado.
+Indicadores (CSAT, performance, CX) e bônus não são afetados. O mínimo de 4
+registros por canal de Configurações > Elegibilidade continua valendo só para o
+✓ da elegibilidade.
 
-Na tela inicial da gestão, "Ranking e elegibilidade do ciclo" ganhou a regra
-escrita e a coluna "Registros por canal" (R.A., GMN, Contest., R.I.) ao lado dos
-pontos; o agente vê o aviso do que falta no "Meu ciclo"; a Auditoria de
-pontuação e a página da pessoa seguem a mesma conta.
+**Quem é "todos os colaboradores":** agentes ativos que atuam em reclamações no
+ciclo, isto é, com pelo menos um registro de qualquer canal. Quem é agente ativo
+mas ainda não registrou nada (por exemplo o "Agente de Teste" e quem trabalha só
+com projetos) não trava os canais dos demais. Quem não é agente (gestor) ou está
+inativo também fica de fora.
+
+**Telas:** na tela inicial da gestão, "Ranking e elegibilidade do ciclo" traz a
+regra, o estado de cada canal ("liberado" ou "aguardando fulano") e a coluna
+"Registros por canal" (R.A., GMN, Contest., R.I.) ao lado dos pontos. O agente
+vê o aviso no "Meu ciclo"; a Auditoria de pontuação e a página da pessoa seguem
+a mesma conta.

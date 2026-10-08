@@ -7,7 +7,8 @@ import DialogoBonus from '@/components/ciclo/DialogoBonus';
 import { ciclosEmOrdem } from '@/lib/bonusManual';
 import { createPageUrl } from '@/utils';
 import IconeExigencia from '@/components/ciclo/IconeExigencia';
-import { cicloExigeRegistroEmTodosOsCanais } from '@/lib/pontuacaoCiclo';
+import { cicloExigeRegistroDaEquipe, canaisLiberadosDaEquipe } from '@/lib/pontuacaoCiclo';
+import { primeiroNome } from '@/lib/nomes';
 
 /**
  * Tela inicial do gestor — proposta C, "O ciclo".
@@ -29,17 +30,21 @@ const CANAIS_DA_TABELA = [
   { chave: 'reclamacao_interna', sigla: 'R.I.', nome: 'Reclamação interna' },
 ];
 
-/** Registros de cada canal no ciclo: canal sem nenhum registro trava os pontos de tratativas. */
-export function ContadorPorCanal({ volume = {}, retidos = {}, regraValendo }) {
+/** Registros de cada canal no ciclo. O canal só pontua quando TODOS da equipe têm registro nele. */
+export function ContadorPorCanal({ volume = {}, liberados = [], regraValendo }) {
   return (
     <span className="mx-auto grid w-[9.5rem] grid-cols-2 gap-1">
       {CANAIS_DA_TABELA.map((c) => {
         const n = volume[c.chave] ?? 0;
-        const tem = n > 0;
-        const classe = tem ? 'bg-success-soft text-success' : regraValendo ? 'bg-warning-soft text-warning' : 'bg-muted text-muted-foreground';
-        const titulo = tem
-          ? `${c.nome}: ${n} registro${n === 1 ? '' : 's'} no ciclo`
-          : `${c.nome}: nenhum registro no ciclo${regraValendo ? ' — enquanto faltar um canal, os pontos de tratativas ficam retidos' : ''}`;
+        const liberado = liberados.includes(c.chave);
+        const bloqueando = regraValendo && !liberado && n === 0;
+        const classe = !regraValendo ? (n > 0 ? 'bg-success-soft text-success' : 'bg-muted text-muted-foreground')
+          : liberado ? 'bg-success-soft text-success'
+            : bloqueando ? 'bg-warning-soft text-warning' : 'bg-muted text-foreground';
+        const titulo = !regraValendo ? `${c.nome}: ${n} registro${n === 1 ? '' : 's'}`
+          : liberado ? `${c.nome}: ${n} registro${n === 1 ? '' : 's'} — canal liberado, conta para a pontuação`
+            : bloqueando ? `${c.nome}: sem registro — falta esta pessoa para o canal ser liberado`
+              : `${c.nome}: ${n} registro${n === 1 ? '' : 's'} — canal ainda não liberado (falta alguém da equipe)`;
         return (
           <span key={c.chave} title={titulo} className={`flex items-baseline justify-between gap-1 rounded px-1.5 py-0.5 text-[11px] tabular-nums ${classe}`}>
             <span>{c.sigla}</span>
@@ -115,7 +120,9 @@ export default function PainelCicloGestor({
   // faz sentido para o ativo que já passou do fim.
   const historico = ciclo.id !== cicloAtivo?.id;
   const cicloIdDaUrl = historico ? ciclo.id : null;
-  const regraDoVolume = cicloExigeRegistroEmTodosOsCanais(ciclo);
+  const regraDoVolume = cicloExigeRegistroDaEquipe(ciclo);
+  const liberacao = canaisLiberadosDaEquipe(agentes.map((a) => ({ id: a.id, volume: a.volume })));
+  const nomeDe = (id) => primeiroNome(agentes.find((a) => a.id === id)?.nome ?? '');
 
   return (
     <section className="space-y-4" aria-labelledby="titulo-ciclo-gestor">
@@ -154,9 +161,20 @@ export default function PainelCicloGestor({
             <p className="hidden text-xs text-muted-foreground sm:block">Clique numa pessoa para ver em detalhe</p>
             <p className="mt-1 max-w-3xl text-xs text-muted-foreground">
               {regraDoVolume
-                ? 'Regra para pontuar: a pessoa precisa ter pelo menos 1 tratativa em cada um dos 4 canais (Reclame Aqui, Google Meu Negócio, Contestação de compra e Reclamação interna) no ciclo. Enquanto faltar um canal, os pontos de tratativas ficam retidos, fora do total e do ranking, e passam a contar quando todos os 4 tiverem registro.'
-                : 'Este ciclo já foi apurado sem a regra de uma tratativa em cada canal (ela vale do Ciclo 3 em diante). Os contadores mostram os registros de cada canal.'}
+                ? 'Regra para pontuar (Estrutura de Trabalho): um canal só conta quando TODOS os colaboradores têm pelo menos 1 tratativa nele no ciclo. Enquanto um não tiver, os pontos daquele canal — de todo mundo — ficam retidos, fora do total e do ranking, e passam a contar quando o último registrar. Se o trimestre acabar assim, o canal é desconsiderado.'
+                : 'Este ciclo já foi apurado sem a regra de liberação dos canais (ela vale do Ciclo 3 em diante). Os contadores mostram os registros de cada canal.'}
             </p>
+            {regraDoVolume && liberacao.participantes > 0 && (
+              <p className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs">
+                {CANAIS_DA_TABELA.map((c) => (liberacao.liberados.includes(c.chave)
+                  ? <span key={c.chave} className="text-success"><span className="font-semibold">{c.nome}</span>: liberado</span>
+                  : (
+                    <span key={c.chave} className="text-warning">
+                      <span className="font-semibold">{c.nome}</span>: aguardando {liberacao.faltam[c.chave].map(nomeDe).filter(Boolean).join(', ')}
+                    </span>
+                  )))}
+              </p>
+            )}
           </div>
           <div className="flex flex-wrap items-center gap-2">
             {/* Histórico: os ciclos encerrados ficam a um clique, do mais recente ao mais antigo. */}
@@ -190,7 +208,7 @@ export default function PainelCicloGestor({
                 <th className="pb-2 px-2 text-right font-medium">Pontos</th>
                 <th className="hidden pb-2 px-2 text-center font-medium md:table-cell">
                   Registros por canal
-                  <span className="block text-[11px] font-normal">1 em cada para pontuar</span>
+                  <span className="block text-[11px] font-normal">1 de cada pessoa libera o canal</span>
                 </th>
                 <th className="hidden whitespace-nowrap pb-2 px-2 font-medium lg:table-cell">Ritmo 6 sem.</th>
                 {exigencias.map((e) => (
@@ -222,13 +240,13 @@ export default function PainelCicloGestor({
                   <td className="px-2 text-right font-semibold tabular-nums text-foreground">
                     {fmt(a.totalPontos)}
                     {regraDoVolume && a.pontosRetidos > 0 && (
-                      <span className="block text-[11px] font-normal text-warning" title="Pontos de tratativas retidos: falta registro em algum canal, então ainda não entram no total">
+                      <span className="block text-[11px] font-normal text-warning" title="Pontos de canais que a equipe ainda não liberou (falta registro de alguém): não entram no total">
                         +{fmt(a.pontosRetidos)} retidos
                       </span>
                     )}
                   </td>
                   <td className="hidden px-2 md:table-cell">
-                    <ContadorPorCanal volume={a.volume} retidos={a.retidos} regraValendo={regraDoVolume} />
+                    <ContadorPorCanal volume={a.volume} liberados={liberacao.liberados} regraValendo={regraDoVolume} />
                   </td>
                   <td className="hidden px-2 lg:table-cell"><Ritmo semanas={a.semanas} /></td>
                   {a.avaliacoes.map((av) => (

@@ -8,10 +8,10 @@ import { tratativaNosCiclo } from '@/lib/pontuacaoCiclo';
  * (Observações) e para a visão 360º do Oráculo, para que ninguém converse
  * com um número diferente do que o sistema paga.
  */
-export function contextoDoColaborador({ colaboradorId, ciclo, tratativas = [], apuracoes = [], bonus = [] }) {
+export function contextoDoColaborador({ colaboradorId, ciclo, tratativas = [], apuracoes = [], bonus = [], equipe = null }) {
   const minhasApuracoes = apuracoes.filter((a) => a.colaborador_id === colaboradorId);
   const indicadores = indicadoresDoCiclo(minhasApuracoes, ciclo);
-  const pontos = totalNoCiclo({ tratativas, apuracoes, bonus, ciclo, colaboradorId });
+  const pontos = totalNoCiclo({ tratativas, apuracoes, bonus, ciclo, colaboradorId, equipe });
 
   const encerradas = tratativas.filter((t) => !t.excluida
     && t.agente_responsavel_id === colaboradorId

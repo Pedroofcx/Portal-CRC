@@ -83,6 +83,9 @@ export default function OraculoPage() {
   const isGestor = temPermissao('acessar_oraculo');
   const cicloAtivo = useMemo(() => ciclos.find((c) => c.ativo) ?? null, [ciclos]);
 
+  // Os agentes ativos liberam (ou não) cada canal da pontuação: a mesma equipe do ranking.
+  const equipe = useMemo(() => colaboradores.filter((c) => c.papel === 'agente' && c.ativo !== false).map((c) => c.id), [colaboradores]);
+
   const agentes = useMemo(() => colaboradores
     .filter((c) => c.papel === 'agente')
     .sort((a, b) => (a.nome_completo || '').localeCompare(b.nome_completo || '')), [colaboradores]);
@@ -99,14 +102,14 @@ export default function OraculoPage() {
     return [c.id, {
       leituras,
       medias: mediaDasCompetencias(leituras),
-      pontos: cicloAtivo ? totalNoCiclo({ tratativas, apuracoes, bonus, ciclo: cicloAtivo, colaboradorId: c.id }) : null,
+      pontos: cicloAtivo ? totalNoCiclo({ tratativas, apuracoes, bonus, ciclo: cicloAtivo, colaboradorId: c.id, equipe }) : null,
     }];
-  })), [agentes, observacoes, tratativas, apuracoes, bonus, cicloAtivo]);
+  })), [agentes, observacoes, tratativas, apuracoes, bonus, cicloAtivo, equipe]);
 
   const dadosDoSelecionado = useMemo(() => {
     if (!selecionado) return null;
     const contexto = contextoDoColaborador({
-      colaboradorId: selecionado.id, ciclo: cicloAtivo, tratativas, apuracoes, bonus,
+      colaboradorId: selecionado.id, ciclo: cicloAtivo, tratativas, apuracoes, bonus, equipe,
     });
     const minhas = tratativas.filter((t) => !t.excluida
       && t.agente_responsavel_id === selecionado.id
