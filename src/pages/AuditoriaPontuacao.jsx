@@ -6,7 +6,7 @@ import { calculateTratativaPoints } from '@/components/utils/helpers';
 import { tratativaNosCiclo } from '@/hooks/usePontuacaoAgente';
 import { comReaberturaApurada, aberturasNoCiclo, cicloExigeRegistroDaEquipe, canaisLiberadosDaEquipe, PONTOS_POR_ABERTURA } from '@/lib/pontuacaoCiclo';
 import { registrosNoCiclo } from '@/lib/cicloEquipe';
-import { canalDe, CANAIS } from '@/lib/elegibilidade';
+import { canalDe, CANAIS, idsDaEquipeQuePontua } from '@/lib/elegibilidade';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import PageHeader from '@/components/ui/PageHeader';
@@ -62,9 +62,10 @@ export default function AuditoriaPontuacao() {
     if (!cicloAtivo) return [];
     const agentes = colaboradores.filter(c => c.papel === 'agente' && c.ativo !== false);
     const aplicaRegra = cicloExigeRegistroDaEquipe(cicloAtivo);
-    // A equipe libera (ou não) cada canal: todos os agentes ativos com registro precisam ter 1.
+    // A equipe libera (ou não) cada canal: todos os agentes ativos da Equipe CRC precisam ter 1.
+    const idsEquipe = new Set(idsDaEquipeQuePontua(colaboradores));
     const volumeDe = (id) => registrosNoCiclo(todasTratativas.filter(t => t.agente_responsavel_id === id), cicloAtivo);
-    const liberacao = canaisLiberadosDaEquipe(agentes.map(a => ({ id: a.id, volume: volumeDe(a.id) })));
+    const liberacao = canaisLiberadosDaEquipe(agentes.filter(a => idsEquipe.has(a.id)).map(a => ({ id: a.id, volume: volumeDe(a.id) })), 1, { soQuemAtua: false });
     const canaisBloqueados = aplicaRegra && liberacao.participantes > 0 ? CANAIS.filter(c => !liberacao.liberados.includes(c)) : [];
 
     return agentes.map(agente => {

@@ -1,4 +1,5 @@
 import db from '@/api/db';
+import { idsDaEquipeQuePontua } from '@/lib/elegibilidade';
 import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { tratativaNosCiclo } from '@/hooks/usePontuacaoAgente';
@@ -73,7 +74,7 @@ export function useRankingCiclo(cicloId = null) {
       encerrada: (t) => STATUS_ENCERRADOS.includes(t.status),
       noCiclo: tratativaNosCiclo,
       // Os agentes ativos liberam (ou não) cada canal da pontuação.
-      equipe: colaboradores.filter((c) => c.papel === 'agente' && c.ativo !== false).map((c) => c.id),
+      equipe: idsDaEquipeQuePontua(colaboradores),
     });
     const bonusDoCiclo = bonus.filter((b) => b.ciclo_id === ciclo.id);
     const pontuouNoCiclo = new Set([...porAgente.keys(), ...bonusDoCiclo.map((b) => b.colaborador_id)]);

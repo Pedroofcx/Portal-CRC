@@ -15,6 +15,16 @@ export const CANAIS = ['reclamacao_interna', 'reclame_aqui', 'google_meu_negocio
 /** Contestação aparece com dois nomes nos dados antigos. */
 export const canalDe = (tipo) => (tipo === 'contestacao_compra' ? 'contestacao' : tipo);
 
+/** A equipe que libera (ou não) os canais da pontuação: os agentes ativos da Equipe CRC. */
+export const EQUIPE_QUE_PONTUA = 'Equipe CRC';
+
+/** Ids dos colaboradores que contam na liberação dos canais (agentes ativos da Equipe CRC). */
+export function idsDaEquipeQuePontua(colaboradores = []) {
+  return colaboradores
+    .filter((c) => c?.papel === 'agente' && c.ativo !== false && c.equipe_nome === EQUIPE_QUE_PONTUA)
+    .map((c) => c.id);
+}
+
 /** Mínimo de registros por canal quando o gestor não cadastrou outro. */
 export const VOLUME_MINIMO_PADRAO = 4;
 

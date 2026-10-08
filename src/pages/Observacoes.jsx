@@ -1,4 +1,5 @@
 import db from '@/api/db';
+import { idsDaEquipeQuePontua } from '@/lib/elegibilidade';
 import React, { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -218,7 +219,7 @@ export default function Observacoes() {
             tratativas,
             apuracoes,
             bonus,
-            equipe: colaboradores.filter((c) => c.papel === 'agente' && c.ativo !== false).map((c) => c.id),
+            equipe: idsDaEquipeQuePontua(colaboradores),
           })}
           salvando={leituraMutation.isPending}
           onSalvar={(dados, aoTerminar) => leituraMutation.mutate({ dados, aoTerminar })}

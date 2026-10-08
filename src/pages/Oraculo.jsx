@@ -1,4 +1,5 @@
 import db from '@/api/db';
+import { idsDaEquipeQuePontua } from '@/lib/elegibilidade';
 import React, { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Eye } from 'lucide-react';
@@ -84,7 +85,7 @@ export default function OraculoPage() {
   const cicloAtivo = useMemo(() => ciclos.find((c) => c.ativo) ?? null, [ciclos]);
 
   // Os agentes ativos liberam (ou não) cada canal da pontuação: a mesma equipe do ranking.
-  const equipe = useMemo(() => colaboradores.filter((c) => c.papel === 'agente' && c.ativo !== false).map((c) => c.id), [colaboradores]);
+  const equipe = useMemo(() => idsDaEquipeQuePontua(colaboradores), [colaboradores]);
 
   const agentes = useMemo(() => colaboradores
     .filter((c) => c.papel === 'agente')

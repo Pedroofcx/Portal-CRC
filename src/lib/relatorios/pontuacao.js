@@ -4,6 +4,7 @@
  * (src/lib/pontuacaoCiclo.js + indicadoresCiclo.js): aqui só organizamos.
  * Funções puras, testadas em `npm run testar`.
  */
+import { idsDaEquipeQuePontua } from '../elegibilidade.js';
 import { pontosDeTratativasNoCiclo, tratativaNosCiclo, reaberturaDe } from '../pontuacaoCiclo.js';
 import { indicadoresDoCiclo } from '../indicadoresCiclo.js';
 import { STATUS_ENCERRADOS, somaDoBonus } from '../bonusManual.js';
@@ -20,7 +21,7 @@ export function pontuacaoDoCiclo({ tratativas = [], apuracoes = [], bonus = [], 
   const porAgente = pontosDeTratativasNoCiclo(tratativas, ciclo, {
     encerrada: (t) => STATUS_ENCERRADOS.includes(t.status),
     noCiclo: tratativaNosCiclo,
-    equipe: colaboradores.filter((c) => c.papel === 'agente' && c.ativo !== false).map((c) => c.id),
+    equipe: idsDaEquipeQuePontua(colaboradores),
   }, agora);
   const porId = new Map(tratativas.map((t) => [t.id, t]));
 

@@ -21,8 +21,9 @@
  * o último colaborador registra. Se o trimestre acabar assim, a tratativa
  * daquele canal é desconsiderada da pontuação total. Indicadores (CSAT,
  * performance, CX) e bônus não são afetados. Ciclos 1 e 2 já foram apurados e
- * não mudam. "Colaboradores que atuam" = agentes ativos com ao menos um
- * registro de qualquer canal no ciclo.
+ * não mudam. "Todos os colaboradores" = os agentes ativos da Equipe CRC
+ * (idsDaEquipeQuePontua); quem é de outra equipe, ou não é agente, fica de fora.
+ * Sem a lista da equipe, vale quem tem registro de qualquer canal no ciclo.
  *
  * ABERTURA: cada tratativa aberta no Portal vale 0,5 ponto para o agente
  * responsável, no ciclo em que foi REGISTRADA. Vale do Ciclo 2 em diante
@@ -44,12 +45,12 @@ export const cicloExigeRegistroDaEquipe = (ciclo) => !!ciclo?.data_inicio && cic
 
 /**
  * Quais canais a equipe liberou. Cada item de `pessoas` é { id, volume }, com
- * o volume de registros por canal. Só entra na conta quem atua em reclamações
- * (tem algum registro no ciclo).
+ * o volume de registros por canal. Com `soQuemAtua` (padrão), só entra na conta
+ * quem tem algum registro no ciclo; com a equipe definida, entram todos.
  * @returns { liberados: [canal], faltam: { [canal]: [id] }, participantes }
  */
-export function canaisLiberadosDaEquipe(pessoas = [], registrosPorCanal = REGISTROS_POR_CANAL_PARA_PONTUAR) {
-  const participantes = pessoas.filter((p) => CANAIS.some((c) => (p.volume?.[c] ?? 0) > 0));
+export function canaisLiberadosDaEquipe(pessoas = [], registrosPorCanal = REGISTROS_POR_CANAL_PARA_PONTUAR, { soQuemAtua = true } = {}) {
+  const participantes = soQuemAtua ? pessoas.filter((p) => CANAIS.some((c) => (p.volume?.[c] ?? 0) > 0)) : pessoas;
   const faltam = Object.fromEntries(CANAIS.map((c) => [c, participantes.filter((p) => (p.volume?.[c] ?? 0) < registrosPorCanal).map((p) => p.id)]));
   const liberados = participantes.length ? CANAIS.filter((c) => faltam[c].length === 0) : [];
   return { liberados, faltam, participantes: participantes.length };
@@ -208,8 +209,11 @@ export function pontosDeTratativasNoCiclo(todas = [], ciclo, { encerrada, noCicl
 
   const aplica = cicloExigeRegistroDaEquipe(ciclo);
   const volumes = [...porAgente.keys()].map((id) => ({ id, volume: volumePorCanal(registrosDe.get(id) ?? []) }));
-  const ids = equipe ? new Set(equipe) : null;
-  const liberacao = canaisLiberadosDaEquipe(ids ? volumes.filter((v) => ids.has(v.id)) : volumes, registrosPorCanal);
+  // Com a equipe definida, TODOS dela entram na conta (mesmo sem nenhum registro);
+  // sem ela, só quem tem registro no ciclo.
+  const liberacao = equipe
+    ? canaisLiberadosDaEquipe([...new Set(equipe)].map((id) => ({ id, volume: volumePorCanal(registrosDe.get(id) ?? []) })), registrosPorCanal, { soQuemAtua: false })
+    : canaisLiberadosDaEquipe(volumes, registrosPorCanal);
   const bloqueados = CANAIS.filter((c) => !liberacao.liberados.includes(c));
   for (const [id, reg] of porAgente) {
     const volume = volumes.find((v) => v.id === id)?.volume ?? volumePorCanal([]);

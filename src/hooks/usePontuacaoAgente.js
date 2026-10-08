@@ -1,4 +1,5 @@
 import db from '@/api/db';
+import { idsDaEquipeQuePontua } from '@/lib/elegibilidade';
 import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 
@@ -47,7 +48,7 @@ export function usePontuacaoAgente(colaboradorId) {
     enabled: !!colaboradorId,
     staleTime: 120000,
   });
-  const equipe = useMemo(() => colaboradores.filter((c) => c.papel === 'agente' && c.ativo !== false).map((c) => c.id), [colaboradores]);
+  const equipe = useMemo(() => idsDaEquipeQuePontua(colaboradores), [colaboradores]);
 
   const minhas = useMemo(() => {
     if (!cicloAtivo || !colaboradorId) return null;

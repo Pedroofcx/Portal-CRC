@@ -1136,11 +1136,12 @@ Indicadores (CSAT, performance, CX) e bônus não são afetados. O mínimo de 4
 registros por canal de Configurações > Elegibilidade continua valendo só para o
 ✓ da elegibilidade.
 
-**Quem é "todos os colaboradores":** agentes ativos que atuam em reclamações no
-ciclo, isto é, com pelo menos um registro de qualquer canal. Quem é agente ativo
-mas ainda não registrou nada (por exemplo o "Agente de Teste" e quem trabalha só
-com projetos) não trava os canais dos demais. Quem não é agente (gestor) ou está
-inativo também fica de fora.
+**Quem é "todos os colaboradores" (decisão do Pedro):** só os membros da
+Equipe CRC — hoje Sirlene, Ana, Bárbara e Dayane (agentes ativos com a equipe
+"Equipe CRC" no cadastro). Quem é de outra equipe (o Julliano é da Equipe CX), o
+agente de teste e a gestão ficam de fora e não travam nenhum canal. Quem está
+na Equipe CRC conta mesmo sem nenhum registro: se ainda não registrou, o canal
+fica aguardando. O critério é 1 registro por colaborador.
 
 **Telas:** na tela inicial da gestão, "Ranking e elegibilidade do ciclo" traz a
 regra, o estado de cada canal ("liberado" ou "aguardando fulano") e a coluna

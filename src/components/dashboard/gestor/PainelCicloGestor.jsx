@@ -7,7 +7,8 @@ import DialogoBonus from '@/components/ciclo/DialogoBonus';
 import { ciclosEmOrdem } from '@/lib/bonusManual';
 import { createPageUrl } from '@/utils';
 import IconeExigencia from '@/components/ciclo/IconeExigencia';
-import { cicloExigeRegistroDaEquipe, canaisLiberadosDaEquipe } from '@/lib/pontuacaoCiclo';
+import { cicloExigeRegistroDaEquipe } from '@/lib/pontuacaoCiclo';
+import { CANAIS } from '@/lib/elegibilidade';
 import { primeiroNome } from '@/lib/nomes';
 
 /**
@@ -121,7 +122,11 @@ export default function PainelCicloGestor({
   const historico = ciclo.id !== cicloAtivo?.id;
   const cicloIdDaUrl = historico ? ciclo.id : null;
   const regraDoVolume = cicloExigeRegistroDaEquipe(ciclo);
-  const liberacao = canaisLiberadosDaEquipe(agentes.map((a) => ({ id: a.id, volume: a.volume })));
+  // O estado dos canais é da equipe toda: vem do ranking (igual para qualquer pessoa).
+  const referencia = agentes.find((a) => a.faltamPorCanal && Object.keys(a.faltamPorCanal).length) ?? null;
+  const liberacao = referencia
+    ? { liberados: CANAIS.filter((c) => !referencia.canaisBloqueados.includes(c)), faltam: referencia.faltamPorCanal, participantes: 1 }
+    : { liberados: [], faltam: {}, participantes: 0 };
   const nomeDe = (id) => primeiroNome(agentes.find((a) => a.id === id)?.nome ?? '');
 
   return (

@@ -8,7 +8,7 @@ import { saudacao } from '../src/lib/saudacao.js';
 import { primeiroNome } from '../src/lib/nomes.js';
 import { resumoDoDia } from '../src/lib/resumoDoDia.js';
 import { pontosDaFaixa, proximaFaixa } from '../src/lib/faixasIndicadores.js';
-import { avaliarExigencia, volumePorCanal } from '../src/lib/elegibilidade.js';
+import { avaliarExigencia, volumePorCanal, idsDaEquipeQuePontua } from '../src/lib/elegibilidade.js';
 import { pontosPorSemana, fimDoRitmo } from '../src/lib/ritmoSemanal.js';
 import { posicaoNoRanking } from '../src/lib/posicaoRanking.js';
 import { prazoDaTratativa, descreverPrazo, consumoDoPrazo, tempoEmPausa } from '../src/lib/prazoSla.js';
@@ -626,9 +626,22 @@ console.log('\n== canal liberado pela equipe: todos com 1 registro (Ciclo 3 em d
   checa('R.I. com todos da equipe esta liberado', depois.get('ana').canaisBloqueados.includes('reclamacao_interna') ? 'bloqueado' : 'liberado', 'liberado');
   checa('os pontos de R.I. (abertura 0,5) contam mesmo com outros canais bloqueados', String(r.get('ana').aberturas.filter((a) => a.tipo_tratativa === 'reclamacao_interna').length), '1');
 
-  // quem nao atua em reclamacoes (sem registro nenhum) nao trava os canais dos outros
-  const comJulliano = pontosDeTratativasNoCiclo([...todosCom(['reclame_aqui'])], c3, opcoes([...EQUIPE, 'julliano']), agora);
-  checa('colaborador sem nenhum registro no ciclo nao trava o canal', comJulliano.get('ana').canaisBloqueados.includes('reclame_aqui') ? 'bloqueado' : 'liberado', 'liberado');
+  // com a equipe definida, TODOS dela contam: quem esta na Equipe CRC e nao registrou nada trava o canal
+  const comAusente = pontosDeTratativasNoCiclo([...todosCom(['reclame_aqui'])], c3, opcoes([...EQUIPE, 'sem-registro']), agora);
+  checa('membro da equipe sem nenhum registro trava o canal', comAusente.get('ana').canaisBloqueados.includes('reclame_aqui') ? 'bloqueado' : 'liberado', 'bloqueado');
+  checa('e e ele que aparece como faltando', comAusente.get('ana').faltamPorCanal.reclame_aqui.join(','), 'sem-registro');
+  // sem a lista da equipe (uso puro), so quem tem algum registro entra na conta
+  const semLista = pontosDeTratativasNoCiclo([...todosCom(['reclame_aqui'])], c3, opcoes(null), agora);
+  checa('sem a lista da equipe, quem nao registrou nada nao trava', semLista.get('ana').canaisBloqueados.includes('reclame_aqui') ? 'bloqueado' : 'liberado', 'liberado');
+
+  // a equipe que pontua: so agentes ativos da Equipe CRC
+  const cols = [
+    { id: 'a', papel: 'agente', ativo: true, equipe_nome: 'Equipe CRC' }, { id: 'b', papel: 'agente', ativo: true, equipe_nome: 'Equipe CRC' },
+    { id: 'jul', papel: 'agente', ativo: true, equipe_nome: 'Equipe CX' }, { id: 'teste', papel: 'agente', ativo: true, equipe_nome: null },
+    { id: 'g', papel: 'gestor', ativo: true, equipe_nome: 'Equipe CRC' }, { id: 'in', papel: 'agente', ativo: false, equipe_nome: 'Equipe CRC' },
+  ];
+  checa('so agentes ativos da Equipe CRC pontuam em equipe', idsDaEquipeQuePontua(cols).join(','), 'a,b');
+  checa('Julliano (Equipe CX) e o agente de teste ficam de fora', String(idsDaEquipeQuePontua(cols).some((id) => ['jul', 'teste'].includes(id))), 'false');
 
   // quem nao e da equipe (gestor, inativo) nao conta como participante
   const comGestor = pontosDeTratativasNoCiclo([...todosCom(['reclame_aqui']), um('gestor', 'contestacao')], c3, opcoes(EQUIPE), agora);
