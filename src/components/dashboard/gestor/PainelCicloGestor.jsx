@@ -7,8 +7,7 @@ import DialogoBonus from '@/components/ciclo/DialogoBonus';
 import { ciclosEmOrdem } from '@/lib/bonusManual';
 import { createPageUrl } from '@/utils';
 import IconeExigencia from '@/components/ciclo/IconeExigencia';
-import { cicloExigeVolumeMinimo } from '@/lib/pontuacaoCiclo';
-import { volumeMinimoDasExigencias } from '@/lib/elegibilidade';
+import { cicloExigeRegistroEmTodosOsCanais } from '@/lib/pontuacaoCiclo';
 
 /**
  * Tela inicial do gestor — proposta C, "O ciclo".
@@ -30,22 +29,21 @@ const CANAIS_DA_TABELA = [
   { chave: 'reclamacao_interna', sigla: 'R.I.', nome: 'Reclamação interna' },
 ];
 
-/** Registros de cada canal no ciclo, contra o mínimo: abaixo dele, os pontos do canal não contam. */
-export function ContadorPorCanal({ volume = {}, minimo, retidos = {}, regraValendo }) {
+/** Registros de cada canal no ciclo: canal sem nenhum registro trava os pontos de tratativas. */
+export function ContadorPorCanal({ volume = {}, retidos = {}, regraValendo }) {
   return (
     <span className="mx-auto grid w-[9.5rem] grid-cols-2 gap-1">
       {CANAIS_DA_TABELA.map((c) => {
         const n = volume[c.chave] ?? 0;
-        const conta = n >= minimo;
-        const retido = retidos[c.chave]?.pontos > 0;
-        const classe = conta ? 'bg-success-soft text-success' : n === 0 ? 'bg-muted text-muted-foreground' : 'bg-warning-soft text-warning';
-        const titulo = conta
-          ? `${c.nome}: ${n} registros, conta para a pontuação`
-          : `${c.nome}: ${n} de ${minimo} registros${regraValendo ? retido ? ` — ${Number(retidos[c.chave].pontos).toLocaleString('pt-BR')} pts retidos, não contam` : ' — só conta a partir do mínimo' : ''}`;
+        const tem = n > 0;
+        const classe = tem ? 'bg-success-soft text-success' : regraValendo ? 'bg-warning-soft text-warning' : 'bg-muted text-muted-foreground';
+        const titulo = tem
+          ? `${c.nome}: ${n} registro${n === 1 ? '' : 's'} no ciclo`
+          : `${c.nome}: nenhum registro no ciclo${regraValendo ? ' — enquanto faltar um canal, os pontos de tratativas ficam retidos' : ''}`;
         return (
           <span key={c.chave} title={titulo} className={`flex items-baseline justify-between gap-1 rounded px-1.5 py-0.5 text-[11px] tabular-nums ${classe}`}>
             <span>{c.sigla}</span>
-            <span className="font-semibold">{n}/{minimo}</span>
+            <span className="font-semibold">{n}</span>
           </span>
         );
       })}
@@ -117,8 +115,7 @@ export default function PainelCicloGestor({
   // faz sentido para o ativo que já passou do fim.
   const historico = ciclo.id !== cicloAtivo?.id;
   const cicloIdDaUrl = historico ? ciclo.id : null;
-  const regraDoVolume = cicloExigeVolumeMinimo(ciclo);
-  const minimoPorCanal = volumeMinimoDasExigencias(exigencias);
+  const regraDoVolume = cicloExigeRegistroEmTodosOsCanais(ciclo);
 
   return (
     <section className="space-y-4" aria-labelledby="titulo-ciclo-gestor">
@@ -157,8 +154,8 @@ export default function PainelCicloGestor({
             <p className="hidden text-xs text-muted-foreground sm:block">Clique numa pessoa para ver em detalhe</p>
             <p className="mt-1 max-w-3xl text-xs text-muted-foreground">
               {regraDoVolume
-                ? `Regra do volume: cada canal (R.A., Google Meu Negócio, Contestação de compra e Reclamação interna) só soma pontos se a pessoa teve pelo menos ${minimoPorCanal} registros nele no ciclo. Abaixo disso, os pontos do canal ficam retidos, fora do total e do ranking, e voltam a contar quando o canal chega ao mínimo.`
-                : `Este ciclo já foi apurado sem a regra do volume mínimo por canal (ela vale do Ciclo 3 em diante). Os contadores mostram quantos registros cada um teve (mínimo de ${minimoPorCanal}).`}
+                ? 'Regra para pontuar: a pessoa precisa ter pelo menos 1 tratativa em cada um dos 4 canais (Reclame Aqui, Google Meu Negócio, Contestação de compra e Reclamação interna) no ciclo. Enquanto faltar um canal, os pontos de tratativas ficam retidos, fora do total e do ranking, e passam a contar quando todos os 4 tiverem registro.'
+                : 'Este ciclo já foi apurado sem a regra de uma tratativa em cada canal (ela vale do Ciclo 3 em diante). Os contadores mostram os registros de cada canal.'}
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
@@ -193,7 +190,7 @@ export default function PainelCicloGestor({
                 <th className="pb-2 px-2 text-right font-medium">Pontos</th>
                 <th className="hidden pb-2 px-2 text-center font-medium md:table-cell">
                   Registros por canal
-                  <span className="block text-[11px] font-normal">mínimo {minimoPorCanal} para pontuar</span>
+                  <span className="block text-[11px] font-normal">1 em cada para pontuar</span>
                 </th>
                 <th className="hidden whitespace-nowrap pb-2 px-2 font-medium lg:table-cell">Ritmo 6 sem.</th>
                 {exigencias.map((e) => (
@@ -225,13 +222,13 @@ export default function PainelCicloGestor({
                   <td className="px-2 text-right font-semibold tabular-nums text-foreground">
                     {fmt(a.totalPontos)}
                     {regraDoVolume && a.pontosRetidos > 0 && (
-                      <span className="block text-[11px] font-normal text-warning" title="Pontos de canais abaixo do mínimo de registros: não entram no total">
+                      <span className="block text-[11px] font-normal text-warning" title="Pontos de tratativas retidos: falta registro em algum canal, então ainda não entram no total">
                         +{fmt(a.pontosRetidos)} retidos
                       </span>
                     )}
                   </td>
                   <td className="hidden px-2 md:table-cell">
-                    <ContadorPorCanal volume={a.volume} minimo={minimoPorCanal} retidos={a.retidos} regraValendo={regraDoVolume} />
+                    <ContadorPorCanal volume={a.volume} retidos={a.retidos} regraValendo={regraDoVolume} />
                   </td>
                   <td className="hidden px-2 lg:table-cell"><Ritmo semanas={a.semanas} /></td>
                   {a.avaliacoes.map((av) => (

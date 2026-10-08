@@ -184,6 +184,8 @@ export default function Dashboard() {
     cicloAtivo,
     bonusManual,
     retidos: retidosDoAgente,
+    pontosRetidos: pontosRetidosDoAgente,
+    canaisSemRegistro: canaisSemRegistroDoAgente,
   } = usePontuacaoAgente(colaborador?.id);
   // A equipe no ciclo — só a visão do gestor usa, mas hooks não podem ser
   // condicionais; para o operador as consultas são as mesmas do ranking.
@@ -277,6 +279,8 @@ export default function Dashboard() {
             detalhamentoPontos={detalhamentoPontos}
             bonusManual={bonusManual}
             retidos={retidosDoAgente}
+            pontosRetidos={pontosRetidosDoAgente}
+            canaisSemRegistro={canaisSemRegistroDoAgente}
             minhasTratativas={minhasTratativas}
             exigencias={elegibilidades}
             rankingVisivel={rankingVisivel}

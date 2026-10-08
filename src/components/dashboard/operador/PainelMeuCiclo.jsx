@@ -5,7 +5,7 @@ import { tipoTratativaLabels } from '@/components/utils/helpers';
 import { useRankingCiclo, posicaoNoRanking } from '@/hooks/useRankingCiclo';
 import { pontosDaFaixa, proximaFaixa } from '@/lib/faixasIndicadores';
 import { avaliarExigencia } from '@/lib/elegibilidade';
-import { cicloExigeVolumeMinimo } from '@/lib/pontuacaoCiclo';
+import { cicloExigeRegistroEmTodosOsCanais } from '@/lib/pontuacaoCiclo';
 import { indicadoresDoCiclo, detalheCsat } from '@/lib/indicadoresCiclo';
 import { pontosPorSemana, fimDoRitmo } from '@/lib/ritmoSemanal';
 import IconeExigencia from '@/components/ciclo/IconeExigencia';
@@ -64,6 +64,8 @@ export default function PainelMeuCiclo({
   detalhamentoPontos = [],
   bonusManual = 0,
   retidos = {},
+  pontosRetidos = 0,
+  canaisSemRegistro = [],
   minhasTratativas = [],
   exigencias = [],
   rankingVisivel = true,
@@ -196,12 +198,19 @@ export default function PainelMeuCiclo({
 
       {/* 2. De onde vieram */}
       <div className="space-y-4">
+        {cicloExigeRegistroEmTodosOsCanais(cicloAtivo) && canaisSemRegistro.length > 0 && (
+          <p className="rounded-lg bg-warning-soft px-3 py-2 text-xs text-foreground">
+            Para os pontos de tratativas valerem, você precisa de pelo menos 1 tratativa em cada canal no ciclo.
+            {' '}Falta: <span className="font-semibold">{canaisSemRegistro.map((c) => tipoTratativaLabels[c]).join(', ')}</span>.
+            {pontosRetidos > 0 && <> Enquanto isso, <span className="font-semibold">{fmt(pontosRetidos)} pts</span> ficam retidos e entram quando o último canal tiver registro.</>}
+          </p>
+        )}
         <Grupo titulo="De onde vieram — tratativas">
           {CANAIS.map((c) => (
             <Linha
               key={c}
               rotulo={tipoTratativaLabels[c]}
-              detalhe={retidos[c]?.pontos > 0 ? `${fmt(retidos[c].pontos)} pts retidos: só ${retidos[c].registros} de ${volumeMinimo} registros` : null}
+              detalhe={retidos[c]?.pontos > 0 ? `${fmt(retidos[c].pontos)} pts retidos` : null}
               valor={fmt(porCanal[c])}
             />
           ))}
@@ -240,11 +249,6 @@ export default function PainelMeuCiclo({
         <p className="mt-4 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
           Registros por canal · mínimo {volumeMinimo}
         </p>
-        {cicloExigeVolumeMinimo(cicloAtivo) && (
-          <p className="mt-1 text-xs text-muted-foreground">
-            Cada canal só soma pontos com {volumeMinimo} registros ou mais no ciclo. Abaixo disso os pontos do canal ficam retidos e voltam a contar quando ele chega lá.
-          </p>
-        )}
         <div className="mt-1.5 grid grid-cols-2 gap-1.5">
           {CANAIS.map((c) => {
             const n = volume[c];

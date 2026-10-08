@@ -195,6 +195,12 @@ export default function CicloColaborador() {
       <div className="grid items-start gap-6 lg:grid-cols-2">
         {/* De onde vieram os pontos */}
         <Cartao titulo="De onde vieram os pontos">
+          {pessoa.canaisSemRegistro?.length > 0 && pessoa.pontosRetidos > 0 && (
+            <p className="mb-3 rounded-lg bg-warning-soft px-3 py-2 text-xs text-foreground">
+              Pontos de tratativas retidos ({fmt(pessoa.pontosRetidos)}): falta pelo menos 1 tratativa em{' '}
+              <span className="font-semibold">{pessoa.canaisSemRegistro.map((c) => tipoTratativaLabels[c]).join(', ')}</span> neste ciclo. Entram quando todos os canais tiverem registro.
+            </p>
+          )}
           <div className="divide-y divide-border">
             {CANAIS.map((c) => (
               <Linha
@@ -202,7 +208,7 @@ export default function CicloColaborador() {
                 rotulo={tipoTratativaLabels[c]}
                 detalhe={[
                   `${porCanal[c].n} encerrada${porCanal[c].n === 1 ? '' : 's'} no ciclo`,
-                  pessoa.retidos?.[c]?.pontos > 0 ? `${fmt(pessoa.retidos[c].pontos)} pts retidos: só ${pessoa.retidos[c].registros} de ${volumeMinimo} registros` : null,
+                  pessoa.retidos?.[c]?.pontos > 0 ? `${fmt(pessoa.retidos[c].pontos)} pts retidos` : null,
                 ].filter(Boolean).join(' · ')}
                 valor={fmt(porCanal[c].pontos)}
               />

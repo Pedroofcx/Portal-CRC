@@ -4,9 +4,9 @@ import { useQuery } from '@tanstack/react-query';
 
 import { calculateTratativaPoints } from '@/components/utils/helpers';
 import { tratativaNosCiclo } from '@/hooks/usePontuacaoAgente';
-import { comReaberturaApurada, aberturasNoCiclo, cicloExigeVolumeMinimo, PONTOS_POR_ABERTURA } from '@/lib/pontuacaoCiclo';
+import { comReaberturaApurada, aberturasNoCiclo, cicloExigeRegistroEmTodosOsCanais, PONTOS_POR_ABERTURA } from '@/lib/pontuacaoCiclo';
 import { registrosNoCiclo } from '@/lib/cicloEquipe';
-import { canalDe, volumeMinimoDasExigencias } from '@/lib/elegibilidade';
+import { CANAIS } from '@/lib/elegibilidade';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import PageHeader from '@/components/ui/PageHeader';
@@ -57,18 +57,10 @@ export default function AuditoriaPontuacao() {
     staleTime: 60000,
   });
 
-  // O mínimo de registros por canal (Configurações > Elegibilidade).
-  const { data: exigencias = [] } = useQuery({
-    queryKey: ['elegibilidades'],
-    queryFn: () => db.entities.ElegibilidadePremio.filter({ ativa: true }),
-    staleTime: 300000,
-  });
-  const volumeMinimo = volumeMinimoDasExigencias(exigencias);
-
   // Para cada agente, monta o detalhamento completo dentro do ciclo
   const auditoria = useMemo(() => {
     if (!cicloAtivo) return [];
-    const aplicaMinimo = cicloExigeVolumeMinimo(cicloAtivo);
+    const aplicaRegra = cicloExigeRegistroEmTodosOsCanais(cicloAtivo);
     const agentes = colaboradores.filter(c => c.papel === 'agente' && c.ativo !== false);
 
     return agentes.map(agente => {
@@ -87,10 +79,12 @@ export default function AuditoriaPontuacao() {
         !tratativaNosCiclo(t, cicloAtivo)
       );
 
-      // Volume mínimo por canal (do Ciclo 3 em diante): canal abaixo do mínimo
-      // não soma, os pontos dele ficam retidos — a mesma regra do ranking.
+      // Uma tratativa em cada canal (do Ciclo 3 em diante): enquanto faltar
+      // registro em algum canal, os pontos de tratativas ficam retidos — a mesma
+      // regra do ranking.
       const volume = registrosNoCiclo(todasTratativas.filter(t => t.agente_responsavel_id === agente.id), cicloAtivo);
-      const abaixoDoMinimo = (tipo) => aplicaMinimo && volume[canalDe(tipo)] !== undefined && volume[canalDe(tipo)] < volumeMinimo;
+      const canaisSemRegistro = CANAIS.filter(c => (volume[c] ?? 0) < 1);
+      const abaixoDoMinimo = () => aplicaRegra && canaisSemRegistro.length > 0;
 
       let totalPontos = 0;
       let pontosRetidos = 0;
@@ -116,13 +110,14 @@ export default function AuditoriaPontuacao() {
         linhas,
         aberturas,
         pontosRetidos,
+        canaisSemRegistro,
         volume,
         totalTratativas: tratativasDoCiclo.length,
         foraDosCiclo: tratativasForaDoCiclo.length,
         semPontos: linhas.filter(l => l.pontos === 0).length,
       };
     }).sort((a, b) => b.totalPontos - a.totalPontos);
-  }, [colaboradores, todasTratativas, cicloAtivo, tiposFiltro, volumeMinimo]);
+  }, [colaboradores, todasTratativas, cicloAtivo, tiposFiltro]);
 
   const auditoriafiltrada = useMemo(() => {
     if (!busca) return auditoria;
@@ -272,7 +267,7 @@ export default function AuditoriaPontuacao() {
                       {item.totalTratativas} tratativas no ciclo
                       {item.aberturas > 0 && ` · ${item.aberturas} abertas (+${String(item.aberturas * PONTOS_POR_ABERTURA).replace('.', ',')} pts)`}
                       {item.pontosRetidos > 0 && (
-                        <span className="text-warning ml-2">· {String(item.pontosRetidos).replace('.', ',')} pts retidos (canal abaixo de {volumeMinimo} registros)</span>
+                        <span className="text-warning ml-2">· {String(item.pontosRetidos).replace('.', ',')} pts retidos (falta tratativa em algum canal)</span>
                       )}
                       {item.foraDosCiclo > 0 && (
                         <span className="text-destructive ml-2">· {item.foraDosCiclo} fora do ciclo (não contabilizadas)</span>

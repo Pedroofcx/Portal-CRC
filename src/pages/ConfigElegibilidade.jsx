@@ -198,7 +198,7 @@ export default function ConfigElegibilidade() {
             <div className="mb-4 p-3 bg-muted border border-border rounded-lg flex items-start gap-2 text-xs text-muted-foreground">
               <Info className="w-4 h-4 text-muted-foreground flex-shrink-0 mt-0.5" />
               <span>
-                <strong>Regra de volume mínimo:</strong> do Ciclo 3 em diante, os pontos de um canal (Reclame Aqui, Google Meu Negócio, Contestação de compra e Reclamação interna) só contam se a pessoa teve pelo menos 4 registros nele no trimestre. Abaixo disso os pontos ficam retidos e voltam a contar quando o canal chega ao mínimo.
+                <strong>Regra de volume mínimo:</strong> canais com menos de 4 registros no trimestre são desconsiderados na validação da elegibilidade, evitando distorções por baixo volume. (Os pontos de tratativas têm outra regra: do Ciclo 3 em diante só valem com pelo menos 1 tratativa em cada um dos 4 canais.)
               </span>
             </div>
 

@@ -4,7 +4,6 @@ import { useQuery } from '@tanstack/react-query';
 
 import { STATUS_ENCERRADOS, somaDoBonus } from '@/lib/bonusManual';
 import { pontosDeTratativasNoCiclo, PONTOS_POR_ABERTURA } from '@/lib/pontuacaoCiclo';
-import { volumeMinimoDasExigencias } from '@/lib/elegibilidade';
 import { indicadoresDoCiclo } from '@/lib/indicadoresCiclo';
 import { extratoDoAgente } from '@/lib/extratoPontos';
 
@@ -41,24 +40,13 @@ export function usePontuacaoAgente(colaboradorId) {
     refetchOnWindowFocus: false,
   });
 
-  // O mínimo de registros por canal (mesma chave da tela do gestor).
-  const { data: exigencias = [] } = useQuery({
-    queryKey: ['elegibilidades'],
-    queryFn: () => db.entities.ElegibilidadePremio.filter({ ativa: true }),
-    enabled: !!colaboradorId,
-    staleTime: 300000,
-    refetchOnWindowFocus: false,
-  });
-  const volumeMinimo = volumeMinimoDasExigencias(exigencias);
-
   const minhas = useMemo(() => {
     if (!cicloAtivo || !colaboradorId) return null;
     return pontosDeTratativasNoCiclo(todas, cicloAtivo, {
       encerrada: (t) => STATUS_ENCERRADOS.includes(t.status),
       noCiclo: tratativaNosCiclo,
-      volumeMinimo,
-    }).get(colaboradorId) ?? { itens: [], aberturas: [], pontosEncerramento: 0, pontosAbertura: 0, retidos: {}, pontosRetidos: 0 };
-  }, [todas, cicloAtivo, colaboradorId, volumeMinimo]);
+    }).get(colaboradorId) ?? { itens: [], aberturas: [], pontosEncerramento: 0, pontosAbertura: 0, retidos: {}, pontosRetidos: 0, faltando: [] };
+  }, [todas, cicloAtivo, colaboradorId]);
 
   const tratativasEncerradas = useMemo(() => {
     const ids = new Set((minhas?.itens ?? []).map((i) => i.tratativa_id));
@@ -136,7 +124,7 @@ export function usePontuacaoAgente(colaboradorId) {
     bonusManual,
     retidos: minhas?.retidos ?? {},
     pontosRetidos: minhas?.pontosRetidos ?? 0,
-    volumeMinimo,
+    canaisSemRegistro: minhas?.faltando ?? [],
     indicadores,
     extrato,
     detalhamentoPontos,

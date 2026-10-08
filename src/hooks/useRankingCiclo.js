@@ -4,7 +4,6 @@ import { useQuery } from '@tanstack/react-query';
 import { tratativaNosCiclo } from '@/hooks/usePontuacaoAgente';
 import { STATUS_ENCERRADOS, somaDoBonus } from '@/lib/bonusManual';
 import { pontosDeTratativasNoCiclo } from '@/lib/pontuacaoCiclo';
-import { volumeMinimoDasExigencias } from '@/lib/elegibilidade';
 import { indicadoresDoCiclo } from '@/lib/indicadoresCiclo';
 
 /**
@@ -60,16 +59,6 @@ export function useRankingCiclo(cicloId = null) {
     refetchOnWindowFocus: false,
   });
 
-  // O mínimo de registros por canal (Configurações > Elegibilidade). Mesma chave
-  // da tela do gestor: uma busca só.
-  const { data: exigencias = [] } = useQuery({
-    queryKey: ['elegibilidades'],
-    queryFn: () => db.entities.ElegibilidadePremio.filter({ ativa: true }),
-    staleTime: 300000,
-    refetchOnWindowFocus: false,
-  });
-  const volumeMinimo = volumeMinimoDasExigencias(exigencias);
-
   // Apurações de toda a equipe (todas, sem limite): os indicadores entram no total.
   const { data: apuracoes = [] } = useQuery({
     queryKey: ['apuracoes-equipe'],
@@ -83,7 +72,6 @@ export function useRankingCiclo(cicloId = null) {
     const porAgente = pontosDeTratativasNoCiclo(todasTratativas, ciclo, {
       encerrada: (t) => STATUS_ENCERRADOS.includes(t.status),
       noCiclo: tratativaNosCiclo,
-      volumeMinimo,
     });
     const bonusDoCiclo = bonus.filter((b) => b.ciclo_id === ciclo.id);
     const pontuouNoCiclo = new Set([...porAgente.keys(), ...bonusDoCiclo.map((b) => b.colaborador_id)]);
@@ -95,7 +83,7 @@ export function useRankingCiclo(cicloId = null) {
     return agentes.map((agente) => {
       // Uma linha por tratativa encerrada: a página detalhada do gestor monta
       // dela o ritmo por semana, os pontos por canal e o % no SLA.
-      const { itens = [], aberturas = [], pontosEncerramento = 0, pontosAbertura = 0, retidos = {}, pontosRetidos = 0 } = porAgente.get(agente.id) ?? {};
+      const { itens = [], aberturas = [], pontosEncerramento = 0, pontosAbertura = 0, retidos = {}, pontosRetidos = 0, faltando = [], volume = {} } = porAgente.get(agente.id) ?? {};
       const pontosCalculados = pontosEncerramento + pontosAbertura;
       const indicadores = indicadoresDoCiclo(apuracoes.filter((a) => a.colaborador_id === agente.id), ciclo);
       const lancamentos = bonusDoCiclo.filter((b) => b.colaborador_id === agente.id);
@@ -115,14 +103,15 @@ export function useRankingCiclo(cicloId = null) {
         aberturas,
         retidos,
         pontosRetidos,
-        volumeMinimo,
+        canaisSemRegistro: faltando,
+        registrosPorCanal: volume,
         bonus: somaBonus,
         lancamentosBonus: lancamentos,
         itens,
         tratativasEncerradas: itens.length + Object.values(retidos).reduce((n, r) => n + r.itens.length, 0),
       };
     }).sort((a, b) => b.totalPontos - a.totalPontos);
-  }, [colaboradores, bonus, todasTratativas, apuracoes, ciclo, cicloAtivo, volumeMinimo]);
+  }, [colaboradores, bonus, todasTratativas, apuracoes, ciclo, cicloAtivo]);
 
   return { ranking, ciclo, cicloAtivo, ciclos, isLoading };
 }
