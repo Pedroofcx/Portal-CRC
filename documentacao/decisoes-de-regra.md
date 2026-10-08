@@ -1073,3 +1073,11 @@ Oráculo não o encontra. Agora resposta sem nome só entra em pesquisa marcada
 como anônima, e há travas no próprio dado: pesquisa do tipo AVD não pode ser
 anônima e resposta de AVD não pode ficar sem colaborador. A tela também força
 a AVD a gravar o nome, mesmo que alguém a marque como anônima.
+
+## 08/10/2026 — Atestado médico na Escala e no rodízio
+
+A Escala de Trabalho ganhou o tipo "Atestado médico" (migration 52). Quem está
+com atestado é pulado no rodízio de tratativas e na montagem da semana, como em
+férias, day off e falta, e mantém a vez para quando voltar (a fila é pela última
+atribuição). Dá para marcar na grade da Escala ou por "Marcar como indisponível"
+no rodízio, que agora pergunta o motivo: atestado médico ou ausência/imprevisto.

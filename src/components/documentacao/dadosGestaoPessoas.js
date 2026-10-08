@@ -155,7 +155,7 @@ export const modulosGestaoPessoas = [
     objetivo: 'Uma tela para a semana da equipe: Escala de Trabalho (presencial ou home office) e Escala de Turno (quem atende e quem analisa tickets em cada metade do dia). Não há visão de mês.',
     fluxo: 'O gestor navega semana a semana. "Montar a semana" distribui 2 pessoas em home office por dia, revezando quem ficou menos vezes em casa; cada célula pode ser trocada. Na escala de turno, "Montar no padrão" põe 2 atendendo de manhã e inverte à tarde; cada célula gira entre atende, analisa e fora; há "inverter" e "copiar anterior".',
     campos_chave: [
-      { campo: 'EscalaAtribuicao.tipo_evento', descricao: 'presencial | home_office | day_off | ferias | falta | treinamento. Quando duas marcações caem no mesmo dia, vale a mais recente.' },
+      { campo: 'EscalaAtribuicao.tipo_evento', descricao: 'presencial | home_office | day_off | ferias | falta | atestado | treinamento. Quando duas marcações caem no mesmo dia, vale a mais recente.' },
       { campo: 'EscalaTurno.turnos[] (manha/tarde + analisa_manha/analisa_tarde)', descricao: 'Quem não está em nenhuma lista não trabalha aquela metade. As chaves manha/tarde são as que o relatório de produtividade lê.' },
       { campo: 'turnos[].cancelado', descricao: 'Dia sem operação (feriado): some da escala e do relatório.' },
     ],

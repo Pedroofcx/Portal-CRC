@@ -19,6 +19,7 @@ const CORES = {
   day_off: 'bg-warning-soft text-warning border-warning/25',
   ferias: 'bg-success-soft text-success border-success/25',
   falta: 'bg-destructive/10 text-destructive border-destructive/25',
+  atestado: 'bg-warning-soft text-warning border-warning/25',
   treinamento: 'bg-muted text-muted-foreground border-border',
 };
 const rotuloDoTipo = (tipo) => TIPOS_TRABALHO.find((t) => t.valor === tipo)?.rotulo ?? 'Sem marcação';

@@ -30,6 +30,7 @@ export const TIPOS_TRABALHO = [
   { valor: 'day_off', rotulo: 'Day off', curto: 'D' },
   { valor: 'ferias', rotulo: 'Férias', curto: 'F' },
   { valor: 'falta', rotulo: 'Falta', curto: '—' },
+  { valor: 'atestado', rotulo: 'Atestado médico', curto: 'A' },
   { valor: 'treinamento', rotulo: 'Treinamento', curto: 'T' },
 ];
 
@@ -97,7 +98,7 @@ export const trabalhoDe = (mapa, colaboradorId, data) => mapa.get(`${colaborador
 
 /**
  * Monta a semana de trabalho: dois home office por dia, revezando quem já
- * ficou em casa mais vezes. Quem está de férias, em day off ou treinamento
+ * ficou em casa mais vezes. Quem está de férias, em day off, com atestado ou treinamento
  * (indisponíveis) não entra no sorteio nem ocupa vaga de presencial.
  *
  * Determinístico: mesma entrada, mesma saída — nada de sorteio aleatório,

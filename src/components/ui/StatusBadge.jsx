@@ -100,6 +100,7 @@ const statusConfig = {
   evento_especial: { label: "Evento",       tom: "cat3" },
   day_off:         { label: "Day Off",      tom: "neutro" },
   falta:           { label: "Falta",        tom: "destrutivo" },
+  atestado:        { label: "Atestado",     tom: "neutro" },
 
   // --- PDI e cursos -------------------------------------------------------
   concluido: { label: "Concluído", tom: "sucesso" },

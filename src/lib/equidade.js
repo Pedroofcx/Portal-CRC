@@ -4,7 +4,7 @@
  * A regra do CRC: cada pessoa precisa atender pelo menos uma tratativa por
  * canal a cada mês para pontuar nele. Então o rodízio olha, por canal, quem
  * recebeu há mais tempo — e PULA quem não pode receber naquele dia (férias
- * aprovadas ou marcada na Escala como day off, falta ou treinamento).
+ * aprovadas ou marcada na Escala como day off, falta, atestado médico ou treinamento).
  *
  * Quem é pulado não perde a vez: a fila é pela última atribuição, então ao
  * voltar a pessoa já é a primeira.
@@ -18,6 +18,7 @@ const INDISPONIVEIS = {
   ferias: 'Férias',
   day_off: 'Day off',
   falta: 'Ausente',
+  atestado: 'Atestado médico',
   treinamento: 'Em treinamento',
 };
 

@@ -7,18 +7,19 @@ import PainelLateral, { RodapeFixo } from '@/components/ui/PainelLateral';
 const selecao = 'mt-1 h-10 w-full rounded-md border border-input bg-background px-3 text-sm';
 
 /**
- * Marca alguém como indisponível para o rodízio (atestado, imprevisto) quando
+ * Marca alguém como indisponível para o rodízio (atestado médico ou imprevisto) quando
  * isso ainda não está na Escala. Grava na própria Escala como "ausente", então
  * a marcação também aparece lá e some quando alguém a apaga.
  */
 export default function DialogIndisponibilidade({ open, onClose, agentes, hoje, onSalvar, isPending }) {
   const [agenteId, setAgenteId] = useState('');
+  const [motivo, setMotivo] = useState('atestado');
   const [inicio, setInicio] = useState(hoje);
   const [fim, setFim] = useState(hoje);
 
   const valido = agenteId && inicio && fim && fim >= inicio;
   const salvar = () => {
-    onSalvar({ agente: agentes.find((a) => a.id === agenteId), inicio, fim });
+    onSalvar({ agente: agentes.find((a) => a.id === agenteId), inicio, fim, tipo: motivo });
     setAgenteId('');
   };
 
@@ -33,6 +34,13 @@ export default function DialogIndisponibilidade({ open, onClose, agentes, hoje, 
           <select className={selecao} value={agenteId} onChange={(e) => setAgenteId(e.target.value)}>
             <option value="">Selecione</option>
             {agentes.map((a) => <option key={a.id} value={a.id}>{a.nome_completo}</option>)}
+          </select>
+        </div>
+        <div>
+          <Label className="text-xs">Motivo</Label>
+          <select className={selecao} value={motivo} onChange={(e) => setMotivo(e.target.value)}>
+            <option value="atestado">Atestado médico</option>
+            <option value="falta">Ausência / imprevisto</option>
           </select>
         </div>
         <div className="grid grid-cols-2 gap-3">

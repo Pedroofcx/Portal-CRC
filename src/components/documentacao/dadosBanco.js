@@ -241,6 +241,7 @@ export const migracoes = [
   { n: 49, titulo: 'AVD como pesquisa', descricao: 'pesquisa.tipo aceita avd e kaizen e ganha competencia (mês avaliado, AAAA-MM). As respostas seguem em resposta_pesquisa, visíveis só ao gestor e à própria pessoa.' },
   { n: 50, titulo: 'Resposta de pesquisa só em nome próprio', descricao: 'A regra de inserção de resposta_pesquisa passa a exigir que o colaborador_id seja o da pessoa logada (ou vazio, em pesquisa anônima). Fechava a brecha de responder em nome de outra pessoa.' },
   { n: 51, titulo: 'AVD sempre com o nome da pessoa', descricao: 'Resposta sem colaborador só é aceita em pesquisa anônima; pesquisa do tipo AVD não pode ser anônima e resposta de AVD não pode ficar sem colaborador (travas no dado).' },
+  { n: 52, titulo: 'Atestado médico na Escala', descricao: 'escala_atribuicao.tipo_evento aceita atestado. Quem está com atestado é pulado no rodízio e na montagem da semana, como em férias e day off.' },
   { n: 99, titulo: 'Restrições pós-importação', descricao: 'Só se aplica depois da carga de dados do Base44.' },
 ];
 

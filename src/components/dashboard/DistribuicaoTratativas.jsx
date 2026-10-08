@@ -72,14 +72,14 @@ export default function DistribuicaoTratativas({ gestorId, gestorNome, colaborad
   });
 
   const indisponibilidadeMutation = useMutation({
-    mutationFn: async ({ agente, inicio, fim }) => db.entities.EscalaAtribuicao.create({
+    mutationFn: async ({ agente, inicio, fim, tipo = 'falta' }) => db.entities.EscalaAtribuicao.create({
       escala_id: 'direct',
-      escala_nome: 'Indisponível (rodízio)',
+      escala_nome: tipo === 'atestado' ? 'Atestado médico (rodízio)' : 'Indisponível (rodízio)',
       colaborador_id: agente.id,
       colaborador_nome: agente.nome_completo,
       data_inicio: inicio,
       data_fim: fim,
-      tipo_evento: 'falta',
+      tipo_evento: tipo,
       ativa: true,
     }),
     onSuccess: () => {

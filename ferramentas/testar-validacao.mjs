@@ -36,7 +36,7 @@ const { calcularChat, calcularTelefone, validarConsistenciaTelefone, calcularCX 
 import { produtividadePorTurno } from '../src/lib/relatorios/turnos.js';
 import { diasCorridos, saldoDoCiclo, situacaoDoCiclo, cicloParaAData, deFeriasEm, lotacaoNoPeriodo, conferirPedido, fragmentoDoPedido, proximasFerias } from '../src/lib/ferias.js';
 import { situacaoDaPesquisa, quemRespondeu, resultadoDasPerguntas, resumoDaPesquisa, montarParticipacao } from '../src/lib/pesquisas.js';
-import { segundaDaSemana, semanaDeReferencia, diasDaSemana, trabalhoDaSemana, trabalhoDe, montarSemanaDeTrabalho, avisosDoTrabalho, montarTurnosDaSemana, meuDiaNoTurno, equilibrioDoAtendimento, estadoNoTurno, definirEstado, proximoEstado, inverterDia, copiarDia, trabalhandoNaMetade } from '../src/lib/escalas.js';
+import { TIPOS_TRABALHO, TRABALHANDO, segundaDaSemana, semanaDeReferencia, diasDaSemana, trabalhoDaSemana, trabalhoDe, montarSemanaDeTrabalho, avisosDoTrabalho, montarTurnosDaSemana, meuDiaNoTurno, equilibrioDoAtendimento, estadoNoTurno, definirEstado, proximoEstado, inverterDia, copiarDia, trabalhandoNaMetade } from '../src/lib/escalas.js';
 import { mediaDasCompetencias, leiturasDoColaborador, palavrasRecorrentes, pontosDoRadar, evolucaoDasLeituras } from '../src/lib/competencias.js';
 import { proximaVersao, popsParaCiencia, agruparPorCategoria, popsDoTipo, fotografia } from '../src/lib/pops.js';
 import { filaDePendencias, avisosVisiveis, pesquisasVisiveis, obrigatoriasSemResposta, montarResposta, pesquisaEhPara } from '../src/lib/pendencias.js';
@@ -1525,6 +1525,16 @@ console.log('\n== equidade: rodizio que pula quem esta ausente ==');
   checa('ao voltar e a primeira da fila', filaDoCanal('reclame_aqui', A, hist, depois, '2026-10-11').sugerido.agente.nome_completo, 'Sirlene');
 
   const escala = [{ colaborador_id: 'ana', tipo_evento: 'falta', data_inicio: '2026-10-02', data_fim: '2026-10-03', created_date: '2026-10-02T09:00:00Z' }];
+  // Atestado medico: a pessoa e pulada no rodizio e mantem a vez para quando voltar
+  const atestado = [{ colaborador_id: 'sir', tipo_evento: 'atestado', data_inicio: '2026-10-02', data_fim: '2026-10-04', created_date: '2026-10-02T08:00:00Z' }];
+  const indAtestado = indisponiveisEm('2026-10-02', { atribuicoes: atestado });
+  checa('atestado aparece como indisponivel, com o motivo', indAtestado.get('sir').motivo, 'Atestado médico');
+  checa('atestado diz ate quando', indAtestado.get('sir').ate, '2026-10-04');
+  checa('o rodizio pula quem esta com atestado', filaDoCanal('reclame_aqui', A, hist, indAtestado, '2026-10-02').sugerido.agente.nome_completo, 'Ana');
+  checa('quem esta com atestado vai para o fim da fila, com o motivo', filaDoCanal('reclame_aqui', A, hist, indAtestado, '2026-10-02').fila[3].motivo, 'Atestado médico');
+  checa('depois do atestado volta a ser a primeira', filaDoCanal('reclame_aqui', A, hist, indisponiveisEm('2026-10-05', { atribuicoes: atestado }), '2026-10-05').sugerido.agente.nome_completo, 'Sirlene');
+  checa('atestado e um tipo da escala de trabalho', String(TIPOS_TRABALHO.some((t) => t.valor === 'atestado' && t.rotulo === 'Atestado médico')), 'true');
+  checa('atestado nao conta como trabalhando', String(TRABALHANDO.has('atestado')), 'false');
   checa('falta na escala pula', indisponiveisEm('2026-10-02', { atribuicoes: escala }).get('ana').motivo, 'Ausente');
   const voltou = [...escala, { colaborador_id: 'ana', tipo_evento: 'presencial', data_inicio: '2026-10-02', data_fim: '2026-10-02', created_date: '2026-10-02T10:00:00Z' }];
   checa('marcacao mais recente (presencial) libera', String(indisponiveisEm('2026-10-02', { atribuicoes: voltou }).has('ana')), 'false');
