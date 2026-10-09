@@ -56,4 +56,5 @@ export const TABELAS = {
   TipoObservacao: 'tipo_observacao',
   TipoTratativa: 'tipo_tratativa',
   Tratativa: 'tratativa',
+  TratativaFixada: 'tratativa_fixada',
 };

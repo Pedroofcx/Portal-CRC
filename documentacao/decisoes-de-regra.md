@@ -1148,3 +1148,17 @@ regra, o estado de cada canal ("liberado" ou "aguardando fulano") e a coluna
 "Registros por canal" (R.A., GMN, Contest., R.I.) ao lado dos pontos. O agente
 vê o aviso no "Meu ciclo"; a Auditoria de pontuação e a página da pessoa seguem
 a mesma conta.
+
+## 09/10/2026 — Ordem da lista de tratativas e fixar tratativas (migration 56)
+
+**Ordem:** a lista de Tratativas é sempre da mais recente para a menos recente,
+pela data de cadastro no portal (created_date), desempatando pela data de registro
+e pelo número do TRT. Antes, a tratativa nova que ainda não estava na lista em
+cache entrava no fim, junto das "abertas" buscadas à parte; agora tudo é ordenado
+depois de juntar as buscas.
+
+**Fixar:** cada pessoa pode fixar as tratativas que quiser (o alfinete em cada
+linha, na lista e na tabela completa). As fixadas ficam no topo da lista dela,
+sob o título "Fixadas", na mesma ordem (mais recente primeiro). É pessoal: não
+muda a lista de mais ninguém, e fica guardado no banco, então vale em qualquer
+computador.

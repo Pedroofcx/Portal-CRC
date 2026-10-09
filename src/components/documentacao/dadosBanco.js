@@ -90,6 +90,7 @@ export const gruposDeTabelas = [
       { entidade: 'Pesquisa', tabela: 'pesquisa', descricao: 'Pesquisas internas (perguntas, período, anonimato, reenvio).', leitura: COLAB, escrita: 'permissão gerenciar_pesquisas' },
       { entidade: 'RespostaPesquisa', tabela: 'resposta_pesquisa', descricao: 'O que foi respondido. Em pesquisa anônima nasce sem colaborador_id e sem nome.', leitura: 'permissão ver_respostas_pesquisa, ou o dono', escrita: 'qualquer colaborador ativo insere; alterar e apagar exigem ver_respostas_pesquisa' },
       { entidade: 'AvdAgendamento', tabela: 'avd_agendamento', descricao: 'O horário que o agente escolheu para responder a AVD (migration 53). Uma linha por pessoa e por AVD: a AVD fica escondida até a hora e volta obrigatória, sem poder agendar de novo. O banco confere que a AVD está aberta, que a pessoa ainda não respondeu e que o horário vai de 1 minuto a 48 horas.', leitura: 'a gestão e o próprio agente', escrita: 'cada agente cria o próprio; só a gestão apaga' },
+      { entidade: 'TratativaFixada', tabela: 'tratativa_fixada', descricao: 'As tratativas que cada pessoa fixou no topo da própria lista (migration 56). É pessoal: o que um fixa não muda a lista de ninguém.', leitura: 'só a própria pessoa', escrita: 'cada pessoa cria e apaga as suas' },
       { entidade: 'PesquisaParticipacao', tabela: 'pesquisa_participacao', descricao: 'QUEM respondeu (sem as respostas): tira a pesquisa da fila de pendências e alimenta "quem respondeu / quem falta" (migration 23).', leitura: 'permissão ver_respostas_pesquisa, ou o dono', escrita: 'cada pessoa insere a própria; apagar exige ver_respostas_pesquisa' },
       { entidade: 'POP', tabela: 'pop', descricao: 'Procedimentos Operacionais e Orientações Técnicas (tipo pop ou ort, migration 25), com a versão atual e se exige ciência.', leitura: COLAB, escrita: 'permissão gerenciar_pop' },
       { entidade: 'PopVersao', tabela: 'pop_versao', descricao: 'O histórico de versões de cada POP (migration 18).', leitura: COLAB, escrita: 'permissão gerenciar_pop' },
@@ -248,6 +249,7 @@ export const migracoes = [
   { n: 53, titulo: 'Agendar a AVD', descricao: 'Tabela avd_agendamento: o agente escolhe um horário (até 48 horas) para responder a AVD, uma vez só; na hora ela volta obrigatória.' },
   { n: 54, titulo: 'AVD: prazo de 48 horas', descricao: 'A conferência do agendamento da AVD passa de 7 dias para 48 horas.' },
   { n: 55, titulo: 'Encerrar sozinho depois dos 7 dias', descricao: 'Função encerrar_prazo_reabertura() e o agendador de hora em hora: a reclamação interna deixa de depender de clique para sair de aguardando confirmação.' },
+  { n: 56, titulo: 'Fixar tratativas', descricao: 'Tabela tratativa_fixada: cada pessoa fixa as tratativas que quiser no topo da própria lista.' },
   { n: 99, titulo: 'Restrições pós-importação', descricao: 'Só se aplica depois da carga de dados do Base44.' },
 ];
 

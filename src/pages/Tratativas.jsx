@@ -8,6 +8,8 @@ import { formatDateSP, tipoTratativaLabels, prioridadeLabels, statusLabels, getS
 import PageHeader from '@/components/ui/PageHeader';
 import DataTable from '@/components/ui/DataTable';
 import ListaTratativas from '@/components/tratativas/ListaTratativas';
+import useTratativasFixadas from '@/hooks/useTratativasFixadas';
+import { ordenarTratativas } from '@/lib/ordenarTratativas';
 import CampoFormulario from '@/components/ui/CampoFormulario';
 import { useValidacao } from '@/hooks/useValidacao';
 import { obrigatorio, url, cnpj as validarCnpj, numeroPositivo, dataNaoFutura } from '@/lib/validacao';
@@ -33,6 +35,7 @@ import {
   Archive,
   Columns2,
   Rows3,
+  Pin,
   Check,
   X
 } from 'lucide-react';
@@ -220,7 +223,10 @@ export default function Tratativas() {
 
   const tratativas = React.useMemo(() => {
     const vistas = new Set(tratativasRecentes.map((t) => t.id));
-    return [...tratativasRecentes, ...abertasTodas.filter((t) => !vistas.has(t.id))];
+    // Depois de juntar as duas buscas, a ordem é sempre a mais recente primeiro
+    // (data de cadastro no portal): a que chega por último na junção não vai mais
+    // para o fim da lista.
+    return ordenarTratativas([...tratativasRecentes, ...abertasTodas.filter((t) => !vistas.has(t.id))]);
   }, [tratativasRecentes, abertasTodas]);
 
   const { data: motivos = [] } = useQuery({
@@ -237,6 +243,9 @@ export default function Tratativas() {
 
   const colaborador = colaboradores.find(c => c.email === user?.email);
   const isGestor = colaborador?.papel === 'gestor';
+
+  // Tratativas que a pessoa fixou: ficam no topo da lista dela.
+  const { fixadas, alternar: alternarFixada } = useTratativasFixadas(colaborador?.id);
 
   // Estado para exibir/ocultar excluídas (gestor e agentes)
   const [mostrarExcluidas, setMostrarExcluidas] = useState(false);
@@ -348,6 +357,9 @@ export default function Tratativas() {
       return cnpj.includes(cnpjTerm);
     });
   }
+
+  // A lista como a pessoa vê: fixadas no topo, depois as mais recentes.
+  const listaOrdenada = ordenarTratativas(filteredTratativas, fixadas);
 
   const createMutation = useMutation({
     mutationFn: async (data) => {
@@ -544,6 +556,22 @@ export default function Tratativas() {
   ] : [];
 
   const columns = [
+    {
+      header: '',
+      render: (row) => (
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={(e) => { e.stopPropagation(); alternarFixada(row.id); }}
+          aria-pressed={fixadas.has(row.id)}
+          aria-label={fixadas.has(row.id) ? `Soltar ${row.id_interno ?? 'a tratativa'}` : `Fixar ${row.id_interno ?? 'a tratativa'} no topo`}
+          title={fixadas.has(row.id) ? 'Soltar (tirar do topo)' : 'Fixar no topo da minha lista'}
+          className={fixadas.has(row.id) ? 'text-primary' : 'text-muted-foreground/60'}
+        >
+          <Pin className={`h-4 w-4 ${fixadas.has(row.id) ? 'fill-current' : ''}`} aria-hidden="true" />
+        </Button>
+      )
+    },
     {
       header: 'ID',
       render: (row) => (
@@ -787,16 +815,18 @@ export default function Tratativas() {
           <Card className="max-h-[calc(100vh-15rem)] overflow-y-auto border shadow-none">
             <div className="sticky top-0 z-10 border-b border-border bg-card px-3 py-2">
               <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                {filteredTratativas.length} tratativa{filteredTratativas.length === 1 ? '' : 's'}
+                {listaOrdenada.length} tratativa{listaOrdenada.length === 1 ? '' : 's'}
               </p>
             </div>
             {isLoading ? (
               <p className="px-4 py-8 text-center text-sm text-muted-foreground">Carregando...</p>
             ) : (
               <ListaTratativas
-                tratativas={filteredTratativas}
+                tratativas={listaOrdenada}
                 selecionadaId={abertaId}
                 onSelecionar={abrirTratativa}
+                fixadas={fixadas}
+                onFixar={alternarFixada}
               />
             )}
           </Card>
@@ -818,7 +848,7 @@ export default function Tratativas() {
       ) : (
         <DataTable
           columns={allColumns}
-          data={filteredTratativas}
+          data={listaOrdenada}
           isLoading={isLoading}
           emptyIcon={ClipboardList}
           emptyTitle="Nenhuma tratativa encontrada"

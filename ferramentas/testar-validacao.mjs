@@ -55,6 +55,7 @@ import { filaDeHoje, entradaESaida, tempoPorCanal, diagnosticoDeCarga } from '..
 import { resumoDoCanal, distribuicaoDeChegada } from '../src/lib/relatorios/canais.js';
 import { resumoQualidade, diaADiaQualidade, diaADiaEquipeQualidade } from '../src/lib/relatorios/qualidade.js';
 import { resumoJornada } from '../src/lib/relatorios/jornada.js';
+import { ordenarTratativas, maisRecentePrimeiro } from '../src/lib/ordenarTratativas.js';
 import { encerramentoAutomaticoDe, encerradasAutomaticamente, textoDoAviso } from '../src/lib/encerramentoAutomatico.js';
 import {
   problemaDoAgendamento, agendamentoDa, agendamentoFuturo, quandoPorExtenso, PERGUNTAS_AVD, NOTAS as NOTAS_AVD, limitarNota, competenciaDoEnvio, lerCarimbo, respostasDaLinha, notasDaResposta, serieMensalAvd, textosDaResposta,
@@ -2339,6 +2340,28 @@ console.log('\n== encerramento automatico depois dos 7 dias ==');
   checa('marca quando o cliente reabriu', String(encerradasAutomaticamente([auto('r', '2026-10-07T09:00:00Z', { status_reabertura: 'cliente_reabriu' })], { agora })[0].cliente_reabriu), 'true');
   checa('texto no singular', textoDoAviso(1), '1 ticket que aguardava confirmação foi encerrado automaticamente (prazo de 7 dias).');
   checa('texto no plural', textoDoAviso(3), '3 tickets que aguardavam confirmação foram encerrados automaticamente (prazo de 7 dias).');
+}
+
+console.log('\n== ordem das tratativas e fixadas ==');
+{
+  const t = (id, criada, extra = {}) => ({ id, id_interno: `TRT-${id}`, created_date: criada, data_registro: criada, ...extra });
+  const velha = t('0100', '2026-09-01T10:00:00Z'), meio = t('0200', '2026-09-20T10:00:00Z'), nova = t('0395', '2026-10-08T13:26:00Z');
+  checa('a mais recente vem primeiro', ordenarTratativas([velha, nova, meio]).map((x) => x.id).join(','), '0395,0200,0100');
+  // o caso do bug: a tratativa nova chega por ultimo na juncao das duas buscas
+  checa('a nova que chega no fim da juncao vai para o topo', ordenarTratativas([velha, meio, nova]).map((x) => x.id)[0], '0395');
+  checa('nao altera a lista original', (() => { const l = [velha, nova]; ordenarTratativas(l); return l.map((x) => x.id).join(','); })(), '0100,0395');
+  checa('empate de cadastro: vale a data de registro', ordenarTratativas([t('1', '2026-10-01T10:00:00Z', { data_registro: '2026-10-01T09:00:00Z' }), t('2', '2026-10-01T10:00:00Z', { data_registro: '2026-10-01T11:00:00Z' })]).map((x) => x.id).join(','), '2,1');
+  checa('empate total: vale o numero do TRT', ordenarTratativas([t('0001', '2026-10-01T10:00:00Z'), t('0002', '2026-10-01T10:00:00Z')]).map((x) => x.id).join(','), '0002,0001');
+  checa('sem data nao quebra e vai para o fim', ordenarTratativas([{ id: 'x' }, nova]).map((x) => x.id).join(','), '0395,x');
+  checa('a data de cadastro e a created_date (nao a data de registro)', ordenarTratativas([t('a', '2026-10-05T10:00:00Z', { data_registro: '2026-01-01T10:00:00Z' }), t('b', '2026-10-01T10:00:00Z', { data_registro: '2026-12-01T10:00:00Z' })]).map((x) => x.id).join(','), 'a,b');
+  checa('comparador: a mais recente antes', String(maisRecentePrimeiro(nova, velha) < 0), 'true');
+
+  // fixadas: no topo, na mesma ordem entre si
+  checa('a fixada vai para o topo', ordenarTratativas([nova, meio, velha], new Set(['0100'])).map((x) => x.id).join(','), '0100,0395,0200');
+  checa('varias fixadas: mais recente primeiro entre elas', ordenarTratativas([nova, meio, velha], new Set(['0100', '0200'])).map((x) => x.id).join(','), '0200,0100,0395');
+  checa('aceita lista de ids', ordenarTratativas([nova, velha], ['0100']).map((x) => x.id).join(','), '0100,0395');
+  checa('fixada que nao esta na lista nao quebra', ordenarTratativas([nova, velha], new Set(['9999'])).map((x) => x.id).join(','), '0395,0100');
+  checa('sem fixadas, so a ordem normal', ordenarTratativas([velha, nova], new Set()).map((x) => x.id).join(','), '0395,0100');
 }
 
 console.log('\n' + passou + ' passaram, ' + falhou + ' falharam');

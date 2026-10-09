@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import StatusBadge from '@/components/ui/StatusBadge';
 import { formatDateSP } from '@/components/utils/helpers';
-import { AlertTriangle } from 'lucide-react';
+import { AlertTriangle, Pin, PinOff } from 'lucide-react';
 
 /**
  * Lista compacta de tratativas — o painel esquerdo do master-detail.
@@ -10,11 +10,14 @@ import { AlertTriangle } from 'lucide-react';
  * cada tratativa ocupa três linhas de texto com o que identifica um caso na
  * conversa da operação: o número interno, o cliente e o estado.
  *
+ * Fixar: cada pessoa fixa as tratativas que quiser (o alfinete de cada linha);
+ * as fixadas ficam no topo, sob o título "Fixadas".
+ *
  * Teclado: setas percorrem, Enter e Espaço abrem. A regra pede que o sistema
  * seja operável só pelo teclado, e navegar uma fila de casos é exatamente o
  * tipo de tarefa em que tirar a mão do teclado custa tempo.
  */
-export default function ListaTratativas({ tratativas, selecionadaId, onSelecionar }) {
+export default function ListaTratativas({ tratativas, selecionadaId, onSelecionar, fixadas = new Set(), onFixar }) {
   const listaRef = useRef(null);
 
   // Mantém o item selecionado visível quando a escolha vem de fora da lista
@@ -50,49 +53,76 @@ export default function ListaTratativas({ tratativas, selecionadaId, onSeleciona
       {tratativas.map((t, i) => {
         const selecionada = t.id === selecionadaId;
         const foraDoSla = t.encerrado_no_sla === false;
+        const fixada = fixadas.has(t.id);
+        const primeiraFixada = fixada && i === 0;
+        const primeiraDasDemais = !fixada && i > 0 && fixadas.has(tratativas[i - 1].id);
 
         return (
           <li key={t.id}>
-            <button
-              type="button"
-              role="option"
-              data-id={t.id}
-              aria-selected={selecionada}
-              tabIndex={selecionada || (!selecionadaId && i === 0) ? 0 : -1}
-              onClick={() => onSelecionar(t.id)}
-              onKeyDown={(e) => aoTeclar(e, i)}
-              className={`flex w-full flex-col gap-1 border-l-2 px-3 py-2.5 text-left transition-colors ${
-                selecionada
-                  ? 'border-primary bg-accent'
-                  : 'border-transparent hover:bg-accent/50'
-              }`}
-            >
-              <span className="flex items-center gap-2">
-                <span className="font-mono text-xs font-medium text-muted-foreground">
-                  {t.id_interno || '—'}
+            {primeiraFixada && (
+              <p className="flex items-center gap-1.5 bg-muted/60 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                <Pin className="h-3 w-3" aria-hidden="true" /> Fixadas
+              </p>
+            )}
+            {primeiraDasDemais && (
+              <p className="bg-muted/60 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                Mais recentes
+              </p>
+            )}
+            <div className="relative">
+              <button
+                type="button"
+                role="option"
+                data-id={t.id}
+                aria-selected={selecionada}
+                tabIndex={selecionada || (!selecionadaId && i === 0) ? 0 : -1}
+                onClick={() => onSelecionar(t.id)}
+                onKeyDown={(e) => aoTeclar(e, i)}
+                className={`flex w-full flex-col gap-1 border-l-2 px-3 py-2.5 text-left transition-colors ${
+                  selecionada
+                    ? 'border-primary bg-accent'
+                    : 'border-transparent hover:bg-accent/50'
+                }`}
+              >
+                <span className="flex items-center gap-2">
+                  <span className="font-mono text-xs font-medium text-muted-foreground">
+                    {t.id_interno || '—'}
+                  </span>
+                  {foraDoSla && (
+                    <AlertTriangle
+                      className="h-3.5 w-3.5 shrink-0 text-critical"
+                      aria-label="Encerrada fora do SLA"
+                    />
+                  )}
+                  <span className="ml-auto shrink-0 text-xs tabular-nums text-muted-foreground">
+                    {t.data_registro ? formatDateSP(t.data_registro, 'DD/MM') : ''}
+                  </span>
                 </span>
-                {foraDoSla && (
-                  <AlertTriangle
-                    className="h-3.5 w-3.5 shrink-0 text-critical"
-                    aria-label="Encerrada fora do SLA"
-                  />
-                )}
-                <span className="ml-auto shrink-0 text-xs tabular-nums text-muted-foreground">
-                  {t.data_registro ? formatDateSP(t.data_registro, 'DD/MM') : ''}
+
+                <span className="truncate text-sm font-medium text-foreground">
+                  {t.nome_cliente || 'Sem cliente'}
                 </span>
-              </span>
 
-              <span className="truncate text-sm font-medium text-foreground">
-                {t.nome_cliente || 'Sem cliente'}
-              </span>
-
-              <span className="flex flex-wrap items-center gap-1.5">
-                <StatusBadge status={t.status} className="text-[11px]" />
-                {t.prioridade && t.prioridade !== 'baixa' && (
-                  <StatusBadge status={t.prioridade} className="text-[11px]" />
-                )}
-              </span>
-            </button>
+                <span className="flex flex-wrap items-center gap-1.5 pr-8">
+                  <StatusBadge status={t.status} className="text-[11px]" />
+                  {t.prioridade && t.prioridade !== 'baixa' && (
+                    <StatusBadge status={t.prioridade} className="text-[11px]" />
+                  )}
+                </span>
+              </button>
+              {onFixar && (
+                <button
+                  type="button"
+                  onClick={() => onFixar(t.id)}
+                  aria-pressed={fixada}
+                  aria-label={fixada ? `Soltar ${t.id_interno ?? 'a tratativa'}` : `Fixar ${t.id_interno ?? 'a tratativa'} no topo`}
+                  title={fixada ? 'Soltar (tirar do topo)' : 'Fixar no topo da minha lista'}
+                  className={`absolute bottom-2 right-2 rounded p-1 transition-colors ${fixada ? 'text-primary hover:bg-accent' : 'text-muted-foreground/60 hover:bg-accent hover:text-foreground'}`}
+                >
+                  {fixada ? <Pin className="h-4 w-4 fill-current" aria-hidden="true" /> : <PinOff className="h-4 w-4" aria-hidden="true" />}
+                </button>
+              )}
+            </div>
           </li>
         );
       })}
