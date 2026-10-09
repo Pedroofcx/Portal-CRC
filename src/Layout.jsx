@@ -131,22 +131,17 @@ function Sidebar({ _user, colaborador, currentPageName, onNavigate, isMobile = f
 
   return (
     <div className="flex h-full flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground">
-      {/* Logo */}
-      <div className="flex items-center gap-2 border-b border-sidebar-border px-3 py-3">
+      {/* Topo: só o ícone do navegador e o botão de recolher (sem texto, que
+          cortava quando o menu estava recolhido). Recolhido, os dois ficam um
+          embaixo do outro, dentro dos 64px da barra. */}
+      <div className={`flex border-b border-sidebar-border px-3 py-3 ${recolhido ? 'flex-col items-center gap-2' : 'items-center gap-2'}`}>
         <Link
           to={createPageUrl('Dashboard')}
-          className="flex min-w-0 flex-1 items-center gap-2.5"
-          title={recolhido ? 'Portal CRC' : undefined}
+          className="flex shrink-0 items-center"
+          aria-label="Portal CRC — ir para o início"
+          title="Portal CRC"
         >
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-sidebar-primary text-base font-bold text-sidebar-primary-foreground">
-            C
-          </div>
-          {!recolhido && (
-            <div className="min-w-0">
-              <p className="truncate text-sm font-semibold tracking-tight text-sidebar-foreground">Portal CRC</p>
-              <p className="truncate text-xs text-sidebar-foreground/55">Central de Relacionamento</p>
-            </div>
-          )}
+          <img src="/favicon.svg" alt="" className="h-8 w-8" />
         </Link>
         {!isMobile && (
           <button
@@ -154,7 +149,7 @@ function Sidebar({ _user, colaborador, currentPageName, onNavigate, isMobile = f
             onClick={onAlternar}
             aria-label={recolhido ? 'Expandir menu' : 'Recolher menu'}
             title={recolhido ? 'Expandir menu' : 'Recolher menu'}
-            className="shrink-0 rounded-md p-1.5 text-sidebar-foreground/50 transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+            className={`shrink-0 rounded-md p-1.5 text-sidebar-foreground/50 transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground ${recolhido ? '' : 'ml-auto'}`}
           >
             {recolhido ? <PanelLeft className="h-4 w-4" /> : <PanelLeftClose className="h-4 w-4" />}
           </button>
@@ -401,12 +396,9 @@ export default function Layout({ children, currentPageName }) {
                 />
               </SheetContent>
             </Sheet>
-            <div className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
-                <span className="text-sm font-bold text-primary-foreground">C</span>
-              </div>
-              <span className="font-semibold text-foreground">Portal CRC</span>
-            </div>
+            <Link to={createPageUrl('Dashboard')} className="flex items-center" aria-label="Portal CRC — ir para o início">
+              <img src="/favicon.svg" alt="" className="h-8 w-8" />
+            </Link>
             <div className="flex items-center gap-2">
               <SinoDeNotificacoes colaborador={colaborador} />
               <AlternarTema />
