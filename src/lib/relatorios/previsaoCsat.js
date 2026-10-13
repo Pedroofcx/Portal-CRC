@@ -84,7 +84,7 @@ export function projetarCsatDoMes({ apuracoes = [], colaboradores = [], fonteCha
   const ate = resumoQualidade({ apuracoes, colaboradores, periodo, fonteChat }).equipe;
   const v = ate.volumes;
   const telTotal = v.positivas + v.negativas;
-  const chatTotal = v.avaliados;
+  const chatTotal = v.avaliados - (v.neutros ?? 0); // base do CSAT: sem as neutras
   const canais = [
     { total: telTotal, positivas: v.positivas, csat: ate.csatTelefone },
     { total: chatTotal, positivas: ate.csatChat !== null ? (ate.csatChat / 100) * chatTotal : 0, csat: ate.csatChat },
@@ -133,7 +133,7 @@ export function projetarCsatDoMes({ apuracoes = [], colaboradores = [], fonteCha
   };
 }
 
-/** Pontos da calculadora CSAT: notas 1 a 5 → satisfeitos (4 e 5), neutros (3) e insatisfeitos (1 e 2). */
+/** Calculadora: notas 1 a 5 → satisfeitos (4 e 5), neutros (3) e insatisfeitos (1 e 2). `csat` é a conta simples; `csatPortal` tira os neutros da base. */
 export function calcularCsat(notas = {}) {
   const n = (k) => Math.max(0, Math.floor(Number(notas[k]) || 0));
   const [n1, n2, n3, n4, n5] = [1, 2, 3, 4, 5].map(n);
@@ -142,11 +142,14 @@ export function calcularCsat(notas = {}) {
   const neutros = n3;
   const insatisfeitos = n1 + n2;
   const csat = total > 0 ? (satisfeitos / total) * 100 : null;
+  const csatPortal = total - neutros > 0 ? (satisfeitos / (total - neutros)) * 100 : null;
   return {
     total, satisfeitos, neutros, insatisfeitos, csat,
     mediaDasNotas: total > 0 ? (n1 + 2 * n2 + 3 * n3 + 4 * n4 + 5 * n5) / total : null,
-    pontos: csat === null ? 0 : pontosDaFaixa('csat', csat),
-    proxima: csat === null ? null : proximaFaixa('csat', csat),
+    // A regra do Portal: a nota 3 (neutra) sai da base.
+    csatPortal,
+    pontos: csatPortal === null ? 0 : pontosDaFaixa('csat', csatPortal),
+    proxima: csatPortal === null ? null : proximaFaixa('csat', csatPortal),
   };
 }
 

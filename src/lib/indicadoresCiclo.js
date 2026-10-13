@@ -41,6 +41,13 @@ const maisRecentePrimeiro = (lista) => [...lista].sort((a, b) => quando(b).local
 const dentro = (dia, ciclo) => dia >= ciclo.data_inicio && dia <= ciclo.data_fim;
 
 /**
+ * Pedro (13/10/2026): a nota 3 do chat é neutra e NÃO entra na base do CSAT
+ * (como já era no telefone). Vale do Ciclo 3 (17/09/2026) em diante; os ciclos 1
+ * e 2, com a premiação já decidida, continuam como foram calculados.
+ */
+export const NEUTROS_FORA_DA_BASE_DESDE = '2026-09-17';
+
+/**
  * Os dias apurados do canal dentro do período, cada dia uma vez só (vale a
  * importação mais recente): [{ dia: 'AAAA-MM-DD', dados }].
  */
@@ -55,7 +62,9 @@ export function diasApurados(apuracoes, tipo, periodo) {
       // são dois números diferentes, que se combinam depois (média simples).
       const chave = fonte ? `${fonte}|${dia}` : dia;
       if (!dados || !dia || dias.has(chave) || !dentro(dia, periodo)) continue;
-      dias.set(chave, { dia, dados, fonte });
+      // Chat: a partir do Ciclo 3 a nota 3 (neutra) sai da base do CSAT.
+      const neutros = fonte && dia >= NEUTROS_FORA_DA_BASE_DESDE ? Math.min(num(dados.total_neutros), Math.max(0, num(dados.total_avaliados) - num(dados.total_positivos))) : 0;
+      dias.set(chave, { dia, dados: neutros ? { ...dados, neutros_fora_da_base: neutros } : dados, fonte });
     }
   }
   return [...dias.values()].map(({ dia, dados, fonte }) => (fonte ? { dia, dados, fonte } : { dia, dados }));
@@ -67,13 +76,14 @@ export const fonteDoChat = (apuracao) => (apuracao?.fonte === 'clickdesk' ? 'cli
 export const ROTULO_DA_FONTE = { combinado: 'Zendesk + ClickDesk (média simples)', zendesk: 'Zendesk', clickdesk: 'ClickDesk' };
 
 /** Um acumulador de avaliações do chat, uma coluna por fonte. */
-export const novoAcumuladorChat = () => Object.fromEntries(FONTES_DO_CHAT.map((f) => [f, { positivos: 0, avaliados: 0, chats: 0 }]));
+export const novoAcumuladorChat = () => Object.fromEntries(FONTES_DO_CHAT.map((f) => [f, { positivos: 0, avaliados: 0, chats: 0, neutros: 0 }]));
 
 export function somarNoAcumulador(acumulador, fonte, dados) {
   const alvo = acumulador[fonte] ?? acumulador.zendesk;
   alvo.positivos += num(dados?.total_positivos);
   alvo.avaliados += num(dados?.total_avaliados);
   alvo.chats += num(dados?.total_chats);
+  alvo.neutros += num(dados?.neutros_fora_da_base);
   return acumulador;
 }
 
@@ -83,11 +93,14 @@ export function juntarAcumuladores(acumulador, outro) {
     acumulador[f].positivos += outro[f].positivos;
     acumulador[f].avaliados += outro[f].avaliados;
     acumulador[f].chats += outro[f].chats;
+    acumulador[f].neutros += outro[f].neutros;
   }
   return acumulador;
 }
 
-const pctDoChat = (c) => (c.avaliados > 0 ? (c.positivos / c.avaliados) * 100 : null);
+// Positivas ÷ avaliações que não são neutras.
+const baseDoChat = (c) => (c.avaliados ?? 0) - (c.neutros ?? 0);
+const pctDoChat = (c) => (baseDoChat(c) > 0 ? (c.positivos / baseDoChat(c)) * 100 : null);
 
 /**
  * CSAT do chat de um acumulador. `escolha`: 'combinado' (média simples dos CSATs
@@ -102,7 +115,7 @@ export function csatDoAcumulador(acumulador, escolha = 'combinado') {
 /** Total de chats / avaliados do que foi escolhido. */
 export function volumeDoAcumulador(acumulador, escolha = 'combinado') {
   const fontes = escolha === 'combinado' ? FONTES_DO_CHAT : [escolha];
-  return fontes.reduce((t, f) => ({ chats: t.chats + (acumulador[f]?.chats ?? 0), avaliados: t.avaliados + (acumulador[f]?.avaliados ?? 0), positivos: t.positivos + (acumulador[f]?.positivos ?? 0) }), { chats: 0, avaliados: 0, positivos: 0 });
+  return fontes.reduce((t, f) => ({ chats: t.chats + (acumulador[f]?.chats ?? 0), avaliados: t.avaliados + (acumulador[f]?.avaliados ?? 0), positivos: t.positivos + (acumulador[f]?.positivos ?? 0), neutros: t.neutros + (acumulador[f]?.neutros ?? 0) }), { chats: 0, avaliados: 0, positivos: 0, neutros: 0 });
 }
 
 /** O chat de uma lista de apurações num período: acumulador por fonte, cada dia uma vez por fonte. */

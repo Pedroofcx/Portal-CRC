@@ -48,7 +48,7 @@ export default function OuvidoriaChat({ apuracoes, classificando, onClassificar 
           </div>
         </div>
         <p className="mt-3 text-xs text-muted-foreground">
-          Classificar aqui não muda o CSAT oficial da premiação — só alimenta o comparativo em Análise → Chat.
+          Desde o Ciclo 3 (17/09/2026), os tickets classificados como nota 3 (neutro) saem da base do CSAT do chat, como já era no telefone. Ticket sem classificar continua contando como negativo.
         </p>
       </Cartao>
 

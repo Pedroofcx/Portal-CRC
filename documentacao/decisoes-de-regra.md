@@ -1172,8 +1172,8 @@ desligado, os dois rodam em paralelo (só atendimento por CHAT).
   Avaliado em, Nota, Responsável, Equipe. Só entram as linhas da equipe
   **Ouvidoria** nos canais WhatsApp e Chat no site; as outras são descartadas e contadas na conferência. Linhas sem
   nota de 1 a 5 também ficam de fora.
-- **Nota = CSAT, mesma regra de sempre:** 4 e 5 positivo, 1 a 3 negativo (a nota 3
-  aparece à parte, só como informação). Nenhum neutro é retirado do número oficial.
+- **Nota = CSAT:** 4 e 5 positivo, 1 e 2 negativo e a nota 3 neutra, que sai da
+  base (ver a decisão do dia 13/10/2026 sobre os neutros do chat, abaixo).
 - **Tag de origem:** cada registro guarda a fonte (`zendesk` ou `clickdesk`); o
   Histórico de importações mostra a coluna Fonte e os relatórios deixam escolher.
 - **Soma dos dois:** o CSAT do chat é a **média simples** do CSAT do Zendesk e do
@@ -1187,3 +1187,21 @@ desligado, os dois rodam em paralelo (só atendimento por CHAT).
   avaliações). E só entram os canais **WhatsApp** e **Chat no site**: telefone já
   vem do 55PBX (importar aqui duplicaria a meta) e e-mail não é atendimento em si.
   A coluna Canal passou a ser obrigatória na importação do ClickDesk.
+
+## Neutros do chat saem da base do CSAT (Pedro, 13/10/2026)
+
+A nota 3 é neutra, não negativa, e contá-la como negativa era errado. O CSAT do
+chat passa a ser **positivas ÷ (avaliadas − neutras)**, a mesma ideia que o
+telefone já tinha (positivas ÷ positivas + negativas).
+
+- **ClickDesk:** a nota vem no arquivo, então o neutro é conhecido na importação.
+- **Zendesk:** o neutro só é conhecido depois que o Pedro classifica o ticket como
+  nota 3 na aba Ouvidoria. Ticket sem classificar continua contando como negativo.
+- **Vale do Ciclo 3 em diante** (dias a partir de 17/09/2026). Os ciclos 1 e 2,
+  com a premiação já decidida, não mudam: o corte é a constante
+  `NEUTROS_FORA_DA_BASE_DESDE`, em `src/lib/indicadoresCiclo.js`.
+- Onde aparece: indicador do ciclo, relatórios de Qualidade, Análise, Preditivo e
+  Calculadora CSAT. A calculadora mostra também a conta simples (neutros na base)
+  só para comparação.
+- O número de "avaliações" exibido continua sendo o total de avaliadas; só o
+  denominador do CSAT tira as neutras.

@@ -2433,5 +2433,22 @@ console.log('\n== ordem das tratativas e fixadas ==');
   eq('previsao: mes fechado quando ja ha dado no ultimo dia util', fechado.mesFechado, true);
 }
 
+// ---- Neutros do chat fora da base do CSAT (do Ciclo 3 em diante) ----
+{
+  const { resumoQualidade } = await import('../src/lib/relatorios/qualidade.js');
+  const { calcularCsat } = await import('../src/lib/relatorios/previsaoCsat.js');
+  const eq = (n, r, e) => checa(n, String(r), String(e));
+  const colabs = [{ id: 'a1', nome_completo: 'Ana', ativo: true, papel: 'agente' }];
+  const chat = (data, avaliados, positivos, neutros) => ({ tipo_apuracao: 'chat', fonte: 'clickdesk', colaborador_id: 'a1', dados_por_data: [{ data, chat: { total_chats: avaliados, total_avaliados: avaliados, total_positivos: positivos, total_negativos: avaliados - positivos, total_neutros: neutros } }] });
+  const novo = resumoQualidade({ apuracoes: [chat('2026-10-05', 4, 2, 1)], colaboradores: colabs, periodo: {} });
+  eq('neutro sai da base no Ciclo 3 (2 de 3 = 66,7)', Math.round(novo.equipe.csatChat * 10) / 10, 66.7);
+  const velho = resumoQualidade({ apuracoes: [chat('2026-09-16', 4, 2, 1)], colaboradores: colabs, periodo: {} });
+  eq('ciclo 2 nao muda (2 de 4 = 50)', velho.equipe.csatChat, 50);
+  eq('neutro maior que o possivel nao quebra', resumoQualidade({ apuracoes: [chat('2026-10-05', 4, 2, 9)], colaboradores: colabs, periodo: {} }).equipe.csatChat, 100);
+  const c = calcularCsat({ 1: 1, 2: 1, 3: 2, 4: 3, 5: 4 });
+  eq('calculadora sem neutros: 7 de 9', Math.round(c.csatPortal * 10) / 10, 77.8);
+  eq('calculadora so neutros nao tem CSAT', calcularCsat({ 3: 5 }).csatPortal, 'null');
+}
+
 console.log('\n' + passou + ' passaram, ' + falhou + ' falharam');
 process.exit(falhou ? 1 : 0);
