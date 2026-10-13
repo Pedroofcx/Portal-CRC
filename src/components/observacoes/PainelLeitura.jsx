@@ -102,8 +102,8 @@ export default function PainelLeitura({ open, onOpenChange, colaborador, palavra
       });
       if (resposta?.pergunta) setPergunta(resposta.pergunta);
       else toast.error('A IA não devolveu uma pergunta.');
-    } catch {
-      toast.error('Não consegui falar com a IA agora. Escreva a pergunta à mão.');
+    } catch (e) {
+      toast.error(`Não consegui falar com a IA agora. Escreva a pergunta à mão. ${e?.message ?? ''}`.trim());
     } finally {
       setGerando(false);
     }

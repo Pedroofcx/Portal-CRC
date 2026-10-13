@@ -94,8 +94,8 @@ export default function Visao360({ colaborador, leituras, mediasEquipe, processo
         },
       });
       setResumoIA(resposta);
-    } catch {
-      toast.error('Não consegui falar com a IA agora.');
+    } catch (e) {
+      toast.error(`Não consegui falar com a IA agora. ${e?.message ?? ''}`.trim());
     } finally {
       setGerando(false);
     }
