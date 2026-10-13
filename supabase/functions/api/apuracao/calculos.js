@@ -7,7 +7,7 @@
 // A leitura da data mora em src/lib/apuracao/datas.js — o importador novo e
 // estes cálculos precisam entender exatamente a mesma coisa.
 import { normalizarData } from './datas.js';
-import { ehDaOuvidoria, notaDoClickDesk } from './importacao.js';
+import { ehDaOuvidoria, ehCanalDeChat, notaDoClickDesk } from './importacao.js';
 
 export { normalizarData };
 
@@ -464,6 +464,7 @@ export function calcularChatClickDesk(dados, mapeamento) {
   const notaDoTicket = {};
   dados.forEach((row) => {
     if (!ehDaOuvidoria(row[mapeamento.equipe])) return;
+    if (!ehCanalDeChat(row[mapeamento.canal])) return;
     const nota = notaDoClickDesk(row[mapeamento.nota]);
     if (nota === null) return;
     const ticket = String(row[mapeamento.ticket] ?? '').trim();

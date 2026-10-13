@@ -66,11 +66,19 @@ export const CAMPOS_CLICKDESK = [
   { chave: 'nota', rotulo: 'Nota (1 a 5, é o CSAT)', obrigatorio: true, sinonimos: ['nota', 'csat'] },
   { chave: 'agente', rotulo: 'Responsável', obrigatorio: true, sinonimos: ['responsavel', 'responsável', 'agente', 'atendente'] },
   { chave: 'equipe', rotulo: 'Equipe (só a Ouvidoria entra)', obrigatorio: true, sinonimos: ['equipe', 'time', 'fila'] },
+  { chave: 'canal', rotulo: 'Canal (só WhatsApp e chat no site entram)', obrigatorio: true, sinonimos: ['canal', 'origem'] },
 ];
 
 /** A equipe do ClickDesk que entra na apuração. */
 export const EQUIPE_DA_APURACAO = 'ouvidoria';
 export const ehDaOuvidoria = (equipe) => nomeComparavel(equipe).includes(EQUIPE_DA_APURACAO);
+
+/**
+ * Só WhatsApp e chat no site são atendimento por chat (Pedro, 13/10/2026).
+ * Telefone já vem do 55PBX (importar aqui duplicaria a meta) e e-mail não é
+ * atendimento em si, então não são validados.
+ */
+export const ehCanalDeChat = (canal) => { const c = nomeComparavel(canal); return c.includes('whatsapp') || c.includes('chat'); };
 
 /** Os campos de cada fonte: o ClickDesk tem os seus; as outras seguem o tipo. */
 export const camposDaFonte = (fonte, tipo) => (fonte === 'clickdesk' ? CAMPOS_CLICKDESK : (CAMPOS[tipo] ?? []));
@@ -191,6 +199,7 @@ const MOTIVOS = {
   sem_data: 'sem data ou com data que não dá para entender',
   outra_equipe: 'de outras equipes (só a Ouvidoria entra)',
   sem_nota: 'sem nota de 1 a 5',
+  outro_canal: 'de outros canais (só WhatsApp e chat no site entram; telefone vem do 55PBX e e-mail não é atendimento)',
 };
 
 /**
@@ -215,13 +224,14 @@ export function conferirImportacao({
   linhas.forEach((linha) => {
     // ClickDesk: o arquivo traz todas as equipes; só a Ouvidoria é apuração.
     if (clickdesk && !ehDaOuvidoria(linha[mapeamento.equipe])) { descartes.set('outra_equipe', (descartes.get('outra_equipe') ?? 0) + 1); return; }
+    if (clickdesk && !ehCanalDeChat(linha[mapeamento.canal])) { descartes.set('outro_canal', (descartes.get('outro_canal') ?? 0) + 1); return; }
     const agente = String(linha[mapeamento.agente] ?? '').trim();
     const data = normalizarData(linha[mapeamento.data]);
     if (!agente) { descartes.set('sem_agente', (descartes.get('sem_agente') ?? 0) + 1); return; }
     if (!data) { descartes.set('sem_data', (descartes.get('sem_data') ?? 0) + 1); return; }
     if (clickdesk && notaDoClickDesk(linha[mapeamento.nota]) === null) { descartes.set('sem_nota', (descartes.get('sem_nota') ?? 0) + 1); return; }
     if (clickdesk) {
-      const canal = String(linha.Canal ?? linha.canal ?? '').trim() || 'sem canal';
+      const canal = String(linha[mapeamento.canal] ?? '').trim() || 'sem canal';
       porCanal[canal] = (porCanal[canal] ?? 0) + 1;
       if (nomeComparavel(linha.Atendimento ?? linha.atendimento).includes('so ia')) soIA += 1;
     }

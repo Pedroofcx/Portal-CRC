@@ -264,7 +264,7 @@ export default function ImportarApuracao({ colaboradores, mapeamentos = [], apur
           {fonte === 'clickdesk' && conferencia.faltando.length === 0 && (
             <p className="rounded-lg bg-muted px-4 py-3 text-sm text-muted-foreground">
               ClickDesk e Zendesk andam em paralelo no chat. Cada importação fica marcada com a fonte, e o CSAT do chat do
-              ciclo é a <span className="font-medium text-foreground">média simples</span> dos dois. Só a equipe Ouvidoria entra; as demais linhas são ignoradas.
+              ciclo é a <span className="font-medium text-foreground">média simples</span> dos dois. Só entra a equipe Ouvidoria, nos canais WhatsApp e chat no site; as demais linhas são ignoradas (telefone vem do 55PBX e e-mail não é atendimento).
             </p>
           )}
 

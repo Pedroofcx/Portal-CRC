@@ -2382,6 +2382,8 @@ console.log('\n== ordem das tratativas e fixadas ==');
   const vinc = vincularAgentes(['Ana Guelber'], colabs);
   eq('clickdesk: vincula nome parcial', vinc[0].colaborador_id, 'a1');
   const calc = calculoDaFonte('clickdesk', 'chat')(lido.linhas, mapa);
+  const conf = conferirImportacao({ tipo: 'chat', fonte: 'clickdesk', linhas: [...lido.linhas, { ...lido.linhas[0], Chamado: '9', Canal: 'E-mail' }, { ...lido.linhas[0], Chamado: '10', Canal: 'Telefone' }, { ...lido.linhas[0], Chamado: '11', Canal: 'WhatsApp' }], mapeamento: mapa, colaboradores: colabs });
+  eq('clickdesk: e-mail e telefone ficam de fora, whatsapp e chat entram', conf.linhasValidas, 4);
   const ana = calc.resultados?.[0] ?? Object.values(calc.porAgente ?? {})[0];
   eq('clickdesk: calculo gera resultado', !!calc, true);
   void ana;

@@ -1170,7 +1170,7 @@ desligado, os dois rodam em paralelo (só atendimento por CHAT).
 
 - **Importar:** além do Zendesk, a fonte **ClickDesk (chat)**. Colunas: Chamado,
   Avaliado em, Nota, Responsável, Equipe. Só entram as linhas da equipe
-  **Ouvidoria**; as outras são descartadas e contadas na conferência. Linhas sem
+  **Ouvidoria** nos canais WhatsApp e Chat no site; as outras são descartadas e contadas na conferência. Linhas sem
   nota de 1 a 5 também ficam de fora.
 - **Nota = CSAT, mesma regra de sempre:** 4 e 5 positivo, 1 a 3 negativo (a nota 3
   aparece à parte, só como informação). Nenhum neutro é retirado do número oficial.
@@ -1182,6 +1182,8 @@ desligado, os dois rodam em paralelo (só atendimento por CHAT).
 - **Relatórios:** o seletor "Fonte do chat" (Zendesk + ClickDesk | só Zendesk | só
   ClickDesk) aparece na Análise da apuração e no grupo Qualidade; a tela mostra o
   CSAT de cada fonte lado a lado e explica a média simples.
-- **A confirmar com o Pedro:** a média é de percentuais (não ponderada pelo número
-  de avaliações); e todas as linhas da Ouvidoria entram, qualquer que seja o Canal
-  (e-mail, telefone, "Só IA"), podendo-se filtrar por Canal se ele quiser.
+- **Confirmado pelo Pedro (13/10/2026):** a média é simples e padrão: CSAT do
+  Zendesk + CSAT do ClickDesk, dividido por dois (sem peso pelo número de
+  avaliações). E só entram os canais **WhatsApp** e **Chat no site**: telefone já
+  vem do 55PBX (importar aqui duplicaria a meta) e e-mail não é atendimento em si.
+  A coluna Canal passou a ser obrigatória na importação do ClickDesk.
