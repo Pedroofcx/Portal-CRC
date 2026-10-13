@@ -25,7 +25,7 @@ function melhorEPior(lista, chave) {
 }
 
 /**
- * Preditivo — varre TODO o histórico (não o período filtrado acima na tela)
+ * Melhor e pior mês/semana — varre TODO o histórico (não o período filtrado acima na tela)
  * pra achar o melhor e o pior mês/semana de CSAT da equipe, e deixa escolher
  * qualquer outro mês ou semana pra ver o dia que puxou o resultado.
  */
@@ -58,14 +58,14 @@ export default function PreditivoApuracao({ apuracoes, colaboradores, fonteChat 
 
   if (!melhorMes) {
     return (
-      <Cartao titulo="Preditivo">
+      <Cartao titulo="Melhor e pior mês e semana">
         <p className="text-sm text-muted-foreground">Sem apuração suficiente no histórico pra achar um padrão ainda.</p>
       </Cartao>
     );
   }
 
   return (
-    <Cartao titulo="Preditivo" className="space-y-5">
+    <Cartao titulo="Melhor e pior mês e semana" className="space-y-5">
       <p className="text-sm text-muted-foreground -mt-2">
         Olha todo o histórico de apuração, não só o período filtrado acima.
       </p>

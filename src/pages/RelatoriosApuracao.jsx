@@ -17,6 +17,9 @@ import { ComoCalculamos, FiltroPeriodo, periodoPorExtenso } from '@/components/r
 import { intervaloDoAtalho } from '@/lib/relatorios/periodo';
 import { resumoQualidade, diaADiaQualidade } from '@/lib/relatorios/qualidade';
 import { pontosDaFaixa, proximaFaixa } from '@/lib/faixasIndicadores';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import PreditivoMes from '@/components/relatorios/apuracao/PreditivoMes';
+import CalculadoraCsat from '@/components/relatorios/apuracao/CalculadoraCsat';
 import PreditivoApuracao from '@/components/relatorios/apuracao/PreditivoApuracao';
 import SeletorFonteChat, { detalheDasFontes } from '@/components/relatorios/hub/SeletorFonteChat';
 import { usePermissoes } from '@/hooks/usePermissoes';
@@ -74,6 +77,14 @@ export default function RelatoriosApuracao() {
     <div className="space-y-6">
       <PageHeader title="Análise da apuração" subtitle="Dia a dia e semana a semana, para achar o que puxou o mês" icon={BarChart3} />
 
+      <Tabs defaultValue="analise">
+        <TabsList>
+          <TabsTrigger value="analise">Análise</TabsTrigger>
+          <TabsTrigger value="preditivo">Preditivo</TabsTrigger>
+          <TabsTrigger value="calculadora">Calculadora CSAT</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="analise" className="space-y-6 pt-4">
       <Cartao>
         <div className="flex flex-wrap items-end gap-3">
           <FiltroPeriodo valor={periodo} onChange={setPeriodo} />
@@ -98,6 +109,19 @@ export default function RelatoriosApuracao() {
       )}
 
       <PreditivoApuracao apuracoes={apuracoes} colaboradores={colaboradores} fonteChat={fonteChat} />
+        </TabsContent>
+
+        <TabsContent value="preditivo" className="space-y-6 pt-4">
+          <Cartao>
+            <SeletorFonteChat valor={fonteChat} aoMudar={setFonteChat} id="fonte-chat-preditivo" />
+          </Cartao>
+          <PreditivoMes apuracoes={apuracoes} colaboradores={colaboradores} fonteChat={fonteChat} />
+        </TabsContent>
+
+        <TabsContent value="calculadora" className="pt-4">
+          <CalculadoraCsat />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

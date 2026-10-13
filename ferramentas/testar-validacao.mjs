@@ -2402,5 +2402,36 @@ console.log('\n== ordem das tratativas e fixadas ==');
   eq('chat so clickdesk', Math.round(clk.equipe.csatChat), 50);
 }
 
+// ---- Preditivo do mês e calculadora de CSAT ----
+{
+  const { projetarCsatDoMes, calcularCsat, zonaDoCsat, diasUteis } = await import('../src/lib/relatorios/previsaoCsat.js');
+  const eq = (n, r, e) => checa(n, String(r), String(e));
+  eq('dias uteis: 1 a 7/out/2026 (qua a ter)', diasUteis('2026-10-01', '2026-10-07'), 5);
+  eq('dias uteis: so fim de semana', diasUteis('2026-10-03', '2026-10-04'), 0);
+
+  const c = calcularCsat({ 1: 1, 2: 1, 3: 2, 4: 3, 5: 4 });
+  eq('calculadora: o exemplo do site (7 de 11)', Math.round(c.csat), 64);
+  eq('calculadora: total, neutros e insatisfeitos', `${c.total}/${c.neutros}/${c.insatisfeitos}`, '11/2/2');
+  eq('calculadora: sem respostas nao tem CSAT', calcularCsat({}).csat, 'null');
+  eq('calculadora: texto e negativo viram zero', calcularCsat({ 5: 'abc', 4: -3 }).total, 0);
+  eq('zona: 92 e Qualidade', zonaDoCsat(92).nome, 'Qualidade');
+  eq('zona: 80 abaixo da meta', zonaDoCsat(80).nome, 'Abaixo da meta');
+
+  const colabs = [{ id: 'a1', nome_completo: 'Ana', ativo: true, papel: 'agente' }];
+  const dia = (data, pos, neg) => ({ data, telefone: { total_ligacoes: pos + neg, total_atendidas: pos + neg, total_avaliadas: pos + neg, total_positivas: pos, total_negativas: neg } });
+  const apuracoes = [{ tipo_apuracao: 'telefone', colaborador_id: 'a1', dados_por_data: [dia('2026-10-01', 9, 1), dia('2026-10-02', 9, 1), dia('2026-10-05', 8, 2)] }];
+  const p = projetarCsatDoMes({ apuracoes, colaboradores: colabs, hoje: '2026-10-06' });
+  eq('previsao: CSAT ate agora (26 de 30 = 86,7)', Math.round(p.atual.csat * 10) / 10, 86.7);
+  eq('previsao: ultimo dia apurado', p.ultimoDia, '2026-10-05');
+  eq('previsao: dias uteis que faltam (6/out a 30/out)', p.restantesUteis, 19);
+  eq('previsao: ritmo do mes mantem o CSAT', Math.round(p.cenarios[0].csat * 10) / 10, 86.7);
+  eq('previsao: pior caso menor que o ritmo e melhor maior', p.piso.csat < p.cenarios[0].csat && p.teto.csat > p.cenarios[0].csat, true);
+  eq('previsao: proxima faixa e 90%', p.proximaFaixa.limiar, 90);
+  eq('previsao: o necessario para 90% fica entre o atual e 100', p.proximaFaixa.csatNecessario > 86.7 && p.proximaFaixa.csatNecessario < 100, true);
+  eq('previsao: sem dados no mes', projetarCsatDoMes({ apuracoes, colaboradores: colabs, hoje: '2026-11-10' }), 'null');
+  const fechado = projetarCsatDoMes({ apuracoes: [{ tipo_apuracao: 'telefone', colaborador_id: 'a1', dados_por_data: [dia('2026-10-30', 9, 1)] }], colaboradores: colabs, hoje: '2026-10-31' });
+  eq('previsao: mes fechado quando ja ha dado no ultimo dia util', fechado.mesFechado, true);
+}
+
 console.log('\n' + passou + ' passaram, ' + falhou + ' falharam');
 process.exit(falhou ? 1 : 0);
