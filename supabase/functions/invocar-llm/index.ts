@@ -46,7 +46,18 @@
  * republicar a função: basta criar o segredo GEMINI_MODELO no Supabase.
  */
 const MODELO = Deno.env.get('GEMINI_MODELO') ?? 'gemini-3.6-flash';
-const CHAVE = Deno.env.get('GEMINI_API_KEY');
+const CHAVE_GEMINI = Deno.env.get('GEMINI_API_KEY');
+
+/**
+ * Groq (Pedro, 13/10/2026): se existir o segredo GROQ_API_KEY, é ele quem
+ * responde; sem ele, segue o Gemini como antes. O Groq fala o formato da OpenAI
+ * (chat/completions). Para trocar de modelo sem republicar, crie o segredo
+ * GROQ_MODELO.
+ */
+const CHAVE_GROQ = Deno.env.get('GROQ_API_KEY');
+const MODELO_GROQ = Deno.env.get('GROQ_MODELO') ?? 'llama-3.3-70b-versatile';
+const USA_GROQ = Boolean(CHAVE_GROQ);
+const CHAVE = USA_GROQ ? CHAVE_GROQ : CHAVE_GEMINI;
 
 const URL_SUPABASE = Deno.env.get('SUPABASE_URL')!;
 const CHAVE_ANON = Deno.env.get('SUPABASE_ANON_KEY')!;
@@ -109,7 +120,7 @@ Deno.serve(async (req) => {
 
   if (!CHAVE) {
     return responder({
-      error: 'A chave da IA não está configurada. Defina o segredo GEMINI_API_KEY no projeto do Supabase.',
+      error: 'A chave da IA não está configurada. Defina o segredo GROQ_API_KEY (ou GEMINI_API_KEY) no projeto do Supabase.',
     }, 503);
   }
 
@@ -195,7 +206,19 @@ Deno.serve(async (req) => {
       geracao.responseMimeType = 'application/json';
     }
 
-    const corpoModelo = JSON.stringify({
+    const pedidoDoFormato = `${prompt}
+
+Responda SOMENTE com um JSON válido neste formato, sem texto ao redor e sem marcação de código:
+${JSON.stringify(corpo.response_json_schema)}`;
+
+    // Groq: o formato vai sempre descrito no texto, com o modo JSON ligado.
+    const corpoGroq = JSON.stringify({
+      model: MODELO_GROQ,
+      messages: [{ role: 'user', content: schema ? pedidoDoFormato : prompt }],
+      ...(schema ? { response_format: { type: 'json_object' } } : {}),
+    });
+
+    const corpoModelo = USA_GROQ ? corpoGroq : JSON.stringify({
       contents: [{
         role: 'user',
         parts: [{
@@ -216,14 +239,20 @@ ${JSON.stringify(corpo.response_json_schema)}`,
 
     for (let tentativa = 1; tentativa <= 3; tentativa++) {
       try {
-        resposta = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/${MODELO}:generateContent`,
-          {
+        resposta = USA_GROQ
+          ? await fetch('https://api.groq.com/openai/v1/chat/completions', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'x-goog-api-key': CHAVE },
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${CHAVE}` },
             body: corpoModelo,
-          },
-        );
+          })
+          : await fetch(
+            `https://generativelanguage.googleapis.com/v1beta/models/${MODELO}:generateContent`,
+            {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'x-goog-api-key': CHAVE },
+              body: corpoModelo,
+            },
+          );
         falhaRede = null;
       } catch (e) {
         falhaRede = String(e);
@@ -246,7 +275,7 @@ ${JSON.stringify(corpo.response_json_schema)}`,
   // custar, então é isso que entra na conta do teto diário.
   await sb.from('log_invocacao_llm').insert({ colaborador_id: colaborador.id });
 
-  let via = schema ? 'schema' : 'texto';
+  let via = schema ? (USA_GROQ ? 'prompt' : 'schema') : 'texto';
   let { resposta, dados, falhaRede } = await pedirAoModelo(true);
 
   /*
@@ -262,7 +291,7 @@ ${JSON.stringify(corpo.response_json_schema)}`,
    * instrução. Menos garantido, mas funcionando é melhor que perfeito e fora
    * do ar.
    */
-  if (schema && !resposta?.ok && (falhaRede || resposta.status >= 500)) {
+  if (!USA_GROQ && schema && !resposta?.ok && (falhaRede || resposta.status >= 500)) {
     const alternativa = await pedirAoModelo(false);
     if (alternativa.resposta?.ok) {
       ({ resposta, dados, falhaRede } = alternativa);
@@ -282,7 +311,7 @@ ${JSON.stringify(corpo.response_json_schema)}`,
      * "cota esgotada" é acionável, "erro 429" não é.
      */
     if (resposta.status === 429) {
-      return responder({ error: 'A cota gratuita de IA do dia acabou. Tente de novo mais tarde.' }, 429);
+      return responder({ error: 'A cota de IA acabou (ou há muitos pedidos ao mesmo tempo). Tente de novo mais tarde.' }, 429);
     }
 
     /*
@@ -300,7 +329,9 @@ ${JSON.stringify(corpo.response_json_schema)}`,
     return responder({ error: `O provedor de IA recusou o pedido: ${detalhe}` }, 502);
   }
 
-  const texto = dados?.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
+  const texto = USA_GROQ
+    ? (dados?.choices?.[0]?.message?.content ?? '')
+    : (dados?.candidates?.[0]?.content?.parts?.[0]?.text ?? '');
 
   if (!texto) {
     /*

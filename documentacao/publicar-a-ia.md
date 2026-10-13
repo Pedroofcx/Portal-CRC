@@ -80,6 +80,25 @@ O teste faz quatro coisas:
 
 ---
 
+## Usar o Groq em vez do Gemini
+
+A função aceita os dois provedores. Se existir o segredo `GROQ_API_KEY`, o Groq
+responde; se não existir, continua o Gemini.
+
+1. Crie a chave em **https://console.groq.com/keys** (começa com `gsk_`).
+2. Supabase → **Edge Functions** → **Secrets** → **Add new secret**:
+   `GROQ_API_KEY` = a chave. (Opcional: `GROQ_MODELO` para trocar o modelo; o
+   padrão é `llama-3.3-70b-versatile`.)
+3. Republique a função `invocar-llm` com o conteúdo atual do arquivo
+   `supabase/functions/invocar-llm/index.ts` (passo 3 acima).
+4. Rode o teste do passo 4. Para voltar ao Gemini, apague o segredo
+   `GROQ_API_KEY`.
+
+No Groq o formato da resposta é sempre pedido no texto, com o modo JSON ligado
+(a resposta traz `via: "prompt"`).
+
+---
+
 ## O que esperar na prática
 
 **Limite gratuito.** O plano gratuito do Gemini tem cota diária. As duas telas
