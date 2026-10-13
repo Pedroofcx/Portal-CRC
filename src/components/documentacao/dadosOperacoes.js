@@ -180,7 +180,7 @@ export const modulosOperacoes = [
       { campo: 'dados_por_data[]', descricao: 'Um registro por dia. É daqui que saem CSAT e performance do ciclo (src/lib/indicadoresCiclo.js), com cada dia contando uma vez.' },
       { campo: 'periodo_inicio / periodo_fim', descricao: 'Primeiro e último dia que o arquivo trouxe daquela pessoa.' },
       { campo: 'ApuracaoMapeamento', descricao: 'O de-para por fonte (coluna → campo; nome do arquivo → pessoa). É o que faz o sistema lembrar em vez de pedir tudo de novo.' },
-      { campo: 'chat.total_neutros / negativos_confirmados / csat_sem_neutros', descricao: 'Ouvidoria do chat: classificação manual, ticket a ticket. Desde o Ciclo 3 (17/09/2026) os neutros (nota 3) saem da base do CSAT oficial do chat; ticket sem classificar conta como negativo.' },
+      { campo: 'chat.total_neutros / negativos_confirmados / csat_sem_neutros', descricao: 'Ouvidoria do chat: classificação manual, ticket a ticket. Informativa: o CSAT oficial (premiação) nunca muda por causa dela.' },
     ],
     regras_negocio: [
       'As regras de classificação do telefone, do chat e do CX estão em Regras de negócio > Apuração.',

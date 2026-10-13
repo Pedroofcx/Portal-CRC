@@ -7,8 +7,8 @@ import { calcularCsat, zonaDoCsat } from '@/lib/relatorios/previsaoCsat';
 /**
  * Calculadora de CSAT — só conta na tela, não grava nada. Digita quantas
  * respostas teve cada nota (1 a 5) e vê o CSAT: satisfeitos (notas 4 e 5) ÷
- * respostas SEM os neutros (nota 3), a mesma regra da premiação. Mostra também
- * a conta simples de mercado, com os neutros na base, só para comparar.
+ * total de respostas. É a conta simples de mercado; o número oficial da
+ * premiação segue as regras de cada canal (ver "Como calculamos" na Análise).
  */
 const CAMPOS = [
   { nota: '1', grupo: 'Insatisfeitos', classe: 'bg-destructive/15 text-destructive' },
@@ -38,7 +38,7 @@ function Medidor({ valor }) {
 export default function CalculadoraCsat() {
   const [notas, setNotas] = useState(VAZIO);
   const r = calcularCsat(notas);
-  const zona = zonaDoCsat(r.csatPortal);
+  const zona = zonaDoCsat(r.csat);
 
   return (
     <div className="grid items-start gap-6 lg:grid-cols-2">
@@ -70,14 +70,13 @@ export default function CalculadoraCsat() {
           <Linha rotulo="Satisfeitos (notas 4 e 5)" valor={r.satisfeitos} />
           <Linha rotulo="Neutros (nota 3)" valor={r.neutros} />
           <Linha rotulo="Insatisfeitos (notas 1 e 2)" valor={r.insatisfeitos} />
-          <Linha rotulo="CSAT com os neutros na base" detalhe="a conta simples dos sites de calculadora" valor={fmt(r.csat)} />
           <Linha rotulo="Média das notas" valor={r.mediaDasNotas === null ? '—' : r.mediaDasNotas.toLocaleString('pt-BR', { maximumFractionDigits: 2 })} />
         </div>
       </Cartao>
 
       <Cartao titulo="Resultado">
-        <Medidor valor={r.csatPortal} />
-        {r.csatPortal === null ? (
+        <Medidor valor={r.csat} />
+        {r.csat === null ? (
           <p className="mt-2 text-center text-sm text-muted-foreground">Digite as respostas para ver o CSAT.</p>
         ) : (
           <div className="mt-2 text-center">
@@ -90,8 +89,8 @@ export default function CalculadoraCsat() {
           </div>
         )}
         <p className="mt-4 border-t border-border pt-3 text-xs text-muted-foreground">
-          CSAT do Portal = satisfeitos (notas 4 e 5) ÷ respostas que não são neutras. A nota 3 sai da base, como na
-          premiação. Na primeira tabela, "CSAT com os neutros na base" mostra a conta simples, para comparar.
+          CSAT = satisfeitos (4 e 5) ÷ total de respostas. É a conta simples; no número oficial da premiação, o telefone
+          deixa as neutras de fora e o chat as conta como negativas.
         </p>
       </Cartao>
     </div>

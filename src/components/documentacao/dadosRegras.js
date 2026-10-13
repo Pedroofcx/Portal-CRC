@@ -112,7 +112,7 @@ export const secoesDeRegras = [
     fonte: 'src/lib/csv.js, src/lib/apuracao/*, src/components/apuracao/*',
     itens: [
       { rotulo: 'Telefone (55PBX)', texto: 'Transferência de fila conta como atendida (performance) mas nunca gera avaliação. FCR 1 + nota 4 ou 5 = positiva; FCR 1 + nota 1 ou 2 = negativa; FCR 1 + nota 3 = neutra (avaliada, a favor de ninguém); FCR 2 = sempre negativa; FCR 1 sem nota válida = incompleta (nem conta como avaliada). CSAT = positivas ÷ (positivas + negativas).' },
-      { rotulo: 'Chat (Zendesk)', texto: 'O arquivo não traz nota. "Boa" é positiva e "ruim" conta como negativa na premiação. A classificação de quais "ruim" são nota 3 (neutro) é manual, ticket a ticket, na aba Ouvidoria, e, desde o Ciclo 3 (17/09/2026), os neutros saem da base do CSAT; sem classificar, continua negativo.' },
+      { rotulo: 'Chat (Zendesk)', texto: 'O arquivo não traz nota. "Boa" é positiva e "ruim" conta como negativa na premiação. A classificação de quais "ruim" são nota 3 (neutro) é manual, ticket a ticket, na aba Ouvidoria, e aparece à parte, sem mudar o resultado oficial.' },
       { rotulo: 'CX', texto: 'Média das notas dos critérios PREENCHIDOS de cada avaliação (critério em branco sai da conta, não vira zero). A avaliação CX é por mês de apuração e entra no ciclo em que o mês termina.' },
       { rotulo: 'Importação', texto: 'Leitor de CSV de verdade (aspas, ; ou ,, BOM). A tela mostra a conferência antes de salvar (linhas lidas e descartadas, dias já importados, quem ficou sem vínculo). Cada importação é um lote (importacao_id) que pode ser desfeito.' },
     ],
