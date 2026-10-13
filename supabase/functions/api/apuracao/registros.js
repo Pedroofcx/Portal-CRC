@@ -75,7 +75,9 @@ export function registrosDaImportacao({ resultados, tipo, fonte, vinculos, colab
           total_neutros: dia.total_neutros || 0,
           negativos_confirmados: dia.negativos_confirmados ?? (dia.total_negativos || 0),
           csat_sem_neutros: dia.csat_sem_neutros ?? (dia.csat || 0),
-          tem_nota: false,
+          // ClickDesk traz a nota de cada avaliação: já nasce classificado.
+          tem_nota: !!r.temNotaChat,
+          ...(r.temNotaChat ? { nota1: dia.nota1 || 0, nota2: dia.nota2 || 0, nota3: dia.nota3 || 0, nota4: dia.nota4 || 0, nota5: dia.nota5 || 0 } : {}),
         };
       } else {
         registro.cx = {
@@ -108,6 +110,9 @@ export function registrosDaImportacao({ resultados, tipo, fonte, vinculos, colab
         total_neutros: r.totalNeutros || 0,
         negativos_confirmados: r.negativosConfirmados ?? (r.totalNegativos || 0),
         csat_sem_neutros: r.csatSemNeutros ?? (r.csatPercentual || 0),
+        // De onde vieram os números (zendesk ou clickdesk) e o que o arquivo trazia.
+        fonte,
+        ...(r.soAvaliados ? { so_avaliados: true, por_nota: r.porNota } : {}),
       };
       base.satisfacao_media = r.csatPercentual || 0;
       base.percentual_avaliados = r.percentualAvaliados || 0;

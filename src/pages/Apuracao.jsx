@@ -13,7 +13,7 @@ import HistoricoImportacoes from '@/components/apuracao/HistoricoImportacoes';
 import OuvidoriaChat from '@/components/apuracao/OuvidoriaChat';
 import AuditoriaTelefone from '@/components/apuracao/AuditoriaTelefone';
 import RelatoriosApuracao from './RelatoriosApuracao';
-import { calcularTelefone, calcularChat, calcularCX } from '@/components/apuracao/calculosApuracao';
+import { calculoDaFonte } from '@/components/apuracao/calculosApuracao';
 import { registrosDaImportacao } from '../../supabase/functions/api/apuracao/registros.js';
 import { classificarTicket } from '@/lib/apuracao/ouvidoriaChat';
 import { revisarLigacao } from '@/lib/apuracao/revisaoTelefone';
@@ -28,7 +28,6 @@ import { usePermissoes } from '@/hooks/usePermissoes';
  * nomes fica guardado por fonte, e cada importação vira um lote que pode ser
  * desfeito.
  */
-const CALCULO = { telefone: calcularTelefone, chat: calcularChat, cx: calcularCX };
 
 export default function Apuracao() {
   const queryClient = useQueryClient();
@@ -56,7 +55,7 @@ export default function Apuracao() {
 
   const salvarImportacao = useMutation({
     mutationFn: async ({ arquivo, fonte, tipo, mapeamento, vinculos, leitura, conferencia }) => {
-      const resultados = CALCULO[tipo](leitura.linhas, mapeamento);
+      const resultados = calculoDaFonte(fonte, tipo)(leitura.linhas, mapeamento);
       const importacaoId = `imp-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
 
       const registros = registrosDaImportacao({

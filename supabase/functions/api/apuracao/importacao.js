@@ -15,6 +15,7 @@ import { normalizarData, nomeComparavel } from './datas.js';
 export const FONTES = [
   { valor: '55pbx', rotulo: '55PBX (telefone)', tipo: 'telefone' },
   { valor: 'zendesk', rotulo: 'Zendesk (chat)', tipo: 'chat' },
+  { valor: 'clickdesk', rotulo: 'ClickDesk (chat)', tipo: 'chat' },
   { valor: 'planilha_cx', rotulo: 'Planilha de avaliação CX', tipo: 'cx' },
 ];
 
@@ -52,6 +53,34 @@ export const CAMPOS = {
   ],
 };
 
+/**
+ * ClickDesk (chat), o sistema de avaliação que está entrando no lugar do
+ * Zendesk (Pedro, 13/10/2026). O arquivo traz uma linha por avaliação, com nota
+ * de 1 a 5, e várias equipes: só a Ouvidoria entra na apuração. As demais
+ * colunas (Aberto em, Nível, Sentimento, Canal, Assunto, Marca, Comentário...)
+ * não são usadas.
+ */
+export const CAMPOS_CLICKDESK = [
+  { chave: 'ticket', rotulo: 'Chamado', obrigatorio: true, sinonimos: ['chamado', 'ticket', 'id'] },
+  { chave: 'data', rotulo: 'Avaliado em', obrigatorio: true, sinonimos: ['avaliado em', 'data da avaliacao', 'data da avaliação', 'data'] },
+  { chave: 'nota', rotulo: 'Nota (1 a 5, é o CSAT)', obrigatorio: true, sinonimos: ['nota', 'csat'] },
+  { chave: 'agente', rotulo: 'Responsável', obrigatorio: true, sinonimos: ['responsavel', 'responsável', 'agente', 'atendente'] },
+  { chave: 'equipe', rotulo: 'Equipe (só a Ouvidoria entra)', obrigatorio: true, sinonimos: ['equipe', 'time', 'fila'] },
+];
+
+/** A equipe do ClickDesk que entra na apuração. */
+export const EQUIPE_DA_APURACAO = 'ouvidoria';
+export const ehDaOuvidoria = (equipe) => nomeComparavel(equipe).includes(EQUIPE_DA_APURACAO);
+
+/** Os campos de cada fonte: o ClickDesk tem os seus; as outras seguem o tipo. */
+export const camposDaFonte = (fonte, tipo) => (fonte === 'clickdesk' ? CAMPOS_CLICKDESK : (CAMPOS[tipo] ?? []));
+
+/** Nota do ClickDesk: 1 a 5, inteira. Qualquer outra coisa é null. */
+export function notaDoClickDesk(valor) {
+  const n = Number(String(valor ?? '').trim().replace(',', '.'));
+  return Number.isInteger(n) && n >= 1 && n <= 5 ? n : null;
+}
+
 /** Pistas que identificam a fonte pelo cabeçalho do arquivo. */
 const PISTAS = {
   '55pbx': [
@@ -61,6 +90,7 @@ const PISTAS = {
     'tempo na ura', 'tempo de espera', 'quantidade de transbordos', 'motivo de desconexao', 'caminho u r a', 'pergunta3',
   ],
   zendesk: ['ticket', 'assignee', 'atribuido a', 'atribuído a', 'satisfacao', 'satisfação', 'good', 'bad', 'solucionado em'],
+  clickdesk: ['chamado', 'avaliado em', 'quem avaliou', 'sentimento', 'aberto em', 'marca', 'motivo'],
   planilha_cx: ['empatia', 'cordialidade', 'profissionalismo', 'resolucao', 'resolução', 'escrita'],
 };
 
@@ -87,8 +117,8 @@ export function detectarFonte(colunas = []) {
  * Sugere a coluna de cada campo. O que já foi corrigido antes (`lembrado`)
  * ganha da adivinhação — é o de-para que o gestor arrumou na semana passada.
  */
-export function sugerirMapeamento(colunas = [], tipo, lembrado = {}) {
-  const campos = CAMPOS[tipo] ?? [];
+export function sugerirMapeamento(colunas = [], tipo, lembrado = {}, fonte = null) {
+  const campos = camposDaFonte(fonte, tipo);
   const disponiveis = colunas.map((c) => ({ original: c, comparavel: comparavel(c) }));
   const mapeamento = {};
 
@@ -107,7 +137,7 @@ export function sugerirMapeamento(colunas = [], tipo, lembrado = {}) {
 }
 
 /** Faltou mapear algum campo obrigatório? */
-export const camposFaltando = (tipo, mapeamento = {}) => (CAMPOS[tipo] ?? [])
+export const camposFaltando = (tipo, mapeamento = {}, fonte = null) => camposDaFonte(fonte, tipo)
   .filter((campo) => campo.obrigatorio && !mapeamento[campo.chave])
   .map((campo) => campo.rotulo);
 
@@ -123,7 +153,9 @@ export function periodoDoArquivo(linhas = [], colunaData) {
 
 /**
  * Liga cada nome do arquivo a uma pessoa do Portal. Primeiro o que já foi
- * ligado antes; depois nome igual; depois primeiro e último nome iguais.
+ * ligado antes; depois nome igual; depois primeiro e último nome iguais; por fim,
+ * quando TODAS as palavras do nome do arquivo aparecem no nome da pessoa e só uma
+ * pessoa serve ("Ana Guelber" é a Ana Flávia Guelber Amarante).
  */
 export function vincularAgentes(nomes = [], colaboradores = [], lembrados = {}) {
   const ativos = colaboradores.filter((c) => c.ativo !== false);
@@ -139,7 +171,11 @@ export function vincularAgentes(nomes = [], colaboradores = [], lembrados = {}) 
     const pontas = partes.length > 1 ? `${partes[0]} ${partes[partes.length - 1]}` : chave;
 
     const lembrado = lembrados[nome] && ativos.find((c) => c.id === lembrados[nome]);
-    const achado = lembrado || porNome.get(chave) || porPontas.get(pontas) || null;
+    // Todas as palavras do nome do arquivo (2 ou mais) dentro do nome da pessoa.
+    const contidos = partes.length >= 2
+      ? ativos.filter((c) => { const alvo = new Set(comparavel(c.nome_completo).split(' ')); return partes.every((p) => alvo.has(p)); })
+      : [];
+    const achado = lembrado || porNome.get(chave) || porPontas.get(pontas) || (contidos.length === 1 ? contidos[0] : null) || null;
 
     return {
       nome,
@@ -153,6 +189,8 @@ export function vincularAgentes(nomes = [], colaboradores = [], lembrados = {}) 
 const MOTIVOS = {
   sem_agente: 'sem o nome do agente',
   sem_data: 'sem data ou com data que não dá para entender',
+  outra_equipe: 'de outras equipes (só a Ouvidoria entra)',
+  sem_nota: 'sem nota de 1 a 5',
 };
 
 /**
@@ -160,9 +198,9 @@ const MOTIVOS = {
  * por quê, quais dias já tinham sido importados e quem ficou sem vínculo.
  */
 export function conferirImportacao({
-  tipo, linhas = [], mapeamento = {}, colaboradores = [], vinculos = {}, apuracoesExistentes = [],
+  tipo, fonte = null, linhas = [], mapeamento = {}, colaboradores = [], vinculos = {}, apuracoesExistentes = [],
 }) {
-  const faltando = camposFaltando(tipo, mapeamento);
+  const faltando = camposFaltando(tipo, mapeamento, fonte);
   if (faltando.length > 0) {
     return { pronta: false, faltando, linhasLidas: linhas.length, linhasValidas: 0, descartadas: [], agentes: [], periodo: null, diasJaImportados: [], avisos: [] };
   }
@@ -171,11 +209,22 @@ export function conferirImportacao({
   const porAgente = new Map();
   const validas = [];
 
+  const clickdesk = fonte === 'clickdesk';
+  const porCanal = {};
+  let soIA = 0;
   linhas.forEach((linha) => {
+    // ClickDesk: o arquivo traz todas as equipes; só a Ouvidoria é apuração.
+    if (clickdesk && !ehDaOuvidoria(linha[mapeamento.equipe])) { descartes.set('outra_equipe', (descartes.get('outra_equipe') ?? 0) + 1); return; }
     const agente = String(linha[mapeamento.agente] ?? '').trim();
     const data = normalizarData(linha[mapeamento.data]);
     if (!agente) { descartes.set('sem_agente', (descartes.get('sem_agente') ?? 0) + 1); return; }
     if (!data) { descartes.set('sem_data', (descartes.get('sem_data') ?? 0) + 1); return; }
+    if (clickdesk && notaDoClickDesk(linha[mapeamento.nota]) === null) { descartes.set('sem_nota', (descartes.get('sem_nota') ?? 0) + 1); return; }
+    if (clickdesk) {
+      const canal = String(linha.Canal ?? linha.canal ?? '').trim() || 'sem canal';
+      porCanal[canal] = (porCanal[canal] ?? 0) + 1;
+      if (nomeComparavel(linha.Atendimento ?? linha.atendimento).includes('so ia')) soIA += 1;
+    }
     validas.push({ agente, data });
     const atual = porAgente.get(agente) ?? { nome: agente, linhas: 0, dias: new Set() };
     atual.linhas += 1;
@@ -201,7 +250,7 @@ export function conferirImportacao({
   // Dias que já têm apuração do mesmo tipo: salvar de novo substitui.
   const diasGravados = new Map();
   apuracoesExistentes
-    .filter((a) => a.tipo_apuracao === tipo)
+    .filter((a) => a.tipo_apuracao === tipo && (fonte ? (a.fonte ?? 'zendesk') === fonte : true))
     .forEach((a) => (a.dados_por_data ?? []).forEach((d) => {
       if (!d?.data) return;
       const atual = diasGravados.get(d.data) ?? new Set();
@@ -219,6 +268,10 @@ export function conferirImportacao({
   if (diasJaImportados.length > 0) {
     avisos.push(`${diasJaImportados.length} dia(s) já tinham sido importados (${diasJaImportados[0].split('-').reverse().join('/')} em diante). Salvar de novo substitui aqueles números.`);
   }
+  if (clickdesk && validas.length > 0) {
+    const canais = Object.entries(porCanal).map(([c, n]) => `${c}: ${n}`).join(' · ');
+    avisos.push(`ClickDesk: ${validas.length} avaliação(ões) da Ouvidoria entram (${canais}).${soIA ? ` ${soIA} foi atendida só pela IA.` : ''}`);
+  }
   if (validas.length === 0) avisos.push('Nenhuma linha utilizável neste arquivo — confira o de-para das colunas.');
 
   return {
@@ -231,6 +284,7 @@ export function conferirImportacao({
     periodo,
     diasJaImportados,
     avisos,
+    ...(clickdesk ? { porCanal, soIA } : {}),
   };
 }
 

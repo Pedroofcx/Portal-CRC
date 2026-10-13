@@ -1162,3 +1162,26 @@ linha, na lista e na tabela completa). As fixadas ficam no topo da lista dela,
 sob o título "Fixadas", na mesma ordem (mais recente primeiro). É pessoal: não
 muda a lista de mais ninguém, e fica guardado no banco, então vale em qualquer
 computador.
+
+## Chat com duas fontes: Zendesk e ClickDesk (Pedro, 13/10/2026)
+
+O sistema de avaliação do chat está sendo trocado; enquanto o Zendesk não é
+desligado, os dois rodam em paralelo (só atendimento por CHAT).
+
+- **Importar:** além do Zendesk, a fonte **ClickDesk (chat)**. Colunas: Chamado,
+  Avaliado em, Nota, Responsável, Equipe. Só entram as linhas da equipe
+  **Ouvidoria**; as outras são descartadas e contadas na conferência. Linhas sem
+  nota de 1 a 5 também ficam de fora.
+- **Nota = CSAT, mesma regra de sempre:** 4 e 5 positivo, 1 a 3 negativo (a nota 3
+  aparece à parte, só como informação). Nenhum neutro é retirado do número oficial.
+- **Tag de origem:** cada registro guarda a fonte (`zendesk` ou `clickdesk`); o
+  Histórico de importações mostra a coluna Fonte e os relatórios deixam escolher.
+- **Soma dos dois:** o CSAT do chat é a **média simples** do CSAT do Zendesk e do
+  CSAT do ClickDesk (quando só uma fonte tem avaliação no período, vale ela).
+  Depois entra, como antes, na média do CSAT de telefone e chat.
+- **Relatórios:** o seletor "Fonte do chat" (Zendesk + ClickDesk | só Zendesk | só
+  ClickDesk) aparece na Análise da apuração e no grupo Qualidade; a tela mostra o
+  CSAT de cada fonte lado a lado e explica a média simples.
+- **A confirmar com o Pedro:** a média é de percentuais (não ponderada pelo número
+  de avaliações); e todas as linhas da Ouvidoria entram, qualquer que seja o Canal
+  (e-mail, telefone, "Só IA"), podendo-se filtrar por Canal se ele quiser.

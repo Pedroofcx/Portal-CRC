@@ -18,6 +18,7 @@ import { intervaloDoAtalho } from '@/lib/relatorios/periodo';
 import { resumoQualidade, diaADiaQualidade } from '@/lib/relatorios/qualidade';
 import { pontosDaFaixa, proximaFaixa } from '@/lib/faixasIndicadores';
 import PreditivoApuracao from '@/components/relatorios/apuracao/PreditivoApuracao';
+import SeletorFonteChat, { detalheDasFontes } from '@/components/relatorios/hub/SeletorFonteChat';
 import { usePermissoes } from '@/hooks/usePermissoes';
 
 /**
@@ -39,6 +40,7 @@ const diaSemanaCurto = (iso) => ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sáb
 export default function RelatoriosApuracao() {
   const [periodo, setPeriodo] = useState(() => ({ chave: 'ultimos90', ...intervaloDoAtalho('ultimos90') }));
   const [filtroColaborador, setFiltroColaborador] = useState('todos');
+  const [fonteChat, setFonteChat] = useState('combinado');
 
   const { data: user } = useQuery({ queryKey: ['currentUser'], queryFn: () => db.auth.me() });
   const { data: colaboradores = [] } = useQuery({ queryKey: ['colaboradores', "list()"], queryFn: () => db.entities.Colaborador.list() });
@@ -48,13 +50,13 @@ export default function RelatoriosApuracao() {
   });
 
   const agentes = useMemo(() => colaboradores.filter((c) => c.papel === 'agente' && c.ativo !== false), [colaboradores]);
-  const q = useMemo(() => resumoQualidade({ apuracoes, colaboradores, periodo }), [apuracoes, colaboradores, periodo]);
+  const q = useMemo(() => resumoQualidade({ apuracoes, colaboradores, periodo, fonteChat }), [apuracoes, colaboradores, periodo, fonteChat]);
   const { temPermissao } = usePermissoes();
   const podeApurar = temPermissao('gerenciar_apuracao');
   const pessoa = filtroColaborador !== 'todos' ? q.pessoas.find((p) => p.id === filtroColaborador) : null;
   const drill = useMemo(
-    () => (filtroColaborador !== 'todos' ? diaADiaQualidade({ apuracoes, colaboradorId: filtroColaborador, periodo }) : null),
-    [apuracoes, filtroColaborador, periodo]
+    () => (filtroColaborador !== 'todos' ? diaADiaQualidade({ apuracoes, colaboradorId: filtroColaborador, periodo, fonteChat }) : null),
+    [apuracoes, filtroColaborador, periodo, fonteChat]
   );
 
   if (!user || isLoading) return <LoadingSpinner text="Carregando a análise..." />;
@@ -75,6 +77,7 @@ export default function RelatoriosApuracao() {
       <Cartao>
         <div className="flex flex-wrap items-end gap-3">
           <FiltroPeriodo valor={periodo} onChange={setPeriodo} />
+          <SeletorFonteChat valor={fonteChat} aoMudar={setFonteChat} />
           <div className="space-y-1">
             <Label htmlFor="rel-apuracao-agente" className="text-xs">Agente</Label>
             <Select value={filtroColaborador} onValueChange={setFiltroColaborador}>
@@ -89,12 +92,12 @@ export default function RelatoriosApuracao() {
       </Cartao>
 
       {filtroColaborador === 'todos' ? (
-        <VisaoEquipe q={q} periodo={periodo} />
+        <VisaoEquipe q={q} periodo={periodo} fonteChat={fonteChat} />
       ) : (
         <VisaoPessoa pessoa={pessoa} drill={drill} periodo={periodo} linhaComPontos={linhaComPontos} equipeMeses={q.meses} />
       )}
 
-      <PreditivoApuracao apuracoes={apuracoes} colaboradores={colaboradores} />
+      <PreditivoApuracao apuracoes={apuracoes} colaboradores={colaboradores} fonteChat={fonteChat} />
     </div>
   );
 }
@@ -192,7 +195,7 @@ function ComparacaoDeAgentes({ q }) {
   );
 }
 
-function VisaoEquipe({ q, periodo }) {
+function VisaoEquipe({ q, periodo, fonteChat }) {
   const semDados = q.equipe.volumes.ligacoes + q.equipe.volumes.chats === 0 && !q.pessoas.some((p) => p.cxAvaliacoes > 0);
   if (semDados) {
     return (
@@ -211,10 +214,11 @@ function VisaoEquipe({ q, periodo }) {
           <p className="text-sm text-muted-foreground">CSAT da equipe</p>
           <div className="mt-4 divide-y divide-border border-t border-border">
             <Linha rotulo="CSAT do telefone" detalhe={`${q.equipe.volumes.avaliadas} avaliações`} valor={pct(q.equipe.csatTelefone)} />
-            <Linha rotulo="CSAT do chat" detalhe={`${q.equipe.volumes.avaliados} avaliações`} valor={pct(q.equipe.csatChat)} />
+            <Linha rotulo="CSAT do chat" detalhe={fonteChat === 'combinado' ? (detalheDasFontes(q.equipe.csatChatPorFonte, q.equipe.volumesChatPorFonte) || `${q.equipe.volumes.avaliados} avaliações`) : `${q.equipe.volumes.avaliados} avaliações (só ${fonteChat === 'zendesk' ? 'Zendesk' : 'ClickDesk'})`} valor={pct(q.equipe.csatChat)} />
             <Linha rotulo="Performance" detalhe={`${q.equipe.volumes.atendidas} de ${q.equipe.volumes.ligacoes} ligações`} valor={pct(q.equipe.performance)} />
           </div>
           <ComoCalculamos>
+            <p><strong>Chat:</strong> Zendesk e ClickDesk andam em paralelo. O CSAT do chat é a média simples dos dois (quando só um tem avaliação, vale ele); a escolha de fonte acima mostra um só.</p>
             <p><strong>CSAT</strong> = (CSAT do telefone + CSAT do chat) ÷ 2. Cada canal soma todas as avaliações do período: positivas ÷ (positivas + negativas). Canal sem nenhuma avaliação fica fora da média.</p>
             <p>Selecione um agente acima para ver o dia a dia e a semana a semana da pessoa.</p>
           </ComoCalculamos>

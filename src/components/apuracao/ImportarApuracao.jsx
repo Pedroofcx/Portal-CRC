@@ -7,9 +7,9 @@ import { Cartao, Linha } from '@/components/ui/Cartao';
 import TabelaResumida from '@/components/ui/TabelaResumida';
 import { lerCsv } from '@/lib/csv';
 import {
-  CAMPOS, FONTES, conferirImportacao, detectarFonte, sugerirMapeamento,
+  camposDaFonte, FONTES, conferirImportacao, detectarFonte, sugerirMapeamento,
 } from '@/lib/apuracao/importacao';
-import { calcularTelefone, calcularChat, calcularCX } from '@/components/apuracao/calculosApuracao';
+import { calculoDaFonte } from '@/components/apuracao/calculosApuracao';
 
 /**
  * Importar a apuração em uma tela só: escolher o arquivo, conferir o de-para
@@ -23,10 +23,9 @@ import { calcularTelefone, calcularChat, calcularCX } from '@/components/apuraca
 const brDate = (iso) => (iso ? String(iso).slice(0, 10).split('-').reverse().join('/') : '—');
 const pct = (v) => `${Number(v || 0).toLocaleString('pt-BR', { maximumFractionDigits: 1 })}%`;
 const nota = (v) => Number(v || 0).toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 2 });
-const CALCULO = { telefone: calcularTelefone, chat: calcularChat, cx: calcularCX };
 
 /** Colunas da prévia por pessoa, uma tabela diferente para cada canal. */
-function colunasPrevia(tipo) {
+function colunasPrevia(tipo, fonte) {
   const nome = { chave: 'nome', rotulo: 'No arquivo', alinhar: 'esquerda', principal: true, valor: (l) => l.nomeNoArquivo };
   if (tipo === 'telefone') {
     return [
@@ -39,6 +38,18 @@ function colunasPrevia(tipo) {
       { chave: 'neutras', rotulo: 'Neutras (nota 3)', valor: (l) => l.r.totalNeutras || 0 },
       { chave: 'incompletas', rotulo: 'Incompletas (sem nota)', valor: (l) => l.r.totalIncompletas || 0 },
       { chave: 'ligacoes', rotulo: 'Ligações', valor: (l) => l.r.totalLigacoes },
+    ];
+  }
+  if (tipo === 'chat' && fonte === 'clickdesk') {
+    // ClickDesk traz a nota de cada avaliação: 4 e 5 são positivas, 1 a 3 negativas.
+    return [
+      nome,
+      { chave: 'csat', rotulo: 'CSAT', principal: true, valor: (l) => <span className="font-semibold text-primary">{pct(l.r.csatPercentual)}</span> },
+      { chave: 'avaliacoes', rotulo: 'Avaliações', principal: true, valor: (l) => l.r.totalAvaliados },
+      { chave: 'positivas', rotulo: 'Positivas (4 e 5)', principal: true, valor: (l) => l.r.totalPositivos },
+      { chave: 'negativas', rotulo: 'Negativas (1 a 3)', valor: (l) => l.r.totalNegativos },
+      { chave: 'neutras', rotulo: 'Neutras (nota 3)', valor: (l) => l.r.totalNeutros || 0 },
+      { chave: 'notas', rotulo: 'Notas 1·2·3·4·5', valor: (l) => Object.values(l.r.porNota ?? {}).join(' · ') },
     ];
   }
   if (tipo === 'chat') {
@@ -72,13 +83,14 @@ export default function ImportarApuracao({ colaboradores, mapeamentos = [], apur
   const conferencia = useMemo(() => (leitura && tipo
     ? conferirImportacao({
       tipo,
+      fonte,
       linhas: leitura.linhas,
       mapeamento,
       colaboradores,
       vinculos,
       apuracoesExistentes: apuracoes,
     })
-    : null), [leitura, tipo, mapeamento, colaboradores, vinculos, apuracoes]);
+    : null), [leitura, tipo, fonte, mapeamento, colaboradores, vinculos, apuracoes]);
 
   // Prévia do cálculo, por pessoa do arquivo — para conferir CSAT, positivas
   // e negativas ANTES de salvar, não só depois (Pedro, 29/09/2026: "não
@@ -87,9 +99,9 @@ export default function ImportarApuracao({ colaboradores, mapeamentos = [], apur
   // incompleto.
   const previa = useMemo(() => (
     leitura && tipo && conferencia?.faltando.length === 0
-      ? CALCULO[tipo](leitura.linhas, mapeamento)
+      ? calculoDaFonte(fonte, tipo)(leitura.linhas, mapeamento)
       : null
-  ), [leitura, tipo, mapeamento, conferencia]);
+  ), [leitura, tipo, fonte, mapeamento, conferencia]);
 
   const escolherArquivo = async (evento) => {
     const file = evento.target.files?.[0];
@@ -108,7 +120,7 @@ export default function ImportarApuracao({ colaboradores, mapeamentos = [], apur
     setArquivo(file);
     setLeitura(r);
     setFonte(detectada ?? '');
-    setMapeamento(tipoDetectado ? sugerirMapeamento(r.colunas, tipoDetectado, doBanco?.colunas ?? {}) : {});
+    setMapeamento(tipoDetectado ? sugerirMapeamento(r.colunas, tipoDetectado, doBanco?.colunas ?? {}, detectada) : {});
     setVinculos(doBanco?.agentes ?? {});
     r.avisos.forEach((a) => toast.warning(a));
     toast.success(`${r.linhas.length} linha(s) lidas${detectada ? ` — reconheci como ${FONTES.find((f) => f.valor === detectada).rotulo}` : ''}.`);
@@ -118,7 +130,7 @@ export default function ImportarApuracao({ colaboradores, mapeamentos = [], apur
     setFonte(nova);
     const doBanco = mapeamentos.find((m) => m.fonte === nova) ?? null;
     const novoTipo = FONTES.find((f) => f.valor === nova)?.tipo ?? '';
-    setMapeamento(leitura && novoTipo ? sugerirMapeamento(leitura.colunas, novoTipo, doBanco?.colunas ?? {}) : {});
+    setMapeamento(leitura && novoTipo ? sugerirMapeamento(leitura.colunas, novoTipo, doBanco?.colunas ?? {}, nova) : {});
     setVinculos(doBanco?.agentes ?? {});
   };
 
@@ -156,7 +168,7 @@ export default function ImportarApuracao({ colaboradores, mapeamentos = [], apur
         </div>
         {!arquivo && (
           <p className="mt-2 text-sm text-muted-foreground">
-            Exporte o relatório do 55PBX, do Zendesk ou a planilha de CX em CSV. O período vem do próprio arquivo —
+            Exporte o relatório do 55PBX, do Zendesk, do ClickDesk ou a planilha de CX em CSV. O período vem do próprio arquivo —
             não precisa escolher mês.
           </p>
         )}
@@ -182,7 +194,7 @@ export default function ImportarApuracao({ colaboradores, mapeamentos = [], apur
 
           {tipo && (
             <div className="mt-4 grid gap-3 sm:grid-cols-2">
-              {CAMPOS[tipo].map((campo) => (
+              {camposDaFonte(fonte, tipo).map((campo) => (
                 <div key={campo.chave}>
                   <Label className="text-xs">
                     {campo.rotulo}{campo.obrigatorio && <span className="ml-0.5 text-destructive">*</span>}
@@ -244,9 +256,16 @@ export default function ImportarApuracao({ colaboradores, mapeamentos = [], apur
               <TabelaResumida
                 linhas={Object.entries(previa).map(([nomeNoArquivo, r]) => ({ nomeNoArquivo, r }))}
                 chaveDaLinha={(l) => l.nomeNoArquivo}
-                colunas={colunasPrevia(tipo)}
+                colunas={colunasPrevia(tipo, fonte)}
               />
             </Cartao>
+          )}
+
+          {fonte === 'clickdesk' && conferencia.faltando.length === 0 && (
+            <p className="rounded-lg bg-muted px-4 py-3 text-sm text-muted-foreground">
+              ClickDesk e Zendesk andam em paralelo no chat. Cada importação fica marcada com a fonte, e o CSAT do chat do
+              ciclo é a <span className="font-medium text-foreground">média simples</span> dos dois. Só a equipe Ouvidoria entra; as demais linhas são ignoradas.
+            </p>
           )}
 
           {conferencia.agentes.length > 0 && (

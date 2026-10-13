@@ -16,8 +16,8 @@
  *   6. limite de chamadas por minuto    429  limite_excedido
  */
 
-import { FONTES, CAMPOS, vincularAgentes, periodoDoArquivo } from './apuracao/importacao.js';
-import { calcularTelefone, calcularChat, calcularCX, normalizarData } from './apuracao/calculos.js';
+import { FONTES, camposDaFonte, vincularAgentes, periodoDoArquivo } from './apuracao/importacao.js';
+import { calculoDaFonte, normalizarData } from './apuracao/calculos.js';
 import { registrosDaImportacao } from './apuracao/registros.js';
 
 export const VERSAO = 'v1';
@@ -579,13 +579,14 @@ const TIPO_DA_FONTE = Object.fromEntries(FONTES.map((f) => [f.valor, f.tipo]));
 
 /**
  * Confere o corpo de POST /v1/apuracao:
- *   { fonte: '55pbx' | 'zendesk' | 'planilha_cx',
+ *   { fonte: '55pbx' | 'zendesk' | 'clickdesk' | 'planilha_cx',
  *     registros: [ { ...campos da fonte } ],
  *     vinculos?: { 'Nome do agente no sistema de origem': '<colaborador_id>' } }
  *
  * Os campos de cada registro têm os MESMOS nomes que o Portal usa ao importar o
  * CSV (telefone: agente, data, origem, status, fcr, csat; chat: agente, ticket,
- * data, bom, ruim; cx: agente, data, empatia, cordialidade, comunicacao, escrita,
+ * data, bom, ruim; chat ClickDesk: ticket, data, nota, agente, equipe (só a
+ * Ouvidoria entra); cx: agente, data, empatia, cordialidade, comunicacao, escrita,
  * profissionalismo, resolucao e observacao). Os valores vão como o relatório traz
  * (texto ou número): o Portal faz a classificação, não quem envia.
  */
@@ -614,7 +615,7 @@ export function validarLoteApuracao(corpo) {
 
   if (!tipo || !Array.isArray(corpo.registros)) return { erros, lote: null };
 
-  const campos = CAMPOS[tipo];
+  const campos = camposDaFonte(corpo.fonte, tipo);
   const chaves = campos.map((c) => c.chave);
   const linhas = [];
   let avisos = 0;
@@ -635,7 +636,6 @@ export function validarLoteApuracao(corpo) {
   return { erros, lote: erros.length ? null : { fonte: corpo.fonte, tipo, linhas, vinculos } };
 }
 
-const CALCULO = { telefone: calcularTelefone, chat: calcularChat, cx: calcularCX };
 
 /**
  * O caminho inteiro da importação, sem tocar em banco: calcula pelas mesmas regras
@@ -645,8 +645,8 @@ const CALCULO = { telefone: calcularTelefone, chat: calcularChat, cx: calcularCX
  */
 export function prepararImportacaoApi({ lote, colaboradores = [], lembrados = {}, integracaoNome, importacaoId }) {
   const { fonte, tipo, linhas, vinculos } = lote;
-  const mapeamento = Object.fromEntries(CAMPOS[tipo].map((c) => [c.chave, c.chave]));
-  const resultados = CALCULO[tipo](linhas, mapeamento);
+  const mapeamento = Object.fromEntries(camposDaFonte(fonte, tipo).map((c) => [c.chave, c.chave]));
+  const resultados = calculoDaFonte(fonte, tipo)(linhas, mapeamento);
 
   const nomes = Object.keys(resultados);
   const automaticos = vincularAgentes(nomes, colaboradores, { ...lembrados, ...vinculos });

@@ -29,12 +29,12 @@ function melhorEPior(lista, chave) {
  * pra achar o melhor e o pior mês/semana de CSAT da equipe, e deixa escolher
  * qualquer outro mês ou semana pra ver o dia que puxou o resultado.
  */
-export default function PreditivoApuracao({ apuracoes, colaboradores }) {
+export default function PreditivoApuracao({ apuracoes, colaboradores, fonteChat = 'combinado' }) {
   const [granularidade, setGranularidade] = useState('mes');
   const [selecionado, setSelecionado] = useState('');
 
-  const q = useMemo(() => resumoQualidade({ apuracoes, colaboradores, periodo: {} }), [apuracoes, colaboradores]);
-  const equipe = useMemo(() => diaADiaEquipeQualidade({ apuracoes, colaboradores, periodo: {} }), [apuracoes, colaboradores]);
+  const q = useMemo(() => resumoQualidade({ apuracoes, colaboradores, periodo: {}, fonteChat }), [apuracoes, colaboradores, fonteChat]);
+  const equipe = useMemo(() => diaADiaEquipeQualidade({ apuracoes, colaboradores, periodo: {}, fonteChat }), [apuracoes, colaboradores, fonteChat]);
 
   const { melhor: melhorMes, pior: piorMes } = useMemo(() => melhorEPior(q.meses, 'csat'), [q.meses]);
   const { melhor: melhorSemana, pior: piorSemana } = useMemo(() => melhorEPior(equipe.semanas, 'csat'), [equipe.semanas]);

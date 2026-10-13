@@ -2364,5 +2364,41 @@ console.log('\n== ordem das tratativas e fixadas ==');
   checa('sem fixadas, so a ordem normal', ordenarTratativas([velha, nova], new Set()).map((x) => x.id).join(','), '0395,0100');
 }
 
+// ---- ClickDesk (chat, só Ouvidoria) em paralelo com o Zendesk ----
+{
+  const { calculoDaFonte } = await import('../supabase/functions/api/apuracao/calculos.js');
+  const { resumoQualidade } = await import('../src/lib/relatorios/qualidade.js');
+  const csv = 'Chamado;Avaliado em;Nota;Responsável;Equipe;Canal\n'
+    + '1;2026-10-01 10:00;5;Ana Guelber;Ouvidoria;Chat\n'
+    + '2;2026-10-01 11:00;1;Ana Guelber;Ouvidoria;Chat\n'
+    + '3;2026-10-01 12:00;3;Ana Guelber;Ouvidoria;Chat\n'
+    + '4;2026-10-01 12:00;5;Ana Guelber;Suporte;Chat\n';
+  const lido = lerCsv(csv);
+  const eq = (n, r, e) => checa(n, String(r), String(e));
+  eq('clickdesk: fonte detectada', detectarFonte(lido.colunas), 'clickdesk');
+  const mapa = sugerirMapeamento(lido.colunas, 'chat', {}, 'clickdesk');
+  eq('clickdesk: nada faltando', camposFaltando('chat', mapa, 'clickdesk').length, 0);
+  const colabs = [{ id: 'a1', nome_completo: 'Ana Maria Guelber', ativo: true }];
+  const vinc = vincularAgentes(['Ana Guelber'], colabs);
+  eq('clickdesk: vincula nome parcial', vinc[0].colaborador_id, 'a1');
+  const calc = calculoDaFonte('clickdesk', 'chat')(lido.linhas, mapa);
+  const ana = calc.resultados?.[0] ?? Object.values(calc.porAgente ?? {})[0];
+  eq('clickdesk: calculo gera resultado', !!calc, true);
+  void ana;
+}
+{
+  const { resumoQualidade } = await import('../src/lib/relatorios/qualidade.js');
+  const dia = (fonte, tot, pos) => ({ tipo_apuracao: 'chat', fonte, colaborador_id: 'a1', data_inicio: '2026-10-01', data_fim: '2026-10-01', dados_por_data: [{ data: '2026-10-01', chat: { total_chats: tot, total_avaliados: tot, total_positivos: pos, total_negativos: tot - pos } }] });
+  const eq = (n, r, e) => checa(n, String(r), String(e));
+  const colabs = [{ id: 'a1', nome_completo: 'Ana', ativo: true, papel: 'agente' }];
+  const apuracoes = [dia('zendesk', 10, 9), dia('clickdesk', 4, 2)];
+  const comb = resumoQualidade({ apuracoes, colaboradores: colabs, periodo: {}, fonteChat: 'combinado' });
+  const zen = resumoQualidade({ apuracoes, colaboradores: colabs, periodo: {}, fonteChat: 'zendesk' });
+  const clk = resumoQualidade({ apuracoes, colaboradores: colabs, periodo: {}, fonteChat: 'clickdesk' });
+  eq('chat combinado = media simples (90 e 50 => 70)', Math.round(comb.equipe.csatChat), 70);
+  eq('chat so zendesk', Math.round(zen.equipe.csatChat), 90);
+  eq('chat so clickdesk', Math.round(clk.equipe.csatChat), 50);
+}
+
 console.log('\n' + passou + ' passaram, ' + falhou + ' falharam');
 process.exit(falhou ? 1 : 0);

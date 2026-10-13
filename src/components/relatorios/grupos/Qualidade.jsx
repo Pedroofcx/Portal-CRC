@@ -1,5 +1,5 @@
 import db from '@/api/db';
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { createPageUrl } from '@/utils';
@@ -10,6 +10,7 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'r
 import Grafico from '@/components/relatorios/hub/Grafico';
 import { SERIE_GRAFICO } from '@/lib/cores-grafico';
 import { ComoCalculamos, Pergunta, periodoPorExtenso } from '@/components/relatorios/hub/Pecas';
+import SeletorFonteChat, { detalheDasFontes } from '@/components/relatorios/hub/SeletorFonteChat';
 
 /**
  * Relatórios › Qualidade — como os clientes nos avaliam (CSAT, performance e
@@ -26,12 +27,15 @@ export default function Qualidade({ periodo, colaboradores }) {
     queryFn: () => db.entities.Apuracao.list('-periodo_fim'),
     staleTime: 120000,
   });
-  const q = useMemo(() => resumoQualidade({ apuracoes, colaboradores, periodo }), [apuracoes, colaboradores, periodo]);
+  const [fonteChat, setFonteChat] = useState('combinado');
+  const q = useMemo(() => resumoQualidade({ apuracoes, colaboradores, periodo, fonteChat }), [apuracoes, colaboradores, periodo, fonteChat]);
   const semDados = !isLoading && q.equipe.volumes.ligacoes + q.equipe.volumes.chats === 0 && !q.pessoas.some((p) => p.cxAvaliacoes > 0);
 
   return (
     <div className="space-y-6">
       <Pergunta pergunta="Como os clientes nos avaliam?" explicacao={`CSAT, performance e avaliação de atendimento ${periodoPorExtenso(periodo)}, a partir das apurações importadas.`} />
+
+      <SeletorFonteChat valor={fonteChat} aoMudar={setFonteChat} />
 
       {semDados ? (
         <Cartao>
@@ -50,11 +54,12 @@ export default function Qualidade({ periodo, colaboradores }) {
               <p className="text-sm text-muted-foreground">CSAT da equipe</p>
               <div className="mt-4 divide-y divide-border border-t border-border">
                 <Linha rotulo="CSAT do telefone" detalhe={`${q.equipe.volumes.avaliadas} avaliações · ${pct(q.equipe.avaliadosTelefone)} das ligações atendidas`} valor={pct(q.equipe.csatTelefone)} />
-                <Linha rotulo="CSAT do chat" detalhe={`${q.equipe.volumes.avaliados} avaliações · ${pct(q.equipe.avaliadosChat)} dos chats`} valor={pct(q.equipe.csatChat)} />
+                <Linha rotulo="CSAT do chat" detalhe={fonteChat === 'combinado' ? (detalheDasFontes(q.equipe.csatChatPorFonte, q.equipe.volumesChatPorFonte) || `${q.equipe.volumes.avaliados} avaliações`) : `${q.equipe.volumes.avaliados} avaliações (só ${fonteChat === 'zendesk' ? 'Zendesk' : 'ClickDesk'})`} valor={pct(q.equipe.csatChat)} />
                 <Linha rotulo="Performance" detalhe={`${q.equipe.volumes.atendidas} de ${q.equipe.volumes.ligacoes} ligações atendidas`} valor={pct(q.equipe.performance)} />
               </div>
               <ComoCalculamos>
                 <p><strong>CSAT</strong> = (CSAT do telefone + CSAT do chat) ÷ 2. Cada canal junta todas as avaliações do período: avaliações positivas ÷ avaliações. Se um canal não teve nenhuma avaliação, vale só o outro.</p>
+                <p><strong>O chat</strong> tem duas fontes em paralelo, Zendesk e ClickDesk (só a Ouvidoria): o CSAT do chat é a média simples dos dois, e quando só uma tem avaliação vale a que tem. A escolha acima mostra só uma delas, para comparar.</p>
                 <p><strong>Performance</strong> = ligações atendidas (não abandonadas) ÷ ligações recebidas.</p>
                 <p><strong>A equipe</strong> soma as avaliações de todo mundo — quem atendeu mais pesa mais. Não é a média das pessoas (uma pessoa com 1 avaliação ruim puxaria a média tanto quanto outra com 30).</p>
                 <p>Cada dia conta uma vez: se o mesmo dia foi importado duas vezes, vale a importação mais recente.</p>

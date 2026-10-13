@@ -7,6 +7,7 @@
 // A leitura da data mora em src/lib/apuracao/datas.js — o importador novo e
 // estes cálculos precisam entender exatamente a mesma coisa.
 import { normalizarData } from './datas.js';
+import { ehDaOuvidoria, notaDoClickDesk } from './importacao.js';
 
 export { normalizarData };
 
@@ -443,6 +444,68 @@ export function calcularChat(dados, mapeamento) {
   });
 
   return resultados;
+}
+
+// =====================================================
+// CHAT — ClickDesk (13/10/2026)
+// O arquivo traz uma linha por avaliação, com nota de 1 a 5, de várias
+// equipes. Só a Ouvidoria entra. A regra do CSAT é a do chat que já existia:
+//   - positivo: nota 4 ou 5 ("bom")
+//   - negativo: nota 1, 2 ou 3 ("ruim") — o Sentimento do próprio ClickDesk
+//     já trata a nota 3 como negativa
+//   - CSAT = positivos / avaliados × 100
+// A diferença é que aqui a nota é conhecida: a nota 3 (neutra) já entra
+// classificada, sem precisar da revisão manual da tela Ouvidoria, e o oficial
+// (csat) continua sem tirar as neutras. O arquivo só traz chats AVALIADOS, então
+// total_chats = avaliados (sem como saber quantos chats não foram avaliados).
+// =====================================================
+export function calcularChatClickDesk(dados, mapeamento) {
+  const linhas = [];
+  const notaDoTicket = {};
+  dados.forEach((row) => {
+    if (!ehDaOuvidoria(row[mapeamento.equipe])) return;
+    const nota = notaDoClickDesk(row[mapeamento.nota]);
+    if (nota === null) return;
+    const ticket = String(row[mapeamento.ticket] ?? '').trim();
+    linhas.push({ agente: row[mapeamento.agente], data: row[mapeamento.data], ticket, bom: nota >= 4 ? 1 : 0, ruim: nota <= 3 ? 1 : 0, nota });
+    if (ticket) notaDoTicket[ticket] = nota;
+  });
+
+  const resultados = calcularChat(linhas, { agente: 'agente', data: 'data', ticket: 'ticket', bom: 'bom', ruim: 'ruim' });
+
+  // Notas conhecidas: histórico com a nota e os números por dia e totais.
+  Object.values(resultados).forEach((r) => {
+    r.historico.forEach((h) => { h.nota = notaDoTicket[String(h.ticket ?? '').trim()] ?? null; });
+    let neutros = 0;
+    const porNota = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+    Object.values(r.porData).forEach((d) => { d.total_neutros = 0; d.nota1 = 0; d.nota2 = 0; d.nota3 = 0; d.nota4 = 0; d.nota5 = 0; });
+    r.historico.forEach((h) => {
+      if (!h.nota) return;
+      porNota[h.nota] += 1;
+      const d = r.porData[h.data];
+      if (d) { d[`nota${h.nota}`] += 1; if (h.nota === 3) d.total_neutros += 1; }
+      if (h.nota === 3) neutros += 1;
+    });
+    Object.values(r.porData).forEach((d) => {
+      d.negativos_confirmados = Math.max(0, d.total_negativos - d.total_neutros);
+      const base = d.total_avaliados - d.total_neutros;
+      d.csat_sem_neutros = base > 0 ? (d.total_positivos / base) * 100 : d.csat;
+    });
+    r.totalNeutros = neutros;
+    r.porNota = porNota;
+    r.temNotaChat = true;
+    r.soAvaliados = true;
+    r.negativosConfirmados = Math.max(0, r.totalNegativos - neutros);
+    const baseTotal = r.totalAvaliados - neutros;
+    r.csatSemNeutros = baseTotal > 0 ? (r.totalPositivos / baseTotal) * 100 : r.csatPercentual;
+  });
+  return resultados;
+}
+
+/** O cálculo de cada fonte: o chat do ClickDesk tem o seu. */
+export function calculoDaFonte(fonte, tipo) {
+  if (fonte === 'clickdesk') return calcularChatClickDesk;
+  return { telefone: calcularTelefone, chat: calcularChat, cx: calcularCX }[tipo];
 }
 
 // =====================================================
