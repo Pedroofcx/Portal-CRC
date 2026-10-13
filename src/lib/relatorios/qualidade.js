@@ -20,7 +20,7 @@ const pct = (parte, total) => (total > 0 ? (parte / total) * 100 : null);
 
 /** Soma de telefone e chat de um grupo de apurações (já sem dias duplicados por pessoa). */
 function somar(apuracoesPorPessoa, periodo, fonteChat = 'combinado') {
-  const t = { ligacoes: 0, atendidas: 0, avaliadas: 0, positivas: 0, negativas: 0 };
+  const t = { ligacoes: 0, atendidas: 0, avaliadas: 0, positivas: 0, negativas: 0, neutras: 0 };
   const acumulador = novoAcumuladorChat();
   for (const lista of apuracoesPorPessoa) {
     for (const { dados } of diasApurados(lista, 'telefone', periodo)) {
@@ -29,6 +29,7 @@ function somar(apuracoesPorPessoa, periodo, fonteChat = 'combinado') {
       t.avaliadas += Number(dados.total_avaliadas) || 0;
       t.positivas += Number(dados.total_positivas) || 0;
       t.negativas += Number(dados.total_negativas) || 0;
+      t.neutras += Number(dados.neutras_na_base) || 0;
     }
     juntarAcumuladores(acumulador, acumuladorDoChat(lista, periodo));
   }
@@ -36,7 +37,7 @@ function somar(apuracoesPorPessoa, periodo, fonteChat = 'combinado') {
   // Telefone: positivas ÷ (positivas + negativas) — avaliadas inclui as
   // neutras (FCR 1 + nota 3) e as incompletas, que não entram no CSAT
   // (Pedro, 24/09/2026).
-  const csatTel = pct(t.positivas, t.positivas + t.negativas);
+  const csatTel = pct(t.positivas, t.positivas + t.negativas + t.neutras);
   const csatChat = csatDoAcumulador(acumulador, fonteChat);
   const canais = [csatTel, csatChat].filter((v) => v !== null);
   return {
@@ -139,9 +140,10 @@ export function diaADiaEquipeQualidade({ apuracoes = [], colaboradores = [], per
   const chat = new Map();
   for (const lista of listasPorAgente) {
     for (const { dia, dados } of diasApurados(lista, 'telefone', p)) {
-      const acc = tel.get(dia) || { positivas: 0, negativas: 0, ligacoes: 0, atendidas: 0 };
+      const acc = tel.get(dia) || { positivas: 0, negativas: 0, neutras: 0, ligacoes: 0, atendidas: 0 };
       acc.positivas += Number(dados.total_positivas) || 0;
       acc.negativas += Number(dados.total_negativas) || 0;
+      acc.neutras += Number(dados.neutras_na_base) || 0;
       acc.ligacoes += Number(dados.total_ligacoes) || 0;
       acc.atendidas += Number(dados.total_atendidas) || 0;
       tel.set(dia, acc);
@@ -157,7 +159,7 @@ export function diaADiaEquipeQualidade({ apuracoes = [], colaboradores = [], per
   const dias = diasOrdenados.map((dia) => {
     const t = tel.get(dia) ?? null;
     const c = chat.get(dia) ?? null;
-    const baseCsatTel = t ? t.positivas + t.negativas : 0;
+    const baseCsatTel = t ? t.positivas + t.negativas + t.neutras : 0;
     const csatTelefone = baseCsatTel > 0 ? pct(t.positivas, baseCsatTel) : null;
     const csatChat = c ? csatDoAcumulador(c, fonteChat) : null;
     const canais = [csatTelefone, csatChat].filter((v) => v !== null);
@@ -180,14 +182,14 @@ export function diaADiaEquipeQualidade({ apuracoes = [], colaboradores = [], per
   const semanas = [...porSemana.entries()].sort(([a], [b]) => a.localeCompare(b)).map(([inicio, diasDaSemana]) => {
     // Soma os totais brutos da semana (não os CSAT já calculados por dia —
     // média de percentuais distorceria dias com volumes bem diferentes).
-    const t = { positivas: 0, negativas: 0, ligacoes: 0, atendidas: 0 };
+    const t = { positivas: 0, negativas: 0, neutras: 0, ligacoes: 0, atendidas: 0 };
     const c = novoAcumuladorChat();
     diasDaSemana.forEach((dia) => {
       const dt = tel.get(dia); const dc = chat.get(dia);
-      if (dt) { t.positivas += dt.positivas; t.negativas += dt.negativas; t.ligacoes += dt.ligacoes; t.atendidas += dt.atendidas; }
+      if (dt) { t.positivas += dt.positivas; t.negativas += dt.negativas; t.neutras += dt.neutras; t.ligacoes += dt.ligacoes; t.atendidas += dt.atendidas; }
       if (dc) juntarAcumuladores(c, dc);
     });
-    const csatTelefone = (t.positivas + t.negativas) > 0 ? pct(t.positivas, t.positivas + t.negativas) : null;
+    const csatTelefone = (t.positivas + t.negativas + t.neutras) > 0 ? pct(t.positivas, t.positivas + t.negativas + t.neutras) : null;
     const csatChat = csatDoAcumulador(c, fonteChat);
     const canais = [csatTelefone, csatChat].filter((v) => v !== null);
     return {
@@ -230,7 +232,7 @@ export function diaADiaQualidade({ apuracoes = [], colaboradorId, periodo = {}, 
     const v = acc ? volumeDoAcumulador(acc, fonteChat) : null;
     // `chat` no formato de sempre (total_*), com o que foi escolhido (uma fonte ou as duas).
     const c = acc && (v.chats > 0 || v.avaliados > 0) ? { total_chats: v.chats, total_avaliados: v.avaliados, total_positivos: v.positivos } : null;
-    const baseCsatTel = t ? (Number(t.total_positivas) || 0) + (Number(t.total_negativas) || 0) : 0;
+    const baseCsatTel = t ? (Number(t.total_positivas) || 0) + (Number(t.total_negativas) || 0) + (Number(t.neutras_na_base) || 0) : 0;
     return {
       dia,
       telefone: t,
@@ -250,12 +252,13 @@ export function diaADiaQualidade({ apuracoes = [], colaboradorId, periodo = {}, 
   });
 
   const semanas = [...porSemana.entries()].sort(([a], [b]) => a.localeCompare(b)).map(([inicio, diasDaSemana]) => {
-    const t = { pos: 0, neg: 0, lig: 0, at: 0 };
+    const t = { pos: 0, neg: 0, neu: 0, lig: 0, at: 0 };
     const c = novoAcumuladorChat();
     diasDaSemana.forEach((d) => {
       if (d.telefone) {
         t.pos += Number(d.telefone.total_positivas) || 0;
         t.neg += Number(d.telefone.total_negativas) || 0;
+        t.neu += Number(d.telefone.neutras_na_base) || 0;
         t.lig += Number(d.telefone.total_ligacoes) || 0;
         t.at += Number(d.telefone.total_atendidas) || 0;
       }
@@ -265,7 +268,7 @@ export function diaADiaQualidade({ apuracoes = [], colaboradorId, periodo = {}, 
       inicio,
       fim: fimDaSemana(inicio),
       dias: diasDaSemana,
-      csatTelefone: (t.pos + t.neg) > 0 ? pct(t.pos, t.pos + t.neg) : null,
+      csatTelefone: (t.pos + t.neg + t.neu) > 0 ? pct(t.pos, t.pos + t.neg + t.neu) : null,
       csatChat: csatDoAcumulador(c, fonteChat),
       performance: t.lig > 0 ? pct(t.at, t.lig) : null,
       volumes: { ligacoes: t.lig, atendidas: t.at, chats: volumeDoAcumulador(c, fonteChat).chats },

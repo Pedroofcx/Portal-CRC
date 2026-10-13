@@ -1,3 +1,5 @@
+import { NEUTRAS_NA_BASE_DESDE } from '../indicadoresCiclo.js';
+
 /**
  * REVISÃO DE NEGATIVAS DO TELEFONE (55PBX) — Pedro (30/09/2026): algumas
  * ligações ficam mudas (falha técnica, sem áudio) e mesmo assim o cliente
@@ -43,7 +45,7 @@ export function recalcularTelefoneComRevisoes(apuracao) {
 
     const totalNegativas = Math.max(0, negativasBase - removidasAgora);
     const totalAvaliadas = Math.max(0, avaliadasBase - removidasAgora);
-    const baseCsat = (dia.telefone.total_positivas || 0) + totalNegativas;
+    const baseCsat = (dia.telefone.total_positivas || 0) + totalNegativas + (dia.data >= NEUTRAS_NA_BASE_DESDE ? dia.telefone.total_neutras || 0 : 0);
     const csat = baseCsat > 0 ? ((dia.telefone.total_positivas || 0) / baseCsat) * 100 : 0;
 
     return {
@@ -62,7 +64,8 @@ export function recalcularTelefoneComRevisoes(apuracao) {
   const totalPositivas = somaTel('total_positivas');
   const totalNegativas = somaTel('total_negativas');
   const totalAvaliadas = somaTel('total_avaliadas');
-  const baseCsatTotal = totalPositivas + totalNegativas;
+  const baseCsatTotal = totalPositivas + totalNegativas
+    + dados_por_data.reduce((s, d) => s + (d.data >= NEUTRAS_NA_BASE_DESDE ? d.telefone?.total_neutras || 0 : 0), 0);
   const csatTotal = baseCsatTotal > 0 ? (totalPositivas / baseCsatTotal) * 100 : (apuracao?.canal_telefone?.csat ?? 0);
 
   const canal_telefone = apuracao?.canal_telefone

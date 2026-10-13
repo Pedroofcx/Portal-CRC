@@ -41,6 +41,15 @@ const maisRecentePrimeiro = (lista) => [...lista].sort((a, b) => quando(b).local
 const dentro = (dia, ciclo) => dia >= ciclo.data_inicio && dia <= ciclo.data_fim;
 
 /**
+ * Pedro (13/10/2026): o CSAT segue o padrão de CX (satisfeitos ÷ todos que
+ * responderam). A nota 3 é neutra: não é positiva e não é negativa, mas fica na
+ * base. O chat já era assim; o telefone tirava as neutras da base e, do Ciclo 3
+ * (17/09/2026) em diante, passa a mantê-las. Os ciclos 1 e 2, com a premiação já
+ * decidida, continuam como foram calculados.
+ */
+export const NEUTRAS_NA_BASE_DESDE = '2026-09-17';
+
+/**
  * Os dias apurados do canal dentro do período, cada dia uma vez só (vale a
  * importação mais recente): [{ dia: 'AAAA-MM-DD', dados }].
  */
@@ -55,7 +64,9 @@ export function diasApurados(apuracoes, tipo, periodo) {
       // são dois números diferentes, que se combinam depois (média simples).
       const chave = fonte ? `${fonte}|${dia}` : dia;
       if (!dados || !dia || dias.has(chave) || !dentro(dia, periodo)) continue;
-      dias.set(chave, { dia, dados, fonte });
+      // Telefone: a partir do Ciclo 3 a nota 3 (neutra) fica na base do CSAT.
+      const neutras = tipo === 'telefone' && dia >= NEUTRAS_NA_BASE_DESDE ? num(dados.total_neutras) : 0;
+      dias.set(chave, { dia, dados: neutras ? { ...dados, neutras_na_base: neutras } : dados, fonte });
     }
   }
   return [...dias.values()].map(({ dia, dados, fonte }) => (fonte ? { dia, dados, fonte } : { dia, dados }));
@@ -157,7 +168,7 @@ export function indicadoresDoCiclo(apuracoes = [], ciclo) {
   // incompletas (FCR 1 sem nota) — regra de Pedro, 24/09/2026. Usar
   // avaliadas aqui inflaria o denominador e sub-avaliaria o CSAT de quem
   // tivesse atendimentos nota 3.
-  const csatTel = pct(somaTel('total_positivas'), somaTel('total_positivas') + somaTel('total_negativas'));
+  const csatTel = pct(somaTel('total_positivas'), somaTel('total_positivas') + somaTel('total_negativas') + somaTel('neutras_na_base'));
   // Chat: média simples do CSAT de cada fonte (Zendesk e ClickDesk) que tem avaliação.
   const csatChat = csatDoAcumulador(acumuladorChat, 'combinado');
   const csatChatPorFonte = Object.fromEntries(FONTES_DO_CHAT.map((f) => [f, csatDoAcumulador(acumuladorChat, f)]));

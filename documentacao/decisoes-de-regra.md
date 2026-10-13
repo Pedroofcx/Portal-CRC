@@ -1187,3 +1187,24 @@ desligado, os dois rodam em paralelo (só atendimento por CHAT).
   avaliações). E só entram os canais **WhatsApp** e **Chat no site**: telefone já
   vem do 55PBX (importar aqui duplicaria a meta) e e-mail não é atendimento em si.
   A coluna Canal passou a ser obrigatória na importação do ClickDesk.
+
+## CSAT no padrão de CX: a nota 3 (neutra) fica na base (Pedro, 13/10/2026)
+
+O CSAT de CX é **satisfeitos (notas 4 e 5) ÷ todos que responderam**. A nota 3 é
+neutra: não é satisfeita e não é negativa, mas faz parte de quem respondeu.
+Tirá-la da base infla o CSAT (ex.: 87 satisfeitas, 8 neutras e 5 insatisfeitas
+dão 87% com a neutra na base e 94,6% sem ela), e mexeria nas faixas de pontos
+(85%, 90% e 95%), que foram pensadas nesse padrão.
+
+- **Chat:** já era assim (positivas ÷ avaliadas). Nada mudou. O que corrigimos é a
+  ideia de que "a empresa conta o 3 como negativo": ele só está na base.
+- **Telefone:** tirava as neutras da base (24/09/2026). A partir do Ciclo 3
+  (dias de 17/09/2026 em diante) passa a mantê-las: CSAT = positivas ÷ (positivas
+  + negativas + neutras). As incompletas (FCR 1 sem nota) continuam fora.
+- **Ciclos 1 e 2 não mudam** (premiação já decidida): o corte é a constante
+  `NEUTRAS_NA_BASE_DESDE`, em `src/lib/indicadoresCiclo.js` (e a cópia em
+  `supabase/functions/api/apuracao/calculos.js`).
+- Onde vale: indicador do ciclo, relatórios, Análise, Preditivo e Apuração
+  (valores diários e semanais). A Calculadora CSAT usa a mesma conta.
+- Uma opção avaliada e descartada: tirar o neutro da base nos dois canais
+  deixaria as metas mais fáceis sem melhora real no atendimento.

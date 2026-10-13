@@ -11,6 +11,12 @@ import { ehDaOuvidoria, ehCanalDeChat, notaDoClickDesk } from './importacao.js';
 
 export { normalizarData };
 
+// Pedro (13/10/2026): no CSAT do telefone a nota 3 (neutra) fica na base, como no
+// padrão de CX, do Ciclo 3 (17/09/2026) em diante. Antes disso, fora da base.
+// O mesmo corte vive em src/lib/indicadoresCiclo.js (NEUTRAS_NA_BASE_DESDE).
+const NEUTRAS_NA_BASE_DESDE = '2026-09-17';
+const neutrasNaBase = (dia, neutras) => (dia >= NEUTRAS_NA_BASE_DESDE ? neutras || 0 : 0);
+
 // Segunda-feira da semana (seg→sex)
 function getInicioSemana(dataStr) {
   const partes = dataStr.split('-');
@@ -56,7 +62,8 @@ export function formatarRotuloSemana(inicioSemana, numero) {
 //   - Positiva = FCR 1 + CSAT 4/5. Negativa = FCR 1 + CSAT 1/2, ou FCR 2
 //     (qualquer nota). Neutra = FCR 1 + CSAT 3 — nem positiva nem negativa.
 //   - Performance = atendidas / ligações × 100
-//   - CSAT = positivas / (positivas + negativas) × 100 — neutras ficam fora
+//   - CSAT = positivas / (positivas + negativas + neutras) × 100 — padrão de CX: a
+//     neutra fica na base (do Ciclo 3 em diante; antes ficava fora). Incompletas, fora.
 //   - % Avaliados = avaliadas / atendidas × 100
 // =====================================================
 export function calcularTelefone(dados, mapeamento) {
@@ -240,10 +247,20 @@ export function calcularTelefone(dados, mapeamento) {
       // taxa de resposta, inclui neutras e incompletas (respondeu o FCR).
       const atendidasSemTransf = d.total_atendidas - d.transferencias;
       d.percentual_avaliados = atendidasSemTransf > 0 ? (d.total_avaliadas / atendidasSemTransf) * 100 : 0;
-      // CSAT = positivas / (positivas + negativas) — neutras e incompletas
-      // ficam de fora do CSAT (não são nem positivas nem negativas de fato).
-      const baseCsat = d.total_positivas + d.total_negativas;
+      // CSAT = positivas / (positivas + negativas + neutras): padrão de CX. As
+      // incompletas ficam de fora (não são resposta válida).
+      const baseCsat = d.total_positivas + d.total_negativas + neutrasNaBase(dt, d.total_neutras);
       d.csat = baseCsat > 0 ? (d.total_positivas / baseCsat) * 100 : 0;
+    });
+
+    // Neutras na base, por semana e no total (só dos dias do Ciclo 3 em diante).
+    const neutrasDaSemana = {};
+    let neutrasTotal = 0;
+    Object.keys(r.porData).forEach((dt) => {
+      const n = neutrasNaBase(dt, r.porData[dt].total_neutras);
+      neutrasTotal += n;
+      const sem = getInicioSemana(dt);
+      neutrasDaSemana[sem] = (neutrasDaSemana[sem] || 0) + n;
     });
 
     // Por semana
@@ -253,7 +270,7 @@ export function calcularTelefone(dados, mapeamento) {
       s.performance = s.total_ligacoes > 0 ? (s.total_atendidas / s.total_ligacoes) * 100 : 0;
       const atendidasSemTransf = s.total_atendidas - s.transferencias;
       s.percentual_avaliados = atendidasSemTransf > 0 ? (s.total_avaliadas / atendidasSemTransf) * 100 : 0;
-      const baseCsatSemana = s.total_positivas + s.total_negativas;
+      const baseCsatSemana = s.total_positivas + s.total_negativas + (neutrasDaSemana[iniSem] || 0);
       s.csat = baseCsatSemana > 0 ? (s.total_positivas / baseCsatSemana) * 100 : 0;
       s.numero = idx + 1;
       s.rotulo = formatarRotuloSemana(iniSem, idx + 1);
@@ -266,7 +283,7 @@ export function calcularTelefone(dados, mapeamento) {
     const totalAtendidas = r.totalAtendidas;
     const totalSemTransf = totalAtendidas - r.totalTransferencias;
 
-    const baseCsatTotal = r.totalPositivas + r.totalNegativas;
+    const baseCsatTotal = r.totalPositivas + r.totalNegativas + neutrasTotal;
     r.csatPercentual = baseCsatTotal > 0 ? (r.totalPositivas / baseCsatTotal) * 100 : 0;
     r.percentualAvaliados = totalSemTransf > 0 ? (r.totalAvaliadas / totalSemTransf) * 100 : 0;
     r.performance = r.totalLigacoes > 0 ? (totalAtendidas / r.totalLigacoes) * 100 : 0;

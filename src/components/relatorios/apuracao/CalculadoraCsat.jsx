@@ -89,8 +89,8 @@ export default function CalculadoraCsat() {
           </div>
         )}
         <p className="mt-4 border-t border-border pt-3 text-xs text-muted-foreground">
-          CSAT = satisfeitos (4 e 5) ÷ total de respostas. É a conta simples; no número oficial da premiação, o telefone
-          deixa as neutras de fora e o chat as conta como negativas.
+          CSAT = satisfeitos (notas 4 e 5) ÷ total de respostas. É o padrão de CX e a mesma conta da premiação: a nota 3
+          é neutra, não conta como satisfeita nem como negativa, mas fica na base.
         </p>
       </Cartao>
     </div>

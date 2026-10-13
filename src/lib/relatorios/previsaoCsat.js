@@ -83,7 +83,7 @@ export function projetarCsatDoMes({ apuracoes = [], colaboradores = [], fonteCha
 
   const ate = resumoQualidade({ apuracoes, colaboradores, periodo, fonteChat }).equipe;
   const v = ate.volumes;
-  const telTotal = v.positivas + v.negativas;
+  const telTotal = v.positivas + v.negativas + v.neutras; // as neutras ficam na base
   const chatTotal = v.avaliados;
   const canais = [
     { total: telTotal, positivas: v.positivas, csat: ate.csatTelefone },

@@ -1897,7 +1897,7 @@ console.log('\n== api de integracoes: quem passa ==');
   checa('classificacao: fcr 1 sem nota e incompleta', String(dia.total_incompletas), '1');
   checa('transferencia conta ligacao e nao avalia', String(dia.transferencias), '1');
   checa('total de ligacoes do dia', String(dia.total_ligacoes), '7');
-  checa('csat do dia exclui neutras (positivas / positivas+negativas)', String(Math.round(dia.csat * 10) / 10), String(Math.round((2 / 3) * 1000) / 10));
+  checa('csat do dia (Ciclo 3) mantem a neutra na base: 2 de 2+1+1', String(Math.round(dia.csat * 10) / 10), '50');
   checa('canal_telefone calculado', String(rA.registros[0].canal_telefone.total_atendimentos), '7');
   checa('origem do registro e a API', rA.registros[0].arquivo_nome, 'api:Teste');
   checa('quem apurou', rA.registros[0].apurado_por_nome, 'API: Teste');
@@ -2431,6 +2431,22 @@ console.log('\n== ordem das tratativas e fixadas ==');
   eq('previsao: sem dados no mes', projetarCsatDoMes({ apuracoes, colaboradores: colabs, hoje: '2026-11-10' }), 'null');
   const fechado = projetarCsatDoMes({ apuracoes: [{ tipo_apuracao: 'telefone', colaborador_id: 'a1', dados_por_data: [dia('2026-10-30', 9, 1)] }], colaboradores: colabs, hoje: '2026-10-31' });
   eq('previsao: mes fechado quando ja ha dado no ultimo dia util', fechado.mesFechado, true);
+}
+
+// ---- CSAT padrão de CX: a nota 3 (neutra) fica na base, do Ciclo 3 em diante ----
+{
+  const { resumoQualidade } = await import('../src/lib/relatorios/qualidade.js');
+  const { calcularCsat } = await import('../src/lib/relatorios/previsaoCsat.js');
+  const eq = (n, r, e) => checa(n, String(r), String(e));
+  const colabs = [{ id: 'a1', nome_completo: 'Ana', ativo: true, papel: 'agente' }];
+  const tel = (data) => ({ tipo_apuracao: 'telefone', colaborador_id: 'a1', dados_por_data: [{ data, telefone: { total_ligacoes: 3, total_atendidas: 3, total_avaliadas: 3, total_positivas: 2, total_negativas: 0, total_neutras: 1 } }] });
+  const novo = resumoQualidade({ apuracoes: [tel('2026-10-05')], colaboradores: colabs, periodo: {} });
+  eq('telefone Ciclo 3: 2 bons e 1 neutro = 66,7%', Math.round(novo.equipe.csatTelefone * 10) / 10, 66.7);
+  const velho = resumoQualidade({ apuracoes: [tel('2026-09-16')], colaboradores: colabs, periodo: {} });
+  eq('telefone Ciclo 2 nao muda: neutra fora da base = 100%', velho.equipe.csatTelefone, 100);
+  const chat = { tipo_apuracao: 'chat', fonte: 'clickdesk', colaborador_id: 'a1', dados_por_data: [{ data: '2026-10-05', chat: { total_chats: 4, total_avaliados: 4, total_positivos: 2, total_negativos: 2, total_neutros: 1 } }] };
+  eq('chat: neutro continua na base (2 de 4 = 50%)', resumoQualidade({ apuracoes: [chat], colaboradores: colabs, periodo: {} }).equipe.csatChat, 50);
+  eq('calculadora: o exemplo do site, 7 de 11', Math.round(calcularCsat({ 1: 1, 2: 1, 3: 2, 4: 3, 5: 4 }).csat), 64);
 }
 
 console.log('\n' + passou + ' passaram, ' + falhou + ' falharam');
