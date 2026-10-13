@@ -193,7 +193,8 @@ export default function Apuracao() {
             <TabsContent value="chat" className="pt-4">
               <p className="mb-4 text-sm text-muted-foreground">
                 O Zendesk não manda nota no arquivo, só "satisfação boa/ruim" — por isso cada ticket "ruim" precisa
-                ser revisado à mão pra dizer se é negativo de verdade (1 ou 2) ou neutro (3).
+                ser revisado à mão pra dizer se é negativo de verdade (1 ou 2) ou neutro (3). Os tickets do ClickDesk já vêm
+                com a nota do cliente; dá para conferir e corrigir a classificação do mesmo jeito.
               </p>
               <OuvidoriaChat
                 apuracoes={apuracoes}

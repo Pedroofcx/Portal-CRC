@@ -84,7 +84,8 @@ export function recalcularOuvidoriaChat(apuracao) {
  */
 export function classificarTicket(apuracao, ticket, nota) {
   const historico_detalhado = (apuracao?.historico_detalhado ?? []).map((h) => (
-    h?.ticket === ticket ? { ...h, nota } : h
+    // Desfazer num ticket do ClickDesk volta à nota que o cliente deu.
+    h?.ticket === ticket ? { ...h, nota: nota ?? h.nota_original ?? null } : h
   ));
   const recalculo = recalcularOuvidoriaChat({ ...apuracao, historico_detalhado });
   return { historico_detalhado, ...recalculo };
@@ -111,10 +112,13 @@ export function filaDeNegativos(apuracoes = [], { colaboradorId, apenasNaoClassi
           ticket: h.ticket ?? null,
           data: h.data ?? null,
           nota: h.nota ?? null,
+          notaOriginal: h.nota_original ?? null,
+          fonte: a.fonte ?? 'zendesk',
         });
       });
     });
-  return linhas.sort((x, y) => String(y.data ?? '').localeCompare(String(x.data ?? '')));
+  // Os ainda sem classificar primeiro, depois do mais recente ao mais antigo.
+  return linhas.sort((x, y) => (Number(!!x.nota) - Number(!!y.nota)) || String(y.data ?? '').localeCompare(String(x.data ?? '')));
 }
 
 /** Um resumo rápido para o topo da tela: quantos faltam, quantos já são 1/2/3. */

@@ -21,11 +21,12 @@ const NOTAS = [
 
 export default function OuvidoriaChat({ apuracoes, classificando, onClassificar }) {
   const [busca, setBusca] = useState('');
-  const [soNaoClassificados, setSoNaoClassificados] = useState(true);
+  const [soNaoClassificados, setSoNaoClassificados] = useState(false);
+  const [fonte, setFonte] = useState('todas');
 
   const fila = useMemo(
-    () => filaDeNegativos(apuracoes, { apenasNaoClassificados: soNaoClassificados }),
-    [apuracoes, soNaoClassificados],
+    () => filaDeNegativos(apuracoes, { apenasNaoClassificados: soNaoClassificados }).filter((l) => fonte === 'todas' || l.fonte === fonte),
+    [apuracoes, soNaoClassificados, fonte],
   );
   const resumoGeral = useMemo(() => resumoDaFila(filaDeNegativos(apuracoes)), [apuracoes]);
 
@@ -53,6 +54,11 @@ export default function OuvidoriaChat({ apuracoes, classificando, onClassificar 
 
       <div className="flex flex-wrap items-center gap-3">
         <Input className="max-w-xs" placeholder="Buscar por pessoa ou ticket..." value={busca} onChange={(e) => setBusca(e.target.value)} />
+        <div className="flex gap-1.5">
+          {[['todas', 'Todas as fontes'], ['zendesk', 'Zendesk'], ['clickdesk', 'ClickDesk']].map(([v, r]) => (
+            <button key={v} type="button" onClick={() => setFonte(v)} className={`rounded-md border px-3 py-1.5 text-sm font-medium transition-colors ${fonte === v ? 'border-primary/40 bg-primary/10 text-primary' : 'border-border bg-card text-muted-foreground hover:bg-muted'}`}>{r}</button>
+          ))}
+        </div>
         <label className="flex cursor-pointer items-center gap-2 text-sm text-muted-foreground">
           <input type="checkbox" className="h-4 w-4 rounded accent-[hsl(var(--primary))]" checked={soNaoClassificados} onChange={(e) => setSoNaoClassificados(e.target.checked)} />
           Só os ainda não classificados
@@ -69,10 +75,14 @@ export default function OuvidoriaChat({ apuracoes, classificando, onClassificar 
             {filtrada.map((l) => (
               <div key={`${l.apuracaoId}-${l.ticket}`} className="flex flex-wrap items-center justify-between gap-3 py-3">
                 <div className="min-w-0">
-                  <p className="text-sm font-medium text-foreground">{l.colaboradorNome || 'sem pessoa vinculada'}</p>
+                  <p className="text-sm font-medium text-foreground">
+                    {l.colaboradorNome || 'sem pessoa vinculada'}
+                    <span className="ml-2 rounded border border-border px-1.5 py-0.5 text-xs font-normal text-muted-foreground">{l.fonte === 'clickdesk' ? 'ClickDesk' : 'Zendesk'}</span>
+                  </p>
                   <p className="text-xs text-muted-foreground">
                     Ticket {l.ticket || '—'} · {l.data ? formatDateSP(l.data, 'DD/MM/YYYY') : 'sem data'}
                     {l.nota ? ` · classificado como ${l.nota === 3 ? 'neutro' : l.nota}` : ''}
+                    {l.fonte === 'clickdesk' && l.notaOriginal ? ` · nota dada no ClickDesk: ${l.notaOriginal}` : ''}
                   </p>
                 </div>
                 <div className="flex gap-1.5">

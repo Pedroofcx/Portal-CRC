@@ -476,7 +476,7 @@ export function calcularChatClickDesk(dados, mapeamento) {
 
   // Notas conhecidas: histórico com a nota e os números por dia e totais.
   Object.values(resultados).forEach((r) => {
-    r.historico.forEach((h) => { h.nota = notaDoTicket[String(h.ticket ?? '').trim()] ?? null; });
+    r.historico.forEach((h) => { h.nota = notaDoTicket[String(h.ticket ?? '').trim()] ?? null; h.nota_original = h.nota; });
     let neutros = 0;
     const porNota = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
     Object.values(r.porData).forEach((d) => { d.total_neutros = 0; d.nota1 = 0; d.nota2 = 0; d.nota3 = 0; d.nota4 = 0; d.nota5 = 0; });
