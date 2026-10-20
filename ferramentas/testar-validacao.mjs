@@ -1735,7 +1735,7 @@ console.log('\n== api de integracoes: quem passa ==');
   checa('campo de contestacao fora de contestacao', val({ ...ok, numero_case_contestacao: 'C1' }).erros.join(' | '), 'só vale para contestação');
   checa('motivo de contestacao limita 150', val({ ...ok, tipo_tratativa: 'contestacao', numero_case_contestacao: 'C1', motivo_contestacao: 'x'.repeat(151), valor_contestado_inicial: 1, prazo_sla_dias: 5 }).erros.join(' | '), 'no máximo 150');
 
-  for (const tipo of ['reclamacao_interna', 'reclame_aqui', 'google_meu_negocio', 'contestacao', 'procon', 'administrativas']) {
+  for (const tipo of ['reclamacao_interna', 'reclame_aqui', 'google_meu_negocio', 'contestacao', 'procon', 'administrativas', 'lojas_virtuais']) {
     checa(`prazo da API = prazo da tela (${tipo})`, String(slaDoTipo(tipo)), String(getSLAByType(tipo)));
   }
 
@@ -1814,6 +1814,29 @@ console.log('\n== api de integracoes: quem passa ==');
   checa('google: sem a marca nao grava nada', String('dados_localizados' in val(gmn).dados && val(gmn).dados.dados_localizados !== undefined), 'false');
   checa('google: dados_localizados precisa ser booleano', val({ ...gmn, dados_localizados: 'sim' }).erros.join(' | '), 'true ou false');
   checa('google: CNPJ preenchido ainda e conferido', val({ ...gmn, cnpj_cliente: '123' }).erros.join(' | '), 'cnpj_cliente inválido');
+  // Lojas Virtuais: mesmo modelo do Google, mais a origem (Play Store / Apple Store).
+  const lv = { nome_cliente: 'Joao (Play Store)', tipo_tratativa: 'lojas_virtuais', origem_loja: 'play_store' };
+  checa('lojas: nome + origem bastam (sem CNPJ, prioridade, links)', String(val(lv).erros.length), '0');
+  checa('lojas: a origem e obrigatoria', val({ nome_cliente: 'X', tipo_tratativa: 'lojas_virtuais' }).erros.join(' | '), 'origem_loja é obrigatório');
+  checa('lojas: origem fora da lista e recusada', val({ ...lv, origem_loja: 'amazon' }).erros.join(' | '), 'origem_loja: valor inválido');
+  checa('lojas: apple_store e aceita', String(val({ ...lv, origem_loja: 'apple_store' }).dados.origem_loja), 'apple_store');
+  checa('lojas: grava a origem', String(val(lv).dados.origem_loja), 'play_store');
+  checa('lojas: grava dados_localizados false', String(val({ ...lv, dados_localizados: false }).dados.dados_localizados), 'false');
+  checa('lojas: o nome continua obrigatorio', val({ tipo_tratativa: 'lojas_virtuais', origem_loja: 'play_store' }).erros.join(' | '), 'nome_cliente é obrigatório');
+  checa('outro tipo: origem_loja e recusada', val({ ...ok, origem_loja: 'play_store' }).erros.join(' | '), 'origem_loja só vale para lojas_virtuais');
+  // Lojas Virtuais NAO pontua: nem os 0,5 da abertura, nem o encerramento.
+  {
+    const ciclo3 = { data_inicio: '2026-09-17', data_fim: '2026-12-16' };
+    const lvT = { id: 'lv1', tipo_tratativa: 'lojas_virtuais', agente_responsavel_id: 'a', data_registro: '2026-10-01T12:00:00-03:00', data_encerramento: '2026-10-02T12:00:00-03:00', status: 'encerrada' };
+    const riT = { ...lvT, id: 'ri1', tipo_tratativa: 'reclamacao_interna' };
+    checa('lojas: nao paga abertura (0,5)', String(aberturasNoCiclo([lvT], ciclo3).length), '0');
+    checa('outro tipo continua pagando abertura', String(aberturasNoCiclo([riT], ciclo3).length), '1');
+    checa('lojas: a tela da tratativa nao mostra abertura', String(aberturaDaTratativa(lvT, [ciclo3])), 'null');
+    const r = pontosDeTratativasNoCiclo([lvT], ciclo3, { encerrada: () => true, noCiclo: () => true }).get('a');
+    checa('lojas: nao entra nos itens do ciclo', String(r.itens.length + r.aberturas.length), '0');
+  }
+  checa('lojas: SLA de 72h', String(slaDoTipo('lojas_virtuais')), '72');
+  checa('lojas: origem_loja sai nas leituras', String(CAMPOS_TRATATIVA.includes('origem_loja')), 'true');
   checa('outro tipo: dados_localizados e ignorado', String(val({ ...ok, dados_localizados: true }).dados.dados_localizados), 'undefined');
   checa('outro tipo: continua exigindo CNPJ e prioridade', val({ nome_cliente: 'X', tipo_tratativa: 'reclame_aqui' }).erros.length > 1 ? 'sim' : 'nao', 'sim');
   checa('criar: CNPJ invalido e recusado', val({ ...ok, cnpj_cliente: '11222333000182' }).erros.join(' | '), 'cnpj_cliente inválido');

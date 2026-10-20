@@ -90,7 +90,8 @@ export function getSLAByType(tipo) {
     reclamacao_interna: 24,
     reclame_aqui: 48,
     google_meu_negocio: 72,
-    contestacao: 72
+    contestacao: 72,
+    lojas_virtuais: 72
   };
   return slaMap[tipo] || 24;
 }
@@ -241,7 +242,8 @@ export const tipoTratativaLabels = {
   google_meu_negocio: 'Google Meu Negócio',
   contestacao: 'Contestação',
   administrativas: 'Administrativa',
-  procon: 'Procon'
+  procon: 'Procon',
+  lojas_virtuais: 'Lojas Virtuais'
 };
 
 // Labels para prioridades

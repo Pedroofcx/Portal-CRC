@@ -22,7 +22,7 @@ export const modulosOperacoes = [
     campos_chave: [
       { campo: 'id_interno', descricao: 'Número TRT-0000, gerado no navegador (maior número existente + 1). Não é atômico: sob concorrência dois registros recebem o mesmo número (há 35 repetidos). O identificador real é o id (uuid).' },
       { campo: 'status', descricao: 'Estado da máquina de estados (ver Regras de negócio). A matriz é do banco.' },
-      { campo: 'tipo_tratativa', descricao: 'reclamacao_interna | reclame_aqui | google_meu_negocio | contestacao | administrativas | procon. Define o prazo de SLA, os campos do encerramento e a pontuação.' },
+      { campo: 'tipo_tratativa', descricao: 'reclamacao_interna | reclame_aqui | google_meu_negocio | contestacao | administrativas | procon | lojas_virtuais. Define o prazo de SLA, os campos do encerramento e a pontuação.' },
       { campo: 'sla_atribuido / tempo_total_minutos / encerrado_no_sla', descricao: 'Calculados só pelo servidor (gatilhos). O navegador não consegue gravar.' },
       { campo: 'historico_estados[]', descricao: 'Lista só de acréscimos: transições e notas livres, com quem, quando e a observação. Base do SLA (pausas), do custo e da auditoria.' },
       { campo: 'houve_devolucao_financeira / valor_devolvido_cliente', descricao: 'Obrigatório no encerramento de reclamação interna, Reclame Aqui e GMN.' },

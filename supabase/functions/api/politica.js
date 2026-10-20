@@ -126,7 +126,7 @@ export function decidir({ geral, chave, integracao, recurso, acao, agora, usoNoU
 /** Só estes campos de tratativa saem. O custo operacional nunca. */
 export const CAMPOS_TRATATIVA = [
   'id', 'id_interno', 'tipo_tratativa', 'prioridade', 'status',
-  'nome_cliente', 'id_base_cliente', 'cnpj_cliente', 'cliente_sem_cnpj', 'dados_localizados', 'link_zendesk', 'link_intranet',
+  'nome_cliente', 'id_base_cliente', 'cnpj_cliente', 'cliente_sem_cnpj', 'dados_localizados', 'origem_loja', 'link_zendesk', 'link_intranet',
   'motivo_nome', 'plano_cliente', 'modalidade_plano', 'segmento_cliente',
   'agente_responsavel_id', 'agente_responsavel_nome',
   'data_registro', 'data_inicio_tratativa', 'data_encerramento',
@@ -153,7 +153,8 @@ export const CAMPOS_MOTIVO = ['id', 'motivo', 'descricao', 'submotivos', 'ordem'
 
 export const CAMPOS_CICLO = ['id', 'nome', 'data_inicio', 'data_fim', 'ativo'];
 
-export const TIPOS = ['reclamacao_interna', 'reclame_aqui', 'google_meu_negocio', 'contestacao', 'administrativas', 'procon'];
+export const TIPOS = ['reclamacao_interna', 'reclame_aqui', 'google_meu_negocio', 'contestacao', 'administrativas', 'procon', 'lojas_virtuais'];
+export const ORIGENS_LOJA = ['play_store', 'apple_store'];
 export const PRIORIDADES = ['baixa', 'media', 'alta', 'critica'];
 export const STATUS = [
   'registrada', 'tratativa_iniciada', 'em_andamento', 'dependencia_externa',
@@ -197,7 +198,7 @@ export function filtrosDeTratativas(params) {
  * tabela com a de src/components/utils/helpers.js, para as duas não divergirem.
  */
 export function slaDoTipo(tipo) {
-  const mapa = { reclamacao_interna: 24, reclame_aqui: 48, google_meu_negocio: 72, contestacao: 72 };
+  const mapa = { reclamacao_interna: 24, reclame_aqui: 48, google_meu_negocio: 72, contestacao: 72, lojas_virtuais: 72 };
   return mapa[tipo] || 24;
 }
 
@@ -207,7 +208,7 @@ const CAMPOS_ACEITOS = [
   'valor_contratacao_plano_atual', 'data_primeira_contratacao', 'data_contratacao_plano_atual',
   'segmento_cliente', 'numero_case_contestacao', 'motivo_contestacao',
   'valor_contestado_inicial', 'prazo_sla_dias', 'observacao',
-  'ticket_zendesk', 'ticket_clickdesk', 'dados_clickdesk', 'resumo_whatsapp', 'cliente_sem_cnpj', 'dados_localizados',
+  'ticket_zendesk', 'ticket_clickdesk', 'dados_clickdesk', 'resumo_whatsapp', 'cliente_sem_cnpj', 'dados_localizados', 'origem_loja',
 ];
 
 /** Resumo para o cliente: o mesmo teto da coluna no banco. */
@@ -275,9 +276,15 @@ export function validarNovaTratativa(corpo) {
   const nome = texto('nome_cliente', 200);
   if (!nome) erros.push('nome_cliente é obrigatório');
   const tipo = lista('tipo_tratativa', TIPOS, true);
-  // Google Meu Negócio: o cliente só deixa o nome, então só o nome é obrigatório.
-  const google = tipo === 'google_meu_negocio';
+  // Google Meu Negócio e Lojas Virtuais: o cliente só deixa o nome, então só o nome é obrigatório.
+  const loja = tipo === 'lojas_virtuais';
+  const google = tipo === 'google_meu_negocio' || loja;
   const prioridade = lista('prioridade', PRIORIDADES, !google);
+  // origem_loja: obrigatória em Lojas Virtuais (play_store ou apple_store); recusada nos outros tipos.
+  const origemLoja = lista('origem_loja', ORIGENS_LOJA, loja);
+  if (!loja && corpo.origem_loja !== undefined && corpo.origem_loja !== null && corpo.origem_loja !== '') {
+    erros.push('origem_loja só vale para lojas_virtuais');
+  }
 
   // O CNPJ é obrigatório em tratativa nova: é a senha da consulta do cliente no WhatsApp.
   // Cliente sem CNPJ marca cliente_sem_cnpj: true (e então não envia o CNPJ). Esse
@@ -316,6 +323,7 @@ export function validarNovaTratativa(corpo) {
     cnpj_cliente: semCnpj === true ? undefined : cnpjNumeros,
     cliente_sem_cnpj: semCnpj === true ? true : undefined,
     dados_localizados: google && typeof localizados === 'boolean' ? localizados : undefined,
+    origem_loja: origemLoja,
     plano_cliente: lista('plano_cliente', PLANOS),
     modalidade_plano: lista('modalidade_plano', MODALIDADES),
     valor_contratacao_plano_atual: numero('valor_contratacao_plano_atual'),

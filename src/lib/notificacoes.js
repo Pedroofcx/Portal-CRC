@@ -46,6 +46,7 @@ const ROTULO_CANAL = {
   reclame_aqui: 'Reclame Aqui',
   google_meu_negocio: 'Google Meu Negócio',
   contestacao_compra: 'Contestação de Compra',
+  lojas_virtuais: 'Lojas Virtuais',
   procon: 'PROCON',
 };
 const ROTULO_PRIORIDADE = { baixa: 'baixa', media: 'média', alta: 'alta', critica: 'crítica' };

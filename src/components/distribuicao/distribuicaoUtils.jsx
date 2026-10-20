@@ -4,6 +4,7 @@ export const TIPOS_CONFIG = {
   reclame_aqui:        { label: 'Reclame Aqui',          color: 'bg-success-soft text-success',   colorSolid: 'hsl(var(--chart-2))', peso: 2, pontos: 4 },
   google_meu_negocio:  { label: 'Google Meu Negócio',    color: 'bg-info-soft text-primary',     colorSolid: 'hsl(var(--chart-1))', peso: 2, pontos: 3 },
   contestacao_compra:  { label: 'Contestação de Compra', color: 'bg-info-soft text-primary', colorSolid: 'hsl(var(--chart-5))', peso: 3, pontos: 5 },
+  lojas_virtuais:      { label: 'Lojas Virtuais',        color: 'bg-info-soft text-primary',     colorSolid: 'hsl(var(--chart-4))', peso: 1, pontos: 2 },
   procon:              { label: 'PROCON',                 color: 'bg-destructive/10 text-destructive',       colorSolid: 'hsl(var(--destructive))', peso: 4, pontos: 6 },
 };
 

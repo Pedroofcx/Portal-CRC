@@ -131,13 +131,21 @@ export function comReaberturaApurada(tratativa, todas, agora) {
 
 const dentro = (valor, ciclo) => instanteNoCiclo(valor, ciclo);
 
+/**
+ * Tipos que NÃO pontuam: nem encerramento, nem os 0,5 da abertura. Lojas
+ * Virtuais é um processo novo que ainda precisa amadurecer; os registros
+ * existem (e entram no rodízio), mas ficam fora da conta do trimestre.
+ */
+export const TIPOS_QUE_NAO_PONTUAM = ['lojas_virtuais'];
+export const tipoPontua = (tipo) => !TIPOS_QUE_NAO_PONTUAM.includes(tipo);
+
 /** O ciclo paga 0,5 por abertura? Só os que começam no Ciclo 2 ou depois. */
 export const cicloPagaAbertura = (ciclo) => !!ciclo?.data_inicio && ciclo.data_inicio >= ABERTURA_PONTUA_DESDE;
 
 /** Tratativas registradas no ciclo que pagam 0,5 (não excluídas, com agente). */
 export function aberturasNoCiclo(todas = [], ciclo) {
   if (!cicloPagaAbertura(ciclo)) return [];
-  return todas.filter((t) => !t.excluida && t.agente_responsavel_id && dentro(t.data_registro, ciclo));
+  return todas.filter((t) => !t.excluida && t.agente_responsavel_id && tipoPontua(t.tipo_tratativa) && dentro(t.data_registro, ciclo));
 }
 
 /**
@@ -147,7 +155,7 @@ export function aberturasNoCiclo(todas = [], ciclo) {
  * tratativa só — a tela da tratativa mostra o ponto por aqui.
  */
 export function aberturaDaTratativa(tratativa, ciclos = []) {
-  if (!tratativa || tratativa.excluida || !tratativa.agente_responsavel_id) return null;
+  if (!tratativa || tratativa.excluida || !tratativa.agente_responsavel_id || !tipoPontua(tratativa.tipo_tratativa)) return null;
   const ciclo = ciclos.find((c) => dentro(tratativa.data_registro, c));
   if (!ciclo || !cicloPagaAbertura(ciclo)) return null;
   return { pontos: PONTOS_POR_ABERTURA, ciclo };
@@ -174,7 +182,7 @@ export function pontosDeTratativasNoCiclo(todas = [], ciclo, { encerrada, noCicl
   };
 
   for (const t of todas) {
-    if (t.excluida || !t.agente_responsavel_id || !encerrada(t) || !noCiclo(t, ciclo)) continue;
+    if (t.excluida || !t.agente_responsavel_id || !tipoPontua(t.tipo_tratativa) || !encerrada(t) || !noCiclo(t, ciclo)) continue;
     const { pontos, detalhes } = calculateTratativaPoints(comReaberturaApurada(t, todas, agora), { ciclo });
     const reg = doAgente(t.agente_responsavel_id);
     reg.itens.push({

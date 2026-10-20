@@ -8,6 +8,7 @@ const NOME_CURTO = {
   reclame_aqui: 'Reclame Aqui',
   google_meu_negocio: 'GMN',
   contestacao_compra: 'Contestação',
+  lojas_virtuais: 'Lojas Virtuais',
   procon: 'PROCON',
 };
 
